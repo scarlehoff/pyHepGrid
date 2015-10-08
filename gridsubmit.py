@@ -10,6 +10,7 @@ except IndexError:
     prodwarm = 'production'
 
 prodwarm = 'production'
+mode = 'Dirac'
 
 if prodwarm == 'warmup':
     multithread=True
@@ -19,10 +20,14 @@ else:
     multithread=False
     print "ASSUMING THIS IS A PRODUCTION RUN"
     print "SETTING TO SINGLE THREADED RUNNING"
-    nruns = 1000
+    nruns = 100
+
+if multithread and mode != 'ARC':
+    print "Error: multithreading is not supported for backends other than ARC"
+    exit()
 
 
-seedList = [str(i) for i in range(1,nruns+1)]
+seedList = [str(i) for i in range(nruns,2*nruns+1)]
 
 
 argList = []
@@ -49,13 +54,19 @@ argSplit = ArgSplitter(args = argList)
 
 j0 = Job()
 j0.application = Executable(exe=File('/mt/home/morgan/working/ganga.py'))
-j0.backend=ARC()
-j0.backend.CE='ce2.dur.scotgrid.ac.uk'
-#j0.backend.requirements.cputime=60
-#j0.backend.requirements.allowedCEs="\.dur\.ac\.uk"
-#j0.backend.settings['BannedSites']=["\.brunel\.ac\.uk","\.rhul\.ac\.uk"]
-#j0.backend.requirements.excludedCEs="\.brunnel\.ac\.uk"#"\.rhul\.ac.\uk"
+
+if mode == 'ARC':
+    j0.backend=ARC()
+    j0.backend.CE='ce2.dur.scotgrid.ac.uk'
+elif mode == 'Dirac':
+    j0.backend=Dirac()
+    j0.backend.settings['BannedSites']=["LCG.UKI-NORTHGRID-MAN-HEP.uk","LCG.UKI-LT2-IC-HEP.uk","LCG.EFDA-JET.xx"]
+else:
+    print "Invalid backend: ", mode
+    exit()
+
 if multithread:
     j0.backend.requirements.other = ['(count=16)','(countpernode=16)']
+
 j0.splitter=argSplit
 j0.submit()

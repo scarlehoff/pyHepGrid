@@ -33,8 +33,10 @@ os.environ['CXX']="g++"
 LFN='lfn:/grid/pheno/morgan/'
 SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/'
 
-os.system('lcg-cp '+SRM+'input/local.tar.gz $PWD/local.tar.gz' )
-#os.system('lcg-cp lfn:input/local.tar.gz local.tar.gz')
+# SRM
+#os.system('lcg-cp '+SRM+'input/local.tar.gz $PWD/local.tar.gz' )
+# LFN
+os.system('lcg-cp lfn:input/local2.tar.gz local.tar.gz')
 
 os.system('tar -zxf local.tar.gz')
 os.system('chmod +x NNLOJET')
@@ -77,8 +79,14 @@ output = 'output'+config+'.tar.gz'
 
 os.system('tar -czf '+output+' *') 
 os.system('lcg-cp $PWD/'+output+' '+SRM+directory+'/'+output)
-print 'lcg-cp $PWD/'+output+' '+SRM+directory+'/'+output
-os.system('lcg-rf '+SRM+directory+'/'+output+' -l '+LFN+'/'+directory+'/'+output) 
-print 'lcg-rf '+SRM+directory+'/'+output+' -l '+LFN+'/'+directory+'/'+output
-#os.system('lcg-cr --vo pheno -l lfn:'+directory+'/output'+config+'.tar.gz file:$PWD/output.tar.gz')
-#print 'lcg-cr --vo pheno -l lfn:'+directory+'/output'+config+'.tar.gz file:$PWD/output.tar.gz'
+
+#SRM 
+#print 'lcg-cp $PWD/'+output+' '+SRM+directory+'/'+output
+#os.system('lcg-rf '+SRM+directory+'/'+output+' -l '+LFN+'/'+directory+'/'+output) 
+#print 'lcg-rf '+SRM+directory+'/'+output+' -l '+LFN+'/'+directory+'/'+output
+
+#LFN
+
+os.system('ls')
+os.system('lcg-cr --vo pheno -l lfn:'+directory+'/output'+config+'.tar.gz file:$PWD/output'+config+'.tar.gz')
+print 'lcg-cr --vo pheno -l lfn:'+directory+'/output'+config+'.tar.gz file:$PWD/output'+config+'.tar.gz'

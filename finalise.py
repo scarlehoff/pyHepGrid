@@ -55,12 +55,12 @@ for run in runcards:
         name = 'output'+run+'-'+seed+'.tar.gz'
         runid = getid(run)
         checkname = runid+'-'+seed+'.log'
-        output = [name] # HACK for now
+#        output = [name] # HACK for now
         if name in output and checkname not in logcheck:
             status = 0
             print run,seed
-            #command = 'lcg-cp lfn:output/'+name+' '+name
-            command = 'lcg-cp '+SRM+'output/'+name+' '+name
+            command = 'lcg-cp lfn:output/'+name+' '+name
+            #command = 'lcg-cp '+SRM+'output/'+name+' '+name
             os.system(command)
             os.system('tar -xf '+name+' -C .')
             tmpfiles = os.listdir('.')
