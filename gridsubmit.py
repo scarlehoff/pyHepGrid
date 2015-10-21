@@ -9,8 +9,11 @@ try:
 except IndexError:
     prodwarm = 'production'
 
+# warmup,production
 prodwarm = 'production'
+# Dirac,ARC,Local
 mode = 'Dirac'
+mode = 'Local'
 
 if prodwarm == 'warmup':
     multithread=True
@@ -20,14 +23,14 @@ else:
     multithread=False
     print "ASSUMING THIS IS A PRODUCTION RUN"
     print "SETTING TO SINGLE THREADED RUNNING"
-    nruns = 100
+    nruns = 3
 
 if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"
     exit()
 
 
-seedList = [str(i) for i in range(nruns,2*nruns+1)]
+seedList = [str(i) for i in range(1,nruns+1)]
 
 
 argList = []
@@ -53,14 +56,19 @@ print "Number of jobs: ", len(argList)
 argSplit = ArgSplitter(args = argList)
 
 j0 = Job()
-j0.application = Executable(exe=File('/mt/home/morgan/working/ganga.py'))
+if mode == 'Local': # slightly differen syntax and can be used for debugging, does not generate data either
+    j0.application = Executable(exe=File('/mt/home/morgan/working/ganga_local.py'))
+else:
+    j0.application = Executable(exe=File('/mt/home/morgan/working/ganga.py'))
 
 if mode == 'ARC':
     j0.backend=ARC()
     j0.backend.CE='ce2.dur.scotgrid.ac.uk'
 elif mode == 'Dirac':
     j0.backend=Dirac()
-    j0.backend.settings['BannedSites']=["LCG.UKI-NORTHGRID-MAN-HEP.uk","LCG.UKI-LT2-IC-HEP.uk","LCG.EFDA-JET.xx"]
+    j0.backend.settings['BannedSites']=["LCG.UKI-NORTHGRID-MAN-HEP.uk","LCG.EFDA-JET.xx","LCG.UKI-LT2-IC-HEP.uk"]
+elif mode == 'Local':
+    j0.backend=Local()
 else:
     print "Invalid backend: ", mode
     exit()

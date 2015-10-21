@@ -20,10 +20,10 @@ cp -r $RUNCARDS .
 
 lcg-del -a lfn:input/local.tar.gz
 lcg-del $SRM/input/local.tar.gz
-tar -czf local.tar.gz NNLOJET *.RRa *.RRb *.vRa *.vRb LHAPDF grid
+tar -czf local.tar.gz NNLOJET *.RRa *.RRb *.vRa *.vRb *.vBa *.vBb LHAPDF grid
 
 #LFN
-lcg-cr --vo pheno -l lfn:input/local2.tar.gz  file:$PWD/local.tar.gz
+lcg-cr --vo pheno -l lfn:input/local.tar.gz  file:$PWD/local.tar.gz
 
 #SRM
 #lcg-cp $PWD/local.tar.gz $SRM/input/local.tar.gz
