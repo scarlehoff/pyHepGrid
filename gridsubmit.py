@@ -10,10 +10,12 @@ except IndexError:
     prodwarm = 'production'
 
 # warmup,production
-prodwarm = 'production'
+#prodwarm = 'production'
+prodwarm = 'warmup'
 # Dirac,ARC,Local
-mode = 'Dirac'
-mode = 'Local'
+mode = 'ARC'
+#mode = 'Dirac'
+#mode = 'Local'
 
 if prodwarm == 'warmup':
     multithread=True
@@ -23,7 +25,7 @@ else:
     multithread=False
     print "ASSUMING THIS IS A PRODUCTION RUN"
     print "SETTING TO SINGLE THREADED RUNNING"
-    nruns = 3
+    nruns = 100
 
 if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"
@@ -47,7 +49,7 @@ for seed in seedList:
         if '~' not in r:
             arg = ' -run '+r+' -iseed '+seed
             checkarg = r+'-'+seed
-            if checkarg not in output:
+            if checkarg not in output  or mode == 'Local':
                 argList.append([arg,r,seed,multithread])
 
 
@@ -66,7 +68,7 @@ if mode == 'ARC':
     j0.backend.CE='ce2.dur.scotgrid.ac.uk'
 elif mode == 'Dirac':
     j0.backend=Dirac()
-    j0.backend.settings['BannedSites']=["LCG.UKI-NORTHGRID-MAN-HEP.uk","LCG.EFDA-JET.xx","LCG.UKI-LT2-IC-HEP.uk"]
+    j0.backend.settings['BannedSites']=["LCG.UKI-NORTHGRID-MAN-HEP.uk","LCG.EFDA-JET.xx"]#,"LCG.UKI-LT2-IC-HEP.uk"]
 elif mode == 'Local':
     j0.backend=Local()
 else:

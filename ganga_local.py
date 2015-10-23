@@ -18,9 +18,22 @@ os.environ["LFC_HOST"]="lfc.grid.sara.nl"
 os.environ["LCG_CATALOG_TYPE"]="lfc"
 os.environ["LFC_HOME"]="/grid/pheno/morgan"
 os.environ["LCG_GFAL_INFOSYS"]="lcgbdii.gridpp.rl.ac.uk:2170"
-os.environ["LD_LIBRARY_PATH"]="./LHAPDF/lib"
-os.environ['LHAPATH']="./LHAPDF/share/LHAPDF"
-os.environ['LHA_DATA_PATH']="./LHAPDF/share/LHAPDF"
+lhapdf_path = os.path.join(os.getcwd(), "LHAPDF", "lib")
+gcc_libpath = os.path.join(os.getcwd(), "gcc", "lib")
+gcc_lib64path = os.path.join(os.getcwd(), "gcc", "lib64")
+if "LD_LIBRARY_PATH" in os.environ:
+  old_ldpath = os.environ["LD_LIBRARY_PATH"]
+  os.environ["LD_LIBRARY_PATH"] = "%s:%s:%s:%s" % (gcc_libpath,gcc_lib64path,old_ldpath, lhapdf_path)
+else:
+  os.environ["LD_LIBRARY_PATH"] = "%s:%s:%s" % (gcc_libpath,gcc_lib64path,lhapdf_path)
+
+gcc_PATH = os.path.join(os.getcwd(),"gcc","bin")
+# PATH must always exist
+old_PATH = os.environ["PATH"]
+os.environ["PATH"] = "%s:%s" % (gcc_PATH,old_PATH)
+lhapdf_sharepath = os.path.join(os.getcwd(),"LHAPDF","share","LHAPDF")
+os.environ['LHAPATH']=lhapdf_sharepath
+os.environ['LHA_DATA_PATH']=lhapdf_sharepath
 os.environ['OMP_STACKSIZE']="999999"
 if warmup:
     os.environ['OMP_NUM_THREADS']="16"
@@ -42,7 +55,7 @@ os.system('chmod +x NNLOJET')
 
 
 # COMMAND GOES HERE
-command = 'source /cvmfs/pheno.egi.eu/compilers/GCC/4.9.2/setup.sh;'
+command = ''
 
 command += './NNLOJET'
 for var in sys.argv[1:2]:
