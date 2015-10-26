@@ -50,8 +50,9 @@ SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/
 #os.system('lcg-cp '+SRM+'input/local.tar.gz $PWD/local.tar.gz' )
 # LFN
 os.system('lcg-cp lfn:input/local.tar.gz local.tar.gz')
-
+os.system('lcg-cp lfn:input/NNLOJET.tar.gz NNLOJET.tar.gz')
 os.system('tar -zxf local.tar.gz')
+os.system('tar -zxf NNLOJET.tar.gz')
 os.system('chmod +x NNLOJET')
 
 
