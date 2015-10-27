@@ -1,8 +1,7 @@
 #!/usr/bin/env ganga
 import os,sys
 import subprocess
-runcarddir = '/mt/home/morgan/NNLOJET/driver/grid'
-
+import config as c
 
 try:
     prodwarm = sys.argv[1]
@@ -10,11 +9,11 @@ except IndexError:
     prodwarm = 'production'
 
 # warmup,production
-#prodwarm = 'production'
-prodwarm = 'warmup'
+prodwarm = 'production'
+#prodwarm = 'warmup'
 # Dirac,ARC,Local
-mode = 'ARC'
-#mode = 'Dirac'
+#mode = 'ARC'
+mode = 'Dirac'
 #mode = 'Local'
 
 if prodwarm == 'warmup':
@@ -25,7 +24,7 @@ else:
     multithread=False
     print "ASSUMING THIS IS A PRODUCTION RUN"
     print "SETTING TO SINGLE THREADED RUNNING"
-    nruns = 100
+    nruns = 10
 
 if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"
@@ -37,7 +36,7 @@ seedList = [str(i) for i in range(1,nruns+1)]
 
 argList = []
 
-runcards = os.listdir(runcarddir)
+runcards = os.listdir(c.RUNCARDS)
 
 cmd = ['lfc-ls','output']
 
@@ -50,18 +49,20 @@ for seed in seedList:
             arg = ' -run '+r+' -iseed '+seed
             checkarg = r+'-'+seed
             if checkarg not in output  or mode == 'Local':
-                argList.append([arg,r,seed,multithread])
+                argList.append([arg,r,seed,multithread,c.LFNDIR])
 
 
 print "Number of jobs: ", len(argList)
 
 argSplit = ArgSplitter(args = argList)
 
+HOME = os.getcwd()
+
 j0 = Job()
 if mode == 'Local': # slightly differen syntax and can be used for debugging, does not generate data either
-    j0.application = Executable(exe=File('/mt/home/morgan/working/ganga_local.py'))
+    j0.application = Executable(exe=File(os.path.join(HOME,'ganga_local.py')))
 else:
-    j0.application = Executable(exe=File('/mt/home/morgan/working/ganga.py'))
+    j0.application = Executable(exe=File(os.path.join(HOME,'ganga.py')))
 
 if mode == 'ARC':
     j0.backend=ARC()

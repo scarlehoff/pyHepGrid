@@ -3,10 +3,10 @@
 """A grid submission script using ganga"""
 
 import sys,os
-from config import *
 
 # Set environment variables
 
+LFNDIR=sys.argv[8]
 
 if sys.argv[7] == 'True':
     warmup = True

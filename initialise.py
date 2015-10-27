@@ -6,12 +6,7 @@ os.environ["LCG_CATALOG_TYPE"]="lfc"
 os.environ["LFC_HOME"]=LFNDIR
 os.environ["LCG_GFAL_INFOSYS"]="lcgbdii.gridpp.rl.ac.uk:2170"
 
-#NNLOJETDIR='/mt/home/morgan/NNLOJET'
-#LHAPDFDIR='/mt/home/morgan/NNLOJET/driver/LHAPDF'
-#RUNCARDS='/mt/home/morgan/NNLOJET/driver/grid' # changeme
-#GCCDIR='/mt/home/morgan/gcc-5.2.0/'
-
-LFN='lfn:/grid/pheno/morgan/'
+LFN='lfn:'+LFNDIR
 SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir'
 
 HOME = os.getcwd()
@@ -44,5 +39,5 @@ if allFlag == 'all':
 
 print "Initialising NNLOJET"
 os.system('lcg-del -a lfn:input/NNLOJETtmp.tar.gz --force')
-os.system('tar -czf NNLOJET.tar.gz NNLOJET *.RRa *.RRb *.vRa *.vRb *.vBa *.vBb config.py runcards')
+os.system('tar -czf NNLOJET.tar.gz NNLOJET *.RRa *.RRb *.vRa *.vRb *.vBa *.vBb runcards')
 os.system('lcg-cr --vo pheno -l lfn:input/NNLOJETtmp.tar.gz  file:$PWD/NNLOJET.tar.gz')
