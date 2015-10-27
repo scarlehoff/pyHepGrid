@@ -3,6 +3,7 @@
 """A grid submission script using ganga"""
 
 import sys,os
+from config import *
 
 # Set environment variables
 
@@ -17,7 +18,7 @@ else:
 
 os.environ["LFC_HOST"]="lfc.grid.sara.nl"
 os.environ["LCG_CATALOG_TYPE"]="lfc"
-os.environ["LFC_HOME"]="/grid/pheno/morgan"
+os.environ["LFC_HOME"]=LFNDIR
 os.environ["LCG_GFAL_INFOSYS"]="lcgbdii.gridpp.rl.ac.uk:2170"
 lhapdf_path = os.path.join(os.getcwd(), "LHAPDF", "lib")
 gcc_libpath = os.path.join(os.getcwd(), "gcc", "lib")
@@ -43,14 +44,14 @@ else:
 os.environ['CC']="gcc"
 os.environ['CXX']="g++"
 
-LFN='lfn:/grid/pheno/morgan/'
+LFN='lfn:'+LFNDIR
 SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/'
 
 # SRM
 #os.system('lcg-cp '+SRM+'input/local.tar.gz $PWD/local.tar.gz' )
 # LFN
 os.system('lcg-cp lfn:input/local.tar.gz local.tar.gz')
-os.system('lcg-cp lfn:input/NNLOJET_new.tar.gz NNLOJET.tar.gz')
+os.system('lcg-cp lfn:input/NNLOJET.tar.gz NNLOJET.tar.gz')
 os.system('tar -zxf local.tar.gz')
 os.system('tar -zxf NNLOJET.tar.gz')
 os.system('chmod +x NNLOJET')
