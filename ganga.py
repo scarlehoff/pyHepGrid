@@ -50,7 +50,7 @@ SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/
 #os.system('lcg-cp '+SRM+'input/local.tar.gz $PWD/local.tar.gz' )
 # LFN
 os.system('lcg-cp lfn:input/local.tar.gz local.tar.gz')
-os.system('lcg-cp lfn:input/NNLOJET.tar.gz NNLOJET.tar.gz')
+os.system('lcg-cp lfn:input/NNLOJET_new.tar.gz NNLOJET.tar.gz')
 os.system('tar -zxf local.tar.gz')
 os.system('tar -zxf NNLOJET.tar.gz')
 os.system('chmod +x NNLOJET')
@@ -62,7 +62,7 @@ command = ''
 command += './NNLOJET'
 for var in sys.argv[1:5]:
     command += ' '+var
-os.system('cp grid/'+sys.argv[2]+' .') # copy runcard to working dir
+os.system('cp runcards/'+sys.argv[2]+' .') # copy runcard to working dir
 
 # For debugging
 command +=';echo $LD_LIBRARY_PATH'
@@ -78,7 +78,7 @@ os.system('lfc-mkdir output')
 if not warmup:
     os.system('rm *.RRa *.RRb *.vRa NNLOJET')
 os.system('rm -rf LHAPDF/')
-os.system('rm -rf grid/')
+os.system('rm -rf runcards/')
 os.system('rm -rf gcc/')
 os.system('rm local.tar.gz')
 os.system('rm TOT.*')
