@@ -16,6 +16,8 @@ prodwarm = 'production'
 mode = 'Dirac'
 #mode = 'Local'
 
+#### WIZARD MODE/PRODWARM
+
 if prodwarm == 'warmup':
     multithread=True
     print "SETTING TO MULTITHREADED RUNNING"
