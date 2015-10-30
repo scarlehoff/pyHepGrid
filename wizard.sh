@@ -58,10 +58,11 @@ if [ ! -f $configfile ]; then
 		[Yy]*) lfnname=$USER ;;
 		*) read -p "Write the name of the folder: /grid/pheno/"lfnname ;;
 	esac
-	lfc-mkdir lfnname        || echo ""
-	lfc-mkdir lfnname/input  || echo ""
-	lfc-mkdir lfnname/output || echo ""
-	lfc-mkdir lfnname/warmup || echo ""
+	source bash_nnlojet
+	lfc-mkdir /grid/pheno/$lfnname        
+	lfc-mkdir /grid/pheno/$lfnname/input  
+	lfc-mkdir /grid/pheno/$lfnname/output 
+	lfc-mkdir /grid/pheno/$lfnname/warmup 
 	lfndir=/grid/pheno/$lfnname
 	echo "LFNDIR = "\"$lfndir\" >> $configfile
 
@@ -74,11 +75,11 @@ if [ ! -f $configfile ]; then
 	cp ~/.bashrc ~/.bashrc-backup0
 	bashNNLO=$currentfol/bash_$USER
 
-	echo "LFC_HOME=$lfndir" >> $bashNNLO
-	echo "PATH=$gccdir/bin:$lhadir/bin:\${PATH}" >> $bashNNLO
+	echo "export LFC_HOME=$lfndir" >> $bashNNLO
+	echo "export PATH=$gccdir/bin:$lhadir/bin:\${PATH}" >> $bashNNLO
 	# This is the piece Dirac source file messes up with?
-	echo "LD_LIBRARY_PATH=$gccdir/lib64:$lhadir/lib:\${LD_LIBRARY_PATH}" >> $bashNNLO
-	echo "NNLOJET_PATH=$nnlodir" >> $bashNNLO
+	echo "export LD_LIBRARY_PATH=$gccdir/lib64:$lhadir/lib:\${LD_LIBRARY_PATH}" >> $bashNNLO
+	echo "export NNLOJET_PATH=$nnlodir" >> $bashNNLO
 
 	echo "if [ -f $bashNNLO ]; then" >> ~/.bashrc
 	echo "	source $bashNNLO " >> ~/.bashrc
@@ -99,8 +100,8 @@ if [ ! -f ~/.gangarcDefault ]; then
     ##### Dirac Installation
 		# To Do
 		# Currently assumes dirac is already installed
-	cp ~/.gangarc ~/.gangarcDefault
 	read -p "Path for dirac installation $HOME/" diracpath
+	cp ~/.gangarc ~/.gangarcDefault
 	source $HOME/$diracpath/bashrc
 	env > $HOME/$diracpath/envfile
 	ganga -g -o[Configuration]RUNTIME_PATH=GangaDirac
