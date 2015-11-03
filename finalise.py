@@ -4,15 +4,19 @@ import os,sys
 import subprocess
 import glob
 import shutil
+import config as c
 
 os.environ["LFC_HOST"]="lfc.grid.sara.nl"
 os.environ["LCG_CATALOG_TYPE"]="lfc"
-os.environ["LFC_HOME"]="/grid/pheno/morgan"
+#os.environ["LFC_HOME"]="/grid/pheno/morgan"
+os.environp["LFC_HOME"] = c.LFNDIR
 #os.environ["LCG_GFAL_INFOSYS"]="lcgbdii.gridpp.rl.ac.uk:2170"
-os.environ["LD_LIBRARY_PATH"]="./LHAPDF/lib"
+#os.environ["LD_LIBRARY_PATH"]="./LHAPDF/Lib"
+os.environ["LD_LIBRARY_PATH"] = c.LHAPDFDIR + "/lib"
 SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/'
 
-runcarddir = '/mt/home/morgan/NNLOJET/driver/grid'
+#runcarddir = '/mt/home/morgan/NNLOJET/driver/grid'
+runcarddir = c.RUNCARDS
 
 runcards = os.listdir(runcarddir)
 

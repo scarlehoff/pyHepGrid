@@ -27,6 +27,7 @@ if [ ! -f $configfile ]; then
 	echo ""
 	echo "#Config file for NNLOJET-ganga \n" > $configfile
 	# NNLOJET and Runcards
+	echo "NNLOJETNAME = \"NNLOJET\"" >> $configfile
 	echo "Please, write the full path for the NNLOJET installation"
 	read -p " > " nnlodir
 	echo "NNLOJETDIR = \"$nnlodir\"" >> $configfile
@@ -172,7 +173,7 @@ cp $submitdir/gridsubmit.py $submitdir/tmpsubmit.py
 sed -i "/WIZARD MODE/a mode = \"$mode\" " $submitdir/tmpsubmit.py
 sed -i "/WIZARD MODE/a prodwarm = \"$prodwarm\" " $submitdir/tmpsubmit.py
 
-## Initialisation
+# Initialisation
 if [[ $prodwarm == "warmup" ]]; then
 	allFlag="all"
 else
@@ -183,8 +184,10 @@ else
 	tar xfz tmp.tar.gz
  	rm tmp.tar.gz
 fi
-
-python initialise.py $allFlag
+read -p "Run initialise.py? (y/n) " yn
+if [ $yn == "y" ]; then
+	python initialise.py $allFlag
+fi
 
 ## Running Ganga
 echo "Running ganga"
@@ -193,7 +196,7 @@ echo gsubmit=\"$submitdir/tmpsubmit.py\" > tmp.py
 echo "print '\nexecfile(gsubmit) will run your mod. gridsubmit.py script\n'">> tmp.py
 ganga -i tmp.py
 rm tmp.py
-rm tmpsubmit.py
+#rm tmpsubmit.py
 
 ### On exit
 ### Finalise / Delete ???

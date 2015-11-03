@@ -6,12 +6,14 @@ import os,sys
 import subprocess
 import glob
 import shutil
+import config as c
 
+os.environ["LD_LIBRARY_PATH"]="./LHAPDF/lib"
 os.environ["LFC_HOST"]="lfc.grid.sara.nl"
 os.environ["LCG_CATALOG_TYPE"]="lfc"
-os.environ["LFC_HOME"]="/grid/pheno/morgan"
-#os.environ["LCG_GFAL_INFOSYS"]="lcgbdii.gridpp.rl.ac.uk:2170"
-os.environ["LD_LIBRARY_PATH"]="./LHAPDF/lib"
+os.environp["LFC_HOME"] = c.LFNDIR
+os.environ["LD_LIBRARY_PATH"] = c.LHAPDFDIR + "/lib"
+
 
 runs = sys.argv[1:]
 

@@ -2,6 +2,9 @@
 # make the necessary changes to example.py and then rename it to config.py
 # Do not commit your hand modified version
 
+# Name for the NNLOJET executable
+NNLOJETNAME = "NNLOJET"
+
 # NNLOJET main directory
 NNLOJETDIR='/mt/home/morgan/NNLOJET'
 
@@ -16,4 +19,6 @@ GCCDIR='/mt/home/morgan/gcc-5.2.0/'
 
 # LFN directory 
 LFNDIR = '/grid/pheno/morgan/'
+
+
 

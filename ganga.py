@@ -16,6 +16,8 @@ else:
     print "Arguments: ", sys.argv
     raise Exception('Invalid arguments passed to job')
 
+ ' + NNLOJETNAME + '  NAME = sys.argv[9]
+
 os.environ["LFC_HOST"]="lfc.grid.sara.nl"
 os.environ["LCG_CATALOG_TYPE"]="lfc"
 os.environ["LFC_HOME"]=LFNDIR
@@ -51,16 +53,16 @@ SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/
 #os.system('lcg-cp '+SRM+'input/local.tar.gz $PWD/local.tar.gz' )
 # LFN
 os.system('lcg-cp lfn:input/local.tar.gz local.tar.gz')
-os.system('lcg-cp lfn:input/NNLOJET.tar.gz NNLOJET.tar.gz')
+os.system('lcg-cp lfn:input/ ' + NNLOJETNAME + '.tar.gz  ' + NNLOJETNAME + '.tar.gz')
 os.system('tar -zxf local.tar.gz')
-os.system('tar -zxf NNLOJET.tar.gz')
-os.system('chmod +x NNLOJET')
+os.system('tar -zxf  ' + NNLOJETNAME + '.tar.gz')
+os.system('chmod +x  ' + NNLOJETNAME )
 
 
 # COMMAND GOES HERE
 command = ''
 
-command += './NNLOJET'
+command += './ ' + NNLOJETNAME + '  '
 for var in sys.argv[1:5]:
     command += ' '+var
 os.system('cp runcards/'+sys.argv[2]+' .') # copy runcard to working dir
@@ -77,7 +79,7 @@ os.system('lfc-mkdir output')
 # clear all unnecessary files for taring
 
 if not warmup:
-    os.system('rm *.RRa *.RRb *.vRa NNLOJET')
+    os.system('rm *.RRa *.RRb *.vRa ' +  NNLOJET)
 os.system('rm -rf LHAPDF/')
 os.system('rm -rf runcards/')
 os.system('rm -rf gcc/')

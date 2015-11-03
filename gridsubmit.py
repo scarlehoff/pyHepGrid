@@ -51,7 +51,7 @@ for seed in seedList:
             arg = ' -run '+r+' -iseed '+seed
             checkarg = r+'-'+seed
             if checkarg not in output  or mode == 'Local':
-                argList.append([arg,r,seed,multithread,c.LFNDIR])
+                argList.append([arg,r,seed,multithread,c.LFNDIR,c.NNLOJETNAME])
 
 
 print "Number of jobs: ", len(argList)
