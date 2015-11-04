@@ -53,16 +53,16 @@ SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/
 #os.system('lcg-cp '+SRM+'input/local.tar.gz $PWD/local.tar.gz' )
 # LFN
 os.system('lcg-cp lfn:input/local.tar.gz local.tar.gz')
-os.system('lcg-cp lfn:input/ ' + NNLOJETNAME + '.tar.gz  ' + NNLOJETNAME + '.tar.gz')
+os.system('lcg-cp lfn:input/' + NNLOJETNAME + '.tar.gz ' + NNLOJETNAME + '.tar.gz')
 os.system('tar -zxf local.tar.gz')
-os.system('tar -zxf  ' + NNLOJETNAME + '.tar.gz')
-os.system('chmod +x  ' + NNLOJETNAME )
+os.system('tar -zxf ' + NNLOJETNAME + '.tar.gz')
+os.system('chmod +x ' + NNLOJETNAME )
 
 
 # COMMAND GOES HERE
 command = ''
 
-command += './ ' + NNLOJETNAME + '  '
+command += './' + NNLOJETNAME + '  '
 for var in sys.argv[1:5]:
     command += ' '+var
 os.system('cp runcards/'+sys.argv[2]+' .') # copy runcard to working dir
