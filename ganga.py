@@ -7,6 +7,7 @@ import sys,os
 # Set environment variables
 
 LFNDIR=sys.argv[8]
+NNLOJETNAME = sys.argv[9]
 
 if sys.argv[7] == 'True':
     warmup = True
@@ -16,7 +17,6 @@ else:
     print "Arguments: ", sys.argv
     raise Exception('Invalid arguments passed to job')
 
- ' + NNLOJETNAME + '  NAME = sys.argv[9]
 
 os.environ["LFC_HOST"]="lfc.grid.sara.nl"
 os.environ["LCG_CATALOG_TYPE"]="lfc"

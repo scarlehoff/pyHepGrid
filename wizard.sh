@@ -191,6 +191,8 @@ fi
 
 ## Running Ganga
 echo "Running ganga"
+#read -p "Run in completely automatic mode? " yn
+yn="n" # No by default
 
 echo gsubmit=\"$submitdir/tmpsubmit.py\" > tmp.py
 echo "print '\nexecfile(gsubmit) will run your mod. gridsubmit.py script\n'">> tmp.py
