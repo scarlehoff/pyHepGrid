@@ -38,6 +38,6 @@ if allFlag == 'all':
 
 
 print "Initialising NNLOJET"
-os.system('lcg-del -a lfn:input/NNLOJETtmp.tar.gz --force')
+os.system('lcg-del -a lfn:input/NNLOJET.tar.gz --force')
 os.system('tar -czf NNLOJET.tar.gz NNLOJET *.RRa *.RRb *.vRa *.vRb *.vBa *.vBb runcards')
-os.system('lcg-cr --vo pheno -l lfn:input/NNLOJETtmp.tar.gz  file:$PWD/NNLOJET.tar.gz')
+os.system('lcg-cr --vo pheno -l lfn:input/NNLOJET.tar.gz  file:$PWD/NNLOJET.tar.gz')
