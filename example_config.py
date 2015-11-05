@@ -1,5 +1,5 @@
 # This is the main configuration file for the grid files, it is user specific
-# make the necessary changes to example.py and then rename it to config.py
+# make the necessary changes to example_config.py and then rename it to config.py
 # Do not commit your hand modified version
 
 # Name for the NNLOJET executable
