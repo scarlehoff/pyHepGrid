@@ -8,6 +8,8 @@ import sys,os
 
 LFNDIR=sys.argv[8]
 
+NNLOJET=sys.argv[9]
+
 if sys.argv[7] == 'True':
     warmup = True
 elif sys.argv[7] == 'False':
@@ -38,7 +40,7 @@ os.environ['LHAPATH']=lhapdf_sharepath
 os.environ['LHA_DATA_PATH']=lhapdf_sharepath
 os.environ['OMP_STACKSIZE']="999999"
 if warmup:
-    os.environ['OMP_NUM_THREADS']="1"
+    os.environ['OMP_NUM_THREADS']="16"
 else:
     os.environ['OMP_NUM_THREADS']="1"
 os.environ['CC']="gcc"
@@ -51,7 +53,7 @@ SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/
 #os.system('lcg-cp '+SRM+'input/local.tar.gz $PWD/local.tar.gz' )
 # LFN
 os.system('lcg-cp lfn:input/local.tar.gz local.tar.gz')
-os.system('lcg-cp lfn:input/NNLOJET.tar.gz NNLOJET.tar.gz')
+os.system('lcg-cp lfn:input/'+NNLOJET+'.tar.gz NNLOJET.tar.gz')
 os.system('tar -zxf local.tar.gz')
 os.system('tar -zxf NNLOJET.tar.gz')
 os.system('chmod +x NNLOJET')

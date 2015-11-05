@@ -5,6 +5,9 @@
 # Name for the NNLOJET executable
 NNLOJETNAME = "NNLOJET"
 
+# Number of runs used for production
+NRUNS = 500
+
 # NNLOJET main directory
 NNLOJETDIR='/mt/home/morgan/NNLOJET'
 

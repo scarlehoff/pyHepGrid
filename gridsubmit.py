@@ -9,11 +9,11 @@ except IndexError:
     prodwarm = 'production'
 
 # warmup,production
-#prodwarm = 'production'
-prodwarm = 'warmup'
+prodwarm = 'production'
+#prodwarm = 'warmup'
 # Dirac,ARC,Local
-mode = 'ARC'
-#mode = 'Dirac'
+#mode = 'ARC'
+mode = 'Dirac'
 #mode = 'Local'
 
 #### WIZARD MODE/PRODWARM
@@ -28,7 +28,7 @@ else:
     multithread=False
     print "ASSUMING THIS IS A PRODUCTION RUN"
     print "SETTING TO SINGLE THREADED RUNNING"
-    nruns = 10
+    nruns = c.NRUNS
 
 if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"
