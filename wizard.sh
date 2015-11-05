@@ -27,6 +27,7 @@ if [ ! -f $configfile ]; then
 	echo ""
 	echo "#Config file for NNLOJET-ganga \n" > $configfile
 	# NNLOJET and Runcards
+	echo "NNLOJETNAME = \"NNLOJET\"" >> $configfile
 	echo "Please, write the full path for the NNLOJET installation"
 	read -p " > " nnlodir
 	echo "NNLOJETDIR = \"$nnlodir\"" >> $configfile
@@ -58,10 +59,11 @@ if [ ! -f $configfile ]; then
 		[Yy]*) lfnname=$USER ;;
 		*) read -p "Write the name of the folder: /grid/pheno/"lfnname ;;
 	esac
-	lfc-mkdir lfnname        || echo ""
-	lfc-mkdir lfnname/input  || echo ""
-	lfc-mkdir lfnname/output || echo ""
-	lfc-mkdir lfnname/warmup || echo ""
+	source bash_nnlojet
+	lfc-mkdir /grid/pheno/$lfnname        
+	lfc-mkdir /grid/pheno/$lfnname/input  
+	lfc-mkdir /grid/pheno/$lfnname/output 
+	lfc-mkdir /grid/pheno/$lfnname/warmup 
 	lfndir=/grid/pheno/$lfnname
 	echo "LFNDIR = "\"$lfndir\" >> $configfile
 
@@ -74,11 +76,21 @@ if [ ! -f $configfile ]; then
 	cp ~/.bashrc ~/.bashrc-backup0
 	bashNNLO=$currentfol/bash_$USER
 
-	echo "LFC_HOME=$lfndir" >> $bashNNLO
-	echo "PATH=$gccdir/bin:$lhadir/bin:\${PATH}" >> $bashNNLO
+	echo "export LFC_HOME=$lfndir" >> $bashNNLO
+	echo "export PATH=$gccdir/bin:$lhadir/bin:\${PATH}" >> $bashNNLO
 	# This is the piece Dirac source file messes up with?
-	echo "LD_LIBRARY_PATH=$gccdir/lib64:$lhadir/lib:\${LD_LIBRARY_PATH}" >> $bashNNLO
-	echo "NNLOJET_PATH=$nnlodir" >> $bashNNLO
+	echo "export LD_LIBRARY_PATH=$gccdir/lib64:$lhadir/lib:\${LD_LIBRARY_PATH}" >> $bashNNLO
+	echo "export NNLOJET_PATH=$nnlodir" >> $bashNNLO
+
+	# this lines can be created by the script as well...
+	# they are the same for everyone
+	echo "export LFC_HOST=\"lfc.grid.sara.nl\"" >> $bashNNLO
+	echo "export LCG_CATALOG_TYPE=\"lfc\"" >> $bashNNLO
+    echo "export CC=gcc" >> $bashNNLO
+    echo "export CXX=g++" >> $bashNNLO
+	echo "export OMP_STACKSIZE=999999" >> $bashNNLO
+	echo "export OMP_NUM_THREADS=1 # default to 1 for now" >> $bashNNLO
+	echo "export PATH=/cvmfs/ganga.cern.ch/Ganga/install/6.1.2-patch/bin:${PATH}" >> $bashNNLO
 
 	echo "if [ -f $bashNNLO ]; then" >> ~/.bashrc
 	echo "	source $bashNNLO " >> ~/.bashrc
@@ -99,8 +111,8 @@ if [ ! -f ~/.gangarcDefault ]; then
     ##### Dirac Installation
 		# To Do
 		# Currently assumes dirac is already installed
-	cp ~/.gangarc ~/.gangarcDefault
 	read -p "Path for dirac installation $HOME/" diracpath
+	cp ~/.gangarc ~/.gangarcDefault
 	source $HOME/$diracpath/bashrc
 	env > $HOME/$diracpath/envfile
 	ganga -g -o[Configuration]RUNTIME_PATH=GangaDirac
@@ -171,7 +183,7 @@ cp $submitdir/gridsubmit.py $submitdir/tmpsubmit.py
 sed -i "/WIZARD MODE/a mode = \"$mode\" " $submitdir/tmpsubmit.py
 sed -i "/WIZARD MODE/a prodwarm = \"$prodwarm\" " $submitdir/tmpsubmit.py
 
-## Initialisation
+# Initialisation
 if [[ $prodwarm == "warmup" ]]; then
 	allFlag="all"
 else
@@ -182,17 +194,21 @@ else
 	tar xfz tmp.tar.gz
  	rm tmp.tar.gz
 fi
-
-python initialise.py $allFlag
+read -p "Run initialise.py? (y/n) " yn
+if [ $yn == "y" ]; then
+	python initialise.py $allFlag
+fi
 
 ## Running Ganga
 echo "Running ganga"
+#read -p "Run in completely automatic mode? " yn
+yn="n" # No by default
 
 echo gsubmit=\"$submitdir/tmpsubmit.py\" > tmp.py
 echo "print '\nexecfile(gsubmit) will run your mod. gridsubmit.py script\n'">> tmp.py
 ganga -i tmp.py
 rm tmp.py
-rm tmpsubmit.py
+#rm tmpsubmit.py
 
 ### On exit
 ### Finalise / Delete ???

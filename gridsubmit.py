@@ -53,7 +53,7 @@ for seed in seedList:
             arg = ' -run '+r+' -iseed '+seed
             checkarg = r+'-'+seed
             if checkarg not in output  or mode == 'Local':
-                argList.append([arg,r,seed,multithread,c.LFNDIR])
+                argList.append([arg,r,seed,multithread,c.LFNDIR,c.NNLOJETNAME])
 
 
 print "Number of jobs: ", len(argList)
@@ -63,7 +63,7 @@ argSplit = ArgSplitter(args = argList)
 HOME = os.getcwd()
 
 j0 = Job()
-if mode == 'Local': # slightly differen syntax and can be used for debugging, does not generate data either
+if mode == 'Local': # slightly different syntax and can be used for debugging, does not generate data either
     j0.application = Executable(exe=File(os.path.join(HOME,'ganga_local.py')))
 else:
     j0.application = Executable(exe=File(os.path.join(HOME,'ganga.py')))
