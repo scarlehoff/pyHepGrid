@@ -28,7 +28,7 @@ else:
     multithread=False
     print "ASSUMING THIS IS A PRODUCTION RUN"
     print "SETTING TO SINGLE THREADED RUNNING"
-    nruns = 500
+    nruns = 10
 
 if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"

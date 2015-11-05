@@ -6,14 +6,14 @@
 #
 
 
-configfile=config.py
+configfile=configTemp.py
 firstrun=false
 
 echo "Welcome to the Grid Wizard for NNLOJET"
 
 ########### FIRST RUN
 
-if [ ! -f $configfile ]; then
+if [ ! -f "config.py" ]; then
 ######## CONFIG.PY
 #
 # This assumes you already have installed:
@@ -21,16 +21,23 @@ if [ ! -f $configfile ]; then
 #   LHAPDF
 #   gcc
 #
-
 	echo "Let us create the config file for ganga"
 	read -rsp "Press any key to continue... " -n1 adsgasf
 	echo ""
-	echo "#Config file for NNLOJET-ganga \n" > $configfile
+	echo "#Config file for NNLOJET-ganga" > $configfile
 	# NNLOJET and Runcards
+	while true; do
+		echo "Please, write the full path for the NNLOJET installation"
+		read -p " > " nnlodir
+		echo "NNLOJETDIR = \"$nnlodir\"" >> $configfile
+		if [[ -f $nnlodir/NNLOJET.mk ]]; then
+			echo "Directory found!"
+			break
+		else
+			echo "Couldn't find the directory. Are you sure?"
+		fi
+	done
 	echo "NNLOJETNAME = \"NNLOJET\"" >> $configfile
-	echo "Please, write the full path for the NNLOJET installation"
-	read -p " > " nnlodir
-	echo "NNLOJETDIR = \"$nnlodir\"" >> $configfile
 	
 	echo "Please write the directory for the NNLOJET runcards"
 	read -p " > " runcarddir
@@ -47,8 +54,16 @@ if [ ! -f $configfile ]; then
 	echo "LHAPDFDIR = \"$lhadir\"" >> $configfile
 
 	# GCC
-	echo "Please write the path to your gcc compiler"
-	read -p " > " gccdir
+	while true; do
+		echo "Please write the path to your gcc compiler"
+		read -p " > " gccdir
+		if [[ -f $gccdir/bin/gcc ]]; then
+			echo "Directory found!"
+			break
+		else
+			echo "Couldn't find the directory. Are you sure?"
+		fi
+	done
 	echo "GCCDIR = \"$gccdir\"" >> $configfile
 
 	# lfc mkdirs
@@ -60,18 +75,18 @@ if [ ! -f $configfile ]; then
 		*) read -p "Write the name of the folder: /grid/pheno/"lfnname ;;
 	esac
 	source bash_nnlojet
-	lfc-mkdir /grid/pheno/$lfnname        
-	lfc-mkdir /grid/pheno/$lfnname/input  
-	lfc-mkdir /grid/pheno/$lfnname/output 
-	lfc-mkdir /grid/pheno/$lfnname/warmup 
+#	lfc-mkdir /grid/pheno/$lfnname        
+#	lfc-mkdir /grid/pheno/$lfnname/input  
+#	lfc-mkdir /grid/pheno/$lfnname/output 
+#	lfc-mkdir /grid/pheno/$lfnname/warmup 
 	lfndir=/grid/pheno/$lfnname
 	echo "LFNDIR = "\"$lfndir\" >> $configfile
 
+	mv $configfile config.py
 	echo "Congratulations, your config.py file is ready"
 
     ###### BASHRC
 	echo "Let us add bash_$USER to .bashrc"
-	cp bash_nnlojet bash_$USER
 	currentfol=${PWD}
 	cp ~/.bashrc ~/.bashrc-backup0
 	bashNNLO=$currentfol/bash_$USER
@@ -121,7 +136,13 @@ if [ ! -f ~/.gangarcDefault ]; then
 	sed -i "/\[defaults_GridCommand\]/a info = dirac-proxy-info \ninit = dirac-proxy-init -g pheno_user" ~/.gangarc
 	cp ~/.gangarc ~/.gangarcDirac
 	cp ~/.gangarcDefault ~/.gangarc
-	echo "export sourcedirac=\"$HOME/$diracpath/bashrc\"" >> $bashNNLO
+	if [[ -f bash_$USER ]]; then
+		echo "export sourcedirac=\"$HOME/$diracpath/bashrc\"" >> bash_$USER
+	else
+		echo "You need to source the following line to use this script with dirac:"
+		echo "          export sourcedirac=\"$HOME/$diracpath/bashrc\""
+		echo "Please add this to your .bashrc file, thank you"
+	fi
 	source ~/.bashrc
 	firstrun=true
 fi
@@ -161,7 +182,7 @@ while true; do
 		break
 	elif [[ $mode == "DIRAC" ]]; then
 		echo "Setting up Dirac proxy"]#
-		$sourcedirac #We assume .gangadirac was created with this script
+		source $sourcedirac #We assume .gangadirac was created with this script
 		cp ~/.gangarcDirac ~/.gangarc
 		dirac-proxy-init -g pheno_user -M
 		prodwarm=production

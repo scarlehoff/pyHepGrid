@@ -11,7 +11,7 @@ import config as c
 os.environ["LD_LIBRARY_PATH"]="./LHAPDF/lib"
 os.environ["LFC_HOST"]="lfc.grid.sara.nl"
 os.environ["LCG_CATALOG_TYPE"]="lfc"
-os.environp["LFC_HOME"] = c.LFNDIR
+os.environ["LFC_HOME"] = c.LFNDIR
 os.environ["LD_LIBRARY_PATH"] = c.LHAPDFDIR + "/lib"
 
 
