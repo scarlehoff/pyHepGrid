@@ -117,10 +117,11 @@ if [ ! -f ~/.gangarcDefault ]; then
 	env > $HOME/$diracpath/envfile
 	ganga -g -o[Configuration]RUNTIME_PATH=GangaDirac
 	sed -i "/\[Configuration]/a RUNTIME_PATH = GangaDirac" ~/.gangarc
-	sed -i "/\[Dirac\]/a DiracEnvFile = $HOME/$diracpath/envfile" ~/.gangarc
+	sed -i "/\[DIRAC\]/a DiracEnvFile = $HOME/$diracpath/envfile" ~/.gangarc
 	sed -i "/\[defaults_GridCommand\]/a info = dirac-proxy-info \ninit = dirac-proxy-init -g pheno_user" ~/.gangarc
 	cp ~/.gangarc ~/.gangarcDirac
 	cp ~/.gangarcDefault ~/.gangarc
+	echo "export sourcedirac=\"$HOME/$diracpath/bashrc\"" >> $bashNNLO
 	source ~/.bashrc
 	firstrun=true
 fi
@@ -159,7 +160,8 @@ while true; do
 		prodwarm=production
 		break
 	elif [[ $mode == "DIRAC" ]]; then
-		echo "Setting up Dirac proxy"
+		echo "Setting up Dirac proxy"]#
+		$sourcedirac #We assume .gangadirac was created with this script
 		cp ~/.gangarcDirac ~/.gangarc
 		dirac-proxy-init -g pheno_user -M
 		prodwarm=production
@@ -189,10 +191,29 @@ if [[ $prodwarm == "warmup" ]]; then
 else
 	# Pull back grid file
 	echo "Preparing the grid file for your production run"
-	read -p "Write the name of the runcard > " runcardname
-	lcg-cp lfn:warmup/output$runcardname.run-w.tar.gz tmp.tar.gz
-	tar xfz tmp.tar.gz
- 	rm tmp.tar.gz
+	read -p "Write the name of the runcard > " runcardname 
+	# Check whether the user wrote ".run", if he didn't, append .run
+	if [[ $runcardname == *".run" ]]; then
+		runcardnm=$runcardname
+	else
+		runcardnm=$runcardname.run
+	fi
+	echo "Bringin back warmup files... "
+	lcg-cp lfn:warmup/output$runcardnm-w.tar.gz tmp.tar.gz
+	echo "Untaring said files... "
+	tar xfvz tmp.tar.gz
+	echo "Removing tar"
+	rm tmp.tar.gz
+#	mkdir tempFolder || echo ""
+#	lcg-cp lfn:warmup/output$runcardnm.run-w.tar.gz tempFolder/tmp.tar.gz
+#	cd tempFolder
+#	tar xfz tmp.tar.gz
+#	# In principle we only want grid files?
+#	mv VJ* ../
+#	mv *.run ../
+#	mv *.log ../
+#	cd ..
+# 	rm -rf tempFolder
 fi
 read -p "Run initialise.py? (y/n) " yn
 if [ $yn == "y" ]; then
@@ -213,13 +234,43 @@ rm tmp.py
 ### On exit
 ### Finalise / Delete ???
 
-read -p "Do you want to look at the stdout of the job? " yn
-if [[ $yn == "y" ]]; then
-	read -p "Which one? " jobN
-	read -p "Which subjob? " subjobN
+if [[ $mode == "ARC" ]] || [[ $mode == "ARCDEFAULT" ]]; then
+	read -p "Do you want to look at the stdout of the job? " yn
+	if [[ $yn == "y" ]]; then
+		read -p "Which one? " jobN
+		read -p "Which subjob? " subjobN
+		gunzip $HOME/gangadir/workspace/$USER/LocalXML/$jobN/$subjobN/output/stdout.gz
+		cat $HOME/gangadir/workspace/$USER/LocalXML/$jobN/$subjobN/output/stdout
+	fi
+# Needs DIRAC version
 fi
 
-gunzip $HOME/gangadir/workspace/$USER/LocalXML/$jobN/$subjobN/output/stdout.gz
-cat $HOME/gangadir/workspace/$USER/LocalXML/$jobN/$subjobN/output/stdout
+if [[ $mode == "CLEANDIRAC" ]]; then
+	echo "Cleaning Dirac enviromental mess..."
+	unset PYTHONUNBUFFERED
+	unset PYTHONOPTIMIZE
+	unset X509_VOMS_DIR
+	unset DIRAC
+	unset DIRACBIN
+	unset DIRACSCRIPTS
+	unset DIRACLIB
+	unset TERMINFO
+	unset RRD_DEFAULT_FONT
+	unset PATH
+	unset LD_LIBRARY_PATH
+	unset DYLD_LIBRARY_PATH
+	unset PYTHONPATH
+	# Path from clean session before sourcing .bash_profile
+	export PATH=/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/sbin
+	# Juan:
+	# For Durham gridui we also need to add another path to PATH, this makes $PATH system dependent and that _might_ be bad... 
+	export PATH=$PATH:/usr/lib64/qt-3.3/bin
+	source ~/.bash_profile
+	# Clean duplicates 
+	export PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++')
+	echo "... done!"
+fi
+
+echo "Good Bye!"
 
 
