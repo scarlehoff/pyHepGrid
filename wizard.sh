@@ -82,6 +82,16 @@ if [ ! -f $configfile ]; then
 	echo "export LD_LIBRARY_PATH=$gccdir/lib64:$lhadir/lib:\${LD_LIBRARY_PATH}" >> $bashNNLO
 	echo "export NNLOJET_PATH=$nnlodir" >> $bashNNLO
 
+	# this lines can be created by the script as well...
+	# they are the same for everyone
+	echo "export LFC_HOST=\"lfc.grid.sara.nl\"" >> $bashNNLO
+	echo "export LCG_CATALOG_TYPE=\"lfc\"" >> $bashNNLO
+    echo "export CC=gcc" >> $bashNNLO
+    echo "export CXX=g++" >> $bashNNLO
+	echo "export OMP_STACKSIZE=999999" >> $bashNNLO
+	echo "export OMP_NUM_THREADS=1 # default to 1 for now" >> $bashNNLO
+	echo "export PATH=/cvmfs/ganga.cern.ch/Ganga/install/6.1.2-patch/bin:${PATH}" >> $bashNNLO
+
 	echo "if [ -f $bashNNLO ]; then" >> ~/.bashrc
 	echo "	source $bashNNLO " >> ~/.bashrc
 	echo "fi" >> ~/.bashrc
