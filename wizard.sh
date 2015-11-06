@@ -37,7 +37,6 @@ if [ ! -f "config.py" ]; then
 			echo "Couldn't find the directory. Are you sure?"
 		fi
 	done
-	echo "NNLOJETNAME = \"NNLOJET\"" >> $configfile
 	
 	echo "Please write the directory for the NNLOJET runcards"
 	read -p " > " runcarddir
@@ -81,6 +80,11 @@ if [ ! -f "config.py" ]; then
 #	lfc-mkdir /grid/pheno/$lfnname/warmup 
 	lfndir=/grid/pheno/$lfnname
 	echo "LFNDIR = "\"$lfndir\" >> $configfile
+
+	echo "#THIS PART IS RUN DEPENDANT" >> $configfile
+	echo "NUMRUNS = 10" >> $configfile
+
+	echo "RUNS = {"test.run":"NNLOJET"} # WIZARDRUNCARDS" >> $configfile
 
 	mv $configfile config.py
 	echo "Congratulations, your config.py file is ready"
@@ -156,19 +160,8 @@ fi
 ## Proxy Creation
 echo "Create proxy"
 cp ~/.gangarc ~/.gangarcbak0
-userOption=$1
+mode=$1
 while true; do
-	if [[ $userOption == "ARC"* ]] || [[ $userOption == *"DIRAC" ]]; then
-		echo "Running with option: " $userOption
-		mode=$userOption
-	else
-		# Supports:
-		#	ARC     - warmup
-		#   DIRAC   - production
-		#   ARCPROD - production
-		echo "Select option: "
-		read -p "ARC/DIRAC/ARCPROD: " mode
-	fi
 	if [[ $mode == "ARC" ]]; then
 		echo "Setting up Arc proxy"
 		cp ~/.gangarcDefault ~/.gangarc
@@ -215,9 +208,15 @@ while true; do
 		export PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++')
 		echo "... done!"
 		exit
+	elif [[ $mode == "DEBUG" ]]; then
+		break
 	else
-		echo "Option $1 not recognised..."
-		unset userOption
+		# Supports:
+		#	ARC     - warmup
+		#   DIRAC   - production
+		#   ARCPROD - production
+		echo "Select option: "
+		read -p "ARC/DIRAC/ARCPROD: " mode
 	fi
 done
 
@@ -237,40 +236,64 @@ cp $submitdir/gridsubmit.py $submitdir/tmpsubmit.py
 sed -i "/WIZARD MODE/a mode = \"$mode\" " $submitdir/tmpsubmit.py
 sed -i "/WIZARD MODE/a prodwarm = \"$prodwarm\" " $submitdir/tmpsubmit.py
 
-# Initialisation
-if [[ $prodwarm == "warmup" ]]; then
-	allFlag="all"
-else
-	# Pull back grid file
-	echo "Preparing the grid file for your production run"
-	read -p "Write the name of the runcard > " runcardname 
-	# Check whether the user wrote ".run", if he didn't, append .run
-	if [[ $runcardname == *".run" ]]; then
-		runcardnm=$runcardname
-	else
-		runcardnm=$runcardname.run
+# Autogeneration of runcard variable in config.py
+# Read the value of RUNCARDS into runcarddir
+runcarddir=$(python -c "from config import RUNCARDS ; print RUNCARDS")
+runcardvariable=""
+for f in $(ls $runcarddir/*.run)
+do
+	runcardnm=$(basename "$f")
+	echo "Adding $runcardnm"
+	if [[ $runcardvariable != "" ]]; then
+		runcardvariable=$runcardvariable,
 	fi
-	echo "Bringin back warmup files... "
-	lcg-cp lfn:warmup/output$runcardnm-w.tar.gz tmp.tar.gz
-	echo "Untaring said files... "
-	tar xfvz tmp.tar.gz
-	echo "Removing tar"
-	rm tmp.tar.gz
-#	mkdir tempFolder || echo ""
-#	lcg-cp lfn:warmup/output$runcardnm.run-w.tar.gz tempFolder/tmp.tar.gz
-#	cd tempFolder
-#	tar xfz tmp.tar.gz
-#	# In principle we only want grid files?
-#	mv VJ* ../
-#	mv *.run ../
-#	mv *.log ../
-#	cd ..
-# 	rm -rf tempFolder
-fi
-read -p "Run initialise.py? (y/n) " yn
-if [ $yn == "y" ]; then
-	python initialise.py $allFlag
-fi
+	runcardvariable=$runcardvariable\"$runcardnm\":\"NNLOJET$(echo $runcardnm | tr -d .run)\"
+	# Initialisation
+	if [[ $prodwarm == "warmup" ]]; then
+		allFlag="all"
+	elif [[ $prodwarm == "production" ]]; then
+		# Pull back grid file
+		echo "Preparing the grid file for your production run"
+#		read -p "Write the name of the runcard > " runcardname 
+#		# Check whether the user wrote ".run", if he didn't, append .run
+#		if [[ $runcardname == *".run" ]]; then
+#			runcardnm=$runcardname
+#		else
+#			runcardnm=$runcardname.run
+#		fi
+		echo "Bringin back warmup files... for $runcardnm"
+		lcg-cp lfn:warmup/output$runcardnm-w.tar.gz tmp.tar.gz
+		echo "Untaring said files... "
+		tar xfvz tmp.tar.gz
+		echo "Removing tar"
+		rm tmp.tar.gz
+	#	mkdir tempFolder || echo ""
+	#	lcg-cp lfn:warmup/output$runcardnm.run-w.tar.gz tempFolder/tmp.tar.gz
+	#	cd tempFolder
+	#	tar xfz tmp.tar.gz
+	#	# In principle we only want grid files?
+	#	mv VJ* ../
+	#	mv *.run ../
+	#	mv *.log ../
+	#	cd ..
+	#	rm -rf tempFolder
+	fi
+	#read -p "Run initialise.py? (y/n) " yn
+	#if [ $yn == "y" ]; then
+		echo "Running initialise.py for runcard " $runcardnm
+		# Check the folders runcards, LHAPDF, gcc exist
+		mkdir runcards
+		mkdir LHAPDF
+		mkdir gcc
+		python initialise.py $runcardnm $allFlag
+	#fi
+done
+
+# Option to modify config.py here
+# like, vim config.py
+
+sed -i "/WIZARDRUNCARDS/cRUNS = { $runcardvariable } #WIZARDRUNCARDS" config.py
+echo "Runcards added to config.py"
 
 ## Running Ganga
 echo "Running ganga"
