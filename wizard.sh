@@ -156,10 +156,11 @@ fi
 ## Proxy Creation
 echo "Create proxy"
 cp ~/.gangarc ~/.gangarcbak0
+userOption=$1
 while true; do
-	if [[ $1 == "ARC" ]] || [[ $1 == "DIRAC" ]] || [[ $1 == "ARCPROD" ]]; then
-		echo "Running with option: " $1
-		mode=$1
+	if [[ $userOption == "ARC"* ]] || [[ $userOption == *"DIRAC" ]]; then
+		echo "Running with option: " $userOption
+		mode=$userOption
 	else
 		# Supports:
 		#	ARC     - warmup
@@ -187,6 +188,36 @@ while true; do
 		dirac-proxy-init -g pheno_user -M
 		prodwarm=production
 		break
+	elif [[ $mode == "CLEANDIRAC" ]]; then
+		echo "Cleaning Dirac enviromental mess..."
+		unset PYTHONUNBUFFERED
+		unset PYTHONOPTIMIZE
+		unset X509_VOMS_DIR
+		unset DIRAC
+		unset DIRACBIN
+		unset DIRACSCRIPTS
+		unset DIRACLIB
+		unset TERMINFO
+		unset RRD_DEFAULT_FONT
+		unset PATH
+		unset LD_LIBRARY_PATH
+		unset DYLD_LIBRARY_PATH
+		unset PYTHONPATH
+		# Reset gangaDefault just in case
+		# Path from clean session before sourcing .bash_profile
+		export PATH=/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/sbin
+		cp ~/.gangarcDefault ~/.gangarc
+		# Juan:
+		# For Durham gridui we also need to add another path to PATH, this makes $PATH system dependent and that _might_ be bad... 
+		export PATH=$PATH:/usr/lib64/qt-3.3/bin
+		source ~/.bash_profile
+		# Clean duplicates 
+		export PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++')
+		echo "... done!"
+		exit
+	else
+		echo "Option $1 not recognised..."
+		unset userOption
 	fi
 done
 
@@ -264,33 +295,12 @@ if [[ $mode == "ARC" ]] || [[ $mode == "ARCDEFAULT" ]]; then
 		cat $HOME/gangadir/workspace/$USER/LocalXML/$jobN/$subjobN/output/stdout
 	fi
 # Needs DIRAC version
+elif [[ $mode == "DIRAC" ]]; then
+	echo "Restoring .gangarc..."
+	cp ~/.gangarcDefault ~/.gangarc
 fi
 
-if [[ $mode == "CLEANDIRAC" ]]; then
-	echo "Cleaning Dirac enviromental mess..."
-	unset PYTHONUNBUFFERED
-	unset PYTHONOPTIMIZE
-	unset X509_VOMS_DIR
-	unset DIRAC
-	unset DIRACBIN
-	unset DIRACSCRIPTS
-	unset DIRACLIB
-	unset TERMINFO
-	unset RRD_DEFAULT_FONT
-	unset PATH
-	unset LD_LIBRARY_PATH
-	unset DYLD_LIBRARY_PATH
-	unset PYTHONPATH
-	# Path from clean session before sourcing .bash_profile
-	export PATH=/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/sbin
-	# Juan:
-	# For Durham gridui we also need to add another path to PATH, this makes $PATH system dependent and that _might_ be bad... 
-	export PATH=$PATH:/usr/lib64/qt-3.3/bin
-	source ~/.bash_profile
-	# Clean duplicates 
-	export PATH=$(echo "$PATH" | awk -v RS=':' -v ORS=":" '!a[$1]++')
-	echo "... done!"
-fi
+
 
 echo "Good Bye!"
 
