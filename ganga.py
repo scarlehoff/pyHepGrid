@@ -84,6 +84,7 @@ os.system('rm -rf LHAPDF/')
 os.system('rm -rf runcards/')
 os.system('rm -rf gcc/')
 os.system('rm local.tar.gz')
+os.system('rm NNLOJET.tar.gz')
 os.system('rm TOT.*')
 os.system('rm fort*')
 

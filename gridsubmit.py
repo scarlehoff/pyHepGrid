@@ -28,12 +28,11 @@ else:
     multithread=False
     print "ASSUMING THIS IS A PRODUCTION RUN"
     print "SETTING TO SINGLE THREADED RUNNING"
-    nruns = c.NRUNS
+    nruns = c.NUMRUNS
 
 if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"
     exit()
-
 
 seedList = [str(i) for i in range(1,nruns+1)]
 
@@ -41,11 +40,21 @@ seedList = [str(i) for i in range(1,nruns+1)]
 argList = []
 
 runcards = os.listdir(c.RUNCARDS)
+for r in runcards:
+    if r not in c.RUNS.keys():
+        raise Exception('Runcard '+r+' not found in config.py')
 
 cmd = ['lfc-ls','output']
 
 output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
+cmd = ['lfc-ls','input']
+
+input  = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+
+for r in runcards:
+    if c.RUNS[r] not in input:
+        raise Exception('Error: '+c.RUNS[r]+' not found in input lfs directory')
 
 for seed in seedList:
     for r in runcards:
@@ -53,7 +62,7 @@ for seed in seedList:
             arg = ' -run '+r+' -iseed '+seed
             checkarg = r+'-'+seed
             if checkarg not in output  or mode == 'Local':
-                argList.append([arg,r,seed,multithread,c.LFNDIR,c.NNLOJETNAME])
+                argList.append([arg,r,seed,multithread,c.LFNDIR,c.RUNS[r]])
 
 
 print "Number of jobs: ", len(argList)
