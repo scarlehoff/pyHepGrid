@@ -2,8 +2,12 @@
 # make the necessary changes to example_config.py and then rename it to config.py
 # Do not commit your hand modified version
 
-# Name for the NNLOJET executable
-NNLOJETNAME = "NNLOJET"
+
+# A dictionary of runcards and their input tars on the LFN
+RUNS = {'TEST.run' : 'NNLOJET'}
+
+# Number of runs used for production per runcard
+NUMRUNS = 500
 
 # NNLOJET main directory
 NNLOJETDIR='/mt/home/morgan/NNLOJET'

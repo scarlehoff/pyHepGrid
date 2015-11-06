@@ -16,7 +16,17 @@ shutil.rmtree(os.path.join(HOME,'runcards'))
 shutil.copytree(c.RUNCARDS,os.path.join(HOME,'runcards'))
 
 try:
-    allFlag = sys.argv[1]
+    runcard = sys.argv[1]
+except IndexError:
+    raise Exception('Please provide a runcard name, e.g. python initialise.py TEST.run')
+
+rundir = os.listdir(c.RUNCARDS)
+
+if runcard not in rundir:
+    raise Exception('Error: specified runcard not found in runcard directory')
+
+try:
+    allFlag = sys.argv[2]
 except IndexError:
     allFlag = 'None'
 
@@ -38,7 +48,7 @@ if allFlag == 'all':
 
 
 print "Initialising NNLOJET"
-tarfile = c.NNLOJETNAME + ".tar.gz"
+tarfile = c.RUNS[runcard] + ".tar.gz"
 os.system("lcg-del -a lfn:input/" + tarfile + ' --force')
 os.system("tar -czf " + tarfile  + " NNLOJET *.RRa *.RRb *.vRa *.vRb *.vBa *.vBb runcards")
 os.system("lcg-cr --vo pheno -l lfn:input/" + tarfile + " file:$PWD/" + tarfile)
