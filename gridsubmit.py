@@ -12,23 +12,25 @@ except IndexError:
 prodwarm = 'production'
 #prodwarm = 'warmup'
 # Dirac,ARC,Local
-#mode = 'ARC'
-mode = 'Dirac'
+mode = 'ARC'
+#mode = 'Dirac'
 #mode = 'Local'
 
 #### WIZARD MODE/PRODWARM
 
-mem = '100' # memory allocation per thread in Mb for ARC submissions
 
 if prodwarm == 'warmup':
     multithread=True
     print "SETTING TO MULTITHREADED RUNNING"
     nruns = 1
+    mem = '100' # memory allocation per thread in Mb for ARC submissions
+
 else:
     multithread=False
     print "ASSUMING THIS IS A PRODUCTION RUN"
     print "SETTING TO SINGLE THREADED RUNNING"
     nruns = c.NUMRUNS
+    mem = '1000' # memory allocation per thread in Mb for ARC submissions
 
 if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"
@@ -36,15 +38,30 @@ if multithread and mode != 'ARC':
 
 seedList = [str(i) for i in range(1,nruns+1)]
 
+NUMTHREADS = str(c.NUMTHREADS)
 
 argList = []
 
-runcards = os.listdir(c.RUNCARDS)
+runcards = [r for r in os.listdir(c.RUNCARDS) if '~' not in r]
+
+
+
 for r in runcards:
     if r not in c.RUNS.keys():
         raise Exception('Runcard '+r+' not found in config.py')
+    else:
+        fullr = os.path.join(c.RUNCARDS,r)
+        os.system('cp '+fullr+' .')
+        tarfile = r+'.tar.gz'
+        print "Writing "+r+" to grid storage"
+        os.system("tar -czf "+tarfile+" "+r)
+        os.system("lcg-del -a lfn:runcards/" + tarfile + ' --force')
+        os.system("lcg-cr --vo pheno -l lfn:runcards/" + tarfile + " file:$PWD/" + tarfile)
 
-cmd = ['lfc-ls','output']
+if prodwarm != 'warmup':
+    cmd = ['lfc-ls','output']
+else:
+    cmd = ['lfc-ls','warmup']
 
 output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
@@ -60,9 +77,12 @@ for seed in seedList:
     for r in runcards:
         if '~' not in r:
             arg = ' -run '+r+' -iseed '+seed
-            checkarg = r+'-'+seed
+            if prodwarm != 'warmup':
+                checkarg = r+'-'+seed
+            else:
+                checkarg = r+'-'+'w'
             if checkarg not in output  or mode == 'Local':
-                argList.append([arg,r,seed,multithread,c.LFNDIR,c.RUNS[r]])
+                argList.append([arg,r,seed,multithread,c.LFNDIR,c.RUNS[r],NUMTHREADS])
 
 
 print "Number of jobs: ", len(argList)
@@ -93,8 +113,12 @@ else:
 if mode == 'ARC':
     j0.backend.requirements.other = ['(memory='+mem+')']
     if multithread:
-        j0.backend.requirements.other += ['(count=16)','(countpernode=16)']
-    
+        j0.backend.requirements.other += ['(count='+NUMTHREADS+')','(countpernode='+NUMTHREADS+')']
+
+j0.inputfiles = [] 
+#for r in runcards:  # send all the runcards as an input file now
+#    fullr = os.path.join(c.RUNCARDS,r)
+#    j0.inputfiles += [LocalFile(fullr)]
 
 j0.splitter=argSplit
 j0.submit()

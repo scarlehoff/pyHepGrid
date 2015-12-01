@@ -20,28 +20,28 @@ runcarddir = c.RUNCARDS
 
 runcards = os.listdir(runcarddir)
 
+warm = ''
+try:
+    warm = sys.argv[1]
+except IndexError:
+    pass
 
-seedList = [str(i) for i in range(1,1000)]
+if warm == 'warmup':
+    warmup=True
+else:
+    warmup=False
 
-cmd = ['lfc-ls','output']
+
+if warmup:
+    cmd = ['lfc-ls','warmup']
+    seedList = ['w']
+    processList = []
+else:
+    cmd = ['lfc-ls','output']
+    seedList = [str(i) for i in range(1,1000)]
+    processList = ['qq','qg','gq','qqb','qbq','gg','qbg','gqb','qbqb']
 
 output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
-
-processList = ['qq','qg','gq','qqb','qbq','gg','qbg','gqb','qbqb']
-
-os.system('mkdir results/')
-os.system('mkdir results/tmp/')
-os.system('mkdir results/log/')
-os.system('mkdir results/all')
-for p in processList:
-    newDir = 'results/'+p
-    os.system('mkdir '+newDir)
-
-
-os.chdir('results/log')
-logcheck = glob.glob('*.log')
-
-os.chdir('../tmp/')
 
 currentdir = os.getcwd()
 
@@ -55,21 +55,54 @@ def getid(run):
     return id
 
 for run in runcards:
+    targetdir = os.path.join(currentdir,'results_'+run)
+    os.system('mkdir '+targetdir)
+    if not warmup:
+        for subdir in ['tmp','log','all']+processList:
+            newdir = os.path.join(targetdir,subdir)
+            os.system('mkdir '+newdir)
+    else:
+        newdir = os.path.join(targetdir,'tmp')
+        os.system('mkdir '+newdir)         
+
+    if not warmup:
+        newdir = os.path.join(targetdir,'log')
+    else:
+        newdir = targetdir
+    os.chdir(newdir)
+    logcheck = glob.glob('*.log')
+    tmpdir = os.path.join(targetdir,'tmp')
+    os.chdir(tmpdir)
+
     for seed in seedList:
         name = 'output'+run+'-'+seed+'.tar.gz'
         runid = getid(run)
-        checkname = runid+'-'+seed+'.log'
+        if warmup:
+            checkname = runid+'-'+'1.log'
+        else:
+            checkname = runid+'-'+seed+'.log'
 #        output = [name] # HACK for now
         if name in output and checkname not in logcheck:
             status = 0
             print run,seed
-            command = 'lcg-cp lfn:output/'+name+' '+name
-            #command = 'lcg-cp '+SRM+'output/'+name+' '+name
+            if warmup:
+                command = 'lcg-cp lfn:warmup/'+name+' '+name
+            else:
+                command = 'lcg-cp lfn:output/'+name+' '+name
             os.system(command)
             os.system('tar -xf '+name+' -C .')
             tmpfiles = os.listdir('.')
+            # Hack for modules branch
+#            for i in xrange(len(tmpfiles)):
+#                if 'ZJ.CV9.s' in tmpfiles[i]:
+#                    os.rename(tmpfiles[i],checkname)
+#                    tmpfiles[i] = checkname
+            
             if checkname in tmpfiles:
-                direct = os.path.join('../log/',checkname)
+                if warmup:
+                    direct = os.path.join('../',checkname)
+                else:
+                    direct = os.path.join('../log/',checkname)
                 os.rename(checkname,direct)
                 for f in tmpfiles:
                     splitname = f.split('.')
@@ -80,6 +113,8 @@ for run in runcards:
                             direct = os.path.join('../',splitname[-1])
                             direct = os.path.join(direct,f)
                             os.rename(f,direct)
+                    elif splitname[-1] in ['RRa','RRb','vRa','vRb','txt'] and warmup:
+                        os.rename(f,'../'+f)
             else:
                 status = 1
 
@@ -87,9 +122,9 @@ for run in runcards:
                 print "deleting: ", run,seed
                 os.system('lcg-del -a lfn:output/'+name) 
                
-            shutil.rmtree(currentdir)
-            os.mkdir(currentdir)
-            os.chdir(currentdir)
+            shutil.rmtree(tmpdir)
+            os.mkdir(tmpdir)
+            os.chdir(tmpdir)
 
 
 

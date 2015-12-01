@@ -7,8 +7,8 @@ import sys,os
 # Set environment variables
 
 LFNDIR=sys.argv[8]
-
 NNLOJET=sys.argv[9]
+NUMTHREADS=sys.argv[10]
 
 if sys.argv[7] == 'True':
     warmup = True
@@ -40,7 +40,7 @@ os.environ['LHAPATH']=lhapdf_sharepath
 os.environ['LHA_DATA_PATH']=lhapdf_sharepath
 os.environ['OMP_STACKSIZE']="999999"
 if warmup:
-    os.environ['OMP_NUM_THREADS']="16"
+    os.environ['OMP_NUM_THREADS']=NUMTHREADS
 else:
     os.environ['OMP_NUM_THREADS']="1"
 os.environ['CC']="gcc"
@@ -56,8 +56,30 @@ os.system('lcg-cp lfn:input/local.tar.gz local.tar.gz')
 os.system('lcg-cp lfn:input/'+NNLOJET+'.tar.gz NNLOJET.tar.gz')
 os.system('tar -zxf local.tar.gz')
 os.system('tar -zxf NNLOJET.tar.gz')
-os.system('chmod +x NNLOJET')
+runcardtar = sys.argv[2]+'.tar.gz'
+status = os.system('lcg-cp lfn:runcards/'+runcardtar+' run.tar.gz')
+if status == 0:
+    print "Successfully extracted runcard from: "+runcardtar
+    os.system('tar -zxf run.tar.gz')
+    os.system('rm run.tar.gz')
+else:
+    print "ERROR: Failed to extract runcard from: "+runcardtar
+if not warmup: # attempt to find the grid files automatically
+    warmuptar = 'output'+sys.argv[2]+'-w'+'.tar.gz'
+    os.system('mkdir warmup')
+    status = os.system('lcg-cp lfn:warmup/'+warmuptar+' warmup.tar.gz')
+    if status == 0:
+        os.system('tar -xf warmup.tar.gz -C warmup/')
+        for gfile in ['RRa','RRb','vRa','vRb','vBa','vBb']:
+            os.system('cp warmup/*.'+gfile+' .')
+        print "Successfully extracted warmup grids from: "+warmuptar
+    else:
+        print "WARNING, failed to extract warmup grids from: "+warmuptar
 
+
+
+
+os.system('chmod +x NNLOJET')
 
 # COMMAND GOES HERE
 command = ''
@@ -65,10 +87,10 @@ command = ''
 command += './NNLOJET'
 for var in sys.argv[1:5]:
     command += ' '+var
-os.system('cp runcards/'+sys.argv[2]+' .') # copy runcard to working dir
+#os.system('cp runcards/'+sys.argv[2]+' .') # copy runcard to working dir
 
 # For debugging
-command +=';echo $LD_LIBRARY_PATH'
+command +=' 2>&1 outfile.out;echo $LD_LIBRARY_PATH'
 
 print "executed command: ", command
 print "sys.argv: ", sys.argv

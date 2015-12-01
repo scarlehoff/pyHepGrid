@@ -9,6 +9,9 @@ RUNS = {'TEST.run' : 'NNLOJET'}
 # Number of runs used for production per runcard
 NUMRUNS = 500
 
+# Number of threads used for warmup runs
+NUMTHREADS = 10
+
 # NNLOJET main directory
 NNLOJETDIR='/mt/home/morgan/NNLOJET'
 
