@@ -83,6 +83,7 @@ if [ ! -f "config.py" ]; then
 
 	echo "#THIS PART IS RUN DEPENDANT" >> $configfile
 	echo "NUMRUNS = 10" >> $configfile
+	echo "NUMTHREADS = 1" >> $configfile
 
 	echo "RUNS = {"test.run":"NNLOJET"} # WIZARDRUNCARDS" >> $configfile
 
@@ -115,9 +116,9 @@ if [ ! -f "config.py" ]; then
 	echo "	source $bashNNLO " >> ~/.bashrc
 	echo "fi" >> ~/.bashrc
 
-	mkdir runcards
-	mkdir LHAPDF
-	mkdir gcc
+	mkdir -p runcards
+	mkdir -p LHAPDF
+	mkdir -p gcc
 
 	echo "Done!"
 	firstrun=true
@@ -267,7 +268,7 @@ do
 		tar xfvz tmp.tar.gz
 		echo "Removing tar"
 		rm tmp.tar.gz
-	#	mkdir tempFolder || echo ""
+	#	mkdir -p tempFolder
 	#	lcg-cp lfn:warmup/output$runcardnm.run-w.tar.gz tempFolder/tmp.tar.gz
 	#	cd tempFolder
 	#	tar xfz tmp.tar.gz
@@ -282,9 +283,9 @@ do
 	#if [ $yn == "y" ]; then
 		echo "Running initialise.py for runcard " $runcardnm
 		# Check the folders runcards, LHAPDF, gcc exist
-		mkdir runcards
-		mkdir LHAPDF
-		mkdir gcc
+		mkdir -p runcards
+		mkdir -p LHAPDF
+		mkdir -p gcc
 		python initialise.py $runcardnm $allFlag
 	#fi
 done
