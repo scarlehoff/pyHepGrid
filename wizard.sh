@@ -241,6 +241,8 @@ sed -i "/WIZARD MODE/a prodwarm = \"$prodwarm\" " $submitdir/tmpsubmit.py
 # Read the value of RUNCARDS into runcarddir
 runcarddir=$(python -c "from config import RUNCARDS ; print RUNCARDS")
 runcardvariable=""
+# Remove swap files
+rm -f $runcarddir/*.swp
 for f in $(ls $runcarddir/*.run)
 do
 	runcardnm=$(basename "$f")
@@ -311,7 +313,7 @@ rm tmp.py
 ### Finalise / Delete ???
 
 if [[ $mode == "ARC" ]] || [[ $mode == "ARCDEFAULT" ]]; then
-	read -p "Do you want to look at the stdout of the job? " yn
+	read -p "Do you want to look at the stdout of the job? (y/n)" yn
 	if [[ $yn == "y" ]]; then
 		read -p "Which one? " jobN
 		read -p "Which subjob? " subjobN
@@ -322,6 +324,10 @@ if [[ $mode == "ARC" ]] || [[ $mode == "ARCDEFAULT" ]]; then
 elif [[ $mode == "DIRAC" ]]; then
 	echo "Restoring .gangarc..."
 	cp ~/.gangarcDefault ~/.gangarc
+	read -p "Run finalise.py? (y/n)" yn
+	if [[ $yn == "y" ]]; then
+		python finalise.py
+	fi
 fi
 
 

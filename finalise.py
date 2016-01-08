@@ -28,6 +28,9 @@ except IndexError:
 
 if warm == 'warmup':
     warmup=True
+elif warm != '':
+    modulesFlag = True
+    warmup = False
 else:
     warmup=False
 
@@ -56,14 +59,15 @@ def getid(run):
 
 for run in runcards:
     targetdir = os.path.join(currentdir,'results_'+run)
-    os.system('mkdir '+targetdir)
+    os.system('mkdir -p '+targetdir)
+	# Create all subdirectories
     if not warmup:
         for subdir in ['tmp','log','all']+processList:
             newdir = os.path.join(targetdir,subdir)
-            os.system('mkdir '+newdir)
+            os.system('mkdir -p '+newdir)
     else:
         newdir = os.path.join(targetdir,'tmp')
-        os.system('mkdir '+newdir)         
+        os.system('mkdir -p '+newdir)         
 
     if not warmup:
         newdir = os.path.join(targetdir,'log')
@@ -80,7 +84,13 @@ for run in runcards:
         if warmup:
             checkname = runid+'-'+'1.log'
         else:
-            checkname = runid+'-'+seed+'.log'
+# Messy hack to use with modules ... 
+            if modulesFlag:
+            # We are in modules
+                checkname = warm+'.'+runid+'.s'+seed+'.log'
+            else:
+            # We are in the default branch
+                checkname = runid + '-' + seed + '.log'
 #        output = [name] # HACK for now
         if name in output and checkname not in logcheck:
             status = 0
@@ -97,7 +107,7 @@ for run in runcards:
 #                if 'ZJ.CV9.s' in tmpfiles[i]:
 #                    os.rename(tmpfiles[i],checkname)
 #                    tmpfiles[i] = checkname
-            
+           
             if checkname in tmpfiles:
                 if warmup:
                     direct = os.path.join('../',checkname)
@@ -106,7 +116,9 @@ for run in runcards:
                 os.rename(checkname,direct)
                 for f in tmpfiles:
                     splitname = f.split('.')
-                    if splitname[0] in ['v5b','v5a','RRa','RRb','vRa']:
+                    indexType = 0
+                    if modulesFlag and splitname[-1] == 'dat': indexType = 1 # Same messy hack for modules
+                    if splitname[indexType] in ['v5b','v5a','RRa','RRb','vRa']:
                         if len(splitname) == 5:
                             os.rename(f,'../all/'+f)
                         elif len(splitname) == 6 and splitname[-1] in processList:
