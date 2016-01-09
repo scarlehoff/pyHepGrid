@@ -241,8 +241,6 @@ sed -i "/WIZARD MODE/a prodwarm = \"$prodwarm\" " $submitdir/tmpsubmit.py
 # Read the value of RUNCARDS into runcarddir
 runcarddir=$(python -c "from config import RUNCARDS ; print RUNCARDS")
 runcardvariable=""
-# Remove swap files
-rm -f $runcarddir/*.swp
 for f in $(ls $runcarddir/*.run)
 do
 	runcardnm=$(basename "$f")
