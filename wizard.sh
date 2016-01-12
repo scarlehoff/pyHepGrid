@@ -177,7 +177,7 @@ while true; do
 		mode="ARC"
 		break
 	elif [[ $mode == "DIRAC" ]]; then
-		echo "Setting up Dirac proxy"]#
+		echo "Setting up Dirac proxy"
 		source $sourcedirac #We assume .gangadirac was created with this script
 		cp ~/.gangarcDirac ~/.gangarc
 		dirac-proxy-init -g pheno_user -M
@@ -264,21 +264,25 @@ do
 #			runcardnm=$runcardname.run
 #		fi
 		echo "Bringin back warmup files... for $runcardnm"
+		tfol=tempWarmupFolder
+		echo "Creating temporary folder: " $tfol
+		mkdir -p $tfol
+		cd $tfol
 		lcg-cp lfn:warmup/output$runcardnm-w.tar.gz tmp.tar.gz
 		echo "Untaring said files... "
 		tar xfvz tmp.tar.gz
 		echo "Removing tar"
 		rm tmp.tar.gz
-	#	mkdir -p tempFolder
-	#	lcg-cp lfn:warmup/output$runcardnm.run-w.tar.gz tempFolder/tmp.tar.gz
-	#	cd tempFolder
-	#	tar xfz tmp.tar.gz
-	#	# In principle we only want grid files?
-	#	mv VJ* ../
-	#	mv *.run ../
-	#	mv *.log ../
-	#	cd ..
-	#	rm -rf tempFolder
+		echo "Copying the grid files..."
+		cp *.RRa ../
+		cp *.vRa ../
+		cp *.vRb ../
+		cp *.RRb ../
+		cp *.vBa ../
+		cp *.vBb ../
+		echo "Removing temporary folder (rm -Ir $tfol)"
+		cd ..
+		rm -Ir $tfol
 	fi
 	#read -p "Run initialise.py? (y/n) " yn
 	#if [ $yn == "y" ]; then
