@@ -26,6 +26,7 @@ try:
 except IndexError:
     pass
 
+modulesFlag = False
 if warm == 'warmup':
     warmup=True
 elif warm != '':

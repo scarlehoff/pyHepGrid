@@ -174,6 +174,7 @@ while true; do
 		cp ~/.gangarcDefault ~/.gangarc
 		arcproxy -S pheno -c validityPeriod=24h -c vomsACvalidityPeriod=24h
 		prodwarm=production
+		mode="ARC"
 		break
 	elif [[ $mode == "DIRAC" ]]; then
 		echo "Setting up Dirac proxy"]#
