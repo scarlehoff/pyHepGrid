@@ -168,14 +168,23 @@ firstRun(){
 createArcProxy() { 
 	echo "Setting up Arc proxy"
 	cp ~/.gangarcDefault ~/.gangarc
-	arcproxy -S pheno -c validityPeriod=24h -c vomsACvalidityPeriod=24h
+	if [[ -f .passpass ]]; then
+		arcproxy -S pheno -c validityPeriod=24h -c vomsACvalidityPeriod=24h -p all=file:.passpass
+	else
+		arcproxy -S pheno -c validityPeriod=24h -c vomsACvalidityPeriod=24h 
+	fi
 	return 0
 }
 
 createDiracProxy() {
 	source $sourcedirac #We assume .gangadirac was created with this script
 	cp ~/.gangarcDirac ~/.gangarc
-	dirac-proxy-init -g pheno_user -M
+	if [[ -f .passpass ]]; then
+		passDirac=$(cat .passpass)
+		echo $passDirac | dirac-proxy-init -g pheno_user -M -p
+	else
+		dirac-proxy-init -g pheno_user -M
+	fi
 	return 0
 }
 
@@ -354,7 +363,6 @@ if [[ $mode == "ARC" ]] || [[ $mode == "DIRAC" ]]; then
 	ganga -i tmp.py
 	rm tmp.py
 	finalise
-	break
 fi
 
 echo "Good Bye!"

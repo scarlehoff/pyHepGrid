@@ -30,6 +30,8 @@ modulesFlag = False
 if warm == 'warmup':
     warmup=True
 elif warm != '':
+    print("Modules run")
+    print("Runcards: " + str(runcards))
     modulesFlag = True
     warmup = False
 else:
@@ -61,7 +63,7 @@ def getid(run):
 for run in runcards:
     targetdir = os.path.join(currentdir,'results_'+run)
     os.system('mkdir -p '+targetdir)
-	# Create all subdirectories
+    # Create all subdirectories
     if not warmup:
         for subdir in ['tmp','log','all']+processList:
             newdir = os.path.join(targetdir,subdir)
@@ -88,6 +90,11 @@ for run in runcards:
 # Messy hack to use with modules ... 
             if modulesFlag:
             # We are in modules
+                if warm=='':
+                    print("To use finalise.py with the modules branch")
+                    print("it needs to know about the process, ex:")
+                    print("~$ python finalise.py VFH")
+                    sys.exit(0)
                 checkname = warm+'.'+runid+'.s'+seed+'.log'
             else:
             # We are in the default branch
