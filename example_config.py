@@ -27,5 +27,8 @@ GCCDIR='/mt/home/morgan/gcc-5.2.0/'
 # LFN directory 
 LFNDIR = '/grid/pheno/morgan/'
 
+#MCFM directory
+MCFMDIR = '/mt/home/morgan/MCFM-7.0.1/'
+
 
 

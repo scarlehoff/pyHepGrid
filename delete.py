@@ -20,7 +20,7 @@ runs = sys.argv[1:]
 if runs == []:
     raise Exception('Please provide run names to delete')
 
-seedList = [str(i) for i in range(1,1000)]
+seedList = [str(i) for i in range(1,100000)]
 
 cmd = ['lfc-ls','output']
 
@@ -33,7 +33,7 @@ for run in runs:
         name = 'output'+run+'-'+seed+'.tar.gz'
         if name in output:
             print "deleting: ", run,seed
-            os.system('lcg-del -a lfn:output/'+name) 
+            os.system('lcg-del -a lfn:output/'+name+' --force') 
                
             
 

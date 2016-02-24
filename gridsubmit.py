@@ -16,6 +16,7 @@ mode = 'ARC'
 #mode = 'Dirac'
 #mode = 'Local'
 
+mcfmFlag=False # use MCFM on the grid
 #### WIZARD MODE/PRODWARM
 
 
@@ -36,7 +37,12 @@ if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"
     exit()
 
-seedList = [str(i) for i in range(1,nruns+1)]
+if mcfmFlag:
+    print "Submitting MCFM job(s)"
+else:
+    print "Submitting NNLOJET job(s)"
+
+seedList = [str(i) for i in range(500,nruns+500)]
 
 NUMTHREADS = str(c.NUMTHREADS)
 
@@ -76,13 +82,17 @@ for r in runcards:
 for seed in seedList:
     for r in runcards:
         if '~' not in r:
-            arg = ' -run '+r+' -iseed '+seed
-            if prodwarm != 'warmup':
-                checkarg = r+'-'+seed
+            if not mcfmFlag:
+                arg = ' -run '+r+' -iseed '+seed
+                if prodwarm != 'warmup':
+                    checkarg = r+'-'+seed
+                else:
+                    checkarg = r+'-'+'w'
+                if checkarg not in output  or mode == 'Local':
+                    argList.append([arg,r,seed,multithread,c.LFNDIR,c.RUNS[r],NUMTHREADS])
             else:
-                checkarg = r+'-'+'w'
-            if checkarg not in output  or mode == 'Local':
-                argList.append([arg,r,seed,multithread,c.LFNDIR,c.RUNS[r],NUMTHREADS])
+                arg = r
+                argList.append([arg,multithread,c.LFNDIR,c.RUNS[r],NUMTHREADS])
 
 
 print "Number of jobs: ", len(argList)
@@ -94,6 +104,8 @@ HOME = os.getcwd()
 j0 = Job()
 if mode == 'Local': # slightly different syntax and can be used for debugging, does not generate data either
     j0.application = Executable(exe=File(os.path.join(HOME,'ganga_local.py')))
+elif mcfmFlag: # modified ganga.py for mcfm
+    j0.application = Executable(exe=File(os.path.join(HOME,'ganga_mcfm.py')))
 else:
     j0.application = Executable(exe=File(os.path.join(HOME,'ganga.py')))
 
@@ -102,7 +114,8 @@ if mode == 'ARC':
     j0.backend.CE='ce2.dur.scotgrid.ac.uk'
 elif mode == 'Dirac' or mode == 'DIRAC':
     j0.backend=Dirac()
-    j0.backend.settings['BannedSites']=["LCG.UKI-NORTHGRID-MAN-HEP.uk","LCG.EFDA-JET.xx"]#,"LCG.UKI-LT2-IC-HEP.uk"]
+ #   j0.backend.settings['BannedSites']=["LCG.UKI-NORTHGRID-MAN-HEP.uk","LCG.EFDA-JET.xx"]#,"LCG.UKI-LT2-IC-HEP.uk"]
+    j0.backend.settings['BannedSites']=["LCG.RAL-LCG2.uk"]
 elif mode == 'Local':
     j0.backend=Local()
 else:
