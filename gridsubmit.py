@@ -48,7 +48,7 @@ NUMTHREADS = str(c.NUMTHREADS)
 
 argList = []
 
-runcards = [r for r in os.listdir(c.RUNCARDS) if '~' not in r]
+runcards = [r for r in os.listdir(c.RUNCARDS) if '~' not in r or ".swp" not in r]
 
 
 
@@ -88,7 +88,7 @@ for seed in seedList:
                     checkarg = r+'-'+seed
                 else:
                     checkarg = r+'-'+'w'
-                if 1==1:#checkarg not in output  or mode == 'Local':
+                if checkarg not in output  or mode == 'Local':
                     argList.append([arg,r,seed,multithread,c.LFNDIR,c.RUNS[r],NUMTHREADS])
             else:
                 arg = r

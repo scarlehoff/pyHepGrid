@@ -106,13 +106,6 @@ for run in runcards:
                     splitname = f.split('.')
                     if splitname[-1] == 'dat':
                         os.rename(f,'../'+f)
-                    #if splitname[0] in ['v5b','v5a','RRa','RRb','vRa','vBa']:
-                    #    if len(splitname) == 5:
-                    #        os.rename(f,'../all/'+f)
-                    #    elif len(splitname) == 6 and splitname[-1] in processList:
-                    #        direct = os.path.join('../',splitname[-1])
-                    #        direct = os.path.join(direct,f)
-                    #        os.rename(f,direct)
                     elif splitname[-1] in ['RRa','RRb','vRa','vRb','txt'] and warmup:
                         os.rename(f,'../'+f)
             else:
