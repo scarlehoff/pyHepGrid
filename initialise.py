@@ -11,9 +11,21 @@ SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir'
 
 HOME = os.getcwd()
 
+try:
+    extraFlag = sys.argv[2]
+except IndexError:
+    extraFlag = 'None'
+
+
 shutil.copy(os.path.join(c.NNLOJETDIR,'driver','NNLOJET'),HOME)
 shutil.rmtree(os.path.join(HOME,'runcards'))
 shutil.copytree(c.RUNCARDS,os.path.join(HOME,'runcards'))
+if extraFlag == 'mcfm':
+    shutil.copy(os.path.join(c.MCFMDIR,'Bin','mcfm_omp'),HOME)
+    shutil.copy(os.path.join(c.MCFMDIR,'Bin','process.DAT'),HOME)
+    shutil.rmtree(os.path.join(HOME,'Pdfdata'))
+    shutil.copytree(os.path.join(c.MCFMDIR,'Bin','Pdfdata'),os.path.join(HOME,'Pdfdata'))
+
 
 try:
     runcard = sys.argv[1]
@@ -25,30 +37,37 @@ rundir = os.listdir(c.RUNCARDS)
 if runcard not in rundir:
     raise Exception('Error: specified runcard not found in runcard directory')
 
-try:
-    allFlag = sys.argv[2]
-except IndexError:
-    allFlag = 'None'
 
-if allFlag == 'all':
+if extraFlag == 'all':
     print "Initialising full local directory"
-    shutil.rmtree(os.path.join(HOME,'LHAPDF'))
-    shutil.rmtree(os.path.join(HOME,'gcc'))
+    try:
+        shutil.rmtree(os.path.join(HOME,'LHAPDF'))
+        shutil.rmtree(os.path.join(HOME,'gcc'))
+    except OSError:
+        pass
     shutil.copytree(c.LHAPDFDIR,os.path.join(HOME,'LHAPDF'))
     shutil.copytree(c.GCCDIR,os.path.join(HOME,'gcc'))
     os.system('tar -czf local.tar.gz LHAPDF gcc')
     os.system('lcg-del -a lfn:input/local.tar.gz --force')
     os.system('lcg-cr --vo pheno -l lfn:input/local.tar.gz  file:$PWD/local.tar.gz')
 
+if extraFlag == 'mcfm':
+    print "Initialising MCFM"
+    tarfile = c.RUNS[runcard] + ".tar.gz"
+    os.system("lcg-del -a lfn:input/" + tarfile + ' --force')
+    os.system("tar -czf " + tarfile + " mcfm_omp process.DAT Pdfdata")
+    
+else:
+    print "Initialising NNLOJET"
+    tarfile = c.RUNS[runcard] + ".tar.gz"
+    os.system("lcg-del -a lfn:input/" + tarfile + ' --force')
+    os.system("tar -czf " + tarfile  + " NNLOJET *.RRa *.RRb *.vRa *.vRb *.vBa *.vBb runcards")
+
+os.system("lcg-cr --vo pheno -l lfn:input/" + tarfile + " file:$PWD/" + tarfile)
+print "lcg-cr --vo pheno -l lfn:input/" + tarfile + " file:$PWD/" + tarfile
+
     # TODO: add support for SRM when LFN is down
     #SRM
     #lcg-del $SRM/input/local.tar.gz
     #lcg-cp $PWD/local.tar.gz $SRM/input/local.tar.gz
     #GRID_FILE=$(lcg-rf $SRM/input/local.tar.gz -l $LFN/input/local.tar.gz)
-
-
-print "Initialising NNLOJET"
-tarfile = c.RUNS[runcard] + ".tar.gz"
-os.system("lcg-del -a lfn:input/" + tarfile + ' --force')
-os.system("tar -czf " + tarfile  + " NNLOJET *.RRa *.RRb *.vRa *.vRb *.vBa *.vBb runcards")
-os.system("lcg-cr --vo pheno -l lfn:input/" + tarfile + " file:$PWD/" + tarfile)

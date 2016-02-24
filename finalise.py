@@ -38,8 +38,8 @@ if warmup:
     processList = []
 else:
     cmd = ['lfc-ls','output']
-    seedList = [str(i) for i in range(1,1000)]
-    processList = ['qq','qg','gq','qqb','qbq','gg','qbg','gqb','qbqb']
+    seedList = [str(i) for i in range(1,10000)]
+    processList = [] # no longer separate processes for modules
 
 output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
 
@@ -51,14 +51,16 @@ def getid(run):
     text = f.readlines()
     id = text[1].strip()
     id = id[:3]
+    sproc = text[2].split('!')
+    sproc = sproc[0].strip()
     f.close()
-    return id
+    return id,sproc
 
 for run in runcards:
     targetdir = os.path.join(currentdir,'results_'+run)
     os.system('mkdir '+targetdir)
     if not warmup:
-        for subdir in ['tmp','log','all']+processList:
+        for subdir in ['tmp','log']+processList:
             newdir = os.path.join(targetdir,subdir)
             os.system('mkdir '+newdir)
     else:
@@ -76,11 +78,12 @@ for run in runcards:
 
     for seed in seedList:
         name = 'output'+run+'-'+seed+'.tar.gz'
-        runid = getid(run)
+        runid,sproc = getid(run)
+        # for now ZJ is a hack
         if warmup:
-            checkname = runid+'-'+'1.log'
+            checkname = sproc+'.'+runid+'.'+'s1.log'
         else:
-            checkname = runid+'-'+seed+'.log'
+            checkname = sproc+'.'+runid+'.s'+seed+'.log'
 #        output = [name] # HACK for now
         if name in output and checkname not in logcheck:
             status = 0
@@ -92,11 +95,6 @@ for run in runcards:
             os.system(command)
             os.system('tar -xf '+name+' -C .')
             tmpfiles = os.listdir('.')
-            # Hack for modules branch
-#            for i in xrange(len(tmpfiles)):
-#                if 'ZJ.CV9.s' in tmpfiles[i]:
-#                    os.rename(tmpfiles[i],checkname)
-#                    tmpfiles[i] = checkname
             
             if checkname in tmpfiles:
                 if warmup:
@@ -106,13 +104,15 @@ for run in runcards:
                 os.rename(checkname,direct)
                 for f in tmpfiles:
                     splitname = f.split('.')
-                    if splitname[0] in ['v5b','v5a','RRa','RRb','vRa']:
-                        if len(splitname) == 5:
-                            os.rename(f,'../all/'+f)
-                        elif len(splitname) == 6 and splitname[-1] in processList:
-                            direct = os.path.join('../',splitname[-1])
-                            direct = os.path.join(direct,f)
-                            os.rename(f,direct)
+                    if splitname[-1] == 'dat':
+                        os.rename(f,'../'+f)
+                    #if splitname[0] in ['v5b','v5a','RRa','RRb','vRa','vBa']:
+                    #    if len(splitname) == 5:
+                    #        os.rename(f,'../all/'+f)
+                    #    elif len(splitname) == 6 and splitname[-1] in processList:
+                    #        direct = os.path.join('../',splitname[-1])
+                    #        direct = os.path.join(direct,f)
+                    #        os.rename(f,direct)
                     elif splitname[-1] in ['RRa','RRb','vRa','vRb','txt'] and warmup:
                         os.rename(f,'../'+f)
             else:
@@ -121,7 +121,6 @@ for run in runcards:
             if status != 0:
                 print "deleting: ", run,seed
                 os.system('lcg-del -a lfn:output/'+name) 
-               
             shutil.rmtree(tmpdir)
             os.mkdir(tmpdir)
             os.chdir(tmpdir)
