@@ -300,9 +300,9 @@ finalise() {
 	elif [[ $mode == "DIRAC" ]]; then
 		echo "Restoring .gangarc..."
 		cp ~/.gangarcDefault ~/.gangarc
-		read -p "Run finalise.py? (y/n)" yn
+		read -p "Run finalise.py? (for modules and VFH only at the moment) (y/n)" yn
 		if [[ $yn == "y" ]]; then
-			python finalise.py
+			python finalise.py VFH
 		fi
 	fi
 }
@@ -356,8 +356,8 @@ if [[ $2 == "ganga" ]]; then
 	exit
 fi
 if [[ $mode == "ARC" ]] || [[ $mode == "DIRAC" ]]; then
-	createGridSubmit
 	addRunCards
+	createGridSubmit
 	echo gsubmit=\"$submitdir/tmpsubmit.py\" > tmp.py
 	echo "print '\nexecfile(gsubmit) will run your mod. gridsubmit.py script\n'">> tmp.py
 	ganga -i tmp.py

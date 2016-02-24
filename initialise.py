@@ -20,7 +20,9 @@ try:
 except IndexError:
     raise Exception('Please provide a runcard name, e.g. python initialise.py TEST.run')
 
-rundir = os.listdir(c.RUNCARDS)
+#rundir = os.listdir(c.RUNCARDS)
+# Skipping hidden files
+rundir = [rcard for rcard in os.listdir(c.RUNCARDS) if not rcard.startswith('.')]
 
 if runcard not in rundir:
     raise Exception('Error: specified runcard not found in runcard directory')
