@@ -4,7 +4,10 @@ class database:
   def __init__(self, db, table = None, fields = None):
     self.db = dbapi.connect(db)
     # (check whether table is in database)
-    if self.howManyTables() < 2: self.createTable(table, fields)
+    if self.howManyTables():
+      pass
+    else:
+      self.createTable(table, fields)
 
   def createTable(self, tablename, fields):
     c = self.db.cursor()
@@ -29,6 +32,14 @@ class database:
     for i in c:
       k += 1
     return k
+
+  def isThisTableHere(self, table):
+    query = "SELECT name FROM sqlite_master WHERE type='table' AND name='"+table_name+"';"
+    c = self.db.cursor()
+    c.execute(query)
+    if len(c) > 0: return True
+    return False
+
 
   def insertData(self, table, dataDict):
     keys = [key for key in dataDict]

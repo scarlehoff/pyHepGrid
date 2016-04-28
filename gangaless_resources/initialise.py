@@ -78,15 +78,23 @@ def bringGridFiles(runcard, rname):
     cmd = ["tar", "-tvf", "tmp.tar.gz"]
     out = sp.Popen(cmd, stdout = sp.PIPE).communicate()[0]
     outlist = out.split("\n")
+    logfile = ""
     for fileRaw in outlist:
         if len(fileRaw.split(".y")) == 1: continue
         file = fileRaw.split(" ")[-1]
+        if ".log" in file:
+            logfile = file
         for grid in gridp:
             if grid in file: gridFiles.append(file)
     ## And now extract those particular files
-    cmd = ["tar", "-xzf", "tmp.tar.gz"] + gridFiles
+    extractfiles = gridFiles + [logfile]
+    cmd = ["tar", "-xzf", "tmp.tar.gz"] + extractfiles
     sp.call(cmd)
+    ## Tag log file as warmup
+    newlog = logfile + "-warmup"
+    cmd = ["mv", logfile, newlog]
     sp.call(["rm", "tmp.tar.gz"])
+    gridFiles.append(newlog)
     return gridFiles
 
 def initialiseNNLOJET(runcard, production = None):
