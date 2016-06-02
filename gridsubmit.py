@@ -48,7 +48,7 @@ NUMTHREADS = str(c.NUMTHREADS)
 
 argList = []
 
-runcards = [r for r in os.listdir(c.RUNCARDS) if '~' not in r or ".swp" not in r]
+runcards = [r for r in os.listdir(c.RUNCARDS) if '~' not in r and ".swp" not in r and not r.startswith('.')]
 
 
 
