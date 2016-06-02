@@ -111,7 +111,7 @@ else:
 
 if mode == 'ARC':
     j0.backend=ARC()
-    j0.backend.CE='ce2.dur.scotgrid.ac.uk'
+    j0.backend.CE='ce1.dur.scotgrid.ac.uk'
 elif mode == 'Dirac' or mode == 'DIRAC':
     j0.backend=Dirac()
  #   j0.backend.settings['BannedSites']=["LCG.UKI-NORTHGRID-MAN-HEP.uk","LCG.EFDA-JET.xx"]#,"LCG.UKI-LT2-IC-HEP.uk"]

@@ -32,6 +32,7 @@ else:
     warmup=False
 
 
+
 if warmup:
     cmd = ['lfc-ls','warmup']
     seedList = ['w']
@@ -49,12 +50,13 @@ def getid(run):
     direct = os.path.join(runcarddir,run)
     f = open(direct,'r')
     text = f.readlines()
-    id = text[1].strip()
-    id = id[:3]
+    id = text[1].split('!')
+    id = id[0].strip()    
     sproc = text[2].split('!')
     sproc = sproc[0].strip()
     f.close()
     return id,sproc
+
 
 for run in runcards:
     targetdir = os.path.join(currentdir,'results_'+run)
