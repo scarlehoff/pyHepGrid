@@ -2,15 +2,15 @@
 import os,sys
 import subprocess
 import config as c
-
+reload(c)
 try:
     prodwarm = sys.argv[1]
 except IndexError:
     prodwarm = 'production'
 
 # warmup,production
-prodwarm = 'production'
-#prodwarm = 'warmup'
+#prodwarm = 'production'
+prodwarm = 'warmup'
 # Dirac,ARC,Local
 mode = 'ARC'
 #mode = 'Dirac'
@@ -42,7 +42,7 @@ if mcfmFlag:
 else:
     print "Submitting NNLOJET job(s)"
 
-seedList = [str(i) for i in range(500,nruns+500)]
+seedList = [str(i) for i in range(100,nruns+100)]
 
 NUMTHREADS = str(c.NUMTHREADS)
 

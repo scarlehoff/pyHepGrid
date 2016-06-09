@@ -1,5 +1,5 @@
 import os,sys,shutil
-import config as c # dangerous but I'm a rebel
+import config as c
 
 os.environ["LFC_HOST"]="lfc.grid.sara.nl"
 os.environ["LCG_CATALOG_TYPE"]="lfc"
@@ -9,6 +9,7 @@ os.environ["LCG_GFAL_INFOSYS"]="lcgbdii.gridpp.rl.ac.uk:2170"
 LFN='lfn:'+ c.LFNDIR
 SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir'
 
+LHAPDF_website = 'http://www.hepforge.org/archive/lhapdf/pdfsets/6.1/'
 HOME = os.getcwd()
 
 try:
@@ -16,6 +17,12 @@ try:
 except IndexError:
     extraFlag = 'None'
 
+def readpdfset(runcard):
+    fullpath = os.path.join(c.RUNCARDS,runcard)
+    f = open(fullpath,'r')
+    lines = f.readlines()
+    pdf=lines[8].split('!')[0].strip()
+    return pdf
 
 shutil.copy(os.path.join(c.NNLOJETDIR,'driver','NNLOJET'),HOME)
 shutil.rmtree(os.path.join(HOME,'runcards'))
@@ -39,6 +46,21 @@ rundir = [rcard for rcard in os.listdir(c.RUNCARDS) if not rcard.startswith('.')
 if runcard not in rundir:
     raise Exception('Error: specified runcard not found in runcard directory')
 
+pdf = readpdfset(runcard)
+sharepath = os.path.join(c.LHAPDFDIR,'share','LHAPDF',pdf)
+try:
+    shutil.rmtree(os.path.join(HOME,pdf))
+except OSError:
+    pass
+try:
+    shutil.copytree(sharepath,os.path.join(HOME,pdf))
+    os.system('tar -cpzf '+pdf+'.tar.gz '+pdf)
+except OSError:  # pdf set does not exist locally, try to pull it straight from the LHAPDF website...
+    os.system('wget '+LHAPDF_website+pdf+'.tar.gz')
+
+print 'copying '+pdf+' to grid storage'
+os.system('lcg-del -a lfn:input/'+pdf+'.tar.gz --force')
+os.system('lcg-cr --vo pheno -l lfn:input/'+pdf+'.tar.gz file:$PWD/'+pdf+'.tar.gz')
 
 if extraFlag == 'all':
     print "Initialising full local directory"
@@ -49,9 +71,20 @@ if extraFlag == 'all':
         pass
     shutil.copytree(c.LHAPDFDIR,os.path.join(HOME,'LHAPDF'))
     shutil.copytree(c.GCCDIR,os.path.join(HOME,'gcc'))
-    os.system('tar -czf local.tar.gz LHAPDF gcc')
-    os.system('lcg-del -a lfn:input/local.tar.gz --force')
-    os.system('lcg-cr --vo pheno -l lfn:input/local.tar.gz  file:$PWD/local.tar.gz')
+    sharepath = os.path.join(HOME,'LHAPDF','share','LHAPDF')
+    # clean out pdf sets, note rm -rf is dangerous!! There are two files in this directory LHAPDF needs to run and helpfully gives no error if they're missing -_-
+    os.chdir(sharepath)
+    dirList = [f for f in os.listdir('.') if os.path.isdir(f)]
+    for d in dirList:
+        shutil.rmtree(d)
+    os.chdir(HOME)
+    os.system('tar -czf gcc.tar.gz gcc')
+    os.system('tar -czf LHAPDF.tar.gz LHAPDF')    
+    os.system('lcg-del -a lfn:input/gcc.tar.gz --force')
+    os.system('lcg-del -a lfn:input/LHAPDF.tar.gz --force')
+    os.system('lcg-cr --vo pheno -l lfn:input/gcc.tar.gz  file:$PWD/gcc.tar.gz')
+    os.system('lcg-cr --vo pheno -l lfn:input/LHAPDF.tar.gz  file:$PWD/LHAPDF.tar.gz')
+    
 
 if extraFlag == 'mcfm':
     print "Initialising MCFM"
@@ -63,7 +96,7 @@ else:
     print "Initialising NNLOJET"
     tarfile = c.RUNS[runcard] + ".tar.gz"
     os.system("lcg-del -a lfn:input/" + tarfile + ' --force')
-    os.system("tar -czf " + tarfile  + " NNLOJET *.RRa *.RRb *.vRa *.vRb *.vBa *.vBb runcards")
+    os.system("tar -czf " + tarfile  + " NNLOJET runcards")
 
 os.system("lcg-cr --vo pheno -l lfn:input/" + tarfile + " file:$PWD/" + tarfile)
 print "lcg-cr --vo pheno -l lfn:input/" + tarfile + " file:$PWD/" + tarfile
