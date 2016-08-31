@@ -12,6 +12,9 @@ NUMRUNS = 500
 # Number of threads used for warmup runs
 NUMTHREADS = 10
 
+# The first seed to be used for the runs
+STARTSEED=1
+
 # NNLOJET main directory
 NNLOJETDIR='/mt/home/morgan/NNLOJET'
 

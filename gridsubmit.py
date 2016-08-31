@@ -9,8 +9,8 @@ except IndexError:
     prodwarm = 'production'
 
 # warmup,production
-#prodwarm = 'production'
-prodwarm = 'warmup'
+prodwarm = 'production'
+#prodwarm = 'warmup'
 # Dirac,ARC,Local
 mode = 'ARC'
 #mode = 'Dirac'
@@ -33,6 +33,11 @@ else:
     nruns = c.NUMRUNS
     mem = '1000' # memory allocation per thread in Mb for ARC submissions
 
+try:
+    startseed = c.STARTSEED
+except NameError:
+    raise Exception('Startseed parameter not defined in config file')
+
 if multithread and mode != 'ARC':
     print "Error: multithreading is not supported for backends other than ARC"
     exit()
@@ -42,7 +47,7 @@ if mcfmFlag:
 else:
     print "Submitting NNLOJET job(s)"
 
-seedList = [str(i) for i in range(100,nruns+100)]
+seedList = [str(i) for i in range(c.STARTSEED,nruns+c.STARTSEED)]
 
 NUMTHREADS = str(c.NUMTHREADS)
 

@@ -20,13 +20,11 @@ runs = sys.argv[1:]
 if runs == []:
     raise Exception('Please provide run names to delete')
 
-seedList = [str(i) for i in range(1,100000)]
+seedList = [str(i) for i in range(1,20000)]
 
 cmd = ['lfc-ls','output']
 
 output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
-
-
 
 for run in runs:
     for seed in seedList:
