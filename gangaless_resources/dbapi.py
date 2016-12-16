@@ -1,13 +1,14 @@
 import sqlite3 as dbapi
 
-class database:
+class database(object):
   def __init__(self, db, table = None, fields = None):
     self.db = dbapi.connect(db)
     # (check whether table is in database)
-    if self.howManyTables():
-      pass
-    else:
-      self.createTable(table, fields)
+    if table:
+      if self.isThisTableHere(table):
+        pass
+      else:
+        self.createTable(table, fields)
 
   def createTable(self, tablename, fields):
     c = self.db.cursor()
@@ -34,10 +35,10 @@ class database:
     return k
 
   def isThisTableHere(self, table):
-    query = "SELECT name FROM sqlite_master WHERE type='table' AND name='"+table_name+"';"
+    query = "SELECT name FROM sqlite_master WHERE type='table' AND name='"+table+"';"
     c = self.db.cursor()
     c.execute(query)
-    if len(c) > 0: return True
+    for i in c: return True
     return False
 
 
@@ -67,9 +68,9 @@ class database:
       optional = " where rowid = " + id + " "
     else:
       optional = " where status = \"active\""
-    str    = "select " + keystr + " from " + table + optional + ";"
+    string = "select " + keystr + " from " + table + optional + ";"
     c      = self.db.cursor()
-    c.execute(str)
+    c.execute(string)
     dataList = []
     for i in c:
       tmpDic = {}
