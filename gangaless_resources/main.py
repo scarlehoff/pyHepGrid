@@ -36,6 +36,7 @@ parser.add_argument("-p", "--printme", help = "do arccat to a given job", action
 parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
 # Arc only
 parser.add_argument("-u", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")
+parser.add_argument("-r", "--renewArc", help = "renew the proxy of one given job", action = "store_true")
 parser.add_argument("-c", "--clean", help = "clean given job from the remote cluster", action = "store_true")
 parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an ARC run (only with ini)")
 parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
@@ -139,6 +140,9 @@ elif rmode[:3] == "man":
     elif args.info:
         print("Retrieving information . . . ")
         backend.statusJob(jobid)
+    elif args.renewArc:
+        print("Renewing proxy for the job . . . ")
+        backend.renewProxy(jobid)
     elif args.printme:
         print("Printing information . . . ")
         backend.catJob(jobid)

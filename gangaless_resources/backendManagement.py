@@ -19,6 +19,7 @@ class Arc(Backend):
     cmd_kill  = "arckill"
     cmd_clean = "arcclean"
     cmd_stat  = "arcstat"
+    cmd_renew = "arcrenew"
 
     def __init__(self):
         # Might not work on python2?
@@ -48,6 +49,10 @@ class Arc(Backend):
             mvcmd   = ['mv', 'tmpscript.txt', flnam]
             spCall(stripcm)
             spCall(mvcmd)
+
+    def renewProxy(self, jobid):
+        cmd = [self.cmd_renew, jobid.strip()]
+        spCall(cmd)
 
 
     def getData(self, id):
@@ -180,7 +185,7 @@ class Dirac(Backend):
             pass
         seeds    =  range(self.bSeed, finalSeed)
         tarfiles =  self.multiRun(self.do_getData, seeds, 15)
-        dummy    =  self.multiRun(self.do_extractOutputData, tarfiles, 15)
+        dummy    =  self.multiRun(self.do_extractOutputData, tarfiles, 1)
         chdir("..")
         from utilities import spCall
         print("Everything saved at %s", pathfolder)
