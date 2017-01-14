@@ -129,7 +129,7 @@ class RunDirac(Backend):
             # Check whether warmup/production is active in the runcard
             self.checkProduction(i, runFol)
             rname   = dCards[i]
-            tarfile = rname + ".tar.gz"
+            tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, getcwd())
             if warmupProvided:
                 warmupFiles = [warmupProvided]

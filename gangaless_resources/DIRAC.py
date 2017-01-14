@@ -73,7 +73,7 @@ if gcclocal:
     os.system("lcg-cp lfn:input/gcc.tar.gz")
     os.system("tar zxf gcc.tar.gz")
 # Bring NNLOJET and runcards
-os.system("lcg-cp lfn:input/"+RUNNAME+".tar.gz NNLOJET.tar.gz")
+os.system("lcg-cp lfn:input/"+RUNCARD+RUNNAME+".tar.gz NNLOJET.tar.gz")
 os.system("tar zxf NNLOJET.tar.gz")
 
 #

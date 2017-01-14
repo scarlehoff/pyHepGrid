@@ -174,7 +174,7 @@ class Dirac(Backend):
                 print("Tried to create folder %s in this directory", self.rfolder)
                 print("to no avail. We are going to assume the directory was already there")
                 yn = self.input("Do you want to continue? (y/n) ")
-                if yn == "n": raise Exception("Folder %s already excists", self.rfolder)
+                if yn == "n": raise Exception("Folder %s already exists", self.rfolder)
             else:
                 raise 
         chdir(self.rfolder)
