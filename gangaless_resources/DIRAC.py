@@ -66,11 +66,11 @@ gcc_lib64path = os.path.join(os.getcwd(), "gcc", "lib64")
 #
 
 # Bring LHAPDF from Grid Storage
-os.system("lcg-cp lfn:input/lhapdf.tar.gz lhapdf.tar.gz")
+os.system("lcg-cp lfn:util/lhapdf.tar.gz lhapdf.tar.gz")
 os.system("tar -zxf lhapdf.tar.gz")
 # Bring gcc if needed
 if gcclocal:
-    os.system("lcg-cp lfn:input/gcc.tar.gz")
+    os.system("lcg-cp lfn:util/gcc.tar.gz")
     os.system("tar zxf gcc.tar.gz")
 # Bring NNLOJET and runcards
 os.system("lcg-cp lfn:input/"+RUNCARD+RUNNAME+".tar.gz NNLOJET.tar.gz")

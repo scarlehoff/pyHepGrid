@@ -125,8 +125,8 @@ def lhapdfIni():
     bringLhapdf = ["cp", "-LR", lhaDir, lhapdf]
     spCall(bringLhapdf)
     tarw.tarDir(lhapdf, outputn)
-    # Send to grid input
-    ginput = "input"
+    # Send to grid util
+    ginput = "util"
     if gridw.checkForThis(outputn, ginput): gridw.delete(outputn, ginput)
     gridw.send(outputn, ginput)
     # This is better than doing rm -rf and it will be removed in due time anyway
