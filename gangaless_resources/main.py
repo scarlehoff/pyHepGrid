@@ -40,6 +40,7 @@ parser.add_argument("-r", "--renewArc", help = "renew the proxy of one given job
 parser.add_argument("-c", "--clean", help = "clean given job from the remote cluster", action = "store_true")
 parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
 parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
+parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes)", action = "store_true")
 
 args  = parser.parse_args()
 
@@ -110,7 +111,10 @@ elif rmode[:3] == "run":
         from runArcjob import runWrapper
     if args.runDirac:
         from runDiracjob import runWrapper
-    runWrapper(rcard)
+    if args.test and args.runArc:
+        runWrapper(rcard, True)
+    else:
+        runWrapper(rcard)
 #### Management: 
 elif rmode[:3] == "man":
     if args.runArc:

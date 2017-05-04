@@ -66,9 +66,13 @@ class RunArc(Backend):
                 f.write(" = \"" + dictData[key])
                 f.write("\")\n")
 
-    def runXRSL(self):
+    def runXRSL(self, test = False):
         from utilities import getOutputCall
-        ce      = "ce1.dur.scotgrid.ac.uk"
+        from header import ce_base, ce_test
+        if test:
+            from header import ce_test as ce
+        else:
+            from header import ce_base as ce
         cmdbase = ['arcsub', '-c', ce]
         cmd     = cmdbase + [self.xrslfile]
         output  = getOutputCall(cmd)
@@ -116,7 +120,7 @@ class RunArc(Backend):
             spCall(["rm", i, tarfile])
         spCall(["rm"] + files)
 
-    def runWrap(self, runcard):
+    def runWrap(self, runcard, test = None):
         from utilities import expandCard, generatePath
         from header import warmupthr, jobName
         from datetime import datetime
@@ -138,7 +142,7 @@ class RunArc(Backend):
                         'countpernode': str(warmupthr),}
             self.writeXRSL(dictData)
             # Run the file
-            jobid = self.runXRSL()
+            jobid = self.runXRSL(test)
             # Create daily path
             pathfolder = generatePath(True)
             # Create database entry
@@ -150,10 +154,10 @@ class RunArc(Backend):
                         'status'    : "active",}
             self.dbase.insertData(self.table, dataDict)
 
-def runWrapper(runcard):
+def runWrapper(runcard, test = None):
     print("Running arc job for ", runcard)
     arc = RunArc()
-    arc.runWrap(runcard)
+    arc.runWrap(runcard, test)
 
 def iniWrapper(runcard, warmup=None):
     print("Initialising Arc for ", runcard)

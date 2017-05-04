@@ -172,7 +172,7 @@ class RunDirac(Backend):
                         'status'    : "active",}
             self.dbase.insertData(self.table, dataDict)
 
-def runWrapper(runcard):
+def runWrapper(runcard, test = None):
     print("Running dirac job for ", runcard)
     dirac = RunDirac()
     dirac.runWrap(runcard)

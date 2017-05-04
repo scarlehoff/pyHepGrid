@@ -18,9 +18,16 @@ gccdir     = "/mt/home/jmartinez/LIBRARIES/gcc-5.2.0"
 lhapdf     = "/mt/home/jmartinez/LHAPDF"
 
 #
+# ARC parameters
+#
+ce_base = "ce1.dur.scotgrid.ac.uk"
+ce_test = "ce-test.dur.scotgrid.ac.uk"
+
+
+#
 # NNLOJET Database Parameters
 #
-dbname     = "NNLOJET_VFH.dat"     
+dbname     = "NNLOJET_March.dat"     
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status']
