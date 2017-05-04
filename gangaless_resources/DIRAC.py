@@ -2,6 +2,10 @@
 
 import os, sys
 
+#lcg_cp = "gfal-cp"
+#lcg_cr = "gfal-cp"
+#lfn = "lfn://grid/pheno/jmartinez/"
+
 # Define some utilites
 def outputName(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py

@@ -183,22 +183,29 @@ class GridWrap:
     retriv = ["lcg-cp"]
     delcmd = ["lcg-del", "-a"]
     listfi = ["lfc-ls"]
+    lfn = "lfn:"
+    # Gfal time
+#    lfn = "lfn://grid/pheno/jmartinez/"
+#    sendto = ???
+#    retriv = ["gfal-copy"]
+#    delcmd = ["gfal-rm"]
+#    listfi = ["gfal-ls", lfn]
     def init(self, sendto = None, retriv = None, delete = None):
         if sendto: self.sendto = sendto
         if retriv: self.retriv = retriv
         if delete: self.delcmd = delete
     
     def send(self, tarfile, whereTo):
-        wher = ["lfn:" + whereTo + "/" + tarfile]
+        wher = [lfn + whereTo + "/" + tarfile]
         what = ["file:" + tarfile]
         spCall(self.sendto + wher + what)
 
     def bring(self, tarfile, whereFrom, whereTo):
-        args = ["lfn:" + whereFrom + "/" + tarfile, whereTo]
+        args = [lfn + whereFrom + "/" + tarfile, whereTo]
         spCall(self.retriv + args)
 
     def delete(self, tarfile, whereFrom):
-        args = ["lfn:" + whereFrom + "/" + tarfile]
+        args = [lfn + whereFrom + "/" + tarfile]
         spCall(self.delcmd + args)
 
     def checkForThis(self, filename, where):

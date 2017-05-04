@@ -2,6 +2,14 @@
 
 import os, sys
 
+lcg_cp = "lcg-cp"
+lcg_cr = "lcg-cr --vo -pheno -l"
+lfn    = "lfn"
+
+#lcg_cp = "gfal-cp"
+#lcg_cr = "gfal-cp"
+#lfn = "lfn://grid/pheno/jmartinez/"
+
 # Define some utilites
 def warmupName(runcard, rname):
     # This function must always be the same as the one in Backend.py
@@ -123,7 +131,7 @@ os.system('ls')
 
 # Bring cross section parser
 try:
-    os.system("lcg-cp lfn:util/pyCross.py pyCross.py")
+    os.system("lcg_cp lfn:util/pyCross.py pyCross.py")
     dir = os.listdir('.')
     print dir
     for i in dir:

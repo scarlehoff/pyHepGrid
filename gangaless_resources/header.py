@@ -6,7 +6,7 @@ arcbase    = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
 NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 500
+producRun  = 1
 baseSeed   = 400
 jobName    = "gridjob"
 
