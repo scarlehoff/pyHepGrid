@@ -6,14 +6,20 @@ arcbase    = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
 NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 1
+producRun  = 500  
 baseSeed   = 400
 jobName    = "gridjob"
 
 #
+# Grid config 
+#
+username = "jmartinez"
+lfndir = "/grid/pheno/jmartinez"
+gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
+
+#
 # Grid and libraries 
 #
-lfndir     = "/grid/pheno/jmartinez"
 gccdir     = "/mt/home/jmartinez/LIBRARIES/gcc-5.2.0"
 lhapdf     = "/mt/home/jmartinez/LHAPDF"
 

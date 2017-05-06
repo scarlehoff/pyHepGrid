@@ -1,20 +1,54 @@
 #!/usr/bin/env python
 
 import os, sys
+gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
 
 lcg_cp = "lcg-cp"
-lcg_cr = "lcg-cr --vo -pheno -l"
-lfn    = "lfn"
+lcg_cr = "lcg-cr --vo pheno -l"
+lfn    = "lfn:"
+gfal   = False
 
-#lcg_cp = "gfal-cp"
-#lcg_cr = "gfal-cp"
+#lcg_cp = "gfal-copy"
+#lcg_cr = "gfal-copy"
 #lfn = "lfn://grid/pheno/jmartinez/"
+#gfal = True
 
 # Define some utilites
 def warmupName(runcard, rname):
     # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-warm-" + rname + ".tar.gz"
     return out
+
+def copy_from_grid(grid_file, local_file):
+    cmd = lcg_cp + " " + lfn
+    cmd += grid_file + " " + local_file
+    os.system(cmd)
+
+def untar_file(local_file):
+    cmd = "tar zxf " + local_file
+    os.system(cmd)
+
+def tar_this(tarfile, sourcefiles):
+    cmd = "tar -czf " + tarfile + " " + sourcefiles
+    os.system(cmd)
+    os.system("ls")
+
+def copy_to_grid(local_file, grid_file):
+    print("Copying " + local_file + " to " + grid_file)
+    filein = "file:$PWD/" + local_file
+    fileout = lfn + grid_file
+    if gfal:
+        from uuid import uuid1 as generateRandom
+        from header import gsiftp
+        today_str = datetime.today().strftime('%Y-%m-%d')
+        unique_str = "ffilef" + str(generateRandom())
+        file_str = today_str + "/" + unique_str
+        midfile = gsiftp + file_str
+        cmd = lcg_cr + " " + filein + " " + midfile + " " + fileout
+    else:
+        cmd = lcg_cr + " " + fileout + " " + filein
+    print(cmd)
+    os.system(cmd)
 
 # Runscript for ARC (modified from Tom's ganga.py)
 
@@ -73,15 +107,20 @@ gcc_lib64path = os.path.join(os.getcwd(), "gcc", "lib64")
 #
 
 # Bring LHAPDF from Grid Storage
-os.system("lcg-cp lfn:util/lhapdf.tar.gz lhapdf.tar.gz")
-os.system("tar -zxf lhapdf.tar.gz")
+lhapdf_file = "lhapdf.tar.gz"
+copy_from_grid("util/" + lhapdf_file, lhapdf_file)
+untar_file(lhapdf_file)
 # Bring gcc if needed
 if gcclocal:
-    os.system("lcg-cp lfn:util/gcc.tar.gz")
-    os.system("tar zxf gcc.tar.gz")
+    print("GCC NOT FOUND")
+    gcc_file = "gcc.tar.gz"
+    copy_from_grid("util/" + gcc_file, gcc_file)
+    untar_file(gcc_file)
+
 # Bring NNLOJET and runcards
-os.system("lcg-cp lfn:input/"+RUNCARD+RUNNAME+".tar.gz NNLOJET.tar.gz")
-os.system("tar zxf NNLOJET.tar.gz")
+nnlojet_tar = "NNLOJET.tar.gz"
+copy_from_grid("input/" + RUNCARD + RUNNAME + ".tar.gz", nnlojet_tar)
+untar_file(nnlojet_tar)
 os.system("ls")
 
 #
@@ -94,15 +133,15 @@ command = "./NNLOJET -run " + RUNCARD
 
 # For debugging
 command +=" 2>&1 outfile.out;echo $LD_LIBRARY_PATH"
-print " > Executed command: ", command
-print " > Sys.argv: ", sys.argv
+print(" > Executed command: {0}".format(command))
+print(" > Sys.argv: {0}".format(sys.argv))
 
 # Run command
 status = os.system(command)
 if status == 0:
-    print "Command successfully executed"
+    print("Command successfully executed")
 else:
-    print "Something went wrong"
+    print("Something went wrong")
     os.system("cat outfile.out")
 
 #
@@ -115,25 +154,23 @@ os.system("rm -rf runcards/")
 if gcclocal: 
     os.system("rm -rf gcc/")
     os.system("rm -rf gcc.tar.gz")
-os.system("rm lhapdf.tar.gz")
-os.system("rm NNLOJET.tar.gz")
+os.system("rm " + lhapdf_file)
+os.system("rm " + nnlojet_tar)
 os.system("rm TOT.*")
 os.system("rm fort*")
 # Create warmup name
 directory = "warmup"
 output    = warmupName(RUNCARD, RUNNAME)
-os.system("tar -czf "+output+" *") 
 # Copy to grid storage
-cmd = "lcg-cr --vo pheno -l lfn:"+directory+"/"+output+" file:$PWD/"+output
-print(cmd)
-os.system(cmd)
+tar_this(output, "*")
+copy_to_grid(output, directory + "/" + output)
 os.system('ls')
 
 # Bring cross section parser
 try:
-    os.system("lcg_cp lfn:util/pyCross.py pyCross.py")
+    copy_from_grid("util/pyCross.py", "pyCross.py")
     dir = os.listdir('.')
-    print dir
+    print(dir)
     for i in dir:
         if "cross" in i:
             cmd = "python pyCross.py " + i + " " + RUNCARD

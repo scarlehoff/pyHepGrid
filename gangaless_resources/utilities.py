@@ -178,39 +178,58 @@ class TarWrap:
 # GridUtilities
 # 
 class GridWrap:
+    from header import username
     # Defaults
     sendto = ["lcg-cr", "--vo", "pheno", "-l"]
     retriv = ["lcg-cp"]
     delcmd = ["lcg-del", "-a"]
     listfi = ["lfc-ls"]
     lfn = "lfn:"
+    gfal = False
     # Gfal time
-#    lfn = "lfn://grid/pheno/jmartinez/"
-#    sendto = ???
+#    gfal = True
+#    lfn = "lfn://grid/pheno/{0}/".format(username)
+#    sendto = ["gfal-copy", "-p"]
 #    retriv = ["gfal-copy"]
 #    delcmd = ["gfal-rm"]
-#    listfi = ["gfal-ls", lfn]
-    def init(self, sendto = None, retriv = None, delete = None):
+#    listfi = ["gfal-ls"]
+    def init(self, sendto = None, retriv = None, delete = None, lfn = None):
         if sendto: self.sendto = sendto
         if retriv: self.retriv = retriv
         if delete: self.delcmd = delete
+        if lfn: self.lfn = lfn
     
     def send(self, tarfile, whereTo):
-        wher = [lfn + whereTo + "/" + tarfile]
+        wher = [self.lfn + whereTo + "/" + tarfile]
         what = ["file:" + tarfile]
-        spCall(self.sendto + wher + what)
+        if self.gfal:
+            from datetime import datetime
+            from uuid import uuid1 as generateRandom
+            from header import gsiftp
+            today_str = datetime.today().strftime('%Y-%m-%d')
+            unique_str = "ffilef" + str(generateRandom())
+            file_str = today_str + "/" + unique_str
+            gsiftp_wher = [gsiftp + file_str]
+            cmd = self.sendto + what + gsiftp_wher + wher
+        else:
+            cmd = self.sendto + wher + what
+        spCall(cmd)
 
     def bring(self, tarfile, whereFrom, whereTo):
-        args = [lfn + whereFrom + "/" + tarfile, whereTo]
+        args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
         spCall(self.retriv + args)
 
     def delete(self, tarfile, whereFrom):
-        args = [lfn + whereFrom + "/" + tarfile]
+        args = [self.lfn + whereFrom + "/" + tarfile]
         spCall(self.delcmd + args)
 
     def checkForThis(self, filename, where):
-        args   = [where]
-        output = getOutputCall(self.listfi + args)
+        if self.gfal:
+            args = [self.lfn + where]
+        else:
+            args = [where]
+        cmd = self.listfi + args
+        output = getOutputCall(cmd)
         if filename in output:
             return True
         else:
