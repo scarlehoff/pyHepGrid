@@ -201,8 +201,11 @@ class Dirac(Backend):
         return localfil
 
     def do_extractOutputData(self, tarfile):
-        # It assumes .log and .dat folder are already there
-        from os import chdir
+        # It assumes log and dat folder are already there
+        from os import chdir, path
+        if not path.isfile(tarfile):
+            print(tarfile + " not found")
+            return -1
         files =  self.tarw.listFilesTar(tarfile)
         datf  =  []
         runf  =  []
@@ -222,7 +225,7 @@ class Dirac(Backend):
         chdir("..")
         from utilities import spCall
         spCall(["rm", tarfile])
-        return 1
+        return 0
 
 
 
