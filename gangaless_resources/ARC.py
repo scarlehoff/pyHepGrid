@@ -48,7 +48,12 @@ def copy_to_grid(local_file, grid_file):
     else:
         cmd = lcg_cr + " " + fileout + " " + filein
     print(cmd)
-    os.system(cmd)
+    fail = os.system(cmd)
+    if fail == 0:
+    # success!
+        return True
+    else:
+        return False
 
 # Runscript for ARC (modified from Tom's ganga.py)
 
@@ -144,10 +149,6 @@ else:
     print("Something went wrong")
     os.system("cat outfile.out")
 
-#
-# Is cleanup necessary at all? Is this not done by ARC itself
-# once we "timeout"?
-#
 os.system("voms-proxy-info --all")
 os.system("rm -rf lhapdf/")
 os.system("rm -rf runcards/")
@@ -163,17 +164,10 @@ directory = "warmup"
 output    = warmupName(RUNCARD, RUNNAME)
 # Copy to grid storage
 tar_this(output, "*")
-copy_to_grid(output, directory + "/" + output)
-os.system('ls')
-
-# Bring cross section parser
-try:
-    copy_from_grid("util/pyCross.py", "pyCross.py")
-    dir = os.listdir('.')
-    print(dir)
-    for i in dir:
-        if "cross" in i:
-            cmd = "python pyCross.py " + i + " " + RUNCARD
-            os.system(cmd)
-except:
-    print("Some problem doing pycross")
+# If copying to grid fails, pipe the vegas warmup to stdout so we don't lose the run
+success = copy_to_grid(output, directory + "/" + output)
+if success:
+    print("Copied over to grid storage!")
+    os.system("cat $(ls *.y* | grep -v .txt)")
+else:
+    print("Failure! Outputing vegas warmup to stdout")

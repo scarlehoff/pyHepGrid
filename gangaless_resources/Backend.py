@@ -63,6 +63,7 @@ class Backend(object):
     def listRuns(self):
         fields = ["rowid", "jobid", "runcard", "runfolder", "date"]
         dictC  = self.dbList(fields)
+        print("Active runs: " + str(len(dictC)))
         print("id".center(5) + " | " + "runcard".center(22) + " | " + "runname".center(25) + " |" +  "date".center(20))
         for i in dictC:
             rid = str(i['rowid']).center(5)
