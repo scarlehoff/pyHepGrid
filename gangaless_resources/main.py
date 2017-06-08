@@ -16,12 +16,12 @@ except:
 
 parser = ArgumentParser()
 
-parser.add_argument("mode", help = "Mode running [initialize/run/manage/proxy] + runcard or [list/")
+parser.add_argument("mode", help = "Mode [initialize/run/manage/proxy] ")
 parser.add_argument("runcard", nargs = "?", help = "Runcard to act upon")
 
 # Backend selection
-parser.add_argument("-A", "--runArc",   help = "run/manage an Arc job (warmup)", action = "store_true")
-parser.add_argument("-D", "--runDirac", help = "Run a dirac job (production)", action = "store_true")
+parser.add_argument("-A", "--runArc",   help = "Run/manage an Arc job (warmup)", action = "store_true")
+parser.add_argument("-D", "--runDirac", help = "Run/manage a dirac job (production)", action = "store_true")
 
 # Initialisation options
 parser.add_argument("-L", "--lhapdf",    help = "Send LHAPDF to Grid", action = "store_true")
@@ -31,7 +31,7 @@ parser.add_argument("-n", "--noProxy", help = "Bypasses proxy creation", action 
 # Global management
 parser.add_argument("-g", "--getData", help = "getdata from an ARC job", action = "store_true")
 parser.add_argument("-k", "--killJob", help = "kill a given job", action = "store_true")
-parser.add_argument("-i", "--info", help = "retrieve arcstat for a given job", action = "store_true")
+parser.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
 parser.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
 parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
 # Arc only
@@ -41,6 +41,9 @@ parser.add_argument("-c", "--clean", help = "clean given job from the remote clu
 parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
 parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
 parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes)", action = "store_true")
+
+# Dirac Only
+parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
 
 args  = parser.parse_args()
 
@@ -123,7 +126,8 @@ elif rmode[:3] == "man":
         from backendManagement import Dirac as backend_class
     backend = backend_class()
     if args.updateArc:
-        if not args.runArc: raise Exception("Update ARC can only be used with ARC")
+        if not args.runArc: 
+            raise Exception("Update ARC can only be used with ARC")
         backend.updateStdOut()
         exit(0)
     if args.idjob:
@@ -132,15 +136,11 @@ elif rmode[:3] == "man":
         backend.listRuns()
         id = py_input("> Select id to act upon: ")
     jobid = backend.getId(id) # A string for ARC, a string (list = string.split(" ")) for Dirac
-    #
-    if args.getData:
-        print("Retrieving job data")
-        backend.getData(id)
-        backend.desactivateJob(id)
-    elif args.killJob:
-        print("Killing the job")
-        backend.killJob(jobid)
-        backend.desactivateJob(id)
+    # Options that keep the database entry
+    if args.stats:
+        if not args.runDirac:
+            raise Exception("Statistics currently only implemented for Dirac")
+        backend.statsJob(jobid)
     elif args.info:
         print("Retrieving information . . . ")
         backend.statusJob(jobid)
@@ -150,10 +150,20 @@ elif rmode[:3] == "man":
     elif args.printme:
         print("Printing information . . . ")
         backend.catJob(jobid)
+    # Options that deactivate the database entry once they're done
+    elif args.getData:
+        print("Retrieving job data")
+        backend.getData(id)
+        backend.desactivateJob(id)
+    elif args.killJob:
+        print("Killing the job")
+        backend.killJob(jobid)
+        backend.desactivateJob(id)
     elif args.clean:
         print("Cleaning job . . . ")
         backend.cleanJob(jobid)
         backend.desactivateJob(id)
+    # Enable back any database entry
     elif args.enableme:
         backend.reactivateJob(id)
     else:

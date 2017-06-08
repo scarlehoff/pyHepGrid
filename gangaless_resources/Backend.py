@@ -1,4 +1,9 @@
 class Backend(object):
+    cDONE = 0
+    cWAIT = 1
+    cRUN = 2
+    cFAIL = -1
+    cUNK = 99
 
     def __init__(self):
         from utilities import TarWrap, GridWrap

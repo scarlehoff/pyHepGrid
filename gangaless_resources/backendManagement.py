@@ -134,12 +134,47 @@ class Dirac(Backend):
 
     def statusJob(self, jobids):
         jobid_arr = jobids.split(" ")
-        self.multiRun(self.do_statusJob, jobid_arr)
+        self.multiRun(self.do_statusJob, jobid_arr, 1)
 
     def do_statusJob(self, jobid):
         cmd = [self.cmd_stat, jobid.strip()]
         spCall(cmd)
-        return 1
+        return 0
+
+    def statsJob(self, jobids):
+        jobid_arr = jobids.split(" ")
+        status = self.multiRun(self.do_statsJob, jobid_arr, 10)
+        done = status.count(self.cDONE)
+        wait = status.count(self.cWAIT)
+        run = status.count(self.cRUN)
+        fail = status.count(self.cFAIL)
+        unk = status.count(self.cUNK)
+        total = len(jobid_arr)
+        total2 = done + wait + run + fail + unk 
+        print(" >> Total number of subjobs: {0}".format(total))
+        print("    >> Done:    {0}".format(done))
+        print("    >> Waiting: {0}".format(wait))
+        print("    >> Running: {0}".format(run))
+        print("    >> Failed:  {0}".format(fail))
+        print("    >> Unknown: {0}".format(unk))
+        print("    >> Sum      {0}".format(total2))
+
+    def do_statsJob(self, jobid):
+        cmd = [self.cmd_stat, jobid.strip()]
+        strOut = getOutputCall(cmd)
+        if "Done" in strOut:
+            return self.cDONE
+        elif "Waiting" in strOut:
+            return self.cWAIT
+        elif "Running" in strOut:
+            return self.cRUN
+        elif "Failed" in strOut:
+            return self.cFAIL
+        else:
+            return self.cUNK
+
+
+
 
     def killJob(self, jobids):
         cmd = [self.cmd_kill] + jobids.split(" ")
