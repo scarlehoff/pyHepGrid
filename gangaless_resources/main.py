@@ -95,18 +95,18 @@ if not db.isThisTableHere(diractable): db.createTable(diractable, dbfields)
 if rmode[:3] == "ini":
     if args.runArc:
         from runArcjob import iniWrapper
-        iniWrapper(rcard)
     elif args.runDirac:
         from runDiracjob import iniWrapper
-        if args.provWarm:
-            iniWrapper(rcard, args.provWarm)
-        else:
-            iniWrapper(rcard)
     elif args.lhapdf:
         from utilities import lhapdfIni
         lhapdfIni()
+        exit(0)
     else:
         raise Exception("Choose what do you want to initialise -(A/D/L)")
+    if args.provWarm:
+        iniWrapper(rcard, args.provWarm)
+    else:
+        iniWrapper(rcard)
         
 #### Run: run an ARC or DIRAC job for the given runcard
 elif rmode[:3] == "run":

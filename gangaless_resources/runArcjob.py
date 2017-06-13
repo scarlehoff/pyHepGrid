@@ -97,6 +97,8 @@ class RunArc(Backend):
             raise Exception("Could not find NNLOJET executable")
         copy(nnlojetfull, getcwd())
         files = [NNLOJETexe]
+        if warmup: 
+            files = files + [warmup]
         for i in rncards:
             # Check whether warmup/production is active in the runcard
             if not path.isfile(runFol + "/" + i):
@@ -110,7 +112,6 @@ class RunArc(Backend):
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, getcwd())
-            if warmup: files = files + [warmup]
             self.tarw.tarFiles(files + [i], tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
                 print("Removing old version of " + tarfile + " from Grid Storage")
@@ -118,7 +119,7 @@ class RunArc(Backend):
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
             spCall(["rm", i, tarfile])
-        spCall(["rm"] + files)
+        spCall(["rm", NNLOJETexe])
 
     def runWrap(self, runcard, test = None):
         from utilities import expandCard, generatePath
