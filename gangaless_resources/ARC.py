@@ -168,6 +168,6 @@ tar_this(output, "*")
 success = copy_to_grid(output, directory + "/" + output)
 if success:
     print("Copied over to grid storage!")
-    os.system("cat $(ls *.y* | grep -v .txt)")
 else:
     print("Failure! Outputing vegas warmup to stdout")
+    os.system("cat $(ls *.y* | grep -v .txt)")
