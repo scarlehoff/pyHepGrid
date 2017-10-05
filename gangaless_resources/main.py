@@ -135,14 +135,18 @@ elif rmode[:3] == "man":
     else:
         backend.listRuns()
         id_str = py_input("> Select id to act upon: ")
-    if "-" in id_str:
-        id_limits = id_str.split("-")
-        id_list = range(int(id_limits[0]), int(id_limits[1])+1)
-    else:
-        id_list = [id_str]
-    
-    for id_int in id_list:
-        db_id = str(id_int)
+
+    id_list_raw = id_str.split(",")
+    id_list = []
+    for id_selected in id_list_raw:
+        if "-" in id_selected:
+            id_limits = id_selected.split("-")
+            for id_int in range(int(id_limits[0]), int(id_limits[1]) + 1):
+                id_list.append(str(id_int))
+        else:
+            id_list.append(id_selected)
+
+    for db_id in id_list:
         jobid = backend.getId(db_id) # A string for ARC, a string (list = string.split(" ")) for Dirac
         # Options that keep the database entry
         if args.stats:
