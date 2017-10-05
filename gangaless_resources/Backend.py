@@ -45,8 +45,8 @@ class Backend(object):
         out = "output" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
         return out
 
-    def getId(self, id):
-        jobid = self.dbase.listData(self.table, ["jobid"], id)
+    def getId(self, db_id):
+        jobid = self.dbase.listData(self.table, ["jobid"], db_id)
         try:
             idout = jobid[0]['jobid']
         except IndexError:
@@ -55,12 +55,12 @@ class Backend(object):
             idout = self.getId(idt)
         return idout
 
-    def desactivateJob(self, id):
-        self.dbase.desactivateEntry(self.table, id)
+    def desactivateJob(self, db_id):
+        self.dbase.desactivateEntry(self.table, db_id)
         return 0
 
-    def reactivateJob(self, id):
-        self.dbase.desactivateEntry(self.table, id, revert = True)
+    def reactivateJob(self, db_id):
+        self.dbase.desactivateEntry(self.table, db_id, revert = True)
         return 0
 #
 # Management

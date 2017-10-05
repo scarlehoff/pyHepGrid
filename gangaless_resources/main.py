@@ -131,41 +131,49 @@ elif rmode[:3] == "man":
         backend.updateStdOut()
         exit(0)
     if args.idjob:
-        id = args.idjob
+        id_str = args.idjob
     else:
         backend.listRuns()
-        id = py_input("> Select id to act upon: ")
-    jobid = backend.getId(id) # A string for ARC, a string (list = string.split(" ")) for Dirac
-    # Options that keep the database entry
-    if args.stats:
-        if not args.runDirac:
-            raise Exception("Statistics currently only implemented for Dirac")
-        backend.statsJob(jobid)
-    elif args.info:
-        print("Retrieving information . . . ")
-        backend.statusJob(jobid)
-    elif args.renewArc:
-        print("Renewing proxy for the job . . . ")
-        backend.renewProxy(jobid)
-    elif args.printme:
-        print("Printing information . . . ")
-        backend.catJob(jobid)
-    # Options that deactivate the database entry once they're done
-    elif args.getData:
-        print("Retrieving job data")
-        backend.getData(id)
-        backend.desactivateJob(id)
-    elif args.killJob:
-        print("Killing the job")
-        backend.killJob(jobid)
-        backend.desactivateJob(id)
-    elif args.clean:
-        print("Cleaning job . . . ")
-        backend.cleanJob(jobid)
-        backend.desactivateJob(id)
-    # Enable back any database entry
-    elif args.enableme:
-        backend.reactivateJob(id)
+        id_str = py_input("> Select id to act upon: ")
+    if "-" in id_str:
+        id_limits = id_str.split("-")
+        id_list = range(int(id_limits[0]), int(id_limits[1])+1)
     else:
-        print(jobid)
+        id_list = [id_str]
+    
+    for id_int in id_list:
+        db_id = str(id_int)
+        jobid = backend.getId(db_id) # A string for ARC, a string (list = string.split(" ")) for Dirac
+        # Options that keep the database entry
+        if args.stats:
+            if not args.runDirac:
+                raise Exception("Statistics currently only implemented for Dirac")
+            backend.statsJob(jobid)
+        elif args.info:
+            print("Retrieving information . . . ")
+            backend.statusJob(jobid)
+        elif args.renewArc:
+            print("Renewing proxy for the job . . . ")
+            backend.renewProxy(jobid)
+        elif args.printme:
+            print("Printing information . . . ")
+            backend.catJob(jobid)
+        # Options that deactivate the database entry once they're done
+        elif args.getData:
+            print("Retrieving job data")
+            backend.getData(db_id)
+            backend.desactivateJob(db_id)
+        elif args.killJob:
+            print("Killing the job")
+            backend.killJob(jobid)
+            backend.desactivateJob(db_id)
+        elif args.clean:
+            print("Cleaning job . . . ")
+            backend.cleanJob(jobid)
+            backend.desactivateJob(db_id)
+        # Enable back any database entry
+        elif args.enableme:
+            backend.reactivateJob(db_id)
+        else:
+            print(jobid)
 

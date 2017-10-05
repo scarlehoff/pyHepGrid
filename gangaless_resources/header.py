@@ -6,7 +6,7 @@ arcbase    = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
 NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 400  
+producRun  = 400
 baseSeed   = 400
 jobName    = "gridjob"
 
@@ -26,14 +26,14 @@ lhapdf     = "/mt/home/jmartinez/LHAPDF"
 #
 # ARC parameters
 #
-ce_base = "ce1.dur.scotgrid.ac.uk"
+ce_base = "ce3.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 
 
 #
 # NNLOJET Database Parameters
 #
-dbname     = "NNLOJET_june.dat"     
+dbname     = "NNLOJET_october.dat"     
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status']

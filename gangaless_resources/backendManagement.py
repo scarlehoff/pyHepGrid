@@ -55,10 +55,10 @@ class Arc(Backend):
         spCall(cmd)
 
 
-    def getData(self, id):
+    def getData(self, db_id):
         # Retrieve data from database
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
-        data      =  self.dbase.listData(self.table, fields, id)[0]
+        data      =  self.dbase.listData(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
         finfolder =  data["pathfolder"] + "/" + runfolder
         jobid     =  data["jobid"]
@@ -134,7 +134,7 @@ class Dirac(Backend):
 
     def statusJob(self, jobids):
         jobid_arr = jobids.split(" ")
-        self.multiRun(self.do_statusJob, jobid_arr, 1)
+        self.multiRun(self.do_statusJob, jobid_arr, 10)
 
     def do_statusJob(self, jobid):
         cmd = [self.cmd_stat, jobid.strip()]
@@ -180,12 +180,12 @@ class Dirac(Backend):
         cmd = [self.cmd_kill] + jobids.split(" ")
         spCall(cmd)
 
-    def getData(self, bdid):
+    def getData(self, db_id):
         from utilities import sanitiseGeneratedPath
         print("You are going to download all folders corresponding to this runcard from lfn:output")
         print("Make sure all runs are finished using the -i option")
         fields       = ["runfolder", "jobid", "runcard", "pathfolder"]
-        data         = self.dbase.listData(self.table, fields, bdid)[0]
+        data         = self.dbase.listData(self.table, fields, db_id)[0]
         self.rcard   = data["runcard"]
         self.rfolder = data["runfolder"]
         pathfolderTp = data["pathfolder"]
