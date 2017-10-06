@@ -5,8 +5,10 @@
 arcbase    = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
 NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
 NNLOJETexe = "NNLOJET"
-warmupthr  = 16
-producRun  = 400
+# warmupthr  = 16
+# producRun  = 400
+warmupthr = 2
+producRun = 4
 baseSeed   = 400
 jobName    = "gridjob"
 
@@ -41,8 +43,25 @@ dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status']
 #
 # Templates
 # 
+
+# # If a job is expected to run for long, use the following property (in minutes)
+# "(wallTime  =    \"3 days\")" 
+# it is also possible to specifiy the maximum cpu time instead (or 'as well')
+# "(cpuTime = \"3 days\")"
+# if nothing is used, the end system will decide what the maximum is
+#
+
 ARCSCRIPTDEFAULT = ["&",
         "(executable   = \"ARC.py\")",
+        "(outputFiles  = (\"outfile.out\" \"\") )",
+        "(stdout       = \"stdout\")",
+        "(stderr       = \"stderr\")",
+        "(gmlog        = \"testjob.log\")",
+        "(memory       = \"100\")",
+        ]
+
+ARCSCRIPTDEFAULTPRODUCTION = ["&",
+        "(executable   = \"DIRAC.py\")",
         "(outputFiles  = (\"outfile.out\" \"\") )",
         "(stdout       = \"stdout\")",
         "(stderr       = \"stderr\")",

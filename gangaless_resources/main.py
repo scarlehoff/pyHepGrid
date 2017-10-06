@@ -21,6 +21,7 @@ parser.add_argument("runcard", nargs = "?", help = "Runcard to act upon")
 
 # Backend selection
 parser.add_argument("-A", "--runArc",   help = "Run/manage an Arc job (warmup)", action = "store_true")
+parser.add_argument("-B", "--runArcProduction",   help = "Run/manage an Arc job (production)", action = "store_true")
 parser.add_argument("-D", "--runDirac", help = "Run/manage a dirac job (production)", action = "store_true")
 
 # Initialisation options
@@ -32,17 +33,18 @@ parser.add_argument("-n", "--noProxy", help = "Bypasses proxy creation", action 
 parser.add_argument("-g", "--getData", help = "getdata from an ARC job", action = "store_true")
 parser.add_argument("-k", "--killJob", help = "kill a given job", action = "store_true")
 parser.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
+parser.add_argument("-I", "--infoVerbose", help = "retrieve arcstat/diracstat for a given job (more verbose, only ARC)", action = "store_true")
 parser.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
 parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
-# Arc only
+parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
+parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
+# Warmup only
 parser.add_argument("-u", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")
 parser.add_argument("-r", "--renewArc", help = "renew the proxy of one given job", action = "store_true")
 parser.add_argument("-c", "--clean", help = "clean given job from the remote cluster", action = "store_true")
-parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
-parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
 parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes)", action = "store_true")
 
-# Dirac Only
+# Production Only
 parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
 
 args  = parser.parse_args()
@@ -55,9 +57,9 @@ if len(rmode) < 3:
     raise Exception("Mode ", rmode, " not valid")
 if rmode[:3] == "run" or rmode[:3] == "man":
     if args.runDirac and args.runArc:
-        raise Exception("Please, choose only Dirac (-D) or Arc (-A)")
-    if not args.runDirac and not args.runArc:
-        raise Exception("Please , choose either Dirac (-D) or Arc (-A)")
+        raise Exception("Please, choose only Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
+    if not args.runDirac and not args.runArc and not args.runArcProduction:
+        raise Exception("Please , choose either Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
 ########################################
 
 #### Step0, if Dirac, source dirac
@@ -76,7 +78,7 @@ if  args.runDirac:
 #### Step1, invoke proxy
 if not args.noProxy:
     import proxyUtil
-    if args.runArc:   proxyUtil.arcProxyWiz()
+    if args.runArc or args.runArcProduction:   proxyUtil.arcProxyWiz()
     if args.runDirac: proxyUtil.diracProxy()
     if rmode[:4] == "prox": exit(0)
 ########################################
@@ -95,6 +97,8 @@ if not db.isThisTableHere(diractable): db.createTable(diractable, dbfields)
 if rmode[:3] == "ini":
     if args.runArc:
         from runArcjob import iniWrapper
+    elif args.runArcProduction:
+        from runArcjob import iniWrapperProduction as iniWrapper
     elif args.runDirac:
         from runDiracjob import iniWrapper
     elif args.lhapdf:
@@ -102,7 +106,7 @@ if rmode[:3] == "ini":
         lhapdfIni()
         exit(0)
     else:
-        raise Exception("Choose what do you want to initialise -(A/D/L)")
+        raise Exception("Choose what do you want to initialise -(A/B/D/L)")
     if args.provWarm:
         iniWrapper(rcard, args.provWarm)
     else:
@@ -112,15 +116,16 @@ if rmode[:3] == "ini":
 elif rmode[:3] == "run":
     if args.runArc:
         from runArcjob import runWrapper
-    if args.runDirac:
+    elif args.runArcProduction:
+        from runArcjob import runWrapperProduction as runWrapper
+    elif args.runDirac:
         from runDiracjob import runWrapper
-    if args.test and args.runArc:
-        runWrapper(rcard, True)
     else:
-        runWrapper(rcard)
+        raise Exception("Choose what do you want to run -(A/B/D/L)")
+    runWrapper(rcard, args.test)
 #### Management: 
 elif rmode[:3] == "man":
-    if args.runArc:
+    if args.runArc or args.runArcProduction:
         from backendManagement import Arc as backend_class
     if args.runDirac: 
         from backendManagement import Dirac as backend_class
@@ -150,12 +155,10 @@ elif rmode[:3] == "man":
         jobid = backend.getId(db_id) # A string for ARC, a string (list = string.split(" ")) for Dirac
         # Options that keep the database entry
         if args.stats:
-            if not args.runDirac:
-                raise Exception("Statistics currently only implemented for Dirac")
             backend.statsJob(jobid)
-        elif args.info:
+        elif args.info or args.infoVerbose:
             print("Retrieving information . . . ")
-            backend.statusJob(jobid)
+            backend.statusJob(jobid, args.infoVerbose)
         elif args.renewArc:
             print("Renewing proxy for the job . . . ")
             backend.renewProxy(jobid)
