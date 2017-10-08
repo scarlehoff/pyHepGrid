@@ -15,15 +15,15 @@ class Backend(object):
         self.table = None
         self.bSeed = baseSeed
 
-    # Sigh
-    def input(self, string):
-        try:
-            if version_info.major == 2: 
-                return raw_input(string)
-            else:
-                return input(string)
-        except:
-            return raw_input(string)
+#     # Sigh
+#     def input(self, string):
+#         try:
+#             if version_info.major == 2: 
+#                 return raw_input(string)
+#             else:
+#                 return input(string)
+#         except:
+#             return raw_input(string)
 
     # Check/Probe functions
     def checkProduction(self, r, runcardDir):
@@ -36,14 +36,14 @@ class Backend(object):
             for line in f:
                 if "Warmup" in line and ".true." in line:
                     print("Warmup is on")
-                    yn = self.input("Do you want to continue (y/n) ")
+                    yn = input("Do you want to continue (y/n) ")
                     if yn[0] == "y" or yn[0] == "Y":
                         pass
                     else:
                         raise Exception("WRONG RUNCARD")
                 if "Production" in line and ".false." in line:
                     print("Production is off")
-                    yn = self.input("Do you want to continue (y/n) ")
+                    yn = input("Do you want to continue (y/n) ")
                     if yn[0] == "y" or yn[0] == "Y":
                         pass
                     else:
@@ -59,14 +59,14 @@ class Backend(object):
             for line in f:
                 if "Warmup" in line and ".false." in line:
                     print("Warmup is off")
-                    yn = self.input("Do you want to continue (y/n) ")
+                    yn = input("Do you want to continue (y/n) ")
                     if yn[0] == "y" or yn[0] == "Y":
                         pass
                     else:
                         raise Exception("WRONG RUNCARD")
                 if "Production" in line and ".true." in line:
                     print("Production is on")
-                    yn = self.input("Do you want to continue (y/n) ")
+                    yn = input("Do you want to continue (y/n) ")
                     if yn[0] == "y" or yn[0] == "Y":
                         pass
                     else:
@@ -81,7 +81,7 @@ class Backend(object):
         checknm = self.warmupName(r, rname)
         if self.gridw.checkForThis(checknm, "warmup"):
             print("File " + checknm + " already exist at lfn:warmup")
-            yn = self.input("Do you want to delete this file? (y/n) ")
+            yn = input("Do you want to delete this file? (y/n) ")
             if yn == "y":
                 self.gridw.delete(checknm, "warmup")
             else:
@@ -95,7 +95,7 @@ class Backend(object):
         print("Not sure whether check for output works")
         if self.gridw.checkForThis(checknm, "output"):
             print("Runcard " + r + " has at least one file at output")
-            yn = self.input("Do you want to delete them all? (y/n) ")
+            yn = input("Do you want to delete them all? (y/n) ")
             if yn == "y":
                 from header import baseSeed, producRun
                 for seed in range(baseSeed, baseSeed + producRun):
@@ -181,8 +181,8 @@ class Backend(object):
         for i in rncards:
             # Check whether warmup/production is active in the runcard
             if not path.isfile(runFol + "/" + i):
-                print("Could not find runcard %s", i)
-                yn = self.input("Do you want to continue? (y/n): ")
+                print("Could not find runcard %s" % i)
+                yn = input("Do you want to continue? (y/n): ")
                 if yn == y:
                     continue
                 else:
@@ -249,8 +249,8 @@ class Backend(object):
         try:
             idout = jobid[0]['jobid']
         except IndexError:
-            print("Selected job is %s out of bounds", jobid)
-            idt   = self.input("> Select id to act upon: ")
+            print("Selected job is %s out of bounds" % jobid)
+            idt   = input("> Select id to act upon: ")
             idout = self.getId(idt)
         return idout.split(" ")
 
@@ -346,19 +346,19 @@ class Backend(object):
             finalName = self.outputName(self.rcard, self.rfolder, finalSeed)
             print("The starting filename is %s" % firstName)
             print("The final filename is %s" % finalName)
-            yn = self.input("Are these parameters correct? (y/n) ")
+            yn = input("Are these parameters correct? (y/n) ")
             if yn == "y": break
-            self.bSeed = int(self.input("Please, introduce the starting seed (ex: 400): "))
-            finalSeed  = int(self.input("Please, introduce the final seed (ex: 460): ")) + 1
+            self.bSeed = int(input("Please, introduce the starting seed (ex: 400): "))
+            finalSeed  = int(input("Please, introduce the final seed (ex: 460): ")) + 1
         from os import makedirs, chdir
         try:
             makedirs(self.rfolder)
         except OSError as err:
             if err.errno == 17:
-                print("Tried to create folder %s in this directory", self.rfolder)
+                print("Tried to create folder %s in this directory" % self.rfolder)
                 print("to no avail. We are going to assume the directory was already there")
-                yn = self.input("Do you want to continue? (y/n) ")
-                if yn == "n": raise Exception("Folder %s already exists", self.rfolder)
+                yn = input("Do you want to continue? (y/n) ")
+                if yn == "n": raise Exception("Folder %s already exists" % self.rfolder)
             else:
                 raise 
         chdir(self.rfolder)
@@ -372,7 +372,7 @@ class Backend(object):
         dummy    =  self.multiRun(self.do_extractOutputData, tarfiles, 1)
         chdir("..")
         from utilities import spCall
-        print("Everything saved at %s", pathfolder)
+        print("Everything saved at %s" % pathfolder)
         spCall(["mv", self.rfolder, pathfolder])
 
 

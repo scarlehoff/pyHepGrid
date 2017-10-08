@@ -1,17 +1,17 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from sys import exit, version_info
+from sys import exit
 
-##### Compatibility
-try:
-    if version_info.major == 2: 
-        py_input = raw_input
-    else:
-        py_input = input
-except:
-    # *sigh*
-    py_input = raw_input
+# ##### Compatibility
+# try:
+#     if version_info.major == 2: 
+#         input = raw_input
+#     else:
+#         input = input
+# except:
+#     # *sigh*
+#     input = raw_input
 #############################
 
 parser = ArgumentParser()
@@ -139,7 +139,7 @@ elif rmode[:3] == "man":
         id_str = args.idjob
     else:
         backend.listRuns()
-        id_str = py_input("> Select id to act upon: ")
+        id_str = input("> Select id to act upon: ")
 
     id_list_raw = id_str.split(",")
     id_list = []
