@@ -149,6 +149,7 @@ else:
     print("Something went wrong")
     os.system("cat outfile.out")
 
+os.system("arcrenew --all")
 os.system("voms-proxy-info --all")
 os.system("rm -rf lhapdf/")
 os.system("rm -rf runcards/")

@@ -57,7 +57,7 @@ class Arc(Backend):
 
     def killJob(self, jobids):
         print("WARNING! You are about to kill the job!")
-        yn = self.input("Do you want to continue? (y/n) ")
+        yn = input("Do you want to continue? (y/n) ")
         if yn != "y":
             from sys import exit
             exit(0)
@@ -67,7 +67,7 @@ class Arc(Backend):
 
     def cleanJob(self, jobids):
         print("WARNING! You are about to clean the job!")
-        yn = self.input("Do you want to continue? (y/n) ")
+        yn = input("Do you want to continue? (y/n) ")
         if yn != "y":
             from sys import exit
             exit(0)
