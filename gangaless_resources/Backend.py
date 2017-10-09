@@ -301,6 +301,7 @@ class Backend(object):
 
     def getDataWarmup(self, db_id):
         # Retrieve data from database
+        from header import arcbase
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.listData(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]

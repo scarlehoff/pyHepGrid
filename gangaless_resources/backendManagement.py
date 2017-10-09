@@ -130,7 +130,7 @@ class Dirac(Backend):
         spCall(cmd)
 
     def getData(self, db_id):
-        self.getDataProduction(self, db_id)
+        self.getDataProduction(db_id)
 
 
 if __name__ == '__main__':

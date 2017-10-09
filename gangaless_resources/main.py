@@ -68,8 +68,10 @@ if  args.runDirac:
     cmd = ["bash", "-c", "source $sourcedirac && env"]
     import os, subprocess
     out = subprocess.Popen(cmd, stdout = subprocess.PIPE)
-    for line in out.stdout:
-        if len(line) < 3: continue
+    for lineRaw in out.stdout:
+        if len(lineRaw) < 3:
+            continue
+        line = lineRaw.decode()
         (key, _, value) = line.partition("=")
         value = value.rstrip()
         os.environ[key] = value
