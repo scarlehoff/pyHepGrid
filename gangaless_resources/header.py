@@ -7,8 +7,6 @@ NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
 producRun  = 400
-# warmupthr = 2
-# producRun = 4
 baseSeed   = 400
 jobName    = "gridjob"
 
@@ -28,7 +26,7 @@ lhapdf     = "/mt/home/jmartinez/LHAPDF"
 #
 # ARC parameters
 #
-ce_base = "ce3.dur.scotgrid.ac.uk"
+ce_base = "ce1.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 
 

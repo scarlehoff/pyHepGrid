@@ -31,7 +31,7 @@ class Backend(object):
         # Checks whether warmup and production are active
         # in the runcard
         #
-        print("Checking warmup/production in the runcard")
+        print("Checking warmup/production in runcard %s" % r)
         with open(runcardDir + "/" + r, 'r') as f:
             for line in f:
                 if "Warmup" in line and ".true." in line:
@@ -54,7 +54,7 @@ class Backend(object):
         # Checks whether warmup and production are active
         # in the runcard
         #
-        print("Checking warmup/production in the runcard")
+        print("Checking warmup/production in runcard %s" % r)
         with open(runcardDir + "/" + r, 'r') as f:
             for line in f:
                 if "Warmup" in line and ".false." in line:

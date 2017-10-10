@@ -1,8 +1,7 @@
 print("Sourcing runcard")
-# runcardDir = "/mt/home/jmartinez/Runcards/October/testing"
-runcardDir = "/mt/home/jmartinez/Runcards/October/testing/Production"
+runcardDir = "/mt/home/jmartinez/Runcards/October/testing"
 NNLOJETdir = "/mt/home/jmartinez/NNLOJET"
 dictCard   = {
 #         'runtest.run' : "testing"
-        'runtest.run' : "testing2"
+        'runtest.run' : "testing4"
     }
