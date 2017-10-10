@@ -70,4 +70,4 @@ def runWrapper(runcard, test = None):
 def iniWrapper(runcard, warmupProvided = None):
     print("Initialising dirac for ", runcard)
     dirac = RunDirac()
-    dirac.iniWrap(runcard, warmupProvided)
+    dirac.iniProduction(runcard, warmupProvided)
