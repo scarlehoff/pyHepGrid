@@ -302,12 +302,15 @@ class Backend(object):
     def getDataWarmup(self, db_id):
         # Retrieve data from database
         from header import arcbase
+        from utilities import getOutputCall, spCall
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.listData(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
         finfolder =  data["pathfolder"] + "/" + runfolder
         jobid     =  data["jobid"]
+        runcard   =  data["runcard"]
         cmd       =  [self.cmd_get, "-j", arcbase, jobid.strip()]
+        spCall(["mkdir", "-p", finfolder])
         print("Retrieving ARC output into " + finfolder)
         try:
             # Retrieve ARC standard output
@@ -319,7 +322,8 @@ class Backend(object):
                 print("Found blank spaces in the output folder")
                 print("Nothing will be moved to the warmup global folder")
             else:
-                spCall(["mv", outputfolder, finfolder])
+                destination = finfolder + "/" + "arc_out_" + runcard + outputfolder
+                spCall(["mv", outputfolder, destination])
                 #spCall(["rm", "-rf", outputfolder])
         except:
             print("Couldn't find job output in the ARC server")
@@ -327,7 +331,7 @@ class Backend(object):
             print("Run arcstat to check the state of the job")
             print("Trying to retrieve data from grid storage anyway")
         # Retrieve ARC grid storage output
-        wname = self.warmupName(data["runcard"], runfolder)
+        wname = self.warmupName(runcard, runfolder)
         self.gridw.bring(wname, "warmup", finfolder + "/" + wname)
 
     def getDataProduction(self, db_id):
