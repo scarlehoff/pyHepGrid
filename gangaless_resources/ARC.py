@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# TODO:
+# Split out separte gcc location rather than use LHAPDF loc in case they live in different places
+# and instead pass through via input args for maximum generality.
+# Same for input runcard directory input/
+# Maybe include a debug mode for when all hell has broken loose that does more printing?
+
 import os, sys
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
 
@@ -62,12 +68,12 @@ def copy_to_grid(local_file, grid_file):
 #
 
 # LFNDIR     = "/grid/pheno/dwalker"
-RUNCARD    = sys.argv[1]
-RUNNAME    = sys.argv[2]
-NUMTHREADS = sys.argv[3]
+RUNCARD         = sys.argv[1]
+RUNNAME         = sys.argv[2]
+NUMTHREADS      = sys.argv[3]
 lhapdf_grid_loc = sys.argv[4] 
-LFNDIR = sys.argv[5]
-LHAPDF_LOC = sys.argv[6]
+LFNDIR          = sys.argv[5]
+LHAPDF_LOC      = sys.argv[6]
 
 #
 # Set environment
