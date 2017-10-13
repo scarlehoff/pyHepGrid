@@ -44,7 +44,7 @@ class RunArc(Backend):
     # Runs for ARC
     def runWrapWarmup(self, runcard, test = None):
         from utilities import expandCard, generatePath
-        from header import warmupthr, jobName
+        from header import warmupthr, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
         from datetime import datetime
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
@@ -57,7 +57,10 @@ class RunArc(Backend):
             # Generate the XRSL file
             arguments  = "" + r + "\""
             arguments += " \"" + dCards[r] + "\""
-            arguments += " \"" + str(warmupthr) + ""
+            arguments += " \"" + str(warmupthr) + "\""
+            arguments += " \"" + lhapdf_grid_loc + "\""
+            arguments += " \"" + lfndir + "\""
+            arguments += " \"" + lhapdf_loc + """
             dictData = {'arguments'   : arguments,
                         'jobName'     : jobName,
                         'count'       : str(warmupthr),
