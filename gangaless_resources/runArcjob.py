@@ -115,24 +115,24 @@ class RunArc(Backend):
             self.dbase.insertData(self.table, dataDict)
 
 def runWrapper(runcard, test = None):
-    print("Running arc job for ", runcard)
+    print("Running arc job for {0}".format(runcard))
     from header import ARCSCRIPTDEFAULT
     arc = RunArc(ARCSCRIPTDEFAULT)
     arc.runWrapWarmup(runcard, test)
 
 def runWrapperProduction(runcard, test=None):
-    print("Running arc job for ", runcard)
+    print("Running arc job for {0}".format(runcard))
     from header import ARCSCRIPTDEFAULTPRODUCTION
     arc = RunArc(ARCSCRIPTDEFAULTPRODUCTION)
     arc.runWrapProduction(runcard, test)
 
 def iniWrapper(runcard, warmup=None):
-    print("Initialising Arc for ", runcard)
+    print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
     arc.iniWarmup(runcard, warmup)
 
 def iniWrapperProduction(runcard, warmup=None):
-    print("Initialising Arc for ", runcard)
+    print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
     if warmup:
         arc.iniWarmup(runcard, warmup)

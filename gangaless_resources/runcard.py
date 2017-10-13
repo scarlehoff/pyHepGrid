@@ -1,7 +1,7 @@
+import header
+runcardDir = header.runcardDir
+NNLOJETdir = header.NNLOJETdir
 print("Sourcing runcard")
-runcardDir = "/mt/home/jmartinez/Runcards/October/testing"
-NNLOJETdir = "/mt/home/jmartinez/NNLOJET"
-dictCard   = {
-#         'runtest.run' : "testing"
-        'runtest.run' : "testing4"
-    }
+dictCard = {
+     'LO.run':'DM_LO',
+}

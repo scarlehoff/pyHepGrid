@@ -267,6 +267,8 @@ class Backend(object):
 #
 
     def statsJob(self, jobids):
+        import datetime
+        time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
         status = self.multiRun(self.do_statsJob, jobids, 10)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
@@ -275,7 +277,7 @@ class Backend(object):
         unk = status.count(self.cUNK)
         total = len(jobids)
         total2 = done + wait + run + fail + unk 
-        print(" >> Total number of subjobs: {0}".format(total))
+        print(" >> Total number of subjobs: {0:<20} {1}".format(total, time))
         print("    >> Done:    {0}".format(done))
         print("    >> Waiting: {0}".format(wait))
         print("    >> Running: {0}".format(run))

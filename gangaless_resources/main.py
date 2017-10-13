@@ -62,20 +62,22 @@ if rmode[:3] == "run" or rmode[:3] == "man":
         raise Exception("Please , choose either Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
 ########################################
 
-#### Step0, if Dirac, source dirac
-if  args.runDirac:
-    print("Sourcing dirac...")
-    cmd = ["bash", "-c", "source $sourcedirac && env"]
-    import os, subprocess
-    out = subprocess.Popen(cmd, stdout = subprocess.PIPE)
-    for lineRaw in out.stdout:
-        if len(lineRaw) < 3:
-            continue
-        line = lineRaw.decode()
-        (key, _, value) = line.partition("=")
-        value = value.rstrip()
-        os.environ[key] = value
-########################################
+# Disabled dirac sourcing, pending tests...
+
+# #### Step0, if Dirac, source dirac
+# if  args.runDirac:
+#     print("Sourcing dirac...")
+#     cmd = ["bash", "-c", "source $sourcedirac && env"]
+#     import os, subprocess
+#     out = subprocess.Popen(cmd, stdout = subprocess.PIPE)
+#     for lineRaw in out.stdout:
+#         if len(lineRaw) < 3:
+#             continue
+#         line = lineRaw.decode()
+#         (key, _, value) = line.partition("=")
+#         value = value.rstrip()
+#         os.environ[key] = value
+# ########################################
 
 #### Step1, invoke proxy
 if not args.noProxy:
@@ -143,7 +145,7 @@ elif rmode[:3] == "man":
         backend.listRuns()
         id_str = input("> Select id to act upon: ")
 
-    id_list_raw = id_str.split(",")
+    id_list_raw = str(id_str).split(",")
     id_list = []
     for id_selected in id_list_raw:
         if "-" in id_selected:

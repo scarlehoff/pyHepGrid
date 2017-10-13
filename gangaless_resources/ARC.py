@@ -61,10 +61,13 @@ def copy_to_grid(local_file, grid_file):
 #  Read input arguments
 #
 
-LFNDIR     = "/grid/pheno/jmartinez"
+# LFNDIR     = "/grid/pheno/dwalker"
 RUNCARD    = sys.argv[1]
 RUNNAME    = sys.argv[2]
 NUMTHREADS = sys.argv[3]
+lhapdf_grid_loc = sys.argv[4] 
+LFNDIR = sys.argv[5]
+LHAPDF_LOC = sys.argv[6]
 
 #
 # Set environment
@@ -77,8 +80,8 @@ os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
 os.environ['OMP_STACKSIZE']    = "999999"
 os.environ['OMP_NUM_THREADS']  = NUMTHREADS
 
-lhapdf_path                    = os.path.join(os.getcwd(), "lhapdf", "lib")
-lhapdf_sharepath               = os.path.join(os.getcwd() ,"lhapdf", "share", "LHAPDF")
+lhapdf_path                    = os.path.join(os.getcwd(), LHAPDF_LOC, "lib")
+lhapdf_sharepath               = os.path.join(os.getcwd(), LHAPDF_LOC, "share", "LHAPDF")
 os.environ['LHAPATH']          = lhapdf_sharepath
 os.environ['LHA_DATA_PATH']    = lhapdf_sharepath
 
@@ -113,13 +116,13 @@ gcc_lib64path = os.path.join(os.getcwd(), "gcc", "lib64")
 
 # Bring LHAPDF from Grid Storage
 lhapdf_file = "lhapdf.tar.gz"
-copy_from_grid("util/" + lhapdf_file, lhapdf_file)
+copy_from_grid(lhapdf_grid_loc + lhapdf_file, lhapdf_file)
 untar_file(lhapdf_file)
 # Bring gcc if needed
 if gcclocal:
     print("GCC NOT FOUND")
     gcc_file = "gcc.tar.gz"
-    copy_from_grid("util/" + gcc_file, gcc_file)
+    copy_from_grid(lhapdf_grid_loc + gcc_file, gcc_file)
     untar_file(gcc_file)
 
 # Bring NNLOJET and runcards

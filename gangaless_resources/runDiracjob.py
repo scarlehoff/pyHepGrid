@@ -35,7 +35,7 @@ class RunDirac(Backend):
 
     # Run for DIRAC
     def runWrap(self, runcard):
-        from header    import baseSeed, producRun
+        from header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc
         from utilities import expandCard, generatePath
         from datetime  import datetime
         rncards, dCards, runFol = expandCard(runcard)
@@ -44,9 +44,17 @@ class RunDirac(Backend):
             joblist = []
             #self.checkExistingOutput(r, dCards[r])
             for seed in range(baseSeed, baseSeed + producRun):
+                # From DIRAC.py
+                # RUNCARD = sys.argv[1]
+                # RUNNAME = sys.argv[2]
+                # SEED    = sys.argv[3] 
+                # lhapdf_grid_loc = sys.argv[4] 
+                # LFNDIR = sys.argv[5]
+                # LHAPDF_LOC = sys.argv[6]
                 # Genereate and run a file per seed number
                 argbase = [r, dCards[r]]
-                args    = argbase + [str(seed)]
+                args    = argbase + [str(seed)] + [lhapdf_grid_loc]
+                args = args + [lfndir] + [lhapdf_loc]
                 self.writeJDL(args)
                 jobid   = self.runJDL()
                 joblist.append(jobid)
@@ -63,11 +71,11 @@ class RunDirac(Backend):
             self.dbase.insertData(self.table, dataDict)
 
 def runWrapper(runcard, test = None):
-    print("Running dirac job for ", runcard)
+    print("Running dirac job for {0}".format(runcard))
     dirac = RunDirac()
     dirac.runWrap(runcard)
 
 def iniWrapper(runcard, warmupProvided = None):
-    print("Initialising dirac for ", runcard)
+    print("Initialising dirac for {0}".format(runcard))
     dirac = RunDirac()
     dirac.iniProduction(runcard, warmupProvided)

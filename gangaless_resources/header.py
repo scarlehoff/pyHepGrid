@@ -1,39 +1,56 @@
+import subprocess as sp
+
+##################################################
+#                Helper Functions                #
+# Can't use utilities due to circular imports :( #
+##################################################
+def get_cmd_output(*args,**kwargs):
+    outbyt = sp.Popen(args, stdout=sp.PIPE,**kwargs).communicate()[0]
+    return outbyt.decode("utf-8")
+
+
 #
 # Global Variables (default values)
 # 
-
-arcbase    = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
-NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
+arcbase    = "/mt/home/dwalker/.arc/jobs.dat" # arc database
+runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
+NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 400
-baseSeed   = 400
+producRun  = 1
+baseSeed   = 405
 jobName    = "gridjob"
 
 #
 # Grid config 
 #
-username = "jmartinez"
-lfndir = "/grid/pheno/jmartinez"
-gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
+username = "dwalker"
+lfndir   = "/grid/pheno/dwalker"
+gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
+lhapdf_grid_loc = "input/" # util/ for Juan
+lhapdf_loc = "lhapdf/LHAPDF-6.2.1" # lhapdf for Juan
 
 #
-# Grid and libraries 
+# Grid and libraries. GCC requires version > 5
+# Can be enabled by sourcing on login to gridui
+# As per login message
 #
-gccdir     = "/mt/home/jmartinez/LIBRARIES/gcc-5.2.0"
-lhapdf     = "/mt/home/jmartinez/LHAPDF"
-
+gccdir = "/mt/home/dwalker/gcc-5.2.0"
+# Use installed version of LHAPDF by default
+lhapdf = get_cmd_output("lhapdf-config","--prefix")
+# lhapdf     = "/mt/home/dwalker/LHAPDF"
+ 
 #
 # ARC parameters
 #
-ce_base = "ce1.dur.scotgrid.ac.uk"
+ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 
 
 #
 # NNLOJET Database Parameters
 #
-dbname     = "NNLOJET_october.dat"     
+dbname     = "alljobs.dat"     
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status']
@@ -75,4 +92,3 @@ DIRACSCRIPTDEFAULT = [
         "InputSandbox  = {\"DIRAC.py\"};",
         "OutputSandbox = {\"StdOut\",\"StdErr\"};",
         ]
-
