@@ -91,9 +91,9 @@ class Backend(object):
     # Check whether the output folders already exist in the grid storage system
     def checkExistingOutput(self, r, rname):
         print("Checking whether this runcard has something on the output folder...")
-        checknm = r + "-" + rname
+        checkname = r + "-" + rname
         print("Not sure whether check for output works")
-        if self.gridw.checkForThis(checknm, "output"):
+        if self.gridw.checkForThis(checkname, "output"):
             print("Runcard " + r + " has at least one file at output")
             yn = input("Do you want to delete them all? (y/n) ")
             if yn == "y":
@@ -106,10 +106,12 @@ class Backend(object):
                 raise Exception("Runcard already exists")
 
 
-
-
-    def multiRun(self, function, arguments, threads = 5):
+    def multiRun(self, function, arguments, n_threads = 5):
         from multiprocessing.dummy import Pool as ThreadPool
+        if str(self) == "Arc":
+            threads = 1
+        else:
+            threads = n_threads
         pool   = ThreadPool(threads)
         result = pool.map(function, arguments)
         pool.close()
@@ -267,7 +269,7 @@ class Backend(object):
 #
 
     def statsJob(self, jobids):
-        status = self.multiRun(self.do_statsJob, jobids, 10)
+        status = self.multiRun(self.do_statsJob, jobids, n_threads=12)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)

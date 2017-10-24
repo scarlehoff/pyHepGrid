@@ -46,7 +46,11 @@ def copy_to_grid(local_file, grid_file):
     else:
         cmd = lcg_cr + " " + fileout + " " + filein
     print(cmd)
-    os.system(cmd)
+    fail = os.system(cmd)
+    if fail == 0:
+        return True
+    else:
+        return False
 
 # Runscript for Dirac (modified from Tom's ganga.py)
 
@@ -162,17 +166,22 @@ directory = "output"
 output    = outputName(RUNCARD, RUNNAME, SEED)
 # Copy to grid storage
 tar_this(output, "*")
-copy_to_grid(output, directory + "/" + output)
+success = copy_to_grid(output, directory + "/" + output)
 os.system('ls')
+if success:
+    print("All information copied over to grid storage!")
+else:
+    print("Failure copying to grid storage")
+# Could we use here the python socket to receive the data so nothing get lost?
 
-# Bring cross section parser
-try:
-    copy_from_grid("util/pyCross.py", "pyCross.py")
-    dir = os.listdir('.')
-    print(dir)
-    for i in dir:
-        if "cross" in i:
-            cmd = "python pyCross.py " + i + " " + RUNCARD
-            os.system(cmd)
-except:
-    print("Some problem doing pycross")
+# This doesn't work most of the time, dirac lacks numpy in many nodes
+# try:
+#     copy_from_grid("util/pyCross.py", "pyCross.py")
+#     dir = os.listdir('.')
+#     print(dir)
+#     for i in dir:
+#         if "cross" in i:
+#             cmd = "python pyCross.py " + i + " " + RUNCARD
+#             os.system(cmd)
+# except:
+#     print("Some problem doing pycross")
