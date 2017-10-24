@@ -70,11 +70,11 @@ class RunArc(Backend):
             argument_base += " \"" + str(warmupthr) + "\""
             argument_base += " \"" + lhapdf_grid_loc + "\""
             argument_base += " \"" + lfndir + "\""
-            argument_base += " \"" + lhapdf_loc + "\""
+            argument_base += " \"" + lhapdf_loc + ""
             for i_socket in range(n_sockets):
                 arguments = argument_base
                 if sockets:
-                    arguments += " \"" + str(port) + "\""
+                    arguments += "\" \"" + str(port) + "\""
                     arguments += " \"" + str(n_sockets) + "\""
                     arguments += " \"" + str(i_socket+1) + ""
                 dictData = {'arguments'   : arguments,
