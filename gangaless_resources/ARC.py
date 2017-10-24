@@ -76,7 +76,7 @@ LFNDIR          = sys.argv[5]
 LHAPDF_LOC      = sys.argv[6]
 
 n_args = len(sys.argv)
-if n_args > 6:
+if n_args == 10:
     port = sys.argv[7]
     n_so = sys.argv[8]
     i_so = sys.argv[9]
