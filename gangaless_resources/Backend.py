@@ -108,8 +108,12 @@ class Backend(object):
 
 
 
-    def multiRun(self, function, arguments, threads = 5):
+    def multiRun(self, function, arguments, n_threads = 5):
         from multiprocessing.dummy import Pool as ThreadPool
+        if str(self) == "Arc":
+            threads = 1
+        else:
+            threads = n_threads
         pool   = ThreadPool(threads)
         result = pool.map(function, arguments)
         pool.close()
@@ -269,7 +273,7 @@ class Backend(object):
     def statsJob(self, jobids):
         import datetime
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-        status = self.multiRun(self.do_statsJob, jobids, 10)
+        status = self.multiRun(self.do_statsJob, jobids, n_threads=12)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)

@@ -54,8 +54,11 @@ def copy_to_grid(local_file, grid_file):
         cmd = lcg_cr + " " + filein + " " + midfile + " " + fileout
     else:
         cmd = lcg_cr + " " + fileout + " " + filein
-    print(cmd)
-    os.system(cmd)
+    fail = os.system(cmd)
+    if fail == 0:
+        return True
+    else:
+        return False
 
 # Runscript for Dirac (modified from Tom's ganga.py)
 
@@ -187,20 +190,25 @@ directory = "output"
 output    = outputName(RUNCARD, RUNNAME, SEED)
 # Copy to grid storage
 tar_this(output, "*")
-copy_to_grid(output, directory + "/" + output)
+success = copy_to_grid(output, directory + "/" + output)
+if success:
+    print("All information copied over to grid storage")
+else:
+    print("Failure copying to grid storage")
+    # To do: keep a socket open in gridui which will automatically receive all data if copying fails... mmmm
 os.system('ls')
 
 # Bring cross section parser
 # TODO: 
 # Remove this? OR replace with numpy independent equivalent.
 
-try:
-    copy_from_grid("util/pyCross.py", "pyCross.py")
-    dir = os.listdir('.')
-    print(dir)
-    for i in dir:
-        if "cross" in i:
-            cmd = "python pyCross.py " + i + " " + RUNCARD
-            os.system(cmd)
-except:
-    print("Some problem doing pycross")
+# try:
+#     copy_from_grid("util/pyCross.py", "pyCross.py")
+#     dir = os.listdir('.')
+#     print(dir)
+#     for i in dir:
+#         if "cross" in i:
+#             cmd = "python pyCross.py " + i + " " + RUNCARD
+#             os.system(cmd)
+# except:
+#     print("Some problem doing pycross")
