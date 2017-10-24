@@ -91,9 +91,9 @@ class Backend(object):
     # Check whether the output folders already exist in the grid storage system
     def checkExistingOutput(self, r, rname):
         print("Checking whether this runcard has something on the output folder...")
-        checknm = r + "-" + rname
+        checkname = r + "-" + rname
         print("Not sure whether check for output works")
-        if self.gridw.checkForThis(checknm, "output"):
+        if self.gridw.checkForThis(checkname, "output"):
             print("Runcard " + r + " has at least one file at output")
             yn = input("Do you want to delete them all? (y/n) ")
             if yn == "y":
