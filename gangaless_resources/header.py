@@ -18,8 +18,8 @@ NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
 producRun  = 1
-baseSeed   = 405
-jobName    = "gridjob"
+baseSeed   = 407
+jobName    = "testjob"
 
 #
 # Grid config 

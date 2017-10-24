@@ -89,14 +89,14 @@ os.environ['LHAPATH']          = lhapdf_sharepath
 os.environ['LHA_DATA_PATH']    = lhapdf_sharepath
 
 #DEBUG
-# print("LHAPATH:")
-# os.system('echo $LHAPATH')
-# print("LHA_DATA_PATH:")
-# os.system('echo $LHA_DATA_PATH')
-# print("LD_LIBRARY_PATH:")
-# os.system('echo $LD_LIBRARY_PATH')
-# print("LHAPDFLIB:")
-# os.system('echo $LHAPDFLIB')
+print("LHAPATH:")
+os.system('echo $LHAPATH')
+print("LHA_DATA_PATH:")
+os.system('echo $LHA_DATA_PATH')
+print("LD_LIBRARY_PATH:")
+os.system('echo $LD_LIBRARY_PATH')
+print("LHAPDFLIB:")
+os.system('echo $LHAPDFLIB')
 # Check for gcc in cvmfs
 cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
 if os.path.isdir(cvmfs_gcc_dir):
