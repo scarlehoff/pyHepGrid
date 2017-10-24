@@ -2,7 +2,7 @@ from Backend import Backend
 class RunDirac(Backend):
     def __init__(self):
         super(RunDirac, self).__init__()
-        from header    import diractable, DIRACSCRIPTDEFAULT
+        from my_header    import diractable, DIRACSCRIPTDEFAULT
         from utilities import GridWrap, TarWrap
         self.table     = diractable
         self.templ     = DIRACSCRIPTDEFAULT
@@ -35,7 +35,7 @@ class RunDirac(Backend):
 
     # Run for DIRAC
     def runWrap(self, runcard):
-        from header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc
+        from my_header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc
         from utilities import expandCard, generatePath
         from datetime  import datetime
         rncards, dCards, runFol = expandCard(runcard)

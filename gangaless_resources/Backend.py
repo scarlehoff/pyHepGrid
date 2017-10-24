@@ -7,7 +7,7 @@ class Backend(object):
 
     def __init__(self):
         from utilities import TarWrap, GridWrap
-        from header import dbname, baseSeed
+        from my_header import dbname, baseSeed
         import dbapi
         self.tarw  = TarWrap()
         self.gridw = GridWrap()
@@ -97,7 +97,7 @@ class Backend(object):
             print("Runcard " + r + " has at least one file at output")
             yn = input("Do you want to delete them all? (y/n) ")
             if yn == "y":
-                from header import baseSeed, producRun
+                from my_header import baseSeed, producRun
                 for seed in range(baseSeed, baseSeed + producRun):
                     filename = "output" + checkname + "-" + str(seed) + ".tar.gz"
                     self.gridw.delete(filename, "output")
@@ -167,10 +167,10 @@ class Backend(object):
         from os import getcwd, path
         rncards, dCards, runFol = expandCard(runcard)
         if "NNLOJETdir" not in dCards:
-            from header import NNLOJETdir
+            from my_header import NNLOJETdir
         else:
             NNLOJETdir = dCards["NNLOJETdir"]
-        from header import NNLOJETexe
+        from my_header import NNLOJETexe
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not path.isfile(nnlojetfull): 
             raise Exception("Could not find NNLOJET executable")
@@ -206,10 +206,10 @@ class Backend(object):
         from os import getcwd, path
         rncards, dCards, runFol = expandCard(runcard)
         if "NNLOJETdir" not in dCards:
-            from header import NNLOJETdir
+            from my_header import NNLOJETdir
         else:
             NNLOJETdir = dCards["NNLOJETdir"]
-        from header import NNLOJETexe
+        from my_header import NNLOJETexe
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not path.isfile(nnlojetfull): 
             raise Exception("Could not find NNLOJET executable")
@@ -303,7 +303,7 @@ class Backend(object):
 
     def getDataWarmup(self, db_id):
         # Retrieve data from database
-        from header import arcbase
+        from my_header import arcbase
         from utilities import getOutputCall, spCall
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.listData(self.table, fields, db_id)[0]

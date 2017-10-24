@@ -23,18 +23,18 @@ def findLibraries(exe, gccsource):
 
 
 def deleteFromInput(delfile):
-    from header import deleteFromGrid
+    from my_header import deleteFromGrid
     deleteFromGrid(delfile, "input")
 
 def sendToInput(tarfile):
-    from header import sendToGrid
+    from my_header import sendToGrid
     sendToGrid(tarfile, "input")
 
 def updateLibraries():
     # List all necessary libraries for NNLOJET to run
     # and uploads them to the Grid under lfn:input/local.tar.gz
-    from header import NNLOJETexecutable, gccdir, NNLOJETdir
-    from header import spGetOutput, tarFiles
+    from my_header import NNLOJETexecutable, gccdir, NNLOJETdir
+    from my_header import spGetOutput, tarFiles
     from shutil import copytree, copy
     from os import path, makedirs
     from subprocess import call
@@ -111,7 +111,7 @@ def initialiseNNLOJET(runcard, production = None):
     from shutil     import copy
     from subprocess import call
     from os         import getcwd
-    from header     import NNLOJETdir, NNLOJETexecutable, tarFiles, runcardDir
+    from my_header     import NNLOJETdir, NNLOJETexecutable, tarFiles, runcardDir
     copy(NNLOJETdir + "/driver/" + NNLOJETexecutable, getcwd())
     gridFiles = []
     files = ["NNLOJET"] 

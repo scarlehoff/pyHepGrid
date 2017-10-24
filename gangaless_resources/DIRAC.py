@@ -46,7 +46,7 @@ def copy_to_grid(local_file, grid_file):
     fileout = lfn + grid_file
     if gfal:
         from uuid import uuid1 as generateRandom
-        from header import gsiftp
+        from my_header import gsiftp
         today_str = datetime.today().strftime('%Y-%m-%d')
         unique_str = "ffilef" + str(generateRandom())
         file_str = today_str + "/" + unique_str

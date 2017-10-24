@@ -31,7 +31,12 @@ def expandCard(runcard, dicRuns = None):
         for key in dictCard:
             rcards.append(key)
         # If more variables are defined, they will be added to dictCard
-        if "NNLOJETdir" in vessel: dictCard["NNLOJETdir"] = vessel["NNLOJETdir"]
+        if "NNLOJETdir" in vessel:
+            dictCard["NNLOJETdir"] = vessel["NNLOJETdir"]
+        if "sockets_active" in vessel: 
+            dictCard["sockets_active"] = vessel["sockets_active"]
+        if "port" in vessel: 
+            dictCard["port"] = vessel["port"]
     else:
         rcards.append(runcard)
         dictCard = {}
@@ -109,7 +114,7 @@ def sanitiseGeneratedPath(dailyPath, rname):
 # Library initialisation
 #
 def lhapdfIni():
-    from header import lhapdf_grid_loc as ginput
+    from my_header import lhapdf_grid_loc as ginput
     lhaConf = "lhapdf-config"
     testBin = ["which", lhaConf]
     tarw    = TarWrap()
@@ -120,7 +125,7 @@ def lhapdfIni():
         lhaRaw = getOutputCall(lhPath)
         lhaDir = lhaRaw.rstrip()
     else:
-        from header import lhapdf as lhaDir
+        from my_header import lhapdf as lhaDir
     # Bring lhapdf and create tar
     lhapdf      = "lhapdf"
     bringLhapdf = ["cp", "-LR", lhaDir, lhapdf]
@@ -179,7 +184,7 @@ class TarWrap:
 # GridUtilities
 # 
 class GridWrap:
-    from header import username
+    from my_header import username
     # Defaults
     sendto = ["lcg-cr", "--vo", "pheno", "-l"]
     retriv = ["lcg-cp"]
@@ -206,7 +211,7 @@ class GridWrap:
         if self.gfal:
             from datetime import datetime
             from uuid import uuid1 as generateRandom
-            from header import gsiftp
+            from my_header import gsiftp
             today_str = datetime.today().strftime('%Y-%m-%d')
             unique_str = "ffilef" + str(generateRandom())
             file_str = today_str + "/" + unique_str

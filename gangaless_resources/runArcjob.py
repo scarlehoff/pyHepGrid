@@ -2,7 +2,7 @@ from Backend import Backend
 class RunArc(Backend):
     def __init__(self, arcscript = None): 
         super(RunArc, self).__init__()
-        from header import  arctable, arcbase, ARCSCRIPTDEFAULT
+        from my_header import  arctable, arcbase, ARCSCRIPTDEFAULT
         from utilities import GridWrap, TarWrap
         self.table     = arctable
         self.arcbd     = arcbase
@@ -30,11 +30,11 @@ class RunArc(Backend):
 
     def runXRSL(self, test = False):
         from utilities import getOutputCall
-        from header import ce_base, ce_test
+        from my_header import ce_base, ce_test
         if test:
-            from header import ce_test as ce
+            from my_header import ce_test as ce
         else:
-            from header import ce_base as ce
+            from my_header import ce_base as ce
         cmdbase = ['arcsub', '-c', ce]
         cmd     = cmdbase + [self.xrslfile]
         output  = getOutputCall(cmd)
@@ -44,44 +44,60 @@ class RunArc(Backend):
     # Runs for ARC
     def runWrapWarmup(self, runcard, test = None):
         from utilities import expandCard, generatePath
-        from header import warmupthr, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
+        from my_header import warmupthr, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
         from datetime import datetime
-        # runcard names (keys)
-        # dCards, dictionary of { 'runcard' : 'name' }
+        # runcard names (of the form foo.run)
+        # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
         # runFol = folder where the runcards are
         rncards, dCards, runFol = expandCard(runcard)
+        if "sockets_active" in dCards.keys():
+            sockets = True
+            n_sockets = int(dCards["sockets_active"])
+            if "port" in dCards.keys():
+                port = int(dCards["port"])
+            else:
+                port = 8888
+        else:
+            sockets = False
+            n_sockets = 1
         self.runfolder = runFol
         for r in rncards:
             # Check whether this run has something on the gridStorage
             self.checkExistingWarmup(r, dCards[r])
             # Generate the XRSL file
-            arguments  = "" + r + "\""
-            arguments += " \"" + dCards[r] + "\""
-            arguments += " \"" + str(warmupthr) + "\""
-            arguments += " \"" + lhapdf_grid_loc + "\""
-            arguments += " \"" + lfndir + "\""
-            arguments += " \"" + lhapdf_loc + """
-            dictData = {'arguments'   : arguments,
-                        'jobName'     : jobName,
-                        'count'       : str(warmupthr),
-                        'countpernode': str(warmupthr),}
-            self.writeXRSL(dictData)
-            # Run the file
-            jobid = self.runXRSL(test)
-            # Create daily path
-            pathfolder = generatePath(True)
-            # Create database entry
-            dataDict = {'jobid'     : jobid,
-                        'date'      : str(datetime.now()),
-                        'pathfolder': pathfolder,
-                        'runcard'   : r,
-                        'runfolder' : dCards[r],
-                        'status'    : "active",}
-            self.dbase.insertData(self.table, dataDict)
+            argument_base  = "" + r + "\""
+            argument_base += " \"" + dCards[r] + "\""
+            argument_base += " \"" + str(warmupthr) + "\""
+            argument_base += " \"" + lhapdf_grid_loc + "\""
+            argument_base += " \"" + lfndir + "\""
+            argument_base += " \"" + lhapdf_loc + "\""
+            for i_socket in range(n_sockets):
+                arguments = argument_base
+                if sockets:
+                    arguments += " \"" + str(port) + "\""
+                    arguments += " \"" + str(n_sockets) + "\""
+                    arguments += " \"" + str(i_socket+1) + ""
+                dictData = {'arguments'   : arguments,
+                            'jobName'     : jobName,
+                            'count'       : str(warmupthr),
+                            'countpernode': str(warmupthr),}
+                self.writeXRSL(dictData)
+                # Run the file
+                jobid = self.runXRSL(test)
+                # Create daily path
+                pathfolder = generatePath(True)
+                # Create database entry
+                dataDict = {'jobid'     : jobid,
+                            'date'      : str(datetime.now()),
+                            'pathfolder': pathfolder,
+                            'runcard'   : r,
+                            'runfolder' : dCards[r],
+                            'status'    : "active",}
+                self.dbase.insertData(self.table, dataDict)
 
     def runWrapProduction(self, runcard, test = None):
         from utilities import expandCard, generatePath
-        from header import jobName, baseSeed, producRun
+        from my_header import jobName, baseSeed, producRun
         from datetime import datetime
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
@@ -119,13 +135,13 @@ class RunArc(Backend):
 
 def runWrapper(runcard, test = None):
     print("Running arc job for {0}".format(runcard))
-    from header import ARCSCRIPTDEFAULT
+    from my_header import ARCSCRIPTDEFAULT
     arc = RunArc(ARCSCRIPTDEFAULT)
     arc.runWrapWarmup(runcard, test)
 
 def runWrapperProduction(runcard, test=None):
     print("Running arc job for {0}".format(runcard))
-    from header import ARCSCRIPTDEFAULTPRODUCTION
+    from my_header import ARCSCRIPTDEFAULTPRODUCTION
     arc = RunArc(ARCSCRIPTDEFAULTPRODUCTION)
     arc.runWrapProduction(runcard, test)
 

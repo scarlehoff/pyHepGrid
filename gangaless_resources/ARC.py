@@ -45,7 +45,7 @@ def copy_to_grid(local_file, grid_file):
     fileout = lfn + grid_file
     if gfal:
         from uuid import uuid1 as generateRandom
-        from header import gsiftp
+        from my_header import gsiftp
         today_str = datetime.today().strftime('%Y-%m-%d')
         unique_str = "ffilef" + str(generateRandom())
         file_str = today_str + "/" + unique_str
@@ -74,6 +74,15 @@ NUMTHREADS      = sys.argv[3]
 lhapdf_grid_loc = sys.argv[4] 
 LFNDIR          = sys.argv[5]
 LHAPDF_LOC      = sys.argv[6]
+
+n_args = len(sys.argv)
+if n_args > 6:
+    port = sys.argv[7]
+    n_so = sys.argv[8]
+    i_so = sys.argv[9]
+    extra_args = "-port {0} -sockets {1} -ns {2}".format(port, n_so, i_so)
+else:
+    extra_args = ""
 
 #
 # Set environment
@@ -143,7 +152,7 @@ os.system("ls")
 
 # Prepare for running
 os.system("chmod +x NNLOJET")
-command = "./NNLOJET -run " + RUNCARD 
+command = "./NNLOJET -run " + RUNCARD + " " + extra_args
 
 # For debugging
 command +=" 2>&1 outfile.out;echo $LD_LIBRARY_PATH"
