@@ -57,9 +57,14 @@ class RunArc(Backend):
                 port = int(dCards["port"])
             else:
                 port = 8888
+            job_type = "Socket"
         else:
             sockets = False
             n_sockets = 1
+            if test:
+                job_type = "Warmup Test"
+            else:
+                job_type = "Warmup"
         self.runfolder = runFol
         for r in rncards:
             # Check whether this run has something on the gridStorage
@@ -92,8 +97,9 @@ class RunArc(Backend):
                             'pathfolder': pathfolder,
                             'runcard'   : r,
                             'runfolder' : dCards[r],
+                            'jobtype'   : job_type,
                             'status'    : "active",}
-                self.dbase.insertData(self.table, dataDict)
+                self.dbase.insert_data(self.table, dataDict)
 
     def runWrapProduction(self, runcard, test = None):
         from utilities import expandCard, generatePath
@@ -131,7 +137,7 @@ class RunArc(Backend):
                         'runcard'   : r,
                         'runfolder' : dCards[r],
                         'status'    : "active",}
-            self.dbase.insertData(self.table, dataDict)
+            self.dbase.insert_data(self.table, dataDict)
 
 def runWrapper(runcard, test = None):
     print("Running arc job for {0}".format(runcard))

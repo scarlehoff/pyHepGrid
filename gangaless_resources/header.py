@@ -17,8 +17,8 @@ runcardDir = "/mt/home/jmartinez/Runcards"
 NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 1
-baseSeed   = 407
+producRun  = 500
+baseSeed   = 100
 jobName    = "testjob"
 
 #
@@ -55,7 +55,7 @@ ce_test = "ce-test.dur.scotgrid.ac.uk"
 dbname     = "NNLOJET_october.dat"     
 arctable   = "arcjobs"
 diractable = "diracjobs"
-dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status']
+dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
 
 #
 # Templates

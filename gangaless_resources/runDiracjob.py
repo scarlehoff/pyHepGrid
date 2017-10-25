@@ -14,13 +14,13 @@ class RunDirac(Backend):
         #
     # XRSL file utilities
     # 
-    def writeJDL(self, listData):
+    def writeJDL(self, list_data):
         with open(self.jdlfile, 'w') as f:
             for i in self.templ:
                 f.write(i)
                 f.write("\n")
             f.write("Arguments = \"")
-            for j in listData:
+            for j in list_data:
                 f.write(j)
                 f.write(" ")
             f.write("\";\n")
@@ -68,7 +68,7 @@ class RunDirac(Backend):
                         'runcard'   : r,
                         'runfolder' : dCards[r],
                         'status'    : "active",}
-            self.dbase.insertData(self.table, dataDict)
+            self.dbase.insert_data(self.table, dataDict)
 
 def runWrapper(runcard, test = None):
     print("Running dirac job for {0}".format(runcard))

@@ -120,7 +120,7 @@ class Backend(object):
         return result
 
     def dbList(self, fields):
-        return self.dbase.listData(self.table, fields)
+        return self.dbase.list_data(self.table, fields)
 
     # If any of the "naming" function changes
     # they need to be changed as well at ARC.py/DIRAC.py
@@ -241,7 +241,7 @@ class Backend(object):
     ### General functions for database management
 
     def checkIdForProduction(self, db_id):
-        jobid = self.dbase.listData(self.table, ["jobid"], db_id)
+        jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
         idout = jobid[0]['jobid']
         if len(idout.split(" ")) > 1:
             return True 
@@ -249,7 +249,7 @@ class Backend(object):
             return False
 
     def getId(self, db_id):
-        jobid = self.dbase.listData(self.table, ["jobid"], db_id)
+        jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
         try:
             idout = jobid[0]['jobid']
         except IndexError:
@@ -259,11 +259,11 @@ class Backend(object):
         return idout.split(" ")
 
     def desactivateJob(self, db_id):
-        self.dbase.desactivateEntry(self.table, db_id)
+        self.dbase.disable_entry(self.table, db_id)
         return 0
 
     def reactivateJob(self, db_id):
-        self.dbase.desactivateEntry(self.table, db_id, revert = True)
+        self.dbase.disable_entry(self.table, db_id, revert = True)
         return 0
 
 #
@@ -310,7 +310,7 @@ class Backend(object):
         from my_header import arcbase
         from utilities import getOutputCall, spCall
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
-        data      =  self.dbase.listData(self.table, fields, db_id)[0]
+        data      =  self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
         finfolder =  data["pathfolder"] + "/" + runfolder
         jobid     =  data["jobid"]
@@ -345,7 +345,7 @@ class Backend(object):
         print("You are going to download all folders corresponding to this runcard from lfn:output")
         print("Make sure all runs are finished using the -i option")
         fields       = ["runfolder", "jobid", "runcard", "pathfolder"]
-        data         = self.dbase.listData(self.table, fields, db_id)[0]
+        data         = self.dbase.list_data(self.table, fields, db_id)[0]
         self.rcard   = data["runcard"]
         self.rfolder = data["runfolder"]
         pathfolderTp = data["pathfolder"]
@@ -430,7 +430,7 @@ class Backend(object):
 # List all runs
 #
     def listRuns(self):
-        fields = ["rowid", "jobid", "runcard", "runfolder", "date"]
+        fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype"]
         productionFlag = ""
         dictC  = self.dbList(fields)
         print("Active runs: " + str(len(dictC)))
@@ -439,7 +439,7 @@ class Backend(object):
             rid = str(i['rowid']).center(5)
             ruc = str(i['runcard']).center(22)
             run = str(i['runfolder']).center(25)
-            dat = str(i['date']).split('.')[0]
+            dat = str(i['date']).split('.')[0] + " " + str(i['jobtype'])
             dat = dat.center(20)
             jobids = str(i['jobid'])
             if len(jobids.split(" ")) > 1:
