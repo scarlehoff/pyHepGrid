@@ -119,8 +119,12 @@ class Backend(object):
         pool.close()
         return result
 
-    def dbList(self, fields):
-        return self.dbase.list_data(self.table, fields)
+    def dbList(self, fields, search_string = None):
+        if search_string:
+            search_fields = ["runcard", "runfolder"]
+            return self.dbase.find_and_list(self.table, fields, search_fields, search_string)
+        else:
+            return self.dbase.list_data(self.table, fields)
 
     # If any of the "naming" function changes
     # they need to be changed as well at ARC.py/DIRAC.py
@@ -429,10 +433,10 @@ class Backend(object):
 #
 # List all runs
 #
-    def listRuns(self):
+    def listRuns(self, search_string = None):
         fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype"]
         productionFlag = ""
-        dictC  = self.dbList(fields)
+        dictC  = self.dbList(fields, search_string)
         print("Active runs: " + str(len(dictC)))
         print("id".center(5) + " | " + "runcard".center(22) + " | " + "runname".center(25) + " |" +  "date".center(20))
         for i in dictC:

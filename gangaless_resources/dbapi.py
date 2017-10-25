@@ -113,12 +113,13 @@ class database(object):
         such that the find_this is found in the list of fields find_in"""
         self._protect_jobtype(keys, table)
         keystr = ",".join(keys)
+        search_string = "where (status = \"active\") AND ("
         search_queries = []
-        for field in field_in:
-            search_queries.append("where {0} like '%{1}%'".format(find_in, find_this))
-        search_string = " OR ".join(search_queries)
+        for field in find_in:
+            search_queries.append("{0} like '%{1}%'".format(field, find_this))
+        search_string += " OR ".join(search_queries) + ")"
         query = "select {0} from {1} {2};".format(keystr, table, search_string)
-        c = self._execute_and_retrieve(query)
+        c = self._execute_and_retrieve(query, verbose = True)
         dataList = []
         for i in c:
             tmpDic = {}

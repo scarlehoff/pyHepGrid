@@ -38,6 +38,7 @@ parser.add_argument("-p", "--printme", help = "do arccat to a given job", action
 parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
 parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
 parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
+parser.add_argument("-f", "--find", help = "Only database entries in which a certain string is found are shown")
 # Warmup only
 parser.add_argument("-u", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")
 parser.add_argument("-r", "--renewArc", help = "renew the proxy of one given job", action = "store_true")
@@ -140,7 +141,7 @@ elif rmode[:3] == "man":
     if args.idjob:
         id_str = args.idjob
     else:
-        backend.listRuns()
+        backend.listRuns(args.find)
         id_str = input("> Select id to act upon: ")
 
     id_list_raw = str(id_str).split(",")
