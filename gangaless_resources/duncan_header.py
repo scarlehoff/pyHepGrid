@@ -16,8 +16,8 @@ runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 500
-baseSeed   = 100
+producRun  = 1
+baseSeed   = 500
 jobName    = "testjob"
 
 #

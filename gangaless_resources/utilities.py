@@ -144,10 +144,10 @@ def lhapdfIni():
                     break
     tarw.tarDir(lhapdf, outputn)
     # Send to grid util
-    # ginput = "input"
     if gridw.checkForThis(outputn, ginput): gridw.delete(outputn, ginput)
     gridw.send(outputn, ginput)
     shutil.rmtree(lhapdf)
+    os.remove(outputn)
     # This is better than doing rm -rf and it will be removed in due time anyway
     # movetotmp   = ["mv", "-f", lhapdf, "/tmp/"]
     # spCall(movetotmp)

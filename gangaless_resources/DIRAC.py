@@ -3,9 +3,7 @@
 # TODO:
 # Split out separte gcc location rather than use LHAPDF loc in case they live in different places
 # and instead pass through via input args for maximum generality.
-# Same for input runcard directory input/
-# Maybe include a debug mode for when all hell has broken loose that does more printing?
-
+# Move DEBUG to command line arg passed by runDiracJob.py.
 import os
 import sys
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
@@ -48,6 +46,8 @@ def untar_file(local_file):
 
 def tar_this(tarfile, sourcefiles):
     if DEBUG:
+        cmd = "tar -cvzf " + tarfile + " " + sourcefiles
+    else:
         cmd = "tar -czf " + tarfile + " " + sourcefiles
     print("Tarring {0} as {1}".format(sourcefiles, tarfile))
     os.system(cmd)
