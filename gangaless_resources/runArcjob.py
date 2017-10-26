@@ -77,29 +77,29 @@ class RunArc(Backend):
             argument_base += " \"" + lfndir + "\""
             argument_base += " \"" + lhapdf_loc + ""
             for i_socket in range(n_sockets):
-                arguments = argument_base
-                if sockets:
-                    arguments += "\" \"" + str(port) + "\""
-                    arguments += " \"" + str(n_sockets) + "\""
-                    arguments += " \"" + str(i_socket+1) + ""
-                dictData = {'arguments'   : arguments,
-                            'jobName'     : jobName,
-                            'count'       : str(warmupthr),
-                            'countpernode': str(warmupthr),}
-                self.writeXRSL(dictData)
-                # Run the file
-                jobid = self.runXRSL(test)
-                # Create daily path
-                pathfolder = generatePath(True)
-                # Create database entry
-                dataDict = {'jobid'     : jobid,
-                            'date'      : str(datetime.now()),
-                            'pathfolder': pathfolder,
-                            'runcard'   : r,
-                            'runfolder' : dCards[r],
-                            'jobtype'   : job_type,
-                            'status'    : "active",}
-                self.dbase.insert_data(self.table, dataDict)
+            arguments  = "" + r + "\""
+            arguments += " \"" + dCards[r] + "\""
+            arguments += " \"" + str(warmupthr) + "\""
+            arguments += " \"" + lhapdf_grid_loc + "\""
+            arguments += " \"" + lfndir + "\""
+            arguments += " \"" + lhapdf_loc + ""
+            dictData = {'arguments'   : arguments,
+                        'jobName'     : jobName,
+                        'count'       : str(warmupthr),
+                        'countpernode': str(warmupthr),}
+            self.writeXRSL(dictData)
+            # Run the file
+            jobid = self.runXRSL(test)
+            # Create daily path
+            pathfolder = generatePath(True)
+            # Create database entry
+            dataDict = {'jobid'     : jobid,
+                        'date'      : str(datetime.now()),
+                        'pathfolder': pathfolder,
+                        'runcard'   : r,
+                        'runfolder' : dCards[r],
+                        'status'    : "active",}
+            self.dbase.insertData(self.table, dataDict)
 
     def runWrapProduction(self, runcard, test = None):
         from utilities import expandCard, generatePath

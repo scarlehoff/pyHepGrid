@@ -54,7 +54,7 @@ class RunDirac(Backend):
                 # Genereate and run a file per seed number
                 argbase = [r, dCards[r]]
                 args    = argbase + [str(seed)] + [lhapdf_grid_loc]
-                args = args + [lfndir] + [lhapdf_loc]
+                args = args + [lfndir] + [lhapdf_loc] +[NNLOJETexe]
                 self.writeJDL(args)
                 jobid   = self.runJDL()
                 joblist.append(jobid)

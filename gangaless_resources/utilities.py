@@ -121,6 +121,7 @@ def lhapdfIni():
     gridw   = GridWrap()
     outputn = "lhapdf.tar.gz"
     if getOutputCall(testBin) != "":
+        print("Using lhapdf-config to get lhapdf directory")
         lhPath = [lhaConf, "--prefix"]
         lhaRaw = getOutputCall(lhPath)
         lhaDir = lhaRaw.rstrip()
@@ -128,6 +129,7 @@ def lhapdfIni():
         from my_header import lhapdf as lhaDir
     # Bring lhapdf and create tar
     lhapdf      = "lhapdf"
+    print("Copying lhapdf from {0} to {1}".format(lhaDir, lhapdf))
     bringLhapdf = ["cp", "-LR", lhaDir, lhapdf]
     spCall(bringLhapdf)
     tarw.tarDir(lhapdf, outputn)
@@ -136,10 +138,11 @@ def lhapdfIni():
     if gridw.checkForThis(outputn, ginput): gridw.delete(outputn, ginput)
     gridw.send(outputn, ginput)
     # This is better than doing rm -rf and it will be removed in due time anyway
-    movetotmp   = ["mv", "-f", lhapdf, "/tmp/"]
-    spCall(movetotmp)
-    movetotmp   = ["mv", "-f", outputn, "/tmp/"]
-    spCall(movetotmp)
+    shutil.rmtree(lhapdf)
+    # movetotmp   = ["mv", "-f", lhapdf, "/tmp/"]
+    # spCall(movetotmp)
+    # movetotmp   = ["mv", "-f", outputn, "/tmp/"]
+    # spCall(movetotmp)
 
 #
 # Tar wrappers

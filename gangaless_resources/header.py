@@ -12,9 +12,9 @@ def get_cmd_output(*args,**kwargs):
 #
 # Global Variables (default values)
 # 
-arcbase    = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
-runcardDir = "/mt/home/jmartinez/Runcards"
-NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
+arcbase    = "/mt/home/dwalker/.arc/jobs.dat" # arc database
+runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
+NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
 producRun  = 500
@@ -24,23 +24,21 @@ jobName    = "testjob"
 #
 # Grid config 
 #
-username = "jmartinez"
-lfndir   = "/grid/pheno/jmartinez"
+username = "dwalker"
+lfndir   = "/grid/pheno/dwalker"
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
-lhapdf_grid_loc = "util/" 
-lhapdf_loc = "lhapdf" 
-# lhapdf_grid_loc = "input/" # util/ for Juan
-# lhapdf_loc = "lhapdf/LHAPDF-6.2.1" # lhapdf for Juan
+lhapdf_grid_loc = "input/" # util/ for Juan
+lhapdf_loc = "lhapdf/LHAPDF-6.2.1" # lhapdf for Juan
 
 #
 # Grid and libraries. GCC requires version > 5
 # Can be enabled by sourcing on login to gridui
 # As per login message
 #
-gccdir = "/mt/home/jmartinez/gcc-5.2.0"
+gccdir = "/mt/home/dwalker/gcc-5.2.0"
 # Use installed version of LHAPDF by default
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
-# lhapdf     = "/mt/home/jmartinez/LHAPDF"
+# lhapdf     = "/mt/home/dwalker/LHAPDF"
  
 #
 # ARC parameters
@@ -52,7 +50,7 @@ ce_test = "ce-test.dur.scotgrid.ac.uk"
 #
 # NNLOJET Database Parameters
 #
-dbname     = "NNLOJET_october.dat"     
+dbname     = "alljobs.dat"     
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
