@@ -29,6 +29,7 @@ lfndir   = "/grid/pheno/jmartinez"
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
 lhapdf_grid_loc = "util/" 
 lhapdf_loc = "lhapdf" 
+lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 # lhapdf_grid_loc = "input/" # util/ for Juan
 # lhapdf_loc = "lhapdf/LHAPDF-6.2.1" # lhapdf for Juan
 

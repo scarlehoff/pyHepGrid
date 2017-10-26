@@ -28,7 +28,7 @@ lfndir   = "/grid/pheno/dwalker"
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
 lhapdf_grid_loc = "input/" # util/ for Juan
 lhapdf_loc = "lhapdf/LHAPDF-6.2.1" # lhapdf for Juan
-
+lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 #
 # Grid and libraries. GCC requires version > 5
 # Can be enabled by sourcing on login to gridui

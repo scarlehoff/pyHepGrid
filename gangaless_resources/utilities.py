@@ -115,7 +115,8 @@ def sanitiseGeneratedPath(dailyPath, rname):
 #
 def lhapdfIni():
     from header import lhapdf_grid_loc as ginput
-    import shutil
+    import shutil, os
+    from header import lhapdf_ignore_dirs
     lhaConf = "lhapdf-config"
     testBin = ["which", lhaConf]
     tarw    = TarWrap()
@@ -133,6 +134,14 @@ def lhapdfIni():
     print("Copying lhapdf from {0} to {1}".format(lhaDir, lhapdf))
     bringLhapdf = ["cp", "-LR", lhaDir, lhapdf]
     spCall(bringLhapdf)
+    rmdirs = lhapdf_ignore_dirs
+    for root, dirs, files in os.walk(lhapdf):
+        for directory in dirs:
+            directory_path = os.path.join(root, directory)
+            for rmname in rmdirs:
+                if rmname in directory_path:
+                    shutil.rmtree(directory_path)
+                    break
     tarw.tarDir(lhapdf, outputn)
     # Send to grid util
     # ginput = "input"
