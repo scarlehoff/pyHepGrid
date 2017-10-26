@@ -9,7 +9,7 @@
 #      -  Database initialisation (crate tables)
 # 
 
-from my_header import dbname, arcbase
+from header import dbname, arcbase
 from utilities import getOutputCall, spCall
 from Backend import Backend
 
@@ -24,7 +24,7 @@ class Arc(Backend):
     def __init__(self):
         # Might not work on python2?
         super(Arc, self).__init__()
-        from my_header import arctable
+        from header import arctable
         self.table = arctable
 
     def __str__(self):
@@ -108,7 +108,7 @@ class Dirac(Backend):
 
     def __init__(self):
         super(Dirac, self).__init__()
-        from my_header import diractable
+        from header import diractable
         self.table = diractable
     
     def catJob(self, jobids):

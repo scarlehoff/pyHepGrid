@@ -2,7 +2,7 @@ from Backend import Backend
 class RunArc(Backend):
     def __init__(self, arcscript = None): 
         super(RunArc, self).__init__()
-        from my_header import  arctable, arcbase, ARCSCRIPTDEFAULT
+        from header import  arctable, arcbase, ARCSCRIPTDEFAULT
         from utilities import GridWrap, TarWrap
         self.table     = arctable
         self.arcbd     = arcbase
@@ -30,11 +30,11 @@ class RunArc(Backend):
 
     def runXRSL(self, test = False):
         from utilities import getOutputCall
-        from my_header import ce_base, ce_test
+        from header import ce_base, ce_test
         if test:
-            from my_header import ce_test as ce
+            from header import ce_test as ce
         else:
-            from my_header import ce_base as ce
+            from header import ce_base as ce
         cmdbase = ['arcsub', '-c', ce]
         cmd     = cmdbase + [self.xrslfile]
         output  = getOutputCall(cmd)
@@ -44,7 +44,7 @@ class RunArc(Backend):
     # Runs for ARC
     def runWrapWarmup(self, runcard, test = None):
         from utilities import expandCard, generatePath
-        from my_header import warmupthr, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
+        from header import warmupthr, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
         from datetime import datetime
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
@@ -103,7 +103,7 @@ class RunArc(Backend):
 
     def runWrapProduction(self, runcard, test = None):
         from utilities import expandCard, generatePath
-        from my_header import jobName, baseSeed, producRun
+        from header import jobName, baseSeed, producRun
         from datetime import datetime
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
@@ -141,13 +141,13 @@ class RunArc(Backend):
 
 def runWrapper(runcard, test = None):
     print("Running arc job for {0}".format(runcard))
-    from my_header import ARCSCRIPTDEFAULT
+    from header import ARCSCRIPTDEFAULT
     arc = RunArc(ARCSCRIPTDEFAULT)
     arc.runWrapWarmup(runcard, test)
 
 def runWrapperProduction(runcard, test=None):
     print("Running arc job for {0}".format(runcard))
-    from my_header import ARCSCRIPTDEFAULTPRODUCTION
+    from header import ARCSCRIPTDEFAULTPRODUCTION
     arc = RunArc(ARCSCRIPTDEFAULTPRODUCTION)
     arc.runWrapProduction(runcard, test)
 

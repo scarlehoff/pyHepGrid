@@ -114,7 +114,8 @@ def sanitiseGeneratedPath(dailyPath, rname):
 # Library initialisation
 #
 def lhapdfIni():
-    from my_header import lhapdf_grid_loc as ginput
+    from header import lhapdf_grid_loc as ginput
+    import shutil
     lhaConf = "lhapdf-config"
     testBin = ["which", lhaConf]
     tarw    = TarWrap()
@@ -126,7 +127,7 @@ def lhapdfIni():
         lhaRaw = getOutputCall(lhPath)
         lhaDir = lhaRaw.rstrip()
     else:
-        from my_header import lhapdf as lhaDir
+        from header import lhapdf as lhaDir
     # Bring lhapdf and create tar
     lhapdf      = "lhapdf"
     print("Copying lhapdf from {0} to {1}".format(lhaDir, lhapdf))
@@ -134,11 +135,11 @@ def lhapdfIni():
     spCall(bringLhapdf)
     tarw.tarDir(lhapdf, outputn)
     # Send to grid util
-#    ginput = "input"
+    # ginput = "input"
     if gridw.checkForThis(outputn, ginput): gridw.delete(outputn, ginput)
     gridw.send(outputn, ginput)
-    # This is better than doing rm -rf and it will be removed in due time anyway
     shutil.rmtree(lhapdf)
+    # This is better than doing rm -rf and it will be removed in due time anyway
     # movetotmp   = ["mv", "-f", lhapdf, "/tmp/"]
     # spCall(movetotmp)
     # movetotmp   = ["mv", "-f", outputn, "/tmp/"]
@@ -187,7 +188,7 @@ class TarWrap:
 # GridUtilities
 # 
 class GridWrap:
-    from my_header import username
+    from header import username
     # Defaults
     sendto = ["lcg-cr", "--vo", "pheno", "-l"]
     retriv = ["lcg-cp"]
@@ -214,7 +215,7 @@ class GridWrap:
         if self.gfal:
             from datetime import datetime
             from uuid import uuid1 as generateRandom
-            from my_header import gsiftp
+            from header import gsiftp
             today_str = datetime.today().strftime('%Y-%m-%d')
             unique_str = "ffilef" + str(generateRandom())
             file_str = today_str + "/" + unique_str
