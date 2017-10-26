@@ -14,7 +14,7 @@ lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
 lfn = "lfn:"
 gfal = False
-DEBUG = True
+DEBUG = False
 
 
 #lcg_cp = "gfal-copy"
@@ -182,10 +182,12 @@ if DEBUG:
     print("PREFIX")
     os.system("lhapdf-config --prefix")
     os.system("env | grep -i lha")
-    print "**************END DEBUG**************"
+    os.system('env')
 #    os.system("lhapdf -v ls --outdated")
 #    print("FIND OUTPUT")
 #    os.system("find "+os.getcwd())
+
+    print "**************END DEBUG**************"
 
 
 # Bring gcc if needed
@@ -230,17 +232,17 @@ else:
 # Is cleanup necessary at all? Is this not done by ARC itself
 # once we "timeout"?
 #
-# os.system("voms-proxy-info --all")
-# os.system("rm -rf lhapdf/")
-# os.system("rm -rf runcards/")
-# if gcclocal:
-#     os.system("rm -rf gcc/")
-#     os.system("rm -rf gcc.tar.gz")
-# os.system("rm " + lhapdf_file)
-# os.system('rm *.RRa *.RRb *.vBa *.vRa ' + EXENAME)
-# os.system("rm " + nnlojet_tar)
-# os.system("rm TOT.*")
-# os.system("rm fort*")
+os.system("voms-proxy-info --all")
+os.system("rm -rf lhapdf/")
+os.system("rm -rf runcards/")
+if gcclocal:
+    os.system("rm -rf gcc/")
+    os.system("rm -rf gcc.tar.gz")
+os.system("rm " + lhapdf_file)
+os.system('rm *.RRa *.RRb *.vBa *.vRa ' + EXENAME)
+os.system("rm " + nnlojet_tar)
+os.system("rm TOT.*")
+os.system("rm fort*")
 
 # Create warmup name
 directory = "output"
