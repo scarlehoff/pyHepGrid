@@ -1,4 +1,4 @@
-import duncan_header as head
+import juan_header as head
 import sys
 
 ############ COPY NAMESPACE FROM MY_HEADER #############

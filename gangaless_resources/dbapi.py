@@ -42,7 +42,9 @@ class database(object):
         """
         head = "create table " + tablename
         tail = "("
-        tail += [i + " text, " for i in fields]
+        print(fields)
+        for i in fields:
+            tail += i + " text, "
         tail = tail[:-2]
         tail += ");"
         self._execute_and_commit(head + tail, verbose = True)

@@ -70,7 +70,7 @@ ARCSCRIPTDEFAULT = ["&",
         "(outputFiles  = (\"outfile.out\" \"\") )",
         "(stdout       = \"stdout\")",
         "(stderr       = \"stderr\")",
-        "(gmlog        = \"testjob.log\")",
+        "(gmlog        = \"gridjob.log\")",
         "(memory       = \"100\")",
         ]
 
