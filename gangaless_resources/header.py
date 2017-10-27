@@ -1,13 +1,13 @@
 import template_header as template
 import sys
 from types import ModuleType
+import getpass
+import importlib
+ 
+header_mappings = {"jmartinez":"juan_header",
+                   "dwalker":"duncan_header"}
 
-from getpass import getuser
-username = getuser()
-if username == "jmartinez":
-    import juan_header as head
-elif username == "dwalker":
-    import duncan_header as head
+head = importlib.import_module(header_mappings[getpass.getuser()])
 
 print("Using header file {0}.py".format(head.__name__))
 
@@ -43,5 +43,5 @@ for i in template_attributes:
     except AssertionError as e:
         print("> ERROR: Missing {0} attribute inside {1}.py file that is present in {2}.py.".format(
                 i, head.__name__, template.__name__))
-        print("> Check that {0}.py file is up to date as functionality may be broken.".format(head.__name__))
+        print("> Check that {0}.py file is up to date as functionality may be broken otherwise.".format(head.__name__))
         sys.exit(1)
