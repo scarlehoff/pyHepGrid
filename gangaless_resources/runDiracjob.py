@@ -2,7 +2,7 @@ from Backend import Backend
 class RunDirac(Backend):
     def __init__(self):
         super(RunDirac, self).__init__()
-        from my_header    import diractable, DIRACSCRIPTDEFAULT
+        from header    import diractable, DIRACSCRIPTDEFAULT
         from utilities import GridWrap, TarWrap
         self.table     = diractable
         self.templ     = DIRACSCRIPTDEFAULT
@@ -35,12 +35,13 @@ class RunDirac(Backend):
 
     # Run for DIRAC
     def runWrap(self, runcard):
-        from my_header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc
+        from header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe
         from utilities import expandCard, generatePath
         from datetime  import datetime
         rncards, dCards, runFol = expandCard(runcard)
         self.runfolder          = runFol
         for r in rncards:
+            print("> Submitting {0} job(s) for {2} to Dirac, beginning at seed {1}.".format(producRun, baseSeed, r))
             joblist = []
             #self.checkExistingOutput(r, dCards[r])
             for seed in range(baseSeed, baseSeed + producRun):
@@ -53,8 +54,8 @@ class RunDirac(Backend):
                 # LHAPDF_LOC = sys.argv[6]
                 # Genereate and run a file per seed number
                 argbase = [r, dCards[r]]
-                args    = argbase + [str(seed)] + [lhapdf_grid_loc]
-                args = args + [lfndir] + [lhapdf_loc]
+                args    = argbase + [str(seed), lhapdf_grid_loc]
+                args = args + [lfndir, lhapdf_loc, NNLOJETexe]
                 self.writeJDL(args)
                 jobid   = self.runJDL()
                 joblist.append(jobid)

@@ -89,7 +89,7 @@ if not args.noProxy:
 ########################################
 
 #### Step2, generate database and tables
-from my_header import arctable, diractable, dbname, dbfields
+from header import arctable, diractable, dbname, dbfields
 from dbapi  import database
 db = database(dbname, tables = [arctable, diractable])
 ########################################
