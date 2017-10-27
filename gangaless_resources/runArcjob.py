@@ -57,7 +57,7 @@ class RunArc(Backend):
                 port = int(dCards["port"])
             else:
                 port = 8888
-            job_type = "Socket"
+            job_type = "Socket={}".format(port)
         else:
             sockets = False
             n_sockets = 1
@@ -76,6 +76,7 @@ class RunArc(Backend):
             argument_base += " \"" + lhapdf_grid_loc + "\""
             argument_base += " \"" + lfndir + "\""
             argument_base += " \"" + lhapdf_loc + ""
+            jobids = []
             for i_socket in range(n_sockets):
                 arguments = argument_base
                 if sockets:
@@ -88,18 +89,18 @@ class RunArc(Backend):
                             'countpernode': str(warmupthr),}
                 self.writeXRSL(dictData)
                 # Run the file
-                jobid = self.runXRSL(test)
-                # Create daily path
-                pathfolder = generatePath(True)
-                # Create database entry
-                dataDict = {'jobid'     : jobid,
-                            'date'      : str(datetime.now()),
-                            'pathfolder': pathfolder,
-                            'runcard'   : r,
-                            'runfolder' : dCards[r],
-                            'jobtype'   : job_type,
-                            'status'    : "active",}
-                self.dbase.insert_data(self.table, dataDict)
+                jobids.append(self.runXRSL(test))
+            # Create daily path
+            pathfolder = generatePath(True)
+            # Create database entry
+            dataDict = {'jobid'     : ' '.join(jobids),
+                        'date'      : str(datetime.now()),
+                        'pathfolder': pathfolder,
+                        'runcard'   : r,
+                        'runfolder' : dCards[r],
+                        'jobtype'   : job_type,
+                        'status'    : "active",}
+            self.dbase.insert_data(self.table, dataDict)
 
     def runWrapProduction(self, runcard, test = None):
         from utilities import expandCard, generatePath
