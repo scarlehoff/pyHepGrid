@@ -447,7 +447,7 @@ class Backend(object):
             dat = dat.center(20)
             jobids = str(i['jobid'])
             if len(jobids.split(" ")) > 1:
-                productionFlag = " (p)"
+                productionFlag = " (+)"
             print(rid + " | " + ruc + " | " + run + " | " + dat + productionFlag)
 
 

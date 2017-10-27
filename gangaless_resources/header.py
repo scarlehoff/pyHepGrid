@@ -2,12 +2,10 @@ import duncan_header as head
 import template_header as template
 import sys
 from types import ModuleType
-
 print("Using header file {0}.py".format(head.__name__))
 
 ############ COPY NAMESPACE FROM MY_HEADER #############
 # Only slightly abusive...
-
 this_file = sys.modules[__name__]
 
 # Check that the all of the attributes in template are present...
