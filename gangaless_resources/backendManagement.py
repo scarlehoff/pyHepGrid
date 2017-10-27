@@ -63,7 +63,7 @@ class Arc(Backend):
             exit(0)
         for jobid in jobids:
             cmd = [self.cmd_kill, "-j", arcbase, jobid.strip()]
-        spCall(cmd)
+            spCall(cmd)
 
     def cleanJob(self, jobids):
         print("WARNING! You are about to clean the job!")
