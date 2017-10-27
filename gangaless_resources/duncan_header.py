@@ -1,4 +1,5 @@
 import subprocess as sp
+import os
 
 ##################################################
 #                Helper Functions                #
@@ -18,7 +19,7 @@ NNLOJETexe = "NNLOJET"
 warmupthr  = 16
 producRun  = 1
 baseSeed   = 500
-jobName    = "testjob"
+jobName    = "gridjob"
 
 #
 # Grid config 
@@ -27,14 +28,16 @@ username = "dwalker"
 lfndir   = "/grid/pheno/dwalker"
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
 lhapdf_grid_loc = "input/" # util/ for Juan
-lhapdf_loc = "lhapdf/LHAPDF-6.2.1" # lhapdf for Juan
+lhapdf_loc = "lhapdf"#/LHAPDF-6.2.1" # lhapdf for Juan
 lhapdf_ignore_dirs = ["doc", "examples", "config", "LHAPDF-6.2.1/share"]
+
 #
 # Grid and libraries. GCC requires version > 5
 # Can be enabled by sourcing on login to gridui
 # As per login message
 #
 gccdir = "/mt/home/dwalker/gcc-5.2.0"
+
 # Use installed version of LHAPDF by default
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
 # lhapdf     = "/mt/home/dwalker/LHAPDF"
@@ -44,7 +47,6 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 #
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
-
 
 #
 # NNLOJET Database Parameters
