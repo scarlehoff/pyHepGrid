@@ -1,7 +1,14 @@
-import duncan_header as head
 import template_header as template
 import sys
 from types import ModuleType
+
+from getpass import getuser
+username = getuser()
+if username == "jmartinez":
+    import juan_header as head
+elif username == "dwalker":
+    import duncan_header as head
+
 print("Using header file {0}.py".format(head.__name__))
 
 ############ COPY NAMESPACE FROM MY_HEADER #############
