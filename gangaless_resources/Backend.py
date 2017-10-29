@@ -34,14 +34,14 @@ class Backend(object):
         print("Checking warmup/production in runcard %s" % r)
         with open(runcardDir + "/" + r, 'r') as f:
             for line in f:
-                if "Warmup" in line and ".true." in line:
+                if "Warmup" in line and ".true." in line.lower():
                     print("Warmup is on")
                     yn = input("Do you want to continue (y/n) ")
                     if yn[0] == "y" or yn[0] == "Y":
                         pass
                     else:
                         raise Exception("WRONG RUNCARD")
-                if "Production" in line and ".false." in line:
+                if "Production" in line and ".false." in line.lower():
                     print("Production is off")
                     yn = input("Do you want to continue (y/n) ")
                     if yn[0] == "y" or yn[0] == "Y":
@@ -57,14 +57,14 @@ class Backend(object):
         print("Checking warmup/production in runcard %s" % r)
         with open(runcardDir + "/" + r, 'r') as f:
             for line in f:
-                if "Warmup" in line and ".false." in line:
+                if "Warmup" in line and ".false." in line.lower():
                     print("Warmup is off")
                     yn = input("Do you want to continue (y/n) ")
                     if yn[0] == "y" or yn[0] == "Y":
                         pass
                     else:
                         raise Exception("WRONG RUNCARD")
-                if "Production" in line and ".true." in line:
+                if "Production" in line and ".true." in line.lower():
                     print("Production is on")
                     yn = input("Do you want to continue (y/n) ")
                     if yn[0] == "y" or yn[0] == "Y":
