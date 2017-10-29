@@ -120,8 +120,8 @@ class Dirac(Backend):
     def statusJob(self, jobids, verbose = False):
         self.multiRun(self.do_statusJob, jobids, 10)
 
-    def do_statusJob(self, jobids):
-        cmd = [self.cmd_stat, ' '.join(jobids)]
+    def do_statusJob(self, jobid):
+        cmd = [self.cmd_stat, jobid]
         spCall(cmd)
         return 0
 
