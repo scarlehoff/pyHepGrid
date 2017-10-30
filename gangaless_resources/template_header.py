@@ -26,6 +26,8 @@ jobName    = "testjob"
 username = "dwalker"
 lfndir   = "/grid/pheno/dwalker"
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
+LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
+LFC_CATALOG_TYPE = "lfc"
 lhapdf_grid_loc = "input/" # util/ for Juan
 lhapdf_loc = "lhapdf/LHAPDF-6.2.1" # lhapdf for Juan
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
@@ -53,6 +55,12 @@ dbname     = "alljobs.dat"
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
+
+# finalise.py parameters
+# Directory for results output
+results_dir = "RESULTS/"
+finalise_no_cores = 5
+finalise_runcards = "runcards"
 
 #
 # Templates

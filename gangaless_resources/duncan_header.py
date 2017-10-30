@@ -1,5 +1,4 @@
 import subprocess as sp
-import os
 
 ##################################################
 #                Helper Functions                #
@@ -17,8 +16,8 @@ runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 1
-baseSeed   = 500
+producRun  = 1000
+baseSeed   = 1001
 jobName    = "gridjob"
 
 #
@@ -27,8 +26,10 @@ jobName    = "gridjob"
 username = "dwalker"
 lfndir   = "/grid/pheno/dwalker"
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
-lhapdf_grid_loc = "input/" # util/ for Juan
-lhapdf_loc = "lhapdf"#/LHAPDF-6.2.1" # lhapdf for Juan
+LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
+LFC_CATALOG_TYPE = "lfc"
+lhapdf_grid_loc = "input/" 
+lhapdf_loc = "lhapdf"
 lhapdf_ignore_dirs = ["doc", "examples", "config", "LHAPDF-6.2.1/share"]
 
 #
@@ -55,6 +56,12 @@ dbname     = "alljobs.dat"
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
+
+# finalise.py parameters
+# Directory for results output
+results_dir = "../../working/RESULTS/"
+finalise_no_cores = 15
+finalise_runcards = "finalise_runcards"
 
 #
 # Templates
