@@ -1,0 +1,14 @@
+Python script to generate a set of channels based on selectors using the selectchannel file as an input. Will select any channel that matches each selector specified. Multiple values can be specified for each selector which operates as an 'or' group.
+
+Example:
+
+    python gen_channels.py WpJ -IP1 u db -IP2 g gt -ME Ch
+
+Selects all channels for the WpJ process with either u or db as incoming parton 1, g or gt as incoming parton 2 that contain a Ch in the matrix element name. Default behaviour is to select all channels.
+Rejectors are specified with a leading r.
+
+Example:
+
+    python gen_channels.py WpJ -IP1 u db -IP2 g gt -ME Ch -rNF 2 0
+
+behaves as before but will also reject any channels with Nf factors of nf^0 or nf^2

@@ -1,0 +1,1 @@
+To run tests, navigate to the test folder and run nosetests
