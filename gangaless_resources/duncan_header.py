@@ -16,9 +16,9 @@ runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 1
-baseSeed   = 500
-jobName    = "testjob"
+producRun  = 1000
+baseSeed   = 1001
+jobName    = "gridjob"
 
 #
 # Grid config 
@@ -26,15 +26,19 @@ jobName    = "testjob"
 username = "dwalker"
 lfndir   = "/grid/pheno/dwalker"
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
-lhapdf_grid_loc = "input/" # util/ for Juan
-lhapdf_loc = "lhapdf/LHAPDF-6.2.1" # lhapdf for Juan
+LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
+LFC_CATALOG_TYPE = "lfc"
+lhapdf_grid_loc = "input/" 
+lhapdf_loc = "lhapdf"
 lhapdf_ignore_dirs = ["doc", "examples", "config", "LHAPDF-6.2.1/share"]
+
 #
 # Grid and libraries. GCC requires version > 5
 # Can be enabled by sourcing on login to gridui
 # As per login message
 #
 gccdir = "/mt/home/dwalker/gcc-5.2.0"
+
 # Use installed version of LHAPDF by default
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
 # lhapdf     = "/mt/home/dwalker/LHAPDF"
@@ -45,7 +49,6 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 
-
 #
 # NNLOJET Database Parameters
 #
@@ -53,6 +56,12 @@ dbname     = "alljobs.dat"
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
+
+# finalise.py parameters
+# Directory for results output
+results_dir = "../../working/RESULTS/"
+finalise_no_cores = 15
+finalise_runcards = "finalise_runcards"
 
 #
 # Templates

@@ -201,9 +201,11 @@ if gcclocal:
 nnlojet_tar = "NNLOJET.tar.gz"
 copy_from_grid("input/" + RUNCARD + RUNNAME + ".tar.gz", nnlojet_tar)
 untar_file(nnlojet_tar)
-print("LDD")
-os.system("ldd NNLOJET")
-os.system("ls")
+
+if DEBUG:
+    print("LDD")
+    os.system("ldd NNLOJET")
+    os.system("ls")
 
 #
 # Run NNLOJET

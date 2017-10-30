@@ -34,17 +34,17 @@ class Backend(object):
         print("Checking warmup/production in runcard %s" % r)
         with open(runcardDir + "/" + r, 'r') as f:
             for line in f:
-                if "Warmup" in line and ".true." in line:
+                if "Warmup" in line and ".true." in line.lower():
                     print("Warmup is on")
-                    yn = input("Do you want to continue (y/n) ")
-                    if yn[0] == "y" or yn[0] == "Y":
+                    yn = input("Do you want to continue (y/n) ").lower()
+                    if yn.startswith("y"):
                         pass
                     else:
                         raise Exception("WRONG RUNCARD")
-                if "Production" in line and ".false." in line:
+                if "Production" in line and ".false." in line.lower():
                     print("Production is off")
-                    yn = input("Do you want to continue (y/n) ")
-                    if yn[0] == "y" or yn[0] == "Y":
+                    yn = input("Do you want to continue (y/n) ").lower()
+                    if yn.startswith("y"):
                         pass
                     else:
                         raise Exception("WRONG RUNCARD")
@@ -57,17 +57,17 @@ class Backend(object):
         print("Checking warmup/production in runcard %s" % r)
         with open(runcardDir + "/" + r, 'r') as f:
             for line in f:
-                if "Warmup" in line and ".false." in line:
+                if "Warmup" in line and ".false." in line.lower():
                     print("Warmup is off")
-                    yn = input("Do you want to continue (y/n) ")
-                    if yn[0] == "y" or yn[0] == "Y":
+                    yn = input("Do you want to continue (y/n) ").lower()
+                    if yn.startswith("y"):
                         pass
                     else:
                         raise Exception("WRONG RUNCARD")
-                if "Production" in line and ".true." in line:
+                if "Production" in line and ".true." in line.lower():
                     print("Production is on")
-                    yn = input("Do you want to continue (y/n) ")
-                    if yn[0] == "y" or yn[0] == "Y":
+                    yn = input("Do you want to continue (y/n) ").lower()
+                    if yn.startswith("y"):
                         pass
                     else:
                         raise Exception("WRONG RUNCARD")
@@ -81,8 +81,8 @@ class Backend(object):
         checknm = self.warmupName(r, rname)
         if self.gridw.checkForThis(checknm, "warmup"):
             print("File " + checknm + " already exist at lfn:warmup")
-            yn = input("Do you want to delete this file? (y/n) ")
-            if yn == "y":
+            yn = input("Do you want to delete this file? (y/n) ").lower()
+            if yn.startswith("y"):
                 self.gridw.delete(checknm, "warmup")
             else:
                 print("Not deleting... exiting")
@@ -95,8 +95,8 @@ class Backend(object):
         print("Not sure whether check for output works")
         if self.gridw.checkForThis(checkname, "output"):
             print("Runcard " + r + " has at least one file at output")
-            yn = input("Do you want to delete them all? (y/n) ")
-            if yn == "y":
+            yn = input("Do you want to delete them all? (y/n) ").lower()
+            if yn.startswith("y"):
                 from header import baseSeed, producRun
                 for seed in range(baseSeed, baseSeed + producRun):
                     filename = "output" + checkname + "-" + str(seed) + ".tar.gz"
@@ -190,8 +190,8 @@ class Backend(object):
             # Check whether warmup/production is active in the runcard
             if not path.isfile(runFol + "/" + i):
                 print("Could not find runcard %s" % i)
-                yn = input("Do you want to continue? (y/n): ")
-                if yn == y:
+                yn = input("Do you want to continue? (y/n): ").lower()
+                if yn.startswith('y'):
                     continue
                 else:
                     raise Exception("Could not find runcard")
@@ -361,8 +361,8 @@ class Backend(object):
             finalName = self.outputName(self.rcard, self.rfolder, finalSeed)
             print("The starting filename is %s" % firstName)
             print("The final filename is %s" % finalName)
-            yn = input("Are these parameters correct? (y/n) ")
-            if yn == "y": break
+            yn = input("Are these parameters correct? (y/n) ").lower()
+            if yn.startswith("y"): break
             self.bSeed = int(input("Please, introduce the starting seed (ex: 400): "))
             finalSeed  = int(input("Please, introduce the final seed (ex: 460): ")) + 1
         from os import makedirs, chdir
@@ -372,8 +372,8 @@ class Backend(object):
             if err.errno == 17:
                 print("Tried to create folder %s in this directory" % self.rfolder)
                 print("to no avail. We are going to assume the directory was already there")
-                yn = input("Do you want to continue? (y/n) ")
-                if yn == "n": raise Exception("Folder %s already exists" % self.rfolder)
+                yn = input("Do you want to continue? (y/n) ").lower()
+                if yn.startswith("n"): raise Exception("Folder %s already exists" % self.rfolder)
             else:
                 raise 
         chdir(self.rfolder)
