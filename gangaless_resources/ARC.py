@@ -76,10 +76,12 @@ LFNDIR          = sys.argv[5]
 LHAPDF_LOC      = sys.argv[6]
 
 n_args = len(sys.argv)
+socketed = False
 if n_args == 10:
     port = sys.argv[7]
     n_so = sys.argv[8]
     i_so = sys.argv[9]
+    socketed = True
     extra_args = "-port {0} -sockets {1} -ns {2}".format(port, n_so, i_so)
 else:
     extra_args = ""
@@ -183,6 +185,8 @@ output    = warmupName(RUNCARD, RUNNAME)
 # Copy to grid storage
 tar_this(output, "*")
 # If copying to grid fails, pipe the vegas warmup to stdout so we don't lose the run
+if socketed and i_so != 1:
+    sys.exit(0)
 success = copy_to_grid(output, directory + "/" + output)
 if success:
     print("Copied over to grid storage!")
