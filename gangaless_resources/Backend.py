@@ -15,16 +15,6 @@ class Backend(object):
         self.table = None
         self.bSeed = baseSeed
 
-#     # Sigh
-#     def input(self, string):
-#         try:
-#             if version_info.major == 2: 
-#                 return raw_input(string)
-#             else:
-#                 return input(string)
-#         except:
-#             return raw_input(string)
-
     # Check/Probe functions
     def checkProduction(self, r, runcardDir):
         #
@@ -425,8 +415,6 @@ class Backend(object):
         from utilities import spCall
         spCall(["rm", tarfile])
         return 0
-
-
 
 
 

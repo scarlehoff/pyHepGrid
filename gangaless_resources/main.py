@@ -35,6 +35,7 @@ parser.add_argument("-k", "--killJob", help = "kill a given job", action = "stor
 parser.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
 parser.add_argument("-I", "--infoVerbose", help = "retrieve arcstat/diracstat for a given job (more verbose, only ARC)", action = "store_true")
 parser.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
+parser.add_argument("-P", "--printmelog", help = "do arccat to the *.log files of a given job (only ARC)", action = "store_true")
 parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
 parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
 parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
@@ -168,6 +169,10 @@ elif rmode[:3] == "man":
         elif args.printme:
             print("Printing information . . . ")
             backend.catJob(jobid)
+        elif args.printmelog:
+            print("Printing information . . . ")
+            backend.catLogJob(jobid)
+
         # Options that deactivate the database entry once they're done
         elif args.getData:
             print("Retrieving job data")

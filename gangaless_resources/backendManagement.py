@@ -80,6 +80,19 @@ class Arc(Backend):
             cmd = [self.cmd_print, "-j", arcbase, jobid.strip()]
             spCall(cmd)
 
+    def catLogJob(self, jobids):
+        """Sometimes the std output doesn't get updated
+        but we can choose to access the logs themselves"""
+        output_folder = ["file:///tmp/"]
+        cmd_base =  ["globus-url-copy", "-v"]
+        cmd_str = "cat /tmp/"
+        for jobid in jobids:
+            cmd = cmd_base + [jobid + "/*.log"] + output_folder
+            output = getOutputCall(cmd).split()
+            for text in output:
+                if ".log" in text:
+                    spCall((cmd_str + text).split())
+
     def statusJob(self, jobids, verbose = False):
         for jobid in jobids:
             cmd = [self.cmd_stat, "-j", arcbase, jobid.strip()]
