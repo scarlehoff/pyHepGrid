@@ -102,12 +102,9 @@ class Arc(Backend):
 
     def getData(self, db_id, jobid = None):
         # Check whether we are in a production or a warmup run before continuing
-        production = self.checkIdForProduction(db_id)
-        
-        if production:
-            self.getDataProduction(db_id)
-        else:
-            self.getDataWarmup(db_id)
+        jobtype = self.checkIdType(db_id)
+        print("Jobtype: {}".format(jobtype))
+        self.jobtype_get[jobtype](db_id)
 
 ### End Class Arc
 

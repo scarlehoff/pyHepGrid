@@ -14,6 +14,11 @@ class Backend(object):
         self.dbase = dbapi.database(dbname)
         self.table = None
         self.bSeed = baseSeed
+        self.jobtype_get = {
+                'P' : self.getDataProduction,
+                'W' : self.getDataWarmup,
+                'S' : self.getDataWarmup
+                }
 
     # Check/Probe functions
     def checkProduction(self, r, runcardDir):
@@ -234,13 +239,23 @@ class Backend(object):
 
     ### General functions for database management
 
-    def checkIdForProduction(self, db_id):
-        jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
-        idout = jobid[0]['jobid']
-        if len(idout.split(" ")) > 1:
-            return True 
+    def checkIdType(self, db_id):
+        production = 'P'
+        socketed_warmup = 'S'
+        warmup = 'W'
+        jobtype = self.dbase.list_data(self.table, ["jobtype"], db_id)[0]["jobtype"]
+        if "Production" in jobtype:
+            return production
+        elif "Warmup" in jobtype:
+            return warmup
+        elif "Socket" in jobtype:
+            return socketed_warmup
         else:
-            return False
+            idout = self.dbase.list_data(self.table, ["jobid"], db_id)[0]["jobid"]
+            if len(idout.split(" ")) > 1:
+                return production
+            else:
+                return warmup
 
     def getId(self, db_id):
         jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
@@ -307,24 +322,26 @@ class Backend(object):
         data      =  self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
         finfolder =  data["pathfolder"] + "/" + runfolder
-        jobid     =  data["jobid"]
         runcard   =  data["runcard"]
-        cmd       =  [self.cmd_get, "-j", arcbase, jobid.strip()]
+        jobids    =  data["jobid"].split()
         spCall(["mkdir", "-p", finfolder])
         print("Retrieving ARC output into " + finfolder)
         try:
             # Retrieve ARC standard output
-            output    = getOutputCall(cmd)
-            outputfol = output.split("Results stored at: ")[1].rstrip()
-            outputfolder = outputfol.split("\n")[0]
-            if outputfolder == "" or (len(outputfolder.split(" ")) > 1):
-                print("Running mv and rm command is not safe here")
-                print("Found blank spaces in the output folder")
-                print("Nothing will be moved to the warmup global folder")
-            else:
-                destination = finfolder + "/" + "arc_out_" + runcard + outputfolder
-                spCall(["mv", outputfolder, destination])
-                #spCall(["rm", "-rf", outputfolder])
+            for jobid in jobids:
+                print(jobid)
+                cmd       =  [self.cmd_get, "-j", arcbase, jobid.strip()]
+                output    = getOutputCall(cmd)
+                outputfol = output.split("Results stored at: ")[1].rstrip()
+                outputfolder = outputfol.split("\n")[0]
+                if outputfolder == "" or (len(outputfolder.split(" ")) > 1):
+                    print("Running mv and rm command is not safe here")
+                    print("Found blank spaces in the output folder")
+                    print("Nothing will be moved to the warmup global folder")
+                else:
+                    destination = finfolder + "/" + "arc_out_" + runcard + outputfolder
+                    spCall(["mv", outputfolder, destination])
+                    #spCall(["rm", "-rf", outputfolder])
         except:
             print("Couldn't find job output in the ARC server")
             print("jobid: " + jobid)

@@ -111,6 +111,7 @@ class RunArc(Backend):
         # runFol = folder where the runcards are
         rncards, dCards, runFol = expandCard(runcard)
         self.runfolder = runFol
+        job_type = "Production"
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
@@ -136,6 +137,7 @@ class RunArc(Backend):
                         'date'      : str(datetime.now()),
                         'pathfolder': pathfolder,
                         'runcard'   : r,
+                        'jobtype'   : job_type,
                         'runfolder' : dCards[r],
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
