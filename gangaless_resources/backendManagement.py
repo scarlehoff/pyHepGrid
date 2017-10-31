@@ -103,7 +103,8 @@ class Arc(Backend):
     def getData(self, db_id, jobid = None):
         from header import finalise_runcards 
         if finalise_runcards:
-            pass
+            import finalise
+            finalise.do_finalise()
             return
         # Check whether we are in a production or a warmup run before continuing
         jobtype = self.checkIdType(db_id)
@@ -146,7 +147,8 @@ class Dirac(Backend):
     def getData(self, db_id):
         from header import finalise_runcards 
         if finalise_runcards:
-            pass
+            import finalise
+            finalise.do_finalise()
         else:
             self.getDataProduction(db_id)
 

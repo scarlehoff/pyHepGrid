@@ -22,24 +22,16 @@ OUTDIR = config.results_dir
 no_processes = config.finalise_no_cores
 
 # Set up environment
-abspath = os.path.abspath(__file__)
-dname = os.path.dirname(abspath)
-os.chdir(dname)
 os.environ["LFC_HOST"] = config.LFC_HOST
 os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
 os.environ["LFC_HOME"] = config.lfndir
-
-cmd = ['lfc-ls', 'output']
-output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
-currentdir = os.getcwd()
-
 
 def mkdir(directory):
     os.system('mkdir {0} > /dev/null 2>&1'.format(directory))
 
 
 def createdirs(currentdir, runcard):
-    targetdir = os.path.join(currentdir, OUTDIR, 'results_' + runcard)
+    targetdir = os.path.join(currentdir, OUTDIR, "{0}{1}".format(config.finalise_prefix,runcard))
     mkdir(targetdir)
     newdir = os.path.join(targetdir, 'log')
     mkdir(newdir)
@@ -97,8 +89,15 @@ def pull_seed_data(rc_tar, runcard, output, logcheck, targetdir):
     pullrun(rc_tar, seed, runcard, output, logcheck, tmpdir)
 
 
-if __name__ == "__main__":
+def do_finalise():
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
+    cmd = ['lfc-ls', 'output']
+    output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+    currentdir = os.getcwd()
     output = [x for x in str(output).split("\\n")]
+
     pool = mp.Pool(processes=no_processes)
     tot_rc_no = len(rc.dictCard)
     for rc_no, runcard in enumerate(rc.dictCard):
@@ -110,3 +109,7 @@ if __name__ == "__main__":
         pool.starmap(pull_seed_data, zip(runcard_output, it.repeat(runcard), 
                                          it.repeat(output), it.repeat(logcheck),
                                          it.repeat(targetdir)))
+
+
+if __name__ == "__main__":
+    do_finalise()

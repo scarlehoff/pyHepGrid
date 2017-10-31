@@ -134,6 +134,12 @@ elif rmode[:3] == "man":
     if args.runDirac: 
         from backendManagement import Dirac as backend_class
     backend = backend_class()
+
+    from header import finalise_runcards
+    if args.getData and finalise_runcards:
+        backend.getData(0)
+        exit(0)
+
     if args.updateArc:
         if not args.runArc: 
             raise Exception("Update ARC can only be used with ARC")

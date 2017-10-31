@@ -67,6 +67,7 @@ results_dir = "RESULTS/"
 finalise_no_cores = 15
 # if None, "native" finalisation routine will be used, otherwise use finalise.py
 finalise_runcards = None
+finalise_prefix = None
 
 #
 # Templates
