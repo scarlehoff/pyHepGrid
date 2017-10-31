@@ -100,16 +100,7 @@ class Arc(Backend):
                 cmd += ["-l"]
             spCall(cmd)
 
-    def getData(self, db_id, jobid = None):
-        from header import finalise_runcards 
-        if finalise_runcards:
-            import finalise
-            finalise.do_finalise()
-            return
-        # Check whether we are in a production or a warmup run before continuing
-        jobtype = self.checkIdType(db_id)
-        print("Jobtype: {}".format(jobtype))
-        self.jobtype_get[jobtype](db_id)
+
 
 ### End Class Arc
 
@@ -143,14 +134,6 @@ class Dirac(Backend):
     def killJob(self, jobids):
         cmd = [self.cmd_kill] + jobids
         spCall(cmd)
-
-    def getData(self, db_id):
-        from header import finalise_runcards 
-        if finalise_runcards:
-            import finalise
-            finalise.do_finalise()
-        else:
-            self.getDataProduction(db_id)
 
 
 if __name__ == '__main__':

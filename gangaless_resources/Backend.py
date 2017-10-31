@@ -435,7 +435,15 @@ class Backend(object):
         spCall(["rm", tarfile])
         return 0
 
-
+    def getData(self, db_id, jobid = None, custom_get = None):
+        if custom_get:
+            from importlib import import_module
+            import_module(custom_get).do_finalise()
+        else:
+            # Check whether we are in a production or a warmup run before continuing
+            # and call the corresponding get_function
+            jobtype = self.checkIdType(db_id)
+            self.jobtype_get[jobtype](db_id)
 
 #
 # List all runs

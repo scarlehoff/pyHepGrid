@@ -18,7 +18,7 @@ rc = importlib.import_module(config.finalise_runcards)
 # can be removed by keeping better track of tmp files
 
 # CONFIG
-OUTDIR = config.results_dir
+OUTDIR = config.production_base_dir
 no_processes = config.finalise_no_cores
 
 # Set up environment

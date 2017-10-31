@@ -75,6 +75,7 @@ def checkIfThere(dirPath, file):
         return True
 
 def generatePath(warmup):
+    from header import finalisation_script
     from os import path, makedirs, environ
     from datetime import datetime
     # Check whether the folder already exist
@@ -86,19 +87,12 @@ def generatePath(warmup):
         from header import warmup_base_dir as baseDir
     else:
         from header import production_base_dir as baseDir
-    if not baseDir:
-        return None
     basePath = homePath + baseDir
-    # And create it if it doesn't
-    if not path.exists(basePath):
-        print("Creating the basepath at " + basePath)
-        makedirs(basePath)
     monthlyPath = basePath + "/" + month
-    if not path.exists(monthlyPath):
-        print("Creating monthly path at " + monthlyPath)
-        makedirs(monthlyPath)
     dailyPath = monthlyPath + "/" + day
-    if not path.exists(dailyPath):
+    # Only create the folder structure if we are using the "native" getData
+    from header import finalisation_script
+    if not finalisation_script and not path.exists(dailyPath):
         print("Creating daily path at " + dailyPath)
         makedirs(dailyPath)
     return dailyPath

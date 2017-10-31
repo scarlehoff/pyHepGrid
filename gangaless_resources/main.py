@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.4
 
 from argparse import ArgumentParser
 from sys import exit
@@ -135,9 +135,9 @@ elif rmode[:3] == "man":
         from backendManagement import Dirac as backend_class
     backend = backend_class()
 
-    from header import finalise_runcards
-    if args.getData and finalise_runcards:
-        backend.getData(0)
+    from header import finalisation_script
+    if args.getData and finalisation_script:
+        backend.getData(0, custom_get = finalisation_script)
         exit(0)
 
     if args.updateArc:

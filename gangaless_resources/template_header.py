@@ -16,7 +16,7 @@ runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 1
+producRun  = 100
 baseSeed   = 100
 jobName    = "testjob"
 
@@ -39,7 +39,6 @@ lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 gccdir = "/mt/home/dwalker/gcc-5.2.0"
 # Use installed version of LHAPDF by default
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
-# lhapdf     = "/mt/home/dwalker/LHAPDF"
  
 #
 # ARC parameters
@@ -51,21 +50,22 @@ ce_test = "ce-test.dur.scotgrid.ac.uk"
 #
 # NNLOJET Database Parameters
 #
-dbname     = "alljobs.dat"     
+dbname     = "NNLOJET_november.dat"     
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
 
-# storage parameters relative to $HOME
-# if = none, no folders will be created
+# Finalisation and storage options
+finalise_no_cores = 15
+
+# finalisation script, if "None" use native ./main.py man -[DA] -g
+# if using a script, ./main.py will call script.do_finalise()
+finalisation_script = None
+
 warmup_base_dir = "/WarmupsRunGrids"
 production_base_dir = "/ResultsRunGrids"
 
-# finalisation parameters
-results_dir = "RESULTS/"
-# Directory for results output (todo: unify with production_base_dir)
-finalise_no_cores = 15
-# if None, "native" finalisation routine will be used, otherwise use finalise.py
+# finalise.py-only parameters
 finalise_runcards = None
 finalise_prefix = None
 
