@@ -31,7 +31,6 @@ LFC_CATALOG_TYPE = "lfc"
 lhapdf_grid_loc = "util/" 
 lhapdf_loc = "lhapdf" 
 lhapdf_ignore_dirs = ["doc", "examples", "config"]
-
 #
 # Grid and libraries. GCC requires version > 5
 # Can be enabled by sourcing on login to gridui
@@ -47,7 +46,6 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 
-
 #
 # NNLOJET Database Parameters
 #
@@ -56,16 +54,17 @@ arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
 
-# storage parameters relative to $HOME
-# if = none, no folders won't be ever created
+# Finalisation and storage options
+finalise_no_cores = 15
+
+# finalisation script, if "None" use native ./main.py man -[DA] -g
+# if using a script, ./main.py will call script.do_finalise()
+finalisation_script = None
+
 warmup_base_dir = "/WarmupsRunGrids"
 production_base_dir = "/ResultsRunGrids"
 
-# finalisation parameters
-results_dir = "RESULTS/"
-# Directory for results output (todo: unify with production_base_dir)
-finalise_no_cores = 15
-# if None, "native" finalisation routine will be used, otherwise use finalise.py
+# finalise.py-only parameters
 finalise_runcards = None
 finalise_prefix = None
 
