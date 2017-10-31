@@ -51,7 +51,7 @@ ce_test = "ce-test.dur.scotgrid.ac.uk"
 #
 # NNLOJET Database Parameters
 #
-dbname     = "NNLOJET_october.dat"     
+dbname     = "NNLOJET_november.dat"     
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
