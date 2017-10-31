@@ -16,8 +16,8 @@ runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 1000
-baseSeed   = 1001
+producRun  = 500
+baseSeed   = 2500
 jobName    = "gridjob"
 
 #
@@ -58,7 +58,7 @@ diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
 
 # storage parameters relative to $HOME
-# if = none, no folders won't be ever created
+# if = none, no folders will be created
 warmup_base_dir = None
 production_base_dir = None
 
@@ -68,6 +68,7 @@ finalise_no_cores = 15
 results_dir = "../../working/RESULTS/"
 # if None, "native" finalisation routine will be used, otherwise use finalise.py
 finalise_runcards = "finalise_runcards"
+finalise_prefix = "results_"
 
 #
 # Templates
