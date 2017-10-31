@@ -104,7 +104,7 @@ class Backend(object):
 
 
     def multiRun(self, function, arguments, n_threads = 5):
-        from multiprocessing.dummy import Pool as ThreadPool
+        from multiprocessing import Pool as ThreadPool
         if str(self) == "Arc":
             threads = 1
         else:
@@ -281,8 +281,9 @@ class Backend(object):
 
     def statsJob(self, jobids):
         import datetime
+        from header import finalise_no_cores as n_threads
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-        status = self.multiRun(self.do_statsJob, jobids, n_threads=12)
+        status = self.multiRun(self.do_statsJob, jobids, n_threads)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)
@@ -387,11 +388,12 @@ class Backend(object):
         try:
             makedirs("log")
             makedirs("dat")
-        except:
+        except: # todo: macho...
             pass
         seeds    =  range(self.bSeed, finalSeed)
-        tarfiles =  self.multiRun(self.do_getData, seeds, 15)
-        dummy    =  self.multiRun(self.do_extractOutputData, tarfiles, 1)
+        from header import finalise_no_cores as n_threads
+        tarfiles =  self.multiRun(self.do_getData, seeds, n_threads)
+        dummy    =  self.multiRun(self.do_extractOutputData, tarfiles, n_threads)
         chdir("..")
         from utilities import spCall
         print("Everything saved at %s" % pathfolder)
