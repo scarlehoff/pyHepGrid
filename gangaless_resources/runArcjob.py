@@ -91,7 +91,7 @@ class RunArc(Backend):
                 # Run the file
                 jobids.append(self.runXRSL(test))
             # Create daily path
-            pathfolder = generatePath(True)
+            pathfolder = generatePath(warmup=True)
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
                         'date'      : str(datetime.now()),
@@ -130,7 +130,7 @@ class RunArc(Backend):
                 jobid = self.runXRSL(test)
                 joblist.append(jobid)
             # Create daily path
-            pathfolder = generatePath(False)
+            pathfolder = generatePath(warmup=False)
             # Create database entry
             jobStr = ' '.join(joblist)
             dataDict = {'jobid'     : jobStr,

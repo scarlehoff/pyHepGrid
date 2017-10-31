@@ -83,9 +83,11 @@ def generatePath(warmup):
     day      = str(date.day)
     homePath = environ['HOME']
     if warmup:
-        baseDir = "/WarmupsRunGrids"
+        from header import warmup_base_dir as baseDir
     else:
-        baseDir = "/ResultsRunGrids"
+        from header import production_base_dir as baseDir
+    if not baseDir:
+        return None
     basePath = homePath + baseDir
     # And create it if it doesn't
     if not path.exists(basePath):

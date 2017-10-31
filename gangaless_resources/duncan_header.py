@@ -57,10 +57,16 @@ arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
 
-# finalise.py parameters
-# Directory for results output
-results_dir = "../../working/RESULTS/"
+# storage parameters relative to $HOME
+# if = none, no folders won't be ever created
+warmup_base_dir = None
+production_base_dir = None
+
+# finalisation parameters
 finalise_no_cores = 15
+# Directory for results output (todo: unify with production_base_dir)
+results_dir = "../../working/RESULTS/"
+# if None, "native" finalisation routine will be used, otherwise use finalise.py
 finalise_runcards = "finalise_runcards"
 
 #

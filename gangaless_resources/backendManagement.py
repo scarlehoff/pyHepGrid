@@ -36,13 +36,13 @@ class Arc(Backend):
         dictC  = self.dbList(fields)
         for job in dictC:
             # Retrieve data from database
-            id      = str(job['rowid'])
             jobid   = str(job['jobid'])
             rfold   = str(job['runfolder']) 
             pfold   = str(job['pathfolder']) + "/" + rfold
             flnam   = pfold + "/stdout"
             # Create target folder if it doesn't exist
-            if not path.exists(pfold): makedirs(pfold)
+            if not path.exists(pfold): 
+                makedirs(pfold)
             cmd     = self.cmd_print + ' ' +  jobid.strip()
             # It seems script is the only right way to save data with arc
             stripcm = ['script', '-c', cmd, '-a', 'tmpscript.txt']
@@ -101,6 +101,10 @@ class Arc(Backend):
             spCall(cmd)
 
     def getData(self, db_id, jobid = None):
+        from header import finalise_runcards 
+        if finalise_runcards:
+            pass
+            return
         # Check whether we are in a production or a warmup run before continuing
         jobtype = self.checkIdType(db_id)
         print("Jobtype: {}".format(jobtype))
@@ -140,7 +144,11 @@ class Dirac(Backend):
         spCall(cmd)
 
     def getData(self, db_id):
-        self.getDataProduction(db_id)
+        from header import finalise_runcards 
+        if finalise_runcards:
+            pass
+        else:
+            self.getDataProduction(db_id)
 
 
 if __name__ == '__main__':
