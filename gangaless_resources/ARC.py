@@ -186,7 +186,7 @@ output    = warmupName(RUNCARD, RUNNAME)
 tar_this(output, "*")
 # If copying to grid fails, pipe the vegas warmup to stdout so we don't lose the run
 if socketed and i_so != 1:
-    sys.exit(0)
+    print("All good")
 success = copy_to_grid(output, directory + "/" + output)
 if success:
     print("Copied over to grid storage!")
