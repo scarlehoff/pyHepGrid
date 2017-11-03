@@ -15,3 +15,8 @@ dictCard = {
 # Optional values
 # sockets_active = 5
 # port = 8888
+
+# You can overwrite any value in your header by specifying the same attribute here. 
+# E.g to set the number of jobs 99999 for this runcard, you could include the line
+# producRun = 999999
+
