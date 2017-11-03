@@ -100,15 +100,16 @@ def generatePath(warmup):
         from header import warmup_base_dir as baseDir
     else:
         from header import production_base_dir as baseDir
-    basePath = homePath + baseDir
-    monthlyPath = basePath + "/" + month
-    dailyPath = monthlyPath + "/" + day
+    if baseDir is not None:
+        basePath = homePath + baseDir
+        monthlyPath = basePath + "/" + month
+        dailyPath = monthlyPath + "/" + day
     # Only create the folder structure if we are using the "native" get_data
-    from header import finalisation_script
-    if not finalisation_script and not path.exists(dailyPath):
-        print("Creating daily path at " + dailyPath)
-        makedirs(dailyPath)
-    return dailyPath
+        from header import finalisation_script
+        if not finalisation_script and not path.exists(dailyPath):
+            print("Creating daily path at " + dailyPath)
+            makedirs(dailyPath)
+        return dailyPath
 
 def sanitiseGeneratedPath(dailyPath, rname):
     i = 0

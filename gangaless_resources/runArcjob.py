@@ -72,7 +72,7 @@ class RunArc(Backend):
                 job_type = "Warmup"
 
         self.runfolder = header.runcardDir
-        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, jobName
+        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, jobName, warmup_base_dir
         # loop over al .run files defined in runcard.py
         for r in rncards:
             # Check whether this run has something on the gridStorage
@@ -99,7 +99,10 @@ class RunArc(Backend):
                 # Run the file
                 jobids.append(self._run_XRSL(xrslfile, test=test))
             # Create daily path
-            pathfolder = util.generatePath(warmup=True)
+            if warmup_base_dir is not None:
+                pathfolder = util.generatePath(warmup=True)
+            else:
+                pathfolder = "None"
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
                         'date'      : str(datetime.now()),
