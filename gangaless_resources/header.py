@@ -49,6 +49,7 @@ for i in template_attributes:
         sys.exit(1)
 
 ############ General header #################
+# This should not be changed unless you really know what you are doing!
 # Grid config
 arcbase  = "/mt/home/{}/.arc/jobs.dat".format(grid_username) # arc database
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
@@ -99,15 +100,18 @@ DIRACSCRIPTDEFAULT = [
         ]
 
 from argument_parser import runcard as runcard_file
+print(runcard_file)
 if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py",""))
-    overwr = []
     # todo: some safety checks
     for attr_name in dir(runcard):
         if not attr_name.startswith("__") and attr_name != "dictCard":
+            if attr_name not in template_attributes:
+                print("> Warning! {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
+                print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
+                print("> Or even if they do.")
+
             attr_value = getattr(runcard, attr_name)
+            print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
             setattr(this_file, attr_name, attr_value)
-    if overwr:
-        print("{} overwrites: ".format(runcard_file))
-        for i in overwr:
-            print(i)
+

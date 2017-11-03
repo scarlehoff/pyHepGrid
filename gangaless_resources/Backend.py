@@ -206,6 +206,19 @@ class Backend(object):
             idout = self.get_id(idt)
         return idout.split(" ")
 
+    def get_date(self, db_id):
+        """ Returns a list of DIRAC/ARC jobids
+        for a given database entry
+        """
+        jobid = self.dbase.list_data(self.table, ["date"], db_id)
+        try:
+            idout = jobid[0]['date']
+        except IndexError:
+            print("Selected job is %s out of bounds" % jobid)
+            idt   = input("> Select id to act upon: ")
+            idout = self.get_date(idt)
+        return idout
+
     def disable_db_entry(self, db_id):
         """ Disable database entry
         """
@@ -304,17 +317,20 @@ class Backend(object):
         """ Given a list of jobs, returns the number of jobs which
         are in each possible state (done/waiting/running/etc)
         """
-        import datetime
         from header import finalise_no_cores as n_threads
-        time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
         status = self._multirun(self._do_stats_job, jobids, n_threads)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)
         fail = status.count(self.cFAIL)
         unk = status.count(self.cUNK)
+        self.print_stats(done, wait, run, fail, unk, jobids)
+
+    def print_stats(self, done, wait, run, fail, unk, jobids):
+        import datetime
         total = len(jobids)
         total2 = done + wait + run + fail + unk 
+        time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
         print(" >> Total number of subjobs: {0:<20} {1}".format(total, time))
         print("    >> Done:    {0}".format(done))
         print("    >> Waiting: {0}".format(wait))
