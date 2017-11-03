@@ -19,5 +19,15 @@ dictCard = {
     'VV_fix_scale.run':'VV_DM_FIX',
     'R_fix_scale.run':'R_DM_FIX',
     'V_fix_scale.run':'V_DM_FIX',
-    'LO_fix_scale.run':'LO_DM_FIX'
+    'LO_fix_scale.run':'LO_DM_FIX',
+    'ubgRa.run':'Ra',
+    'ubgRb.run':'Rb',
+    'ubgV.run':'V',
+    'dbgRa.run':'Ra',
+    'dbgRb.run':'Rb',
+    'dbgV.run':'V',
+    'QbgRa.run':'Ra',
+    'QbgRb.run':'Rb',
+    'QbgV.run':'V',
+
     }

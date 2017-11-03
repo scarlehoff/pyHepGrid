@@ -74,13 +74,14 @@ NUMTHREADS      = sys.argv[3]
 lhapdf_grid_loc = sys.argv[4] 
 LFNDIR          = sys.argv[5]
 LHAPDF_LOC      = sys.argv[6]
+EXENAME         = sys.argv[7]
 
 n_args = len(sys.argv)
 socketed = False
 if n_args == 10:
-    port = sys.argv[7]
-    n_so = sys.argv[8]
-    i_so = sys.argv[9]
+    port = sys.argv[8]
+    n_so = sys.argv[9]
+    i_so = sys.argv[10]
     socketed = True
     extra_args = "-port {0} -sockets {1} -ns {2}".format(port, n_so, i_so)
 else:
@@ -153,8 +154,8 @@ os.system("ls")
 #
 
 # Prepare for running
-os.system("chmod +x NNLOJET")
-command = "./NNLOJET -run " + RUNCARD + " " + extra_args
+os.system("chmod +x {0}".format(EXENAME))
+command = "./{0} -run ".format(EXENAME) + RUNCARD + " " + extra_args
 
 # For debugging
 command +=" 2>&1 outfile.out;echo $LD_LIBRARY_PATH"
