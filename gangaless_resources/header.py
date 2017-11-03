@@ -99,5 +99,11 @@ DIRACSCRIPTDEFAULT = [
         ]
 
 from argument_parser import runcard as runcard_file
-# Overwrite anything from header with whatever is on the runcard
+if runcard_file:
+    runcard = importlib.import_module(runcard_file.replace(".py",""))
+    # todo: some safety checks
+    for attr_name in runcard:
+        if not attr_name.startswith("__") and attr_name != "dictCard":
+            attr_value = getattr(runcard, attr_name)
+            setattr(this_file, attr_name, attr_value)
 
