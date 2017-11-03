@@ -17,7 +17,7 @@ class RunArc(Backend):
         self.tarw      = util.TarWrap()
 
     def _write_XRSL(self, dictData, filename = None):
-        """ Writes a unique XRSL file to be
+        """ Writes a unique XRSL file 
         which instructs the arc job to run
         """
         if not filename:

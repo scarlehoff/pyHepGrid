@@ -95,7 +95,7 @@ elif rmode[:3] == "man":
     if args.updateArc:
         if not args.runArc: 
             raise Exception("Update ARC can only be used with ARC")
-        backend.updateStdOut()
+        backend.update_stdout()
         exit(0)
     if args.idjob:
         id_str = args.idjob
@@ -123,29 +123,29 @@ elif rmode[:3] == "man":
             backend.stats_job_cheat(jobid, date)
         elif args.info or args.infoVerbose:
             print("Retrieving information . . . ")
-            backend.statusJob(jobid, args.infoVerbose)
+            backend.status_job(jobid, args.infoVerbose)
         elif args.renewArc:
             print("Renewing proxy for the job . . . ")
-            backend.renewProxy(jobid)
+            backend.renew_proxy(jobid)
         elif args.printme:
             print("Printing information . . . ")
-            backend.catJob(jobid)
+            backend.cat_job(jobid)
         elif args.printmelog:
             print("Printing information . . . ")
-            backend.catLogJob(jobid)
+            backend.cat_log_job(jobid)
 
         # Options that deactivate the database entry once they're done
         elif args.get_data:
             print("Retrieving job data")
             backend.get_data(db_id)
             backend.disable_db_entry(db_id)
-        elif args.killJob:
+        elif args.kill_job:
             print("Killing the job")
-            backend.killJob(jobid)
+            backend.kill_job(jobid)
             backend.disable_db_entry(db_id)
         elif args.clean:
             print("Cleaning job . . . ")
-            backend.cleanJob(jobid)
+            backend.clean_job(jobid)
             backend.disable_db_entry(db_id)
         # Enable back any database entry
         elif args.enableme:

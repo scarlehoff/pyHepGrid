@@ -3,10 +3,11 @@
 #
 # Backend Management classes
 #
-
-from header import dbname, arcbase
-from utilities import getOutputCall, spCall
+import utilities as util
+import header
 from Backend import Backend
+
+import os
 
 class Arc(Backend):
     cmd_print = "arccat"
@@ -19,14 +20,15 @@ class Arc(Backend):
     def __init__(self):
         # Might not work on python2?
         super(Arc, self).__init__()
-        from header import arctable
-        self.table = arctable
+        self.table = header.arctable
 
     def __str__(self):
         return "Arc"
 
-    def updateStdOut(self):
-        from os import path, makedirs
+    def update_stdout(self):
+        """ retrieves stdout of all running jobs and store the current state 
+        into its correspondent folder
+        """
         fields = ["rowid", "jobid", "pathfolder", "runfolder"]
         dictC  = self._db_list(fields)
         for job in dictC:
@@ -36,46 +38,43 @@ class Arc(Backend):
             pfold   = str(job['pathfolder']) + "/" + rfold
             flnam   = pfold + "/stdout"
             # Create target folder if it doesn't exist
-            if not path.exists(pfold): 
-                makedirs(pfold)
+            if not os.path.exists(pfold): 
+                os.makedirs(pfold)
             cmd     = self.cmd_print + ' ' +  jobid.strip()
             # It seems script is the only right way to save data with arc
             stripcm = ['script', '-c', cmd, '-a', 'tmpscript.txt']
             mvcmd   = ['mv', 'tmpscript.txt', flnam]
-            spCall(stripcm)
-            spCall(mvcmd)
+            util.spCall(stripcm)
+            util.spCall(mvcmd)
 
-    def renewProxy(self, jobids):
+    def renew_proxy(self, jobids):
+        """ renew proxy for a given job """
         for jobid in jobids:
             cmd = [self.cmd_renew, jobid.strip()]
-            spCall(cmd)
+            util.spCall(cmd)
 
-    def killJob(self, jobids):
-        print("WARNING! You are about to kill the job!")
-        yn = input("Do you want to continue? (y/n) ").lower()
-        if not yn.startswith("y"):
-            from sys import exit
-            exit(0)
+    def kill_job(self, jobids):
+        """ kills given job """
+        self._press_yes_to_continue("WARNING! You are about to kill the job!")
         for jobid in jobids:
-            cmd = [self.cmd_kill, "-j", arcbase, jobid.strip()]
-            spCall(cmd)
+            cmd = [self.cmd_kill, "-j", header.arcbase, jobid.strip()]
+            util.spCall(cmd)
 
-    def cleanJob(self, jobids):
-        print("WARNING! You are about to clean the job!")
-        yn = input("Do you want to continue? (y/n) ").lower()
-        if not yn.startswith("y"):
-            from sys import exit
-            exit(0)
+    def clean_job(self, jobids):
+        """ remove the sandbox of a given job (including its stdout!) from
+        the arc storage """
+        self._press_yes_to_continue("WARNING! You are about to clean the job!")
         for jobid in jobids:
-            cmd = [self.cmd_clean, "-j", arcbase, jobid.strip()]
-            spCall(cmd)
+            cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
+            util.spCall(cmd)
 
-    def catJob(self, jobids):
+    def cat_job(self, jobids):
+        """ print stdandard output of a given job"""
         for jobid in jobids:
-            cmd = [self.cmd_print, "-j", arcbase, jobid.strip()]
-            spCall(cmd)
+            cmd = [self.cmd_print, "-j", header.arcbase, jobid.strip()]
+            util.spCall(cmd)
 
-    def catLogJob(self, jobids):
+    def cat_log_job(self, jobids):
         """Sometimes the std output doesn't get updated
         but we can choose to access the logs themselves"""
         output_folder = ["file:///tmp/"]
@@ -83,54 +82,51 @@ class Arc(Backend):
         cmd_str = "cat /tmp/"
         for jobid in jobids:
             cmd = cmd_base + [jobid + "/*.log"] + output_folder
-            output = getOutputCall(cmd).split()
+            output = util.getOutputCall(cmd).split()
             for text in output:
                 if ".log" in text:
-                    spCall((cmd_str + text).split())
+                    util.spCall((cmd_str + text).split())
 
-    def statusJob(self, jobids, verbose = False):
+    def status_job(self, jobids, verbose = False):
+        """ print the current status of a given job """
         for jobid in jobids:
-            cmd = [self.cmd_stat, "-j", arcbase, jobid.strip()]
+            cmd = [self.cmd_stat, "-j", header.arcbase, jobid.strip()]
             if verbose:
                 cmd += ["-l"]
-            spCall(cmd)
+            util.spCall(cmd)
 
-
-
-### End Class Arc
 
 class Dirac(Backend):
-    def __str__(self):
-        return "Dirac"
-
     cmd_print = "dirac-wms-job-peek"
     cmd_kill  = "dirac-wms-job-kill"
     cmd_stat  = "dirac-wms-job-status"
 
     def __init__(self):
         super(Dirac, self).__init__()
-        from header import diractable
-        self.table = diractable
+        self.table = header.diractable
+
+    def __str__(self):
+        return "Dirac"
     
-    def catJob(self, jobids):
+    def cat_job(self, jobids):
         print("Printing the last 20 lines of the last job")
         jobid = jobids[-1]
         cmd = [self.cmd_print, jobid.strip()]
-        spCall(cmd)
+        header.spCall(cmd)
 
-    def statusJob(self, jobids, verbose = False):
-        self._multirun(self.do_statusJob, jobids, 10)
+    def status_job(self, jobids, verbose = False):
+        """ query dirac on a job-by-job basis about the status of the job """
+        self._multirun(self.do_status_job, jobids, header.finalise_no_cores)
 
-    def do_statusJob(self, jobid):
+    def do_status_job(self, jobid):
+        """ multiproc wrapper for status_job """
         cmd = [self.cmd_stat, jobid]
-        spCall(cmd)
+        header.spCall(cmd)
         return 0
 
     def get_status(self, status, date):
-        from utilities import getOutputCall
-        from header import dirac_name
-        return set(getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
-                                  '--Owner={0}'.format(dirac_name),
+        return set(util.getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
+                                  '--Owner={0}'.format(header.dirac_name),
                                   '--Date={0}'.format(date)]).split("\n")[-2].split(", "))
 
     def stats_job_cheat(self, jobids, date):
@@ -155,9 +151,11 @@ class Dirac(Backend):
         self.print_stats(done, wait, run, fail, unk, jobids)
 
 
-    def killJob(self, jobids):
+    def kill_job(self, jobids):
+        """ kill all jobs associated with this run """
+        self._press_yes_to_continue("WARNING! You are about to kill all jobs for this run!")
         cmd = [self.cmd_kill] + jobids
-        spCall(cmd)
+        header.spCall(cmd)
 
 
 if __name__ == '__main__':

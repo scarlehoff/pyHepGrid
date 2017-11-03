@@ -3,7 +3,11 @@ runcard = None
 import __main__
 import os
 
-if os.path.basename(os.path.realpath(__main__.__file__)) == "main.py":
+try:
+    caller_script = os.path.basename(os.path.realpath(__main__.__file__)) 
+except:
+    caller_script = "None"
+if caller_script == "main.py":
     from argparse import ArgumentParser
     parser = ArgumentParser()
 
@@ -22,7 +26,7 @@ if os.path.basename(os.path.realpath(__main__.__file__)) == "main.py":
 
     # Global management
     parser.add_argument("-g", "--get_data", help = "getdata from an ARC job", action = "store_true")
-    parser.add_argument("-k", "--killJob", help = "kill a given job", action = "store_true")
+    parser.add_argument("-k", "--kill_job", help = "kill a given job", action = "store_true")
     parser.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
     parser.add_argument("-I", "--infoVerbose", help = "retrieve arcstat/diracstat for a given job (more verbose, only ARC)", action = "store_true")
     parser.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
