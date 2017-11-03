@@ -109,7 +109,7 @@ class RunArc(Backend):
         from datetime import datetime
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
-        rncards, dCard = expandCard(runcard)
+        rncards, dCards = expandCard(runcard)
         self.runfolder = runFol
         job_type = "Production"
         for r in rncards:
