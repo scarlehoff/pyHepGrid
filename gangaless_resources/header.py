@@ -99,14 +99,15 @@ DIRACSCRIPTDEFAULT = [
         ]
 
 from argument_parser import runcard as runcard_file
-print(runcard_file)
 if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py",""))
+    overwr = []
     # todo: some safety checks
     for attr_name in dir(runcard):
         if not attr_name.startswith("__") and attr_name != "dictCard":
             attr_value = getattr(runcard, attr_name)
             setattr(this_file, attr_name, attr_value)
-
-print(runcardDir)
-
+    if overwr:
+        print("{} overwrites: ".format(runcard_file))
+        for i in overwr:
+            print(i)

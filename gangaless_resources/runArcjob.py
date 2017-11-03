@@ -1,25 +1,28 @@
 from Backend import Backend
+from datetime import datetime
+import utilities as util
+import header
+
 class RunArc(Backend):
     def __init__(self, arcscript = None): 
         super(RunArc, self).__init__()
-        from header import  arctable, arcbase, ARCSCRIPTDEFAULT
-        from utilities import GridWrap, TarWrap
-        self.table     = arctable
-        self.arcbd     = arcbase
+        self.table     = header.arctable
+        self.arcbd     = header.arcbase
         if arcscript:
             self.templ = arcscript
         else:
-            self.templ = ARCSCRIPTDEFAULT
-        self.runfolder = None
-        self.gridw     = GridWrap()
-        self.tarw      = TarWrap()
-        self.xrslfile  = "runArcJob.xrsl"
+            self.templ = header.ARCSCRIPTDEFAULT
+        self.runfolder = header.runcardDir
+        self.gridw     = util.GridWrap()
+        self.tarw      = util.TarWrap()
 
-    #
-    # XRSL file utilities
-    # 
-    def writeXRSL(self, dictData):
-        with open(self.xrslfile, 'w') as f:
+    def _write_XRSL(self, dictData, filename = None):
+        """ Writes a unique XRSL file to be
+        which instructs the arc job to run
+        """
+        if not filename:
+            filename = util.unique_filename()
+        with open(filename, 'w') as f:
             for i in self.templ:
                 f.write(i)
                 f.write('\n')
@@ -27,29 +30,31 @@ class RunArc(Backend):
                 f.write("(" + key)
                 f.write(" = \"" + dictData[key])
                 f.write("\")\n")
+        return filename
 
-    def runXRSL(self, test = False):
-        from utilities import getOutputCall
-        from header import ce_base, ce_test
+    def _run_XRSL(self, filename, test = False):
+        """ Sends XRSL to the queue defined in header
+        If test = True, use test queue
+        """
         if test:
             from header import ce_test as ce
         else:
             from header import ce_base as ce
-        cmdbase = ['arcsub', '-c', ce]
-        cmd     = cmdbase + [self.xrslfile]
-        output  = getOutputCall(cmd)
-        jobid   = output.split("jobid:")[-1].rstrip().strip()
+        cmd = "arcsub -c {0} {1}".format(ce, filename)
+        output = util.getOutputCall(cmd.split())
+        jobid = output.split("jobid:")[-1].rstrip().strip()
         return jobid
 
     # Runs for ARC
-    def runWrapWarmup(self, runcard, test = None):
-        from utilities import expandCard, generatePath
-        from header import warmupthr, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
-        from header import runcardDir as runFol
-        from datetime import datetime
+    def run_wrap_warmup(self, runcard, test = None):
+        """ Wrapper function. It assumes the initialisation stage has already happend
+            Writes XRSL file with the appropiate information and send one single job
+            (or n_sockets jobs) to the queue
+        """
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
-        rncards, dCards = expandCard(runcard)
+        rncards, dCards = util.expandCard(runcard)
+        # check whether this is a socketed run
         if "sockets_active" in dCards.keys():
             sockets = True
             n_sockets = int(dCards["sockets_active"])
@@ -65,7 +70,10 @@ class RunArc(Backend):
                 job_type = "Warmup Test"
             else:
                 job_type = "Warmup"
-        self.runfolder = runFol
+
+        self.runfolder = header.runcardDir
+        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, jobName
+        # loop over al .run files defined in runcard.py
         for r in rncards:
             # Check whether this run has something on the gridStorage
             self._checkfor_existing_warmup(r, dCards[r])
@@ -87,11 +95,11 @@ class RunArc(Backend):
                             'jobName'     : jobName,
                             'count'       : str(warmupthr),
                             'countpernode': str(warmupthr),}
-                self.writeXRSL(dictData)
+                xrslfile = self._write_XRSL(dictData)
                 # Run the file
-                jobids.append(self.runXRSL(test))
+                jobids.append(self._run_XRSL(xrslfile, test=test))
             # Create daily path
-            pathfolder = generatePath(warmup=True)
+            pathfolder = util.generatePath(warmup=True)
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
                         'date'      : str(datetime.now()),
@@ -102,21 +110,24 @@ class RunArc(Backend):
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
 
-    def runWrapProduction(self, runcard, test = None):
-        from utilities import expandCard, generatePath
-        from header import jobName, baseSeed, producRun
-        from header import runcardDir as runFol
-        from datetime import datetime
+    def run_wrap_production(self, runcard, test = None):
+        """ Wrapper function. It assumes the initialisation stage has already happend
+            Writes XRSL file with the appropiate information and send a producrun 
+            number of jobs to the arc queue
+        """
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
-        rncards, dCard = expandCard(runcard)
-        self.runfolder = runFol
+        rncards, dCard = util.expandCard(runcard)
+        self.runfolder = header.runcardDir
         job_type = "Production"
+        from header import baseSeed, producRun, jobName
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
             self._checkfor_existing_output(r, dCards[r])
-            # Generate the XRSL file
+            # use the same unique name for all seeds since 
+            # we cannot multiprocess the arc submission
+            xrslfile = None 
             for seed in range(baseSeed, baseSeed + producRun):
                 arguments  = "" + r + "\""
                 arguments += " \"" + dCards[r] + "\""
@@ -125,12 +136,12 @@ class RunArc(Backend):
                             'jobName'     : jobName,
                             'count'       : str(1),
                             'countpernode': str(1),}
-                self.writeXRSL(dictData)
+                xrslfile = self._write_XRSL(dictData, filename = xrslfile)
                 # Run the file
-                jobid = self.runXRSL(test)
+                jobid = self._run_XRSL(xrslfile, test=test)
                 joblist.append(jobid)
             # Create daily path
-            pathfolder = generatePath(warmup=False)
+            pathfolder = util.generatePath(warmup=False)
             # Create database entry
             jobStr = ' '.join(joblist)
             dataDict = {'jobid'     : jobStr,
@@ -144,15 +155,13 @@ class RunArc(Backend):
 
 def runWrapper(runcard, test = None):
     print("Running arc job for {0}".format(runcard))
-    from header import ARCSCRIPTDEFAULT
-    arc = RunArc(ARCSCRIPTDEFAULT)
-    arc.runWrapWarmup(runcard, test)
+    arc = RunArc(header.ARCSCRIPTDEFAULT)
+    arc.run_wrap_warmup(runcard, test)
 
 def runWrapperProduction(runcard, test=None):
     print("Running arc job for {0}".format(runcard))
-    from header import ARCSCRIPTDEFAULTPRODUCTION
-    arc = RunArc(ARCSCRIPTDEFAULTPRODUCTION)
-    arc.runWrapProduction(runcard, test)
+    arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
+    arc.run_wrap_production(runcard, test)
 
 def iniWrapper(runcard, warmup=None):
     print("Initialising Arc for {0}".format(runcard))

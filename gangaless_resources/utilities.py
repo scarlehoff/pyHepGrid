@@ -64,6 +64,22 @@ def getOutputCall(cmd):
 #
 # Fileystem Wrappers
 #
+def unique_filename():
+    """ Create a unique filename in /tmp/
+    if possible, otherwise create file in current directory
+    """
+    from uuid import uuid4
+    unique_name = str(uuid4().hex)
+    filename = "/tmp/" + unique_name
+    # better ask for forgiveness than for permission
+    try:
+        f = open(filename, 'w')
+        f.close()
+        return filename
+    except:
+        return unique_name
+
+
 def checkIfThere(dirPath, file):
     from os import path
     if not path.exists(dirPath + "/" + file):
