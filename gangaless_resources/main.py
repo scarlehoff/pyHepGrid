@@ -119,7 +119,8 @@ elif rmode[:3] == "man":
         if args.stats:
             backend.stats_job(jobid)
         elif args.statsCheat:
-            backend.stats_job_cheat(jobid)
+            date = backend.get_date(db_id)
+            backend.stats_job_cheat(jobid, date)
         elif args.info or args.infoVerbose:
             print("Retrieving information . . . ")
             backend.statusJob(jobid, args.infoVerbose)

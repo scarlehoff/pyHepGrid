@@ -126,39 +126,33 @@ class Dirac(Backend):
         spCall(cmd)
         return 0
 
-    def get_status(self, status):
+    def get_status(self, status, date):
         from utilities import getOutputCall
-        return set(getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status)]).split("\n")[-2].split(", "))
+        from header import dirac_name
+        return set(getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
+                                  '--Owner={0}'.format(dirac_name),
+                                  '--Date={0}'.format(date)]).split("\n")[-2].split(", "))
 
-    def stats_job_cheat(self, jobids):
+    def stats_job_cheat(self, jobids, date):
         """ When using Dirac, instead of asking for each job individually
         we can ask for batchs of jobs in a given state and compare.
         In order to use this function you need to modify "dirac-wms-select-jobs.py"
         comment out lines 87-89
         """
-        print("Function under construction")
-        waiting_jobs = self.get_status('Waiting')
+        print("Stats function under testing/debugging. Use with care...")
+        date = date.split()[0]
         jobids = set(jobids)
-        done_jobs = self.get_status('Done')
-        running_jobs = self.get_status('Running')
-        fail_jobs = self.get_status('Failed')
-        unk_jobs = self.get_status('Unknown')
+        waiting_jobs = self.get_status('Waiting', date)
+        done_jobs = self.get_status('Done', date)
+        running_jobs = self.get_status('Running', date)
+        fail_jobs = self.get_status('Failed', date)
+        unk_jobs = self.get_status('Unknown', date)
         wait = len(jobids & waiting_jobs)
         run = len(jobids & running_jobs)
         fail = len(jobids & fail_jobs)
         done = len(jobids & done_jobs)
         unk = len(jobids & unk_jobs)
-        total = len(jobids)
-        total2 = done + wait + run + fail + unk 
-        print(" >> Total number of subjobs: {0:<20} {1}".format(total, time))
-        print("    >> Done:    {0}".format(done))
-        print("    >> Waiting: {0}".format(wait))
-        print("    >> Running: {0}".format(run))
-        print("    >> Failed:  {0}".format(fail))
-        print("    >> Unknown: {0}".format(unk))
-        print("    >> Sum      {0}".format(total2))
-
-
+        self.print_stats(done, wait, run, fail, unk, jobids)
 
 
     def killJob(self, jobids):
