@@ -1,0 +1,7 @@
+Multithread submission
+
+Checks for ARC submission == DIRAC submission
+
+Send production as subjobs for arc [if possible]
+
+Warmup and dat files in ARC sandbox - if job fails halfway through you can retrieve output...
