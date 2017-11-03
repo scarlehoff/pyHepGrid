@@ -10,7 +10,7 @@ class database(object):
                 else:
                     self._create_table(table, fields)
 
-    def _protect_jobtype(self, keys, table):
+    def _protect_fields(self, keys, table):
         """ Wrapper function for a change that was one
         on 25/10/2017 to add a new field job_type 
         to the database"""
@@ -18,6 +18,10 @@ class database(object):
             if not self._is_field_in_table(table, "jobtype"):
                 print("Updating database: table {} with jobtype".format(table))
                 self._insert_field_in_table(table, "jobtype", "text")
+        if "iseed" in keys:
+            if not self._is_field_in_table(table, "iseed"):
+                print("Updating database: table {} with iseed".format(table))
+                self._insert_field_in_table(table, "iseed", "text")
 
     def _execute_and_commit(self, query, verbose = False):
         """ Executes a query and commits to the database """
@@ -57,6 +61,7 @@ class database(object):
         for i in c: 
             c.close()
             return True
+        c.close()
         return False
     
     def _is_field_in_table(self, table, field):
@@ -65,7 +70,9 @@ class database(object):
         c = self._execute_and_retrieve(query)
         for i in c:
             if field in i:
+                c.close()
                 return True
+        c.close()
         return False
 
     def _insert_field_in_table(self, table, field, f_type):
@@ -80,11 +87,13 @@ class database(object):
         k = 0
         for i in c: # Why didn't I use len(c)? Let's leave it like that for the moment...
             k += 1
+        c.close()
         return k
 
     def insert_data(self, table, dataDict):
         """ Insert dataDict in table table """
         keys = [key for key in dataDict]
+        self._protect_fields(keys, table)
         data = [dataDict[k] for k in keys]
         head = "insert into {0} ({1})".format(table, ", ".join(keys))
         tail = "values ('{}');".format("', '".join(data))
@@ -94,7 +103,7 @@ class database(object):
     def list_data(self, table, keys, job_id = None):
         """ List fields keys for active entries in database unless job_id is provided
         in which case only list job_id run"""
-        self._protect_jobtype(keys, table)
+        self._protect_fields(keys, table)
         keystr = ",".join(keys)
         if job_id:
             optional = "where rowid = {}".format(job_id)
@@ -108,12 +117,13 @@ class database(object):
             for (key,j) in zip(keys,i):
                 tmpDic[key]= j
             dataList.append(tmpDic)
+        c.close()
         return dataList
 
     def find_and_list(self, table, keys, find_in, find_this):
         """ List fields keys for active entries in database
         such that the find_this is found in the list of fields find_in"""
-        self._protect_jobtype(keys, table)
+        self._protect_fields(keys, table)
         keystr = ",".join(keys)
         search_string = "where (status = \"active\") AND ("
         search_queries = []
@@ -128,11 +138,11 @@ class database(object):
             for (key,j) in zip(keys,i):
                 tmpDic[key]= j
             dataList.append(tmpDic)
+        c.close()
         return dataList
 
     def disable_entry(self, table, rowid, revert = None):
         """ Disables (or enables) rowid entry"""
-        c = self.db.cursor()
         newStat = "inactive"
         if revert: 
             newStat = "active"
