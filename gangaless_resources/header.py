@@ -6,7 +6,8 @@ import importlib
 
  
 header_mappings = {"jmartinez":"juan_header",
-                   "dwalker":"duncan_header"}
+                   "dwalker":"duncan_header",
+                   "jniehues":"jan_header"}
 
 grid_username = getpass.getuser()
 head = importlib.import_module(header_mappings[grid_username])
