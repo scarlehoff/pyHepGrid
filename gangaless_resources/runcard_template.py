@@ -1,6 +1,5 @@
-import header
-runcardDir = header.runcardDir
-NNLOJETdir = header.NNLOJETdir
+runcardDir = "/custom/runcard/directory"
+NNLOJETdir = "/custom/nnlojet/directory"
 print("Sourcing runcard")
 dictCard = {
     # 'LO.run':'DM_LO',

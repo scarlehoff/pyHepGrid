@@ -1,58 +1,10 @@
 #!/usr/bin/env python3.4
 
-from argparse import ArgumentParser
-from sys import exit
+from argument_parser import arguments as args
 
-# ##### Compatibility
-# try:
-#     if version_info.major == 2: 
-#         input = raw_input
-#     else:
-#         input = input
-# except:
-#     # *sigh*
-#     input = raw_input
-#############################
 
-parser = ArgumentParser()
-
-parser.add_argument("mode", help = "Mode [initialize/run/manage/proxy] ")
-parser.add_argument("runcard", nargs = "?", help = "Runcard to act upon")
-
-# Backend selection
-parser.add_argument("-A", "--runArc",   help = "Run/manage an Arc job (warmup)", action = "store_true")
-parser.add_argument("-B", "--runArcProduction",   help = "Run/manage an Arc job (production)", action = "store_true")
-parser.add_argument("-D", "--runDirac", help = "Run/manage a dirac job (production)", action = "store_true")
-
-# Initialisation options
-parser.add_argument("-L", "--lhapdf",    help = "Send LHAPDF to Grid", action = "store_true")
-
-parser.add_argument("-n", "--noProxy", help = "Bypasses proxy creation", action = "store_true")
-
-# Global management
-parser.add_argument("-g", "--getData", help = "getdata from an ARC job", action = "store_true")
-parser.add_argument("-k", "--killJob", help = "kill a given job", action = "store_true")
-parser.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
-parser.add_argument("-I", "--infoVerbose", help = "retrieve arcstat/diracstat for a given job (more verbose, only ARC)", action = "store_true")
-parser.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
-parser.add_argument("-P", "--printmelog", help = "do arccat to the *.log files of a given job (only ARC)", action = "store_true")
-parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
-parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
-parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
-parser.add_argument("-f", "--find", help = "Only database entries in which a certain string is found are shown")
-# Warmup only
-parser.add_argument("-u", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")
-parser.add_argument("-r", "--renewArc", help = "renew the proxy of one given job", action = "store_true")
-parser.add_argument("-c", "--clean", help = "clean given job from the remote cluster", action = "store_true")
-parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes)", action = "store_true")
-
-# Production Only
-parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
-
-args  = parser.parse_args()
-
-rcard = args.runcard
 rmode = args.mode
+
 
 ##### Checks go here
 if len(rmode) < 3:
@@ -136,8 +88,8 @@ elif rmode[:3] == "man":
     backend = backend_class()
 
     from header import finalisation_script
-    if args.getData and finalisation_script:
-        backend.getData(0, custom_get = finalisation_script)
+    if args.get_data and finalisation_script:
+        backend.get_data(0, custom_get = finalisation_script)
         exit(0)
 
     if args.updateArc:
@@ -148,7 +100,7 @@ elif rmode[:3] == "man":
     if args.idjob:
         id_str = args.idjob
     else:
-        backend.listRuns(args.find)
+        backend.list_runs(args.find)
         id_str = input("> Select id to act upon: ")
 
     id_list_raw = str(id_str).split(",")
@@ -162,10 +114,10 @@ elif rmode[:3] == "man":
             id_list.append(id_selected)
 
     for db_id in id_list:
-        jobid = backend.getId(db_id) # A string for ARC, a string (list = string.split(" ")) for Dirac
+        jobid = backend.get_id(db_id) # A string for ARC, a string (list = string.split(" ")) for Dirac
         # Options that keep the database entry
         if args.stats:
-            backend.statsJob(jobid)
+            backend.stats_job(jobid)
         elif args.info or args.infoVerbose:
             print("Retrieving information . . . ")
             backend.statusJob(jobid, args.infoVerbose)
@@ -180,21 +132,21 @@ elif rmode[:3] == "man":
             backend.catLogJob(jobid)
 
         # Options that deactivate the database entry once they're done
-        elif args.getData:
+        elif args.get_data:
             print("Retrieving job data")
-            backend.getData(db_id)
-            backend.desactivateJob(db_id)
+            backend.get_data(db_id)
+            backend.disable_db_entry(db_id)
         elif args.killJob:
             print("Killing the job")
             backend.killJob(jobid)
-            backend.desactivateJob(db_id)
+            backend.disable_db_entry(db_id)
         elif args.clean:
             print("Cleaning job . . . ")
             backend.cleanJob(jobid)
-            backend.desactivateJob(db_id)
+            backend.disable_db_entry(db_id)
         # Enable back any database entry
         elif args.enableme:
-            backend.reactivateJob(db_id)
+            backend.enable_db_entry(db_id)
         else:
             print(jobid)
 

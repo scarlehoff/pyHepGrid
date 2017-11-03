@@ -21,7 +21,7 @@ DEBUG = False
 #gfal = True
 
 # Define some utilites
-def outputName(runcard, rname, seed):
+def output_name(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
@@ -248,7 +248,7 @@ os.system("rm fort*")
 
 # Create warmup name
 directory = "output"
-output = outputName(RUNCARD, RUNNAME, SEED)
+output = output_name(RUNCARD, RUNNAME, SEED)
 # Copy to grid storage
 tar_this(output, "*")
 success = copy_to_grid(output, directory + "/" + output)

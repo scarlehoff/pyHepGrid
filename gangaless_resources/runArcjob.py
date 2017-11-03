@@ -68,7 +68,7 @@ class RunArc(Backend):
         self.runfolder = runFol
         for r in rncards:
             # Check whether this run has something on the gridStorage
-            self.checkExistingWarmup(r, dCards[r])
+            self._checkfor_existing_warmup(r, dCards[r])
             # Generate the XRSL file
             argument_base  = "" + r + "\""
             argument_base += " \"" + dCards[r] + "\""
@@ -115,7 +115,7 @@ class RunArc(Backend):
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
-            self.checkExistingOutput(r, dCards[r])
+            self._checkfor_existing_output(r, dCards[r])
             # Generate the XRSL file
             for seed in range(baseSeed, baseSeed + producRun):
                 arguments  = "" + r + "\""
@@ -157,12 +157,12 @@ def runWrapperProduction(runcard, test=None):
 def iniWrapper(runcard, warmup=None):
     print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
-    arc.iniWarmup(runcard, warmup)
+    arc.init_warmup(runcard, warmup)
 
 def iniWrapperProduction(runcard, warmup=None):
     print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
     if warmup:
-        arc.iniWarmup(runcard, warmup)
+        arc.init_warmup(runcard, warmup)
     else:
-        arc.iniProduction(runcard)
+        arc.init_production(runcard)

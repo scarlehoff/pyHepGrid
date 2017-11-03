@@ -3,11 +3,13 @@ import sys
 from types import ModuleType
 import getpass
 import importlib
+
  
 header_mappings = {"jmartinez":"juan_header",
                    "dwalker":"duncan_header"}
 
-head = importlib.import_module(header_mappings[getpass.getuser()])
+grid_username = getpass.getuser()
+head = importlib.import_module(header_mappings[grid_username])
 
 print("Using header file {0}.py".format(head.__name__))
 
@@ -45,3 +47,57 @@ for i in template_attributes:
                 i, head.__name__, template.__name__))
         print("> Check that {0}.py file is up to date as functionality may be broken otherwise.".format(head.__name__))
         sys.exit(1)
+
+############ General header #################
+# Grid config
+arcbase  = "/mt/home/{}/.arc/jobs.dat".format(grid_username) # arc database
+gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
+LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
+LFC_CATALOG_TYPE = "lfc"
+
+# Database config
+arctable   = "arcjobs"
+diractable = "diracjobs"
+dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
+
+#
+# Templates
+# 
+
+# # If a job is expected to run for long, use the following property (in minutes)
+# "(wallTime  =    \"3 days\")" 
+# it is also possible to specifiy the maximum cpu time instead (or 'as well')
+# "(cpuTime = \"3 days\")"
+# if nothing is used, the end system will decide what the maximum is
+#
+
+ARCSCRIPTDEFAULT = ["&",
+        "(executable   = \"ARC.py\")",
+        "(outputFiles  = (\"outfile.out\" \"\") )",
+        "(stdout       = \"stdout\")",
+        "(stderr       = \"stderr\")",
+        "(gmlog        = \"testjob.log\")",
+        "(memory       = \"100\")",
+        ]
+
+ARCSCRIPTDEFAULTPRODUCTION = ["&",
+        "(executable   = \"DIRAC.py\")",
+        "(outputFiles  = (\"outfile.out\" \"\") )",
+        "(stdout       = \"stdout\")",
+        "(stderr       = \"stderr\")",
+        "(gmlog        = \"testjob.log\")",
+        "(memory       = \"100\")",
+        ]
+
+DIRACSCRIPTDEFAULT = [
+        "JobName    = \"gridjob1\";",
+        "Executable = \"DIRAC.py\";",
+        "StdOutput  = \"StdOut\";",
+        "StdError   = \"StdErr\";",
+        "InputSandbox  = {\"DIRAC.py\"};",
+        "OutputSandbox = {\"StdOut\",\"StdErr\"};",
+        ]
+
+from argument_parser import runcard as runcard_file
+# Overwrite anything from header with whatever is on the runcard
+

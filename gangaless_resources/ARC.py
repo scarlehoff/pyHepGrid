@@ -20,7 +20,7 @@ gfal   = False
 #gfal = True
 
 # Define some utilites
-def warmupName(runcard, rname):
+def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-warm-" + rname + ".tar.gz"
     return out
@@ -181,7 +181,7 @@ os.system("rm TOT.*")
 os.system("rm fort*")
 # Create warmup name
 directory = "warmup"
-output    = warmupName(RUNCARD, RUNNAME)
+output    = warmup_name(RUNCARD, RUNNAME)
 # Copy to grid storage
 tar_this(output, "*")
 # If copying to grid fails, pipe the vegas warmup to stdout so we don't lose the run
