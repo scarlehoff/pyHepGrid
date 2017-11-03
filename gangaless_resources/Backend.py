@@ -411,7 +411,7 @@ class Backend(object):
         data         = self.dbase.list_data(self.table, fields, db_id)[0]
         self.rcard   = data["runcard"]
         self.rfolder = data["runfolder"]
-        pathfolder   = data["pathfolder"]
+        pathfolderTp   = data["pathfolder"]
         initial_seed = data["iseed"]
         pathfolder   = sanitiseGeneratedPath(pathfolderTp, self.rfolder)
         jobids       = data["jobid"].split(" ")
