@@ -279,10 +279,30 @@ class Backend(object):
 # Management options which are backend independent
 #
 
+    def get_status(self,status):
+        from utilities import getOutputCall
+        return set(getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status)]).split("\n")[-2].split(", "))
+
+
     def statsJob(self, jobids):
         import datetime
         from header import finalise_no_cores as n_threads
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
+
+        # Modifications require commenting out lines 87-89 of dirac-wms-select-jobs.py
+        # waiting_jobs = self.get_status('Waiting')
+        # jobids = set(jobids)
+        # done_jobs = self.get_status('Done')
+        # running_jobs = self.get_status('Running')
+        # fail_jobs = self.get_status('Failed')
+        # unk_jobs = self.get_status('Unknown')
+        # wait = len(jobids & waiting_jobs)
+        # run = len(jobids & running_jobs)
+        # fail = len(jobids & fail_jobs)
+        # done = len(jobids & done_jobs)
+        # unk = len(jobids & unk_jobs)
+
+
         status = self.multiRun(self.do_statsJob, jobids, n_threads)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
@@ -461,8 +481,9 @@ class Backend(object):
             dat = str(i['date']).split('.')[0] + " " + str(i['jobtype'])
             dat = dat.center(20)
             jobids = str(i['jobid'])
-            if len(jobids.split(" ")) > 1:
-                productionFlag = " (+)"
+            no_jobs = len(jobids.split(" "))
+            if no_jobs > 1:
+                productionFlag = " ({0})".format(no_jobs)
             print(rid + " | " + ruc + " | " + run + " | " + dat + productionFlag)
 
 
