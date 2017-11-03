@@ -114,10 +114,12 @@ elif rmode[:3] == "man":
             id_list.append(id_selected)
 
     for db_id in id_list:
-        jobid = backend.get_id(db_id) # A string for ARC, a string (list = string.split(" ")) for Dirac
-        # Options that keep the database entry
+        jobid = backend.get_id(db_id) # a list
+        # Options that keep the database entry after they are done
         if args.stats:
             backend.stats_job(jobid)
+        elif args.statsCheat:
+            backend.stats_job_cheat(jobid)
         elif args.info or args.infoVerbose:
             print("Retrieving information . . . ")
             backend.statusJob(jobid, args.infoVerbose)

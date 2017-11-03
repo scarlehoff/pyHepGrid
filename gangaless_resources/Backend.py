@@ -347,12 +347,7 @@ class Backend(object):
         else:
             return self.cUNK
 
-    def stats_job_cheat(self, jobids):
-        """ When using Dirac, instead of asking for each job individually
-        we can ask for batchs of jobs in a given state and compare.
-        In order to use this function 
-        """
-        print("TODO")
+  
 
     def _get_data_warmup(self, db_id):
         """ Given a database entry, retrieve its data from the 
@@ -520,8 +515,9 @@ class Backend(object):
             dat = str(i['date']).split('.')[0] + " " + str(i['jobtype'])
             dat = dat.center(20)
             jobids = str(i['jobid'])
-            if len(jobids.split(" ")) > 1:
-                productionFlag = " (+)"
+            no_jobs = len(jobids.split(" "))
+            if no_jobs > 1:
+                productionFlag = " ({0})".format(no_jobs)
             print(rid + " | " + ruc + " | " + run + " | " + dat + productionFlag)
 
 
