@@ -26,13 +26,10 @@ def expandCard(runcard, dicRuns = None):
                exec(source_file.read(), vessel)
         else:
             execfile(runcard, vessel) 
-        folder   = vessel['runcardDir']
         dictCard = vessel['dictCard']
         for key in dictCard:
             rcards.append(key)
-        # If more variables are defined, they will be added to dictCard
-        if "NNLOJETdir" in vessel:
-            dictCard["NNLOJETdir"] = vessel["NNLOJETdir"]
+        # If more runcard-only variables are defined, they will be added to dictCard
         if "sockets_active" in vessel: 
             dictCard["sockets_active"] = vessel["sockets_active"]
         if "port" in vessel: 
@@ -40,7 +37,7 @@ def expandCard(runcard, dicRuns = None):
     else:
         rcards.append(runcard)
         dictCard = {}
-    return rcards, dictCard, folder
+    return rcards, dictCard
 
 #
 # Subprocess Wrappers
