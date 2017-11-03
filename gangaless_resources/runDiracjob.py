@@ -36,10 +36,11 @@ class RunDirac(Backend):
     # Run for DIRAC
     def runWrap(self, runcard):
         from header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe
+        from header import runcardDir as runFol
         from utilities import expandCard, generatePath
         from datetime  import datetime
-        rncards, dCards, runFol = expandCard(runcard)
-        self.runfolder          = runFol
+        rncards, dCards = expandCard(runcard)
+        self.runfolder  = runFol
         for r in rncards:
             print("> Submitting {0} job(s) for {2} to Dirac, beginning at seed {1}.".format(producRun, baseSeed, r))
             joblist = []

@@ -42,6 +42,5 @@ if os.path.basename(os.path.realpath(__main__.__file__)) == "main.py":
     # Dirac only
     parser.add_argument("-S", "--statsCheat", help = "Dirac only, use a modified version of dirac to speed up the information retrieval process", action = "store_true")
 
-
-
     arguments = parser.parse_args()
+    runcard = arguments.runcard

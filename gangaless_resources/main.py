@@ -1,8 +1,8 @@
 #!/usr/bin/env python3.4
 
+##### Call argument parser
 from argument_parser import arguments as args
-
-
+rcard = args.runcard
 rmode = args.mode
 
 

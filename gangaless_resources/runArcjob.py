@@ -45,11 +45,11 @@ class RunArc(Backend):
     def runWrapWarmup(self, runcard, test = None):
         from utilities import expandCard, generatePath
         from header import warmupthr, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
+        from header import runcardDir as runFol
         from datetime import datetime
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
-        # runFol = folder where the runcards are
-        rncards, dCards, runFol = expandCard(runcard)
+        rncards, dCards = expandCard(runcard)
         if "sockets_active" in dCards.keys():
             sockets = True
             n_sockets = int(dCards["sockets_active"])
@@ -105,11 +105,11 @@ class RunArc(Backend):
     def runWrapProduction(self, runcard, test = None):
         from utilities import expandCard, generatePath
         from header import jobName, baseSeed, producRun
+        from header import runcardDir as runFol
         from datetime import datetime
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
-        # runFol = folder where the runcards are
-        rncards, dCards, runFol = expandCard(runcard)
+        rncards, dCard = expandCard(runcard)
         self.runfolder = runFol
         job_type = "Production"
         for r in rncards:
