@@ -100,10 +100,15 @@ DIRACSCRIPTDEFAULT = [
 
 from argument_parser import runcard as runcard_file
 if runcard_file:
+    print(runcard)
     runcard = importlib.import_module(runcard_file.replace(".py",""))
     # todo: some safety checks
     for attr_name in runcard:
+        print(attr_name)
         if not attr_name.startswith("__") and attr_name != "dictCard":
+            if attr_name not in template_attributes:
+                print("> Warning! {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard, template.__name__))
+                print("> Be very careful if you're messing with the namespace...")
             attr_value = getattr(runcard, attr_name)
             setattr(this_file, attr_name, attr_value)
 
