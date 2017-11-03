@@ -407,8 +407,9 @@ class Backend(object):
         from utilities import sanitiseGeneratedPath
         print("You are going to download all folders corresponding to this runcard from lfn:output")
         print("Make sure all runs are finished using the -i option")
-        fields       = ["runfolder", "jobid", "runcard", "pathfolder, iseed"]
+        fields       = ["runfolder", "jobid", "runcard", "pathfolder", "iseed"]
         data         = self.dbase.list_data(self.table, fields, db_id)[0]
+        print(data)
         self.rcard   = data["runcard"]
         self.rfolder = data["runfolder"]
         pathfolderTp   = data["pathfolder"]
