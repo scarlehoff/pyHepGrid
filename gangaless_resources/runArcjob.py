@@ -72,7 +72,7 @@ class RunArc(Backend):
                 job_type = "Warmup"
 
         self.runfolder = header.runcardDir
-        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, jobName, warmup_base_dir
+        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, jobName, warmup_base_dir, NNLOJETexe
         # loop over al .run files defined in runcard.py
         for r in rncards:
             # Check whether this run has something on the gridStorage
@@ -83,7 +83,8 @@ class RunArc(Backend):
             argument_base += " \"" + str(warmupthr) + "\""
             argument_base += " \"" + lhapdf_grid_loc + "\""
             argument_base += " \"" + lfndir + "\""
-            argument_base += " \"" + lhapdf_loc + ""
+            argument_base += " \"" + lhapdf_loc + "\""
+            argument_base += " \"" + NNLOJETexe + ""
             jobids = []
             for i_socket in range(n_sockets):
                 arguments = argument_base
