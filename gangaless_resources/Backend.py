@@ -407,16 +407,17 @@ class Backend(object):
         from utilities import sanitiseGeneratedPath
         print("You are going to download all folders corresponding to this runcard from lfn:output")
         print("Make sure all runs are finished using the -i option")
-        fields       = ["runfolder", "jobid", "runcard", "pathfolder"]
+        fields       = ["runfolder", "jobid", "runcard", "pathfolder, iseed"]
         data         = self.dbase.list_data(self.table, fields, db_id)[0]
         self.rcard   = data["runcard"]
         self.rfolder = data["runfolder"]
         pathfolderTp = data["pathfolder"]
+        initial_seed = data["iseed"]
         pathfolder   = sanitiseGeneratedPath(pathfolderTp, self.rfolder)
         jobids       = data["jobid"].split(" ")
         finalSeed    = self.bSeed + len(jobids)
         while True:
-            firstName = self.output_name(self.rcard, self.rfolder, self.bSeed)
+            firstName = self.output_name(self.rcard, self.rfolder, initial_seed)
             finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
             print("The starting filename is %s" % firstName)
             print("The final filename is %s" % finalName)
@@ -513,7 +514,7 @@ class Backend(object):
         If a search_string is provided, only those runs matching the search_string in
         runcard or runfolder will apear
         """
-        fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype"]
+        fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype", "iseed"]
         productionFlag = ""
         dictC  = self._db_list(fields, search_string)
         print("Active runs: " + str(len(dictC)))
@@ -525,9 +526,11 @@ class Backend(object):
             dat = str(i['date']).split('.')[0] + " " + str(i['jobtype'])
             dat = dat.center(20)
             jobids = str(i['jobid'])
+            initial_seed = str(i['iseed'])
             no_jobs = len(jobids.split(" "))
             if no_jobs > 1:
-                productionFlag = " ({0})".format(no_jobs)
+                if initial_seed:
+                    productionFlag = " ({0}, is: {1})".format(no_jobs, initial_seed)
+                else:
+                    productionFlag = " ({0})".format(no_jobs)
             print(rid + " | " + ruc + " | " + run + " | " + dat + productionFlag)
-
-
