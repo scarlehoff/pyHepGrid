@@ -33,7 +33,7 @@ class Backend(object):
                 }
 
     # Helper functions and wrappers
-    def _press_yes_to_continue(msg, error = None):
+    def _press_yes_to_continue(self, msg, error = None):
         """ Press y to continue
             or n to exit the program
         """
@@ -101,24 +101,24 @@ class Backend(object):
                 return warmup
    
     # Checks for the runcard
-    def _check_produduction_warmup(self, r, runcard_dir, warmup, production):
+    def _check_production_warmup(self, r, runcard_dir, warmup, production):
         """ Check whether production/warmup are active in the runcard """
         warm_string = "warmup"
         prod_string = "production"
         print("Checking warmup/production in runcard %s" % r)
-        with open(runcardDir + "/" + r, 'r') as f:
+        with open(runcard_dir + "/" + r, 'r') as f:
             for line_raw in f:
                 line = line_raw.lower()
                 if warm_string in line:
                     if warmup and ".false." in line:
-                        self._pres_yes_to_continue("Warmup is not active")
+                        self._press_yes_to_continue("Warmup is not active")
                     elif not warmup and ".true." in line:
-                        self._pres_yes_to_continue("Warmup is active")
+                        self._press_yes_to_continue("Warmup is active")
                 if prod_string in line:
                     if production and ".false." in line:
-                        self._pres_yes_to_continue("Production is not active")
+                        self._press_yes_to_continue("Production is not active")
                     elif not production and ".true." in line:
-                        self._pres_yes_to_continue("Production is active")
+                        self._press_yes_to_continue("Production is active")
 
     def _check_production(self, r, runcard_dir):
         self._check_production_warmup(r, runcard_dir, warmup = False, production = True)
@@ -131,9 +131,9 @@ class Backend(object):
         """ Check whether given runcard already has a warmup output in the grid """
         print("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
-        if self.gridw.checkForThis(checknm, "warmup"):
-            self._pres_yes_to_continue("File {} already exists at lfn:warmup, do wou want to remove it?".format(checkname))
-            self.gridw.delete(checknm, "warmup")
+        if self.gridw.checkForThis(checkname, "warmup"):
+            self._press_yes_to_continue("File {} already exists at lfn:warmup, do wou want to remove it?".format(checkname))
+            self.gridw.delete(checkname, "warmup")
 
     def _checkfor_existing_output(self, r, rname):
         """ Check whether given runcard already has output in the grid
@@ -144,7 +144,7 @@ class Backend(object):
         checkname = r + "-" + rname
         print("Not sure whether check for output works")
         if self.gridw.checkForThis(checkname, "output"):
-            self._pres_yes_to_continue("File {} already has at least one file at lfn:output. Do you want to remove it/them?".format(checkname))
+            self._press_yes_to_continue("File {} already has at least one file at lfn:output. Do you want to remove it/them?".format(checkname))
             print("Runcard " + r + " has at least one file at output")
             from header import baseSeed, producRun
             for seed in range(baseSeed, baseSeed + producRun):
@@ -227,12 +227,9 @@ class Backend(object):
         from utilities import expandCard, spCall
         from shutil import copy
         from os import getcwd, path
-        rncards, dCards, runFol = expandCard(runcard)
-        if "NNLOJETdir" not in dCards:
-            from header import NNLOJETdir
-        else:
-            NNLOJETdir = dCards["NNLOJETdir"]
-        from header import NNLOJETexe
+        from header import NNLOJETdir, NNLOJETexe
+        from header import runcardDir as runFol
+        rncards, dCards = expandCard(runcard)
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not path.isfile(nnlojetfull): 
             raise Exception("Could not find NNLOJET executable")
@@ -273,12 +270,9 @@ class Backend(object):
         from utilities import expandCard, spCall
         from shutil import copy
         from os import getcwd, path
-        rncards, dCards, runFol = expandCard(runcard)
-        if "NNLOJETdir" not in dCards:
-            from header import NNLOJETdir
-        else:
-            NNLOJETdir = dCards["NNLOJETdir"]
-        from header import NNLOJETexe
+        from header import runcardDir as runFol
+        from header import NNLOJETexe, NNLOJETdir
+        rncards, dCards = expandCard(runcard)
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not path.isfile(nnlojetfull): 
             raise Exception("Could not find NNLOJET executable")
