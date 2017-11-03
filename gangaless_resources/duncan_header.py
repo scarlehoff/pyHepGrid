@@ -16,8 +16,8 @@ runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 500
-baseSeed   = 2500
+producRun  = 1000
+baseSeed   = 4000
 jobName    = "gridjob"
 
 #
@@ -52,7 +52,7 @@ ce_test = "ce-test.dur.scotgrid.ac.uk"
 #
 # NNLOJET Database Parameters
 #
-dbname     = "alljobs.dat"     
+dbname     = "/mt/home/dwalker/submit/gangaless_resources/alljobs.dat"     
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
