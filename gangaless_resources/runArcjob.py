@@ -120,7 +120,7 @@ class RunArc(Backend):
         rncards, dCards = util.expandCard(runcard)
         self.runfolder = header.runcardDir
         job_type = "Production"
-        from header import baseSeed, producRun, jobName
+        from header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
@@ -131,7 +131,10 @@ class RunArc(Backend):
             for seed in range(baseSeed, baseSeed + producRun):
                 arguments  = "" + r + "\""
                 arguments += " \"" + dCards[r] + "\""
-                arguments += " \"" + str(seed) + ""
+                arguments += " \"" + str(seed) + "\""
+                arguments += " \"" + lhapdf_grid_loc + "\""
+                arguments += " \"" + lfndir + "\""
+                arguments += " \"" + lhapdf_loc + ""
                 dictData = {'arguments'   : arguments,
                             'jobName'     : jobName,
                             'count'       : str(1),

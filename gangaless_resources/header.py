@@ -59,7 +59,7 @@ LFC_CATALOG_TYPE = "lfc"
 # Database config
 arctable   = "arcjobs"
 diractable = "diracjobs"
-dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype']
+dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed']
 
 #
 # Templates
