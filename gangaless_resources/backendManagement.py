@@ -132,8 +132,9 @@ class Dirac(Backend):
     def stats_job_cheat(self, jobids, date):
         """ When using Dirac, instead of asking for each job individually
         we can ask for batchs of jobs in a given state and compare.
-        In order to use this function you need to modify "dirac-wms-select-jobs.py"
-        comment out lines 87-89
+        In order to use this function you need to modify 
+        "DIRAC/Interfaces/scripts/dirac-wms-select-jobs.py" to comment out 
+        lines 87-89.
         """
         print("Stats function under testing/debugging. Use with care...")
         date = date.split()[0]
