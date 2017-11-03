@@ -1,8 +1,9 @@
 arguments = None
 runcard = None
+import __main__
+import os
 
-from sys import argv
-if "main.py" in argv[0]:
+if os.path.basename(os.path.realpath(__main__.__file__)) == "main.py":
     from argparse import ArgumentParser
     parser = ArgumentParser()
 
