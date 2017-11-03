@@ -33,7 +33,7 @@ class Arc(Backend):
     def updateStdOut(self):
         from os import path, makedirs
         fields = ["rowid", "jobid", "pathfolder", "runfolder"]
-        dictC  = self.dbList(fields)
+        dictC  = self._db_list(fields)
         for job in dictC:
             # Retrieve data from database
             jobid   = str(job['jobid'])
@@ -124,7 +124,7 @@ class Dirac(Backend):
         spCall(cmd)
 
     def statusJob(self, jobids, verbose = False):
-        self.multiRun(self.do_statusJob, jobids, 10)
+        self._multirun(self.do_statusJob, jobids, 10)
 
     def do_statusJob(self, jobid):
         cmd = [self.cmd_stat, jobid]

@@ -90,7 +90,7 @@ def generatePath(warmup):
     basePath = homePath + baseDir
     monthlyPath = basePath + "/" + month
     dailyPath = monthlyPath + "/" + day
-    # Only create the folder structure if we are using the "native" getData
+    # Only create the folder structure if we are using the "native" get_data
     from header import finalisation_script
     if not finalisation_script and not path.exists(dailyPath):
         print("Creating daily path at " + dailyPath)
@@ -166,13 +166,13 @@ class TarWrap:
         if tarlist: self.tarlist = tarlist
         if untar:   self.untar   = untar
     
-    def tarDir(self, inputDir, outputName):
-        args = [self.targz, outputName, inputDir]
+    def tarDir(self, inputDir, output_name):
+        args = [self.targz, output_name, inputDir]
         cmd  = self.cmdbase + args
         spCall(cmd)
 
-    def tarFiles(self, inputList, outputName):
-        args = [self.targz, outputName] +  inputList
+    def tarFiles(self, inputList, output_name):
+        args = [self.targz, output_name] +  inputList
         cmd  = self.cmdbase + args
         spCall(cmd)
 
@@ -193,7 +193,7 @@ class TarWrap:
 # GridUtilities
 # 
 class GridWrap:
-    from header import username
+    from header import grid_username as username
     # Defaults
     sendto = ["lcg-cr", "--vo", "pheno", "-l"]
     retriv = ["lcg-cp"]

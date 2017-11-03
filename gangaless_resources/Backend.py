@@ -1,9 +1,21 @@
 class Backend(object):
+    """ Abstract class
+    """
     cDONE = 0
     cWAIT = 1
     cRUN = 2
     cFAIL = -1
     cUNK = 99
+
+    ### IMPORTANT: NAMING FUNCTIONS SHOULD BE THE SAME IN ARC.py AND DIRAC.py
+    def warmup_name(self, runcard, rname):
+        out = "output" + runcard + "-warm-" + rname + ".tar.gz"
+        return out
+
+    def output_name(self, runcard, rname, seed):
+        out = "output" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
+        return out
+    #########################################################################
 
     def __init__(self):
         from utilities import TarWrap, GridWrap
@@ -15,235 +27,66 @@ class Backend(object):
         self.table = None
         self.bSeed = baseSeed
         self.jobtype_get = {
-                'P' : self.getDataProduction,
-                'W' : self.getDataWarmup,
-                'S' : self.getDataWarmup
+                'P' : self._get_data_production,
+                'W' : self._get_data_warmup,
+                'S' : self._get_data_warmup
                 }
 
-    # Check/Probe functions
-    def checkProduction(self, r, runcardDir):
-        #
-        # Checks whether warmup and production are active
-        # in the runcard
-        #
-        print("Checking warmup/production in runcard %s" % r)
-        with open(runcardDir + "/" + r, 'r') as f:
-            for line in f:
-                if "Warmup" in line and ".true." in line.lower():
-                    print("Warmup is on")
-                    yn = input("Do you want to continue (y/n) ").lower()
-                    if yn.startswith("y"):
-                        pass
-                    else:
-                        raise Exception("WRONG RUNCARD")
-                if "Production" in line and ".false." in line.lower():
-                    print("Production is off")
-                    yn = input("Do you want to continue (y/n) ").lower()
-                    if yn.startswith("y"):
-                        pass
-                    else:
-                        raise Exception("WRONG RUNCARD")
-
-    def checkWarmup(self, r, runcardDir):
-        #
-        # Checks whether warmup and production are active
-        # in the runcard
-        #
-        print("Checking warmup/production in runcard %s" % r)
-        with open(runcardDir + "/" + r, 'r') as f:
-            for line in f:
-                if "Warmup" in line and ".false." in line.lower():
-                    print("Warmup is off")
-                    yn = input("Do you want to continue (y/n) ").lower()
-                    if yn.startswith("y"):
-                        pass
-                    else:
-                        raise Exception("WRONG RUNCARD")
-                if "Production" in line and ".true." in line.lower():
-                    print("Production is on")
-                    yn = input("Do you want to continue (y/n) ").lower()
-                    if yn.startswith("y"):
-                        pass
-                    else:
-                        raise Exception("WRONG RUNCARD")
-
-
-    def checkExistingWarmup(self, r, rname):
-        #
-        # Checks for any output from this runcard in the grid 
-        #
-        print("Checking whether this runcard is already at lfn:warmup")
-        checknm = self.warmupName(r, rname)
-        if self.gridw.checkForThis(checknm, "warmup"):
-            print("File " + checknm + " already exist at lfn:warmup")
-            yn = input("Do you want to delete this file? (y/n) ").lower()
-            if yn.startswith("y"):
-                self.gridw.delete(checknm, "warmup")
-            else:
-                print("Not deleting... exiting")
-                raise Exception("Runcard already exists")
-
-    # Check whether the output folders already exist in the grid storage system
-    def checkExistingOutput(self, r, rname):
-        print("Checking whether this runcard has something on the output folder...")
-        checkname = r + "-" + rname
-        print("Not sure whether check for output works")
-        if self.gridw.checkForThis(checkname, "output"):
-            print("Runcard " + r + " has at least one file at output")
-            yn = input("Do you want to delete them all? (y/n) ").lower()
-            if yn.startswith("y"):
-                from header import baseSeed, producRun
-                for seed in range(baseSeed, baseSeed + producRun):
-                    filename = "output" + checkname + "-" + str(seed) + ".tar.gz"
-                    self.gridw.delete(filename, "output")
-            else:
-                print("Not deleting... exiting...")
-                raise Exception("Runcard already exists")
-
-
-
-
-    def multiRun(self, function, arguments, n_threads = 5):
-        from multiprocessing import Pool as ThreadPool
-        if str(self) == "Arc":
-            threads = 1
+    # Helper functions and wrappers
+    def _press_yes_to_continue(msg, error = None):
+        """ Press y to continue
+            or n to exit the program
+        """
+        print(msg)
+        yn = input("Do you want to continue (y/n) ").lower()
+        if yn.startswith("y"):
+            return 0
         else:
-            threads = n_threads
-        pool   = ThreadPool(threads)
-        result = pool.map(function, arguments)
-        pool.close()
-        return result
+            if error:
+                raise Exception(error)
+            else:
+                from sys import exit
+                exit(-1)
 
-    def dbList(self, fields, search_string = None):
+    def _db_list(self, fields, search_string = None, search_fields = ["runcard", "runfolder"]):
+        """ Returns a list with a dict for each member of the list.
+            If a search_string is provided, only entries matching searc_string in search_fields
+            will be returned
+        """
         if search_string:
-            search_fields = ["runcard", "runfolder"]
             return self.dbase.find_and_list(self.table, fields, search_fields, search_string)
         else:
             return self.dbase.list_data(self.table, fields)
 
-    # If any of the "naming" function changes
-    # they need to be changed as well at ARC.py/DIRAC.py
-    def warmupName(self, runcard, rname):
-        out = "output" + runcard + "-warm-" + rname + ".tar.gz"
-        return out
-
-    def outputName(self, runcard, rname, seed):
-        out = "output" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
-        return out
-
-    def bringWarmupFiles(self, runcard, rname):
-        from utilities import getOutputCall, spCall
-        gridFiles = []
-        outnm = self.warmupName(runcard, rname)
-        tmpnm = "tmp.tar.gz"
-        ## First bring the warmup .tar.gz
-        self.gridw.bring(outnm, "warmup", tmpnm)
-        gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
-        ## Now list the files inside the .tar.gz and extract the grid files
-        outlist = self.tarw.listFilesTar(tmpnm)
-        logfile = ""
-        for fileRaw in outlist:
-            if ".log" in fileRaw:
-                file = fileRaw.split(" ")[-1]
-                logfile = file
-            if len(fileRaw.split(".y")) == 1: continue
-            file = fileRaw.split(" ")[-1]
-            for grid in gridp:
-                if grid in file: gridFiles.append(file)
-        ## And now extract those particular files
-        extractFiles = gridFiles + [logfile]
-        self.tarw.extractThese(tmpnm, extractFiles)
-        ## Tag log file as warmup
-        newlog = logfile + "-warmup"
-        cmd = ["mv", logfile, newlog]
-        spCall(cmd)
-        spCall(["rm", "tmp.tar.gz"])
-        gridFiles.append(newlog)
-        for i in gridFiles:
-            spCall(["chmod", "a+wrx", i])
-        return gridFiles
-
-    ### Initialisation functions
-    def iniWarmup(self, runcard, warmup = None):
-        from utilities import expandCard, spCall
-        from shutil import copy
-        from os import getcwd, path
-        rncards, dCards, runFol = expandCard(runcard)
-        if "NNLOJETdir" not in dCards:
-            from header import NNLOJETdir
+    def _multirun(self, function, arguments, n_threads = 5):
+        """ Wrapper for multiprocessing
+            For ARC only single thread is allow as the arc database needs
+            to be locked 
+        """
+        from multiprocessing import Pool 
+        if str(self) == "Arc":
+            threads = 1
         else:
-            NNLOJETdir = dCards["NNLOJETdir"]
-        from header import NNLOJETexe
-        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
-        if not path.isfile(nnlojetfull): 
-            raise Exception("Could not find NNLOJET executable")
-        copy(nnlojetfull, getcwd())
-        files = [NNLOJETexe]
-        if warmup: 
-            files = files + [warmup]
-        for i in rncards:
-            # Check whether warmup/production is active in the runcard
-            if not path.isfile(runFol + "/" + i):
-                print("Could not find runcard %s" % i)
-                yn = input("Do you want to continue? (y/n): ").lower()
-                if yn.startswith('y'):
-                    continue
-                else:
-                    raise Exception("Could not find runcard")
-            self.checkWarmup(i, runFol)
-            rname   = dCards[i]
-            tarfile = i + rname + ".tar.gz"
-            copy(runFol + "/" + i, getcwd())
-            self.tarw.tarFiles(files + [i], tarfile)
-            if self.gridw.checkForThis(tarfile, "input"):
-                print("Removing old version of " + tarfile + " from Grid Storage")
-                self.gridw.delete(tarfile, "input")
-            print("Sending " + tarfile + " to lfn:input/")
-            self.gridw.send(tarfile, "input")
-            spCall(["rm", i, tarfile])
-        spCall(["rm", NNLOJETexe])
+            threads = n_threads
+        pool   = Pool(threads)
+        result = pool.map(function, arguments)
+        pool.close()
+        pool.join()
+        return result
 
-    def iniProduction(self, runcard, warmupProvided = None):
-        from utilities import expandCard, spCall
-        from shutil import copy
-        from os import getcwd, path
-        rncards, dCards, runFol = expandCard(runcard)
-        if "NNLOJETdir" not in dCards:
-            from header import NNLOJETdir
-        else:
-            NNLOJETdir = dCards["NNLOJETdir"]
-        from header import NNLOJETexe
-        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
-        if not path.isfile(nnlojetfull): 
-            raise Exception("Could not find NNLOJET executable")
-        copy(nnlojetfull, getcwd())
-        files = [NNLOJETexe]
-        for i in rncards:
-            # Check whether warmup/production is active in the runcard
-            self.checkProduction(i, runFol)
-            rname   = dCards[i]
-            tarfile = i + rname + ".tar.gz"
-            copy(runFol + "/" + i, getcwd())
-            if warmupProvided:
-                warmupFiles = [warmupProvided]
-            else:
-                warmupFiles = self.bringWarmupFiles(i, rname)
-            self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
-            if self.gridw.checkForThis(tarfile, "input"):
-                print("Removing old version of " + tarfile + " from Grid Storage")
-                self.gridw.delete(tarfile, "input")
-            print("Sending " + tarfile + " to lfn:input/")
-            self.gridw.send(tarfile, "input")
-            spCall(["rm", i, tarfile] + warmupFiles)
-        spCall(["rm"] + files)
-
-    ### General functions for database management
-
-    def checkIdType(self, db_id):
+    def _check_id_type(self, db_id):
+        """ Checks whether a job is production/warmup/socketed 
+        """
         production = 'P'
         socketed_warmup = 'S'
         warmup = 'W'
         jobtype = self.dbase.list_data(self.table, ["jobtype"], db_id)[0]["jobtype"]
+        if not jobtype: # legacy suport (database returns None)
+            idout = self.dbase.list_data(self.table, ["jobid"], db_id)[0]["jobid"]
+            if len(idout.split(" ")) > 1:
+                return production
+            else:
+                return warmup
         if "Production" in jobtype:
             return production
         elif "Warmup" in jobtype:
@@ -256,34 +99,221 @@ class Backend(object):
                 return production
             else:
                 return warmup
+   
+    # Checks for the runcard
+    def _check_produduction_warmup(self, r, runcard_dir, warmup, production):
+        """ Check whether production/warmup are active in the runcard """
+        warm_string = "warmup"
+        prod_string = "production"
+        print("Checking warmup/production in runcard %s" % r)
+        with open(runcardDir + "/" + r, 'r') as f:
+            for line_raw in f:
+                line = line_raw.lower()
+                if warm_string in line:
+                    if warmup and ".false." in line:
+                        self._pres_yes_to_continue("Warmup is not active")
+                    elif not warmup and ".true." in line:
+                        self._pres_yes_to_continue("Warmup is active")
+                if prod_string in line:
+                    if production and ".false." in line:
+                        self._pres_yes_to_continue("Production is not active")
+                    elif not production and ".true." in line:
+                        self._pres_yes_to_continue("Production is active")
 
-    def getId(self, db_id):
+    def _check_production(self, r, runcard_dir):
+        self._check_production_warmup(r, runcard_dir, warmup = False, production = True)
+
+    def _check_warmup(self, r, runcard_dir):
+        self._check_production_warmup(r, runcard_dir, warmup = True, production = False)
+
+    # Checks for the grid storage system
+    def _checkfor_existing_warmup(self, r, rname):
+        """ Check whether given runcard already has a warmup output in the grid """
+        print("Checking whether this runcard is already at lfn:warmup")
+        checkname = self.warmup_name(r, rname)
+        if self.gridw.checkForThis(checknm, "warmup"):
+            self._pres_yes_to_continue("File {} already exists at lfn:warmup, do wou want to remove it?".format(checkname))
+            self.gridw.delete(checknm, "warmup")
+
+    def _checkfor_existing_output(self, r, rname):
+        """ Check whether given runcard already has output in the grid
+        needs testing as it needs to be able to remove (many) things for production run 
+        It relies on the base seed from the header file to remove the output
+        """
+        print("Checking whether this runcard has something on the output folder...")
+        checkname = r + "-" + rname
+        print("Not sure whether check for output works")
+        if self.gridw.checkForThis(checkname, "output"):
+            self._pres_yes_to_continue("File {} already has at least one file at lfn:output. Do you want to remove it/them?".format(checkname))
+            print("Runcard " + r + " has at least one file at output")
+            from header import baseSeed, producRun
+            for seed in range(baseSeed, baseSeed + producRun):
+                filename = "output" + checkname + "-" + str(seed) + ".tar.gz"
+                self.gridw.delete(filename, "output")
+
+
+    def _bring_warmup_files(self, runcard, rname):
+        """ Download the warmup file for a run to local directory
+        extracts Vegas grid and log file and returns a list with their names
+        TODO: use a unique /tmp directory instead of local dir
+        """
+        from utilities import getOutputCall, spCall
+        gridFiles = []
+        ## First bring the warmup .tar.gz
+        outnm = self.warmup_name(runcard, rname)
+        tmpnm = "tmp.tar.gz"
+        self.gridw.bring(outnm, "warmup", tmpnm)
+        ## Now list the files inside the .tar.gz and extract only the Vegas grid file
+        gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
+        outlist = self.tarw.listFilesTar(tmpnm)
+        logfile = ""
+        for fileRaw in outlist:
+            if ".log" in fileRaw:
+                file = fileRaw.split(" ")[-1]
+                logfile = file
+            if len(fileRaw.split(".y")) == 1: 
+                continue
+            file = fileRaw.split(" ")[-1]
+            for grid in gridp:
+                if grid in file: 
+                    gridFiles.append(file)
+        ## And now extract only those files
+        extractFiles = gridFiles + [logfile]
+        self.tarw.extractThese(tmpnm, extractFiles)
+        ## Tag log file as -warmup
+        newlog = logfile + "-warmup"
+        cmd = ["mv", logfile, newlog]
+        spCall(cmd)
+        # Remove temporary tar files
+        spCall(["rm", "tmp.tar.gz"])
+        gridFiles.append(newlog)
+        # Make sure access to the file is correct!
+        for i in gridFiles:
+            spCall(["chmod", "a+wrx", i])
+        return gridFiles
+
+    # External functions for database management
+    def get_id(self, db_id):
+        """ Returns a list of DIRAC/ARC jobids
+        for a given database entry
+        """
         jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
         try:
             idout = jobid[0]['jobid']
         except IndexError:
             print("Selected job is %s out of bounds" % jobid)
             idt   = input("> Select id to act upon: ")
-            idout = self.getId(idt)
+            idout = self.get_id(idt)
         return idout.split(" ")
 
-    def desactivateJob(self, db_id):
+    def disable_db_entry(self, db_id):
+        """ Disable database entry
+        """
         self.dbase.disable_entry(self.table, db_id)
-        return 0
 
-    def reactivateJob(self, db_id):
+    def enable_db_entry(self, db_id):
+        """ Enable database entry
+        """
         self.dbase.disable_entry(self.table, db_id, revert = True)
-        return 0
 
-#
-# Management options which are backend independent
-#
+    ### Initialisation functions
+    def init_warmup(self, runcard, provided_warmup = None):
+        """ Initialises a warmup run. An warmup file can be provided and it will be 
+        added to the .tar file sent to the grid storage. 
+        Steps are:
+            1 - tar up NNLOJET, runcard and necessary files
+            2 - sent it to the grid storage
+        """
+        from utilities import expandCard, spCall
+        from shutil import copy
+        from os import getcwd, path
+        rncards, dCards, runFol = expandCard(runcard)
+        if "NNLOJETdir" not in dCards:
+            from header import NNLOJETdir
+        else:
+            NNLOJETdir = dCards["NNLOJETdir"]
+        from header import NNLOJETexe
+        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
+        if not path.isfile(nnlojetfull): 
+            raise Exception("Could not find NNLOJET executable")
+        copy(nnlojetfull, getcwd())
+        files = [NNLOJETexe]
+        if provided_warmup: 
+            files = files + [provided_warmup]
+        for i in rncards:
+            # Check whether warmup/production is active in the runcard
+            if not path.isfile(runFol + "/" + i):
+                print("Could not find runcard %s" % i)
+                yn = input("Do you want to continue? (y/n): ").lower()
+                if yn.startswith('y'):
+                    continue
+                else:
+                    raise Exception("Could not find runcard")
+            self._check_warmup(i, runFol)
+            rname   = dCards[i]
+            tarfile = i + rname + ".tar.gz"
+            copy(runFol + "/" + i, getcwd())
+            self.tarw.tarFiles(files + [i], tarfile)
+            if self.gridw.checkForThis(tarfile, "input"):
+                print("Removing old version of " + tarfile + " from Grid Storage")
+                self.gridw.delete(tarfile, "input")
+            print("Sending " + tarfile + " to lfn:input/")
+            self.gridw.send(tarfile, "input")
+            spCall(["rm", i, tarfile])
+        spCall(["rm", NNLOJETexe])
 
-    def statsJob(self, jobids):
+    def init_production(self, runcard, provided_warmup = None):
+        """ Initialises a production run. If a warmup file is provided
+        retrieval step is skipped
+        Steps are:
+            0 - Retrieve warmup from the grid
+            1 - tar up NNLOJET, runcard and necessary files
+            2 - sent it to the grid storage
+        """
+        from utilities import expandCard, spCall
+        from shutil import copy
+        from os import getcwd, path
+        rncards, dCards, runFol = expandCard(runcard)
+        if "NNLOJETdir" not in dCards:
+            from header import NNLOJETdir
+        else:
+            NNLOJETdir = dCards["NNLOJETdir"]
+        from header import NNLOJETexe
+        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
+        if not path.isfile(nnlojetfull): 
+            raise Exception("Could not find NNLOJET executable")
+        copy(nnlojetfull, getcwd())
+        files = [NNLOJETexe]
+        for i in rncards:
+            # Check whether warmup/production is active in the runcard
+            self._check_production(i, runFol)
+            rname   = dCards[i]
+            tarfile = i + rname + ".tar.gz"
+            copy(runFol + "/" + i, getcwd())
+            if provided_warmup:
+                warmupFiles = [provided_warmup]
+            else:
+                warmupFiles = self._bring_warmup_files(i, rname)
+            self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
+            if self.gridw.checkForThis(tarfile, "input"):
+                print("Removing old version of " + tarfile + " from Grid Storage")
+                self.gridw.delete(tarfile, "input")
+            print("Sending " + tarfile + " to lfn:input/")
+            self.gridw.send(tarfile, "input")
+            spCall(["rm", i, tarfile] + warmupFiles)
+        spCall(["rm"] + files)
+
+    # Backend "independent" management options
+    # (some of them need backend-dependent definitions but work the same
+    # for both ARC and DIRAC)
+    def stats_job(self, jobids):
+        """ Given a list of jobs, returns the number of jobs which
+        are in each possible state (done/waiting/running/etc)
+        """
         import datetime
         from header import finalise_no_cores as n_threads
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-        status = self.multiRun(self.do_statsJob, jobids, n_threads)
+        status = self._multirun(self._do_stats_job, jobids, n_threads)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)
@@ -299,7 +329,9 @@ class Backend(object):
         print("    >> Unknown: {0}".format(unk))
         print("    >> Sum      {0}".format(total2))
 
-    def do_statsJob(self, jobid):
+    def _do_stats_job(self, jobid):
+        """ version of stats job multithread ready
+        """
         # When used with ARC, it assumes -j database is not needed (ie, default db is being used)
         cmd = [self.cmd_stat, jobid.strip()]
         from utilities import getOutputCall
@@ -315,7 +347,18 @@ class Backend(object):
         else:
             return self.cUNK
 
-    def getDataWarmup(self, db_id):
+    def stats_job_cheat(self, jobids):
+        """ When using Dirac, instead of asking for each job individually
+        we can ask for batchs of jobs in a given state and compare.
+        In order to use this function 
+        """
+        print("TODO")
+
+    def _get_data_warmup(self, db_id):
+        """ Given a database entry, retrieve its data from the 
+        warmup folder to the folder defined in said database entry
+        For arc jobs stdoutput will be downloaded in said folder as well
+        """
         # Retrieve data from database
         from header import arcbase
         from utilities import getOutputCall, spCall
@@ -328,7 +371,7 @@ class Backend(object):
         spCall(["mkdir", "-p", finfolder])
         print("Retrieving ARC output into " + finfolder)
         try:
-            # Retrieve ARC standard output
+            # Retrieve ARC standard output for every job of this run
             for jobid in jobids:
                 print(jobid)
                 cmd       =  [self.cmd_get, "-j", arcbase, jobid.strip()]
@@ -348,11 +391,14 @@ class Backend(object):
             print("jobid: " + jobid)
             print("Run arcstat to check the state of the job")
             print("Trying to retrieve data from grid storage anyway")
-        # Retrieve ARC grid storage output
-        wname = self.warmupName(runcard, runfolder)
+        # Retrieve warmup from the grid storage warmup folder
+        wname = self.warmup_name(runcard, runfolder)
         self.gridw.bring(wname, "warmup", finfolder + "/" + wname)
 
-    def getDataProduction(self, db_id):
+    def _get_data_production(self, db_id):
+        """ Given a database entry, retrieve its data from
+        the output folder to the folder defined in said db entry
+        """
         from utilities import sanitiseGeneratedPath
         print("You are going to download all folders corresponding to this runcard from lfn:output")
         print("Make sure all runs are finished using the -i option")
@@ -365,8 +411,8 @@ class Backend(object):
         jobids       = data["jobid"].split(" ")
         finalSeed    = self.bSeed + len(jobids)
         while True:
-            firstName = self.outputName(self.rcard, self.rfolder, self.bSeed)
-            finalName = self.outputName(self.rcard, self.rfolder, finalSeed)
+            firstName = self.output_name(self.rcard, self.rfolder, self.bSeed)
+            finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
             print("The starting filename is %s" % firstName)
             print("The final filename is %s" % finalName)
             yn = input("Are these parameters correct? (y/n) ").lower()
@@ -392,23 +438,29 @@ class Backend(object):
             pass
         seeds    =  range(self.bSeed, finalSeed)
         from header import finalise_no_cores as n_threads
-        tarfiles =  self.multiRun(self.do_getData, seeds, n_threads)
-        dummy    =  self.multiRun(self.do_extractOutputData, tarfiles, n_threads)
+        tarfiles =  self._multirun(self._do_get_data, seeds, n_threads)
+        dummy    =  self._multirun(self._do_extract_outputData, tarfiles, n_threads)
         chdir("..")
         from utilities import spCall
         print("Everything saved at %s" % pathfolder)
         spCall(["mv", self.rfolder, pathfolder])
 
 
-    def do_getData(self, seed):
-        filenm   = self.outputName(self.rcard, self.rfolder, seed)
+    def _do_get_data(self, seed):
+        """ Multithread wrapper used in get_data_production 
+        to download information from the grid storage
+        """
+        filenm   = self.output_name(self.rcard, self.rfolder, seed)
         remotenm = filenm + ".tar.gz"
         localfil = self.rfolder + "-" + str(seed) + ".tar.gz"
         localnm  = self.rfolder + "/" + localfil
         self.gridw.bring(filenm, "output", localnm)
         return localfil
 
-    def do_extractOutputData(self, tarfile):
+    def _do_extract_outputData(self, tarfile):
+        """ Multithread wrapper used in get_data_production
+            for untaring files
+        """
         # It assumes log and dat folder are already there
         from os import chdir, path
         if not path.isfile(tarfile):
@@ -435,23 +487,30 @@ class Backend(object):
         spCall(["rm", tarfile])
         return 0
 
-    def getData(self, db_id, jobid = None, custom_get = None):
+    def get_data(self, db_id, jobid = None, custom_get = None):
+        """ External interface for the get_data routines.
+        If a custom_get is defined in the header, it will be used
+        instead of the 'native' _get_data_{production/warmup}.
+        Custom scripts need to have a public "do_finalise()" function for this to work
+        """
         if custom_get:
             from importlib import import_module
             import_module(custom_get).do_finalise()
         else:
             # Check whether we are in a production or a warmup run before continuing
             # and call the corresponding get_function
-            jobtype = self.checkIdType(db_id)
+            jobtype = self._check_id_type(db_id)
             self.jobtype_get[jobtype](db_id)
 
-#
-# List all runs
-#
-    def listRuns(self, search_string = None):
+    
+    def list_runs(self, search_string = None):
+        """ List all runs in the database.
+        If a search_string is provided, only those runs matching the search_string in
+        runcard or runfolder will apear
+        """
         fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype"]
         productionFlag = ""
-        dictC  = self.dbList(fields, search_string)
+        dictC  = self._db_list(fields, search_string)
         print("Active runs: " + str(len(dictC)))
         print("id".center(5) + " | " + "runcard".center(22) + " | " + "runname".center(25) + " |" +  "date".center(20))
         for i in dictC:

@@ -43,7 +43,7 @@ class RunDirac(Backend):
         for r in rncards:
             print("> Submitting {0} job(s) for {2} to Dirac, beginning at seed {1}.".format(producRun, baseSeed, r))
             joblist = []
-            #self.checkExistingOutput(r, dCards[r])
+            #self._checkfor_existing_output(r, dCards[r])
             for seed in range(baseSeed, baseSeed + producRun):
                 # From DIRAC.py
                 # RUNCARD = sys.argv[1]
@@ -79,4 +79,4 @@ def runWrapper(runcard, test = None):
 def iniWrapper(runcard, warmupProvided = None):
     print("Initialising dirac for {0}".format(runcard))
     dirac = RunDirac()
-    dirac.iniProduction(runcard, warmupProvided)
+    dirac.init_production(runcard, warmupProvided)
