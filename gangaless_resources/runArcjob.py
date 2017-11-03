@@ -137,6 +137,7 @@ class RunArc(Backend):
                             'count'       : str(1),
                             'countpernode': str(1),}
                 xrslfile = self._write_XRSL(dictData, filename = xrslfile)
+                print(xrslfile)
                 # Run the file
                 jobid = self._run_XRSL(xrslfile, test=test)
                 joblist.append(jobid)
