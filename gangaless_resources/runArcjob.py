@@ -117,7 +117,7 @@ class RunArc(Backend):
         """
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
-        rncards, dCard = util.expandCard(runcard)
+        rncards, dCards = util.expandCard(runcard)
         self.runfolder = header.runcardDir
         job_type = "Production"
         from header import baseSeed, producRun, jobName
