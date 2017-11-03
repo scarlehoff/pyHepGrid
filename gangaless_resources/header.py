@@ -100,7 +100,6 @@ DIRACSCRIPTDEFAULT = [
         ]
 
 from argument_parser import runcard as runcard_file
-print(runcard_file)
 if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py",""))
     # todo: some safety checks
