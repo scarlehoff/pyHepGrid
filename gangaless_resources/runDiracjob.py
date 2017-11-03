@@ -1,21 +1,27 @@
 from Backend import Backend
+from datetime import datetime
+import utilities as util
+import header
+
 class RunDirac(Backend):
     def __init__(self):
         super(RunDirac, self).__init__()
-        from header    import diractable, DIRACSCRIPTDEFAULT
-        from utilities import GridWrap, TarWrap
-        self.table     = diractable
-        self.templ     = DIRACSCRIPTDEFAULT
+        self.table     = header.diractable
+        self.templ     = header.DIRACSCRIPTDEFAULT
         self.runfolder = None
-        self.gridw     = GridWrap()
-        self.tarw      = TarWrap()
-        self.jdlfile   = "runDiracJob.jdl"
+        self.gridw     = util.GridWrap()
+        self.tarw      = util.TarWrap()
 
-        #
+    #
     # XRSL file utilities
     # 
-    def writeJDL(self, list_data):
-        with open(self.jdlfile, 'w') as f:
+    def _write_JDL(self, list_data, filename = None):
+        """ Writes a unique JDL file 
+        which instructs the dirac job to run
+        """
+        if not filename:
+            filename = util.unique_filename()
+        with open(filename, 'w') as f:
             for i in self.templ:
                 f.write(i)
                 f.write("\n")
@@ -24,27 +30,31 @@ class RunDirac(Backend):
                 f.write(j)
                 f.write(" ")
             f.write("\";\n")
+        return filename
 
-    def runJDL(self):
-        from utilities import getOutputCall
-        cmdbase = ["dirac-wms-job-submit"]
-        cmd     = cmdbase + [self.jdlfile]
-        output  = getOutputCall(cmd)
+    def _run_JDL(self, filename):
+        """ Sends JDL file to the dirac 
+        management system
+        """
+        cmd = "dirac-wms-job-submit {}".format(filename)
+        output  = util.getOutputCall(cmd.split())
         jobid   = output.rstrip().strip().split(" ")[-1]
         return jobid
 
     # Run for DIRAC
     def runWrap(self, runcard):
+        """ Wrapper function. It assumes the initialisation stage has already happened
+        Writes JDL file with the appropiate information and send procrun number of jobs
+        to the diract management system
+        """
+        rncards, dCards = util.expandCard(runcard)
+        self.runfolder  = header.runcardDir
         from header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe
-        from header import runcardDir as runFol
-        from utilities import expandCard, generatePath
-        from datetime  import datetime
-        rncards, dCards = expandCard(runcard)
-        self.runfolder  = runFol
         for r in rncards:
             print("> Submitting {0} job(s) for {2} to Dirac, beginning at seed {1}.".format(producRun, baseSeed, r))
             joblist = []
-            #self._checkfor_existing_output(r, dCards[r])
+            self._checkfor_existing_output(r, dCards[r])
+            jdlfile = None
             for seed in range(baseSeed, baseSeed + producRun):
                 # From DIRAC.py
                 # RUNCARD = sys.argv[1]
@@ -57,11 +67,11 @@ class RunDirac(Backend):
                 argbase = [r, dCards[r]]
                 args    = argbase + [str(seed), lhapdf_grid_loc]
                 args = args + [lfndir, lhapdf_loc, NNLOJETexe]
-                self.writeJDL(args)
-                jobid   = self.runJDL()
+                jdlfile = self._write_JDL(args)
+                jobid   = self._run_JDL(jdlfile)
                 joblist.append(jobid)
             # Create daily path
-            pathfolder = generatePath(False)
+            pathfolder = util.generatePath(False)
             # Create database entr
             jobStr   = ' '.join(joblist)
             dataDict = {'jobid'     : jobStr,
