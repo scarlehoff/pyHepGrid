@@ -112,7 +112,7 @@ class Dirac(Backend):
         print("Printing the last 20 lines of the last job")
         jobid = jobids[-1]
         cmd = [self.cmd_print, jobid.strip()]
-        header.spCall(cmd)
+        util.spCall(cmd)
 
     def status_job(self, jobids, verbose = False):
         """ query dirac on a job-by-job basis about the status of the job """
@@ -121,7 +121,7 @@ class Dirac(Backend):
     def do_status_job(self, jobid):
         """ multiproc wrapper for status_job """
         cmd = [self.cmd_stat, jobid]
-        header.spCall(cmd)
+        util.spCall(cmd)
         return 0
 
     def get_status(self, status, date):
@@ -156,7 +156,7 @@ class Dirac(Backend):
         """ kill all jobs associated with this run """
         self._press_yes_to_continue("WARNING! You are about to kill all jobs for this run!")
         cmd = [self.cmd_kill] + jobids
-        header.spCall(cmd)
+        util.spCall(cmd)
 
 
 if __name__ == '__main__':
