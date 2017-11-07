@@ -516,11 +516,11 @@ class Backend(object):
         runcard or runfolder will apear
         """
         fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype", "iseed"]
-        productionFlag = ""
         dictC  = self._db_list(fields, search_string)
         print("Active runs: " + str(len(dictC)))
         print("id".center(5) + " | " + "runcard".center(22) + " | " + "runname".center(25) + " |" +  "date".center(20))
         for i in dictC:
+            multirun_flag = ""
             rid = str(i['rowid']).center(5)
             ruc = str(i['runcard']).center(22)
             run = str(i['runfolder']).center(25)
@@ -530,8 +530,8 @@ class Backend(object):
             initial_seed = str(i['iseed'])
             no_jobs = len(jobids.split(" "))
             if no_jobs > 1:
-                if initial_seed:
-                    productionFlag = " ({0}, is: {1})".format(no_jobs, initial_seed)
+                if initial_seed and initial_seed != "None":
+                    multirun_flag = " ({0}, is: {1})".format(no_jobs, initial_seed)
                 else:
-                    productionFlag = " ({0})".format(no_jobs)
-            print(rid + " | " + ruc + " | " + run + " | " + dat + productionFlag)
+                    multirun_flag = " ({0})".format(no_jobs)
+            print(rid + " | " + ruc + " | " + run + " | " + dat + multirun_flag)

@@ -100,13 +100,16 @@ DIRACSCRIPTDEFAULT = [
         "OutputSandbox = {\"StdOut\",\"StdErr\"};",
         ]
 
+port = None
+sockets_active = None
+
 from argument_parser import runcard as runcard_file
 if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py",""))
     # todo: some safety checks
     for attr_name in dir(runcard):
         if not attr_name.startswith("__") and attr_name != "dictCard":
-            if attr_name not in template_attributes:
+            if not hasattr(this_file, attr_name):
                 print("> Warning! {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
                 print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
                 print("> Or even if they do.")
