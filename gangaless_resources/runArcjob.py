@@ -124,7 +124,7 @@ class RunArc(Backend):
         rncards, dCards = util.expandCard(runcard)
         self.runfolder = header.runcardDir
         job_type = "Production"
-        from header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc
+        from header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
@@ -138,7 +138,8 @@ class RunArc(Backend):
                 arguments += " \"" + str(seed) + "\""
                 arguments += " \"" + lhapdf_grid_loc + "\""
                 arguments += " \"" + lfndir + "\""
-                arguments += " \"" + lhapdf_loc + ""
+                arguments += " \"" + lhapdf_loc + "\""
+                arguments += " \"" + NNLOJETexe + ""
                 dictData = {'arguments'   : arguments,
                             'jobName'     : jobName,
                             'count'       : str(1),
