@@ -13,7 +13,7 @@ runcardDir = "/mt/home/jmartinez/Runcards"
 NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 600
+producRun  = 500
 baseSeed   = 100
 jobName    = "testjob"
 
