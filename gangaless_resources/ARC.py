@@ -78,7 +78,7 @@ EXENAME         = sys.argv[7]
 
 n_args = len(sys.argv)
 socketed = False
-if n_args == 10:
+if n_args == 11:
     port = sys.argv[8]
     n_so = sys.argv[9]
     i_so = sys.argv[10]

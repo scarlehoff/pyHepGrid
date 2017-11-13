@@ -406,10 +406,9 @@ class Backend(object):
         """
         from utilities import sanitiseGeneratedPath
         print("You are going to download all folders corresponding to this runcard from lfn:output")
-        print("Make sure all runs are finished using the -i option")
+        print("Make sure all runs are finished using the -s or -S options!")
         fields       = ["runfolder", "jobid", "runcard", "pathfolder", "iseed"]
         data         = self.dbase.list_data(self.table, fields, db_id)[0]
-        print(data)
         self.rcard   = data["runcard"]
         self.rfolder = data["runfolder"]
         pathfolderTp   = data["pathfolder"]
@@ -420,21 +419,21 @@ class Backend(object):
         while True:
             firstName = self.output_name(self.rcard, self.rfolder, initial_seed)
             finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
-            print("The starting filename is %s" % firstName)
-            print("The final filename is %s" % finalName)
+            print("The starting filename is {}".format(firstName))
+            print("The final filename is {}".format(finalName))
             yn = input("Are these parameters correct? (y/n) ").lower()
-            if yn.startswith("y"): break
+            if yn.startswith("y"): 
+                break
             self.bSeed = int(input("Please, introduce the starting seed (ex: 400): "))
-            finalSeed  = int(input("Please, introduce the final seed (ex: 460): ")) + 1
+            finalSeed  = int(input("Please, introduce the final seed (ex: 460): ")) 
         from os import makedirs, chdir
         try:
             makedirs(self.rfolder)
         except OSError as err:
             if err.errno == 17:
-                print("Tried to create folder %s in this directory" % self.rfolder)
+                print("Tried to create folder %s in this directory".format(self.rfolder))
                 print("to no avail. We are going to assume the directory was already there")
-                yn = input("Do you want to continue? (y/n) ").lower()
-                if yn.startswith("n"): raise Exception("Folder %s already exists" % self.rfolder)
+                self._press_yes_to_continue("", "Folder {} already exists".format(self.rfolder))
             else:
                 raise 
         chdir(self.rfolder)
@@ -474,18 +473,28 @@ class Backend(object):
             print(tarfile + " not found")
             return -1
         files =  self.tarw.listFilesTar(tarfile)
-        datf  =  []
-        runf  =  []
-        logf  =  []
+        datf = []
+        logf = []
+        logw = None
+        runf = None
         for fil in files:
             f = fil.strip()
             f = f.split(" ")[-1].strip()
-            if ".run" in fil: runf.append(f)
-            if ".log" in fil: logf.append(f)
-            if ".dat" in fil and 'lhapdf/' not in fil: datf.append(f)
+            if ".dat" in fil and "lhapdf/" not in fil:
+                datf.append(f)
+            elif ".log" in fil:
+                if "warm" in fil:
+                    logw = f
+                else:
+                    logf.append(f)
+            elif ".run" in fil:
+                runf = f
         dtarfile = "../" + tarfile
         chdir("log")
-        self.tarw.extractThese(dtarfile, runf)
+        if not path.isfile(runf):
+            self.tarw.extractThese(dtarfile, [runf])
+        if not path.isfile(logw):
+            self.tarw.extractThese(dtarfile, [logw])
         self.tarw.extractThese(dtarfile, logf)
         chdir("../dat")
         self.tarw.extractThese(dtarfile, datf)
