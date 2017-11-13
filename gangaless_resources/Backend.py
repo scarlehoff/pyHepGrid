@@ -142,9 +142,8 @@ class Backend(object):
         """
         print("Checking whether this runcard has something on the output folder...")
         checkname = r + "-" + rname
-        print("Not sure whether check for output works")
         if self.gridw.checkForThis(checkname, "output"):
-            self._press_yes_to_continue("File {} already has at least one file at lfn:output. Do you want to remove it/them?".format(checkname))
+            self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output (looked for {}). Do you want to remove it/them?".format(checkname))
             print("Runcard " + r + " has at least one file at output")
             from header import baseSeed, producRun
             for seed in range(baseSeed, baseSeed + producRun):
