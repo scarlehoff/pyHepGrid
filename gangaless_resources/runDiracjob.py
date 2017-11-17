@@ -54,14 +54,14 @@ class RunDirac(Backend):
         """
         rncards, dCards = util.expandCard(runcard)
         self.runfolder  = header.runcardDir
-        from header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe
+        from header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
         for r in rncards:
             print("> Submitting {0} job(s) for {2} to Dirac, beginning at seed {1}.".format(producRun, baseSeed, r))
             self._checkfor_existing_output(r, dCards[r])
             jdlfile = None
             argbase = [r, dCards[r]]
             args    = argbase + ["%s", lhapdf_grid_loc]
-            args = args + [lfndir, lhapdf_loc, NNLOJETexe]
+            args = args + [lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir]
             jdlfile = self._write_JDL(args, baseSeed, producRun)
             joblist   = self._run_JDL(jdlfile)
             # Create daily path

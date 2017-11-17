@@ -69,7 +69,8 @@ class RunArc(Backend):
                 job_type = "Warmup"
 
         self.runfolder = header.runcardDir
-        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, jobName, warmup_base_dir, NNLOJETexe
+        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, jobName, \
+            warmup_base_dir, NNLOJETexe, lfn_warmup_dir
         # loop over al .run files defined in runcard.py
         for r in rncards:
             # Check whether this run has something on the gridStorage
@@ -81,7 +82,8 @@ class RunArc(Backend):
             argument_base += " \"" + lhapdf_grid_loc + "\""
             argument_base += " \"" + lfndir + "\""
             argument_base += " \"" + lhapdf_loc + "\""
-            argument_base += " \"" + NNLOJETexe + ""
+            argument_base += " \"" + NNLOJETexe + "\""
+            argument_base += " \"" + lfn_warmup_dir + ""
             jobids = []
             for i_socket in range(n_sockets):
                 arguments = argument_base
@@ -121,7 +123,7 @@ class RunArc(Backend):
         rncards, dCards = util.expandCard(runcard)
         self.runfolder = header.runcardDir
         job_type = "Production"
-        from header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe
+        from header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
@@ -136,7 +138,8 @@ class RunArc(Backend):
                 arguments += " \"" + lhapdf_grid_loc + "\""
                 arguments += " \"" + lfndir + "\""
                 arguments += " \"" + lhapdf_loc + "\""
-                arguments += " \"" + NNLOJETexe + ""
+                arguments += " \"" + NNLOJETexe + "\""
+                arguments += " \"" + lfn_output_dir + ""
                 dictData = {'arguments'   : arguments,
                             'jobName'     : jobName,
                             'count'       : str(1),
