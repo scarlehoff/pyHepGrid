@@ -86,10 +86,9 @@ SEED = sys.argv[3]
 lhapdf_grid_loc = sys.argv[4]
 LFNDIR = sys.argv[5]
 LHAPDF_LOC = sys.argv[6]
-try:
-    EXENAME = sys.argv[7]
-except Exception as e:
-    EXENAME = "NNLOJET"
+EXENAME = sys.argv[7]
+OUTDIR = sys.argv[8]
+
 #
 # Set environment
 #
@@ -101,6 +100,7 @@ os.environ["LFC_HOME"] = LFNDIR
 os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
 os.environ['OMP_STACKSIZE'] = "999999"
 os.environ['OMP_NUM_THREADS'] = "1"
+
 # ./bin/lhapdf:    configured_datadir = '${prefix}/share/LHAPDF'.replace('${prefix}', '/mt/home/jmartinez/LHAPDF')
 PATH = os.environ['PATH']
 LHAPDFBIN = os.path.join(os.getcwd(), LHAPDF_LOC, 'bin')
@@ -247,11 +247,10 @@ os.system("rm TOT.*")
 os.system("rm fort*")
 
 # Create warmup name
-directory = "output"
 output = output_name(RUNCARD, RUNNAME, SEED)
 # Copy to grid storage
 tar_this(output, "*")
-success = copy_to_grid(output, directory + "/" + output)
+success = copy_to_grid(output, OUTDIR + "/" + output)
 if success:
     print("All information copied over to grid storage")
 else:

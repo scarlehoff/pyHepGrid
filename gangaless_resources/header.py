@@ -73,6 +73,29 @@ dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', '
 # if nothing is used, the end system will decide what the maximum is
 #
 
+port = None
+# By default send 10 sockets, the server will decide how many of them survive
+sockets_active = 10
+#sockets_active = None
+
+from argument_parser import runcard as runcard_file
+if runcard_file:
+    runcard = importlib.import_module(runcard_file.replace(".py",""))
+    # todo: some safety checks
+    for attr_name in dir(runcard):
+        if not attr_name.startswith("__") and attr_name != "dictCard":
+            if not hasattr(this_file, attr_name):
+                print("> Warning! {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
+                print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
+                print("> Or even if they do.")
+
+            attr_value = getattr(runcard, attr_name)
+            print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
+            setattr(this_file, attr_name, attr_value)
+
+
+### Moved to the bottom to allow runcard to override jobName
+
 ARCSCRIPTDEFAULT = ["&",
         "(executable   = \"ARC.py\")",
         "(outputFiles  = (\"outfile.out\" \"\") )",
@@ -92,30 +115,10 @@ ARCSCRIPTDEFAULTPRODUCTION = ["&",
         ]
 
 DIRACSCRIPTDEFAULT = [
-        "JobName    = \"gridjob1\";",
+        "JobName    = \"{0}\";".format(jobName),
         "Executable = \"DIRAC.py\";",
         "StdOutput  = \"StdOut\";",
         "StdError   = \"StdErr\";",
         "InputSandbox  = {\"DIRAC.py\"};",
         "OutputSandbox = {\"StdOut\",\"StdErr\"};",
         ]
-
-port = None
-# By default send 10 sockets, the server will decide how many of them survive
-sockets_active = 10
-
-from argument_parser import runcard as runcard_file
-if runcard_file:
-    runcard = importlib.import_module(runcard_file.replace(".py",""))
-    # todo: some safety checks
-    for attr_name in dir(runcard):
-        if not attr_name.startswith("__") and attr_name != "dictCard":
-            if not hasattr(this_file, attr_name):
-                print("> Warning! {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
-                print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
-                print("> Or even if they do.")
-
-            attr_value = getattr(runcard, attr_name)
-            print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
-            setattr(this_file, attr_name, attr_value)
-
