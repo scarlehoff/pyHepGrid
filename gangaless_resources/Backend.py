@@ -408,7 +408,7 @@ class Backend(object):
         initial_seed = data["iseed"]
         pathfolder   = util.sanitiseGeneratedPath(pathfolderTp, self.rfolder)
         jobids       = data["jobid"].split(" ")
-        finalSeed    = self.bSeed + len(jobids)
+        finalSeed    = int(initial_seed) + len(jobids)
         while True:
             firstName = self.output_name(self.rcard, self.rfolder, initial_seed)
             finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
