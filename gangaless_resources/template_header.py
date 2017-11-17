@@ -19,6 +19,11 @@ jobName    = "testjob"
 
 # Grid config 
 lfndir   = "/grid/pheno/dwalker"
+# The following options are not fully functional yet 
+# in particular they need to be propagated to DIRAC/ARC.py via ?cmd line args?
+# I may also have missed some hardcodings
+lfn_output_dir = "output"
+lfn_warmup_dir = "warmup"
 
 # Lhapdf config
 lhapdf_grid_loc = "input/" 
