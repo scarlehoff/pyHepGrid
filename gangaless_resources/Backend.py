@@ -1,3 +1,6 @@
+import os
+import utilities as util
+
 class Backend(object):
     """ Abstract class
     """
@@ -18,11 +21,10 @@ class Backend(object):
     #########################################################################
 
     def __init__(self):
-        from utilities import TarWrap, GridWrap
         from header import dbname, baseSeed
         import dbapi
-        self.tarw  = TarWrap()
-        self.gridw = GridWrap()
+        self.tarw  = util.TarWrap()
+        self.gridw = util.GridWrap()
         self.dbase = dbapi.database(dbname)
         self.table = None
         self.bSeed = baseSeed
@@ -156,7 +158,6 @@ class Backend(object):
         extracts Vegas grid and log file and returns a list with their names
         TODO: use a unique /tmp directory instead of local dir
         """
-        from utilities import getOutputCall, spCall
         gridFiles = []
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
@@ -182,13 +183,13 @@ class Backend(object):
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
         cmd = ["mv", logfile, newlog]
-        spCall(cmd)
+        util.spCall(cmd)
         # Remove temporary tar files
-        spCall(["rm", "tmp.tar.gz"])
+        util.spCall(["rm", "tmp.tar.gz"])
         gridFiles.append(newlog)
         # Make sure access to the file is correct!
         for i in gridFiles:
-            spCall(["chmod", "a+wrx", i])
+            util.spCall(["chmod", "a+wrx", i])
         return gridFiles
 
     # External functions for database management
@@ -236,22 +237,20 @@ class Backend(object):
             1 - tar up NNLOJET, runcard and necessary files
             2 - sent it to the grid storage
         """
-        from utilities import expandCard, spCall
         from shutil import copy
-        from os import getcwd, path
         from header import NNLOJETdir, NNLOJETexe
         from header import runcardDir as runFol
-        rncards, dCards = expandCard(runcard)
+        rncards, dCards = util.expandCard(runcard)
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
-        if not path.isfile(nnlojetfull): 
+        if not os.path.isfile(nnlojetfull): 
             raise Exception("Could not find NNLOJET executable")
-        copy(nnlojetfull, getcwd())
+        copy(nnlojetfull, os.getcwd())
         files = [NNLOJETexe]
         if provided_warmup: 
             files = files + [provided_warmup]
         for i in rncards:
             # Check whether warmup/production is active in the runcard
-            if not path.isfile(runFol + "/" + i):
+            if not os.path.isfile(runFol + "/" + i):
                 print("Could not find runcard %s" % i)
                 yn = input("Do you want to continue? (y/n): ").lower()
                 if yn.startswith('y'):
@@ -261,15 +260,15 @@ class Backend(object):
             self._check_warmup(i, runFol)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
-            copy(runFol + "/" + i, getcwd())
+            copy(runFol + "/" + i, os.getcwd())
             self.tarw.tarFiles(files + [i], tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
                 print("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            spCall(["rm", i, tarfile])
-        spCall(["rm", NNLOJETexe])
+            util.spCall(["rm", i, tarfile])
+        util.spCall(["rm", NNLOJETexe])
 
     def init_production(self, runcard, provided_warmup = None):
         """ Initialises a production run. If a warmup file is provided
@@ -279,23 +278,21 @@ class Backend(object):
             1 - tar up NNLOJET, runcard and necessary files
             2 - sent it to the grid storage
         """
-        from utilities import expandCard, spCall
         from shutil import copy
-        from os import getcwd, path
         from header import runcardDir as runFol
         from header import NNLOJETexe, NNLOJETdir
-        rncards, dCards = expandCard(runcard)
+        rncards, dCards = util.expandCard(runcard)
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
-        if not path.isfile(nnlojetfull): 
+        if not os.path.isfile(nnlojetfull): 
             raise Exception("Could not find NNLOJET executable")
-        copy(nnlojetfull, getcwd())
+        copy(nnlojetfull, os.getcwd())
         files = [NNLOJETexe]
         for i in rncards:
             # Check whether warmup/production is active in the runcard
             self._check_production(i, runFol)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
-            copy(runFol + "/" + i, getcwd())
+            copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
                 warmupFiles = [provided_warmup]
             else:
@@ -306,8 +303,8 @@ class Backend(object):
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            spCall(["rm", i, tarfile] + warmupFiles)
-        spCall(["rm"] + files)
+            util.spCall(["rm", i, tarfile] + warmupFiles)
+        util.spCall(["rm"] + files)
 
     # Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
@@ -343,8 +340,7 @@ class Backend(object):
         """
         # When used with ARC, it assumes -j database is not needed (ie, default db is being used)
         cmd = [self.cmd_stat, jobid.strip()]
-        from utilities import getOutputCall
-        strOut = getOutputCall(cmd)
+        strOut = util.getOutputCall(cmd)
         if "Done" in strOut or "Finished" in strOut:
             return self.cDONE
         elif "Waiting" in strOut or "Queuing" in strOut:
@@ -365,21 +361,20 @@ class Backend(object):
         """
         # Retrieve data from database
         from header import arcbase
-        from utilities import getOutputCall, spCall
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
         finfolder =  data["pathfolder"] + "/" + runfolder
         runcard   =  data["runcard"]
         jobids    =  data["jobid"].split()
-        spCall(["mkdir", "-p", finfolder])
+        util.spCall(["mkdir", "-p", finfolder])
         print("Retrieving ARC output into " + finfolder)
         try:
             # Retrieve ARC standard output for every job of this run
             for jobid in jobids:
                 print(jobid)
                 cmd       =  [self.cmd_get, "-j", arcbase, jobid.strip()]
-                output    = getOutputCall(cmd)
+                output    = util.getOutputCall(cmd)
                 outputfol = output.split("Results stored at: ")[1].rstrip()
                 outputfolder = outputfol.split("\n")[0]
                 if outputfolder == "" or (len(outputfolder.split(" ")) > 1):
@@ -388,8 +383,8 @@ class Backend(object):
                     print("Nothing will be moved to the warmup global folder")
                 else:
                     destination = finfolder + "/" + "arc_out_" + runcard + outputfolder
-                    spCall(["mv", outputfolder, destination])
-                    #spCall(["rm", "-rf", outputfolder])
+                    util.spCall(["mv", outputfolder, destination])
+                    #util.spCall(["rm", "-rf", outputfolder])
         except:
             print("Couldn't find job output in the ARC server")
             print("jobid: " + jobid)
@@ -403,16 +398,15 @@ class Backend(object):
         """ Given a database entry, retrieve its data from
         the output folder to the folder defined in said db entry
         """
-        from utilities import sanitiseGeneratedPath
         print("You are going to download all folders corresponding to this runcard from lfn:output")
         print("Make sure all runs are finished using the -s or -S options!")
         fields       = ["runfolder", "jobid", "runcard", "pathfolder", "iseed"]
         data         = self.dbase.list_data(self.table, fields, db_id)[0]
         self.rcard   = data["runcard"]
         self.rfolder = data["runfolder"]
-        pathfolderTp   = data["pathfolder"]
+        pathfolderTp = data["pathfolder"]
         initial_seed = data["iseed"]
-        pathfolder   = sanitiseGeneratedPath(pathfolderTp, self.rfolder)
+        pathfolder   = util.sanitiseGeneratedPath(pathfolderTp, self.rfolder)
         jobids       = data["jobid"].split(" ")
         finalSeed    = self.bSeed + len(jobids)
         while True:
@@ -425,9 +419,8 @@ class Backend(object):
                 break
             self.bSeed = int(input("Please, introduce the starting seed (ex: 400): "))
             finalSeed  = int(input("Please, introduce the final seed (ex: 460): ")) 
-        from os import makedirs, chdir
         try:
-            makedirs(self.rfolder)
+            os.makedirs(self.rfolder)
         except OSError as err:
             if err.errno == 17:
                 print("Tried to create folder %s in this directory".format(self.rfolder))
@@ -435,20 +428,20 @@ class Backend(object):
                 self._press_yes_to_continue("", "Folder {} already exists".format(self.rfolder))
             else:
                 raise 
-        chdir(self.rfolder)
+        os.chdir(self.rfolder)
         try:
-            makedirs("log")
-            makedirs("dat")
-        except: # todo: macho...
+            os.makedirs("log")
+            os.makedirs("dat")
+        except: # todo: macho... this is like mkdir -p :P
             pass
         seeds    =  range(self.bSeed, finalSeed)
         from header import finalise_no_cores as n_threads
         tarfiles =  self._multirun(self._do_get_data, seeds, n_threads)
+        # Don't try to untar files that do not exist...
         dummy    =  self._multirun(self._do_extract_outputData, tarfiles, n_threads)
-        chdir("..")
-        from utilities import spCall
+        os.chdir("..")
         print("Everything saved at %s" % pathfolder)
-        spCall(["mv", self.rfolder, pathfolder])
+        util.spCall(["mv", self.rfolder, pathfolder])
 
 
     def _do_get_data(self, seed):
@@ -467,8 +460,7 @@ class Backend(object):
             for untaring files
         """
         # It assumes log and dat folder are already there
-        from os import chdir, path
-        if not path.isfile(tarfile):
+        if not os.path.isfile(tarfile):
             print(tarfile + " not found")
             return -1
         files =  self.tarw.listFilesTar(tarfile)
@@ -489,17 +481,30 @@ class Backend(object):
             elif ".run" in fil:
                 runf = f
         dtarfile = "../" + tarfile
-        chdir("log")
-        if not path.isfile(runf):
-            self.tarw.extractThese(dtarfile, [runf])
-        if not path.isfile(logw):
-            self.tarw.extractThese(dtarfile, [logw])
-        self.tarw.extractThese(dtarfile, logf)
-        chdir("../dat")
-        self.tarw.extractThese(dtarfile, datf)
-        chdir("..")
-        from utilities import spCall
-        spCall(["rm", tarfile])
+
+        try:
+            os.chdir("log")
+        except:
+            print("Somehow we could not enter 'log' folder")
+            print(os.getcwd())
+            print(os.system("ls"))
+        if runf:
+            if not os.path.isfile(runf):
+                self.tarw.extractThese(dtarfile, [runf])
+        if logw:
+            if not os.path.isfile(logw):
+                self.tarw.extractThese(dtarfile, [logw])
+        try:
+            self.tarw.extractThese(dtarfile, logf)
+            os.chdir("../dat")
+            self.tarw.extractThese(dtarfile, datf)
+            os.chdir("..")
+            util.spCall(["rm", tarfile])
+        except:
+            print("Once again, something went wrong with os and chdir")
+            print(os.getcwd())
+            print(os.system("ls"))
+
         return 0
 
     def get_data(self, db_id, jobid = None, custom_get = None):

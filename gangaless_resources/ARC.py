@@ -61,6 +61,16 @@ def copy_to_grid(local_file, grid_file):
     else:
         return False
 
+def socket_sync_str(host, port):
+    # Blocking call, it will receive a str of the form
+    # -sockets {0} -ns {1}
+    import socket
+    handshake = "greetings"
+    sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sid.connect((host, int(port)))
+    sid.send(handshake)
+    return sid.recv(32)
+
 # Runscript for ARC (modified from Tom's ganga.py)
 
 #
@@ -78,12 +88,14 @@ EXENAME         = sys.argv[7]
 
 n_args = len(sys.argv)
 socketed = False
-if n_args == 11:
+if n_args == 9:
     port = sys.argv[8]
-    n_so = sys.argv[9]
-    i_so = sys.argv[10]
+    socket_config = socket_sync_str("gridui1.dur.scotgrid.ac.uk", port)
+    if "die" in socket_config:
+        print("Timeout'd by socket server")
+        exit(0)
     socketed = True
-    extra_args = "-port {0} -sockets {1} -ns {2}".format(port, n_so, i_so)
+    extra_args = "-port {0} {1}".format(port, socket_config)
 else:
     extra_args = ""
 
@@ -186,8 +198,6 @@ output    = warmup_name(RUNCARD, RUNNAME)
 # Copy to grid storage
 tar_this(output, "*")
 # If copying to grid fails, pipe the vegas warmup to stdout so we don't lose the run
-if socketed and i_so != 1:
-    print("All good")
 success = copy_to_grid(output, directory + "/" + output)
 if success:
     print("Copied over to grid storage!")
