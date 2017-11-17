@@ -85,11 +85,12 @@ lhapdf_grid_loc = sys.argv[4]
 LFNDIR          = sys.argv[5]
 LHAPDF_LOC      = sys.argv[6]
 EXENAME         = sys.argv[7]
+WARMDIR         = sys.argv[8]
 
 n_args = len(sys.argv)
 socketed = False
-if n_args == 9:
-    port = sys.argv[8]
+if n_args == 10:
+    port = sys.argv[9]
     socket_config = socket_sync_str("gridui1.dur.scotgrid.ac.uk", port)
     if "die" in socket_config:
         print("Timeout'd by socket server")
@@ -193,7 +194,7 @@ os.system("rm " + nnlojet_tar)
 os.system("rm TOT.*")
 os.system("rm fort*")
 # Create warmup name
-directory = "warmup"
+directory = WARMDIR
 output    = warmup_name(RUNCARD, RUNNAME)
 # Copy to grid storage
 tar_this(output, "*")

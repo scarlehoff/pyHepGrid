@@ -142,27 +142,34 @@ class Backend(object):
         needs testing as it needs to be able to remove (many) things for production run 
         It relies on the base seed from the header file to remove the output
         """
-        print("Checking whether this runcard has something on the output folder...")
+        from header import lfn_output_dir
+        print("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         checkname = r + "-" + rname
-        if self.gridw.checkForThis(checkname, "output"):
-            self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output (looked for {}). Do you want to remove it/them?".format(checkname))
-            print("Runcard " + r + " has at least one file at output")
+        files = self.gridw.get_dir_contents(lfn_output_dir)
+        first = True
+        if checkname in files:
             from header import baseSeed, producRun
             for seed in range(baseSeed, baseSeed + producRun):
                 filename = "output" + checkname + "-" + str(seed) + ".tar.gz"
-                self.gridw.delete(filename, "output")
-
+                if filename in files:
+                    if first:
+                        self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output with a seed you are trying to submit (looked for {}). Do you want to remove it/them?".format(checkname))
+                        print("Runcard " + r + " has at least one file at output")
+                        first = False
+                    self.gridw.delete(filename, lfn_output_dir)
+            print("Output check complete")
 
     def _bring_warmup_files(self, runcard, rname):
         """ Download the warmup file for a run to local directory
         extracts Vegas grid and log file and returns a list with their names
         TODO: use a unique /tmp directory instead of local dir
         """
+        from header import lfn_warmup_dir
         gridFiles = []
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
         tmpnm = "tmp.tar.gz"
-        self.gridw.bring(outnm, "warmup", tmpnm)
+        self.gridw.bring(outnm, lfn_warmup_dir, tmpnm)
         ## Now list the files inside the .tar.gz and extract only the Vegas grid file
         gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
         outlist = self.tarw.listFilesTar(tmpnm)
@@ -360,7 +367,7 @@ class Backend(object):
         For arc jobs stdoutput will be downloaded in said folder as well
         """
         # Retrieve data from database
-        from header import arcbase
+        from header import arcbase, lfn_warmup_dir
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
@@ -392,7 +399,7 @@ class Backend(object):
             print("Trying to retrieve data from grid storage anyway")
         # Retrieve warmup from the grid storage warmup folder
         wname = self.warmup_name(runcard, runfolder)
-        self.gridw.bring(wname, "warmup", finfolder + "/" + wname)
+        self.gridw.bring(wname, lfn_warmup_dir, finfolder + "/" + wname)
 
     def _get_data_production(self, db_id):
         """ Given a database entry, retrieve its data from
@@ -448,11 +455,12 @@ class Backend(object):
         """ Multithread wrapper used in get_data_production 
         to download information from the grid storage
         """
+        from header import lfn_output_dir
         filenm   = self.output_name(self.rcard, self.rfolder, seed)
         remotenm = filenm + ".tar.gz"
         localfil = self.rfolder + "-" + str(seed) + ".tar.gz"
         localnm  = self.rfolder + "/" + localfil
-        self.gridw.bring(filenm, "output", localnm)
+        self.gridw.bring(filenm, lfn_output_dir, localnm)
         return localfil
 
     def _do_extract_outputData(self, tarfile):

@@ -14,24 +14,8 @@ if rmode[:3] == "run" or rmode[:3] == "man":
         raise Exception("Please, choose only Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
     if not args.runDirac and not args.runArc and not args.runArcProduction:
         raise Exception("Please , choose either Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
+
 ########################################
-
-# Disabled dirac sourcing, pending tests...
-
-# #### Step0, if Dirac, source dirac
-# if  args.runDirac:
-#     print("Sourcing dirac...")
-#     cmd = ["bash", "-c", "source $sourcedirac && env"]
-#     import os, subprocess
-#     out = subprocess.Popen(cmd, stdout = subprocess.PIPE)
-#     for lineRaw in out.stdout:
-#         if len(lineRaw) < 3:
-#             continue
-#         line = lineRaw.decode()
-#         (key, _, value) = line.partition("=")
-#         value = value.rstrip()
-#         os.environ[key] = value
-# ########################################
 
 #### Step1, invoke proxy
 if not args.noProxy:

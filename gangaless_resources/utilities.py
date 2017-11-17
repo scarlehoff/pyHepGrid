@@ -264,6 +264,15 @@ class GridWrap:
         else:
             return False
 
+    def get_dir_contents(self, directory):
+        if self.gfal:
+            args = [self.lfn + directory]
+        else:
+            args = [directory]
+        cmd = self.listfi + args
+        output = getOutputCall(cmd)
+        return output
+
 
 
 if __name__ == '__main__':
