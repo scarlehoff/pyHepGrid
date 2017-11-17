@@ -142,16 +142,21 @@ class Backend(object):
         needs testing as it needs to be able to remove (many) things for production run 
         It relies on the base seed from the header file to remove the output
         """
-        print("Checking whether this runcard has something on the output folder...")
+        print("Checking whether this runcard has seeds on the output folder tath you are trying to submit...")
         checkname = r + "-" + rname
-        if self.gridw.checkForThis(checkname, "output"):
-            self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output (looked for {}). Do you want to remove it/them?".format(checkname))
-            print("Runcard " + r + " has at least one file at output")
+        files = self.gridw.get_dir_contents("output")
+        first = True
+        if checkname in files:
             from header import baseSeed, producRun
             for seed in range(baseSeed, baseSeed + producRun):
                 filename = "output" + checkname + "-" + str(seed) + ".tar.gz"
-                self.gridw.delete(filename, "output")
-
+                if filename in files:
+                    if first:
+                        self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output with a seed you are trying to submit (looked for {}). Do you want to remove it/them?".format(checkname))
+                        print("Runcard " + r + " has at least one file at output")
+                        first = False
+                    self.gridw.delete(filename, "output")
+            print("Output check complete")
 
     def _bring_warmup_files(self, runcard, rname):
         """ Download the warmup file for a run to local directory

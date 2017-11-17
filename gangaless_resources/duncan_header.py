@@ -1,5 +1,5 @@
 import subprocess as sp
-
+import os
 ##################################################
 #                Helper Functions                #
 # Can't use utilities due to circular imports :( #
@@ -38,7 +38,7 @@ finalise_no_cores = 15
 finalisation_script = "finalise"
 
 warmup_base_dir = None
-production_base_dir = "../../working/RESULTS/"
+production_base_dir = os.path.expanduser("~/working/RESULTS/")
 
 # ARC parameters
 ce_base = "ce2.dur.scotgrid.ac.uk"
