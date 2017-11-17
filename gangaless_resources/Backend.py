@@ -143,7 +143,7 @@ class Backend(object):
         It relies on the base seed from the header file to remove the output
         """
         from header import lfn_output_dir
-        print("Checking whether this runcard has seeds on the output folder tath you are trying to submit...")
+        print("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         checkname = r + "-" + rname
         files = self.gridw.get_dir_contents(lfn_output_dir)
         first = True

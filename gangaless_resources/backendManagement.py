@@ -89,11 +89,17 @@ class Arc(Backend):
 
     def status_job(self, jobids, verbose = False):
         """ print the current status of a given job """
-        for jobid in jobids:
-            cmd = [self.cmd_stat, "-j", header.arcbase, jobid.strip()]
-            if verbose:
-                cmd += ["-l"]
-            util.spCall(cmd)
+        # for jobid in jobids:
+        #     cmd = [self.cmd_stat, "-j", header.arcbase, jobid.strip()]
+        #     if verbose:
+        #         cmd += ["-l"]
+        #     util.spCall(cmd)
+        cmd = [self.cmd_stat, "-j", header.arcbase]
+        jobids = [jobid.strip() for jobid in jobids]
+        cmd = cmd + jobids
+        if verbose:
+            cmd += ["-l"]
+        util.spCall(cmd)
 
 
 class Dirac(Backend):
