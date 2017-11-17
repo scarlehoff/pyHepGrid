@@ -55,13 +55,10 @@ class RunArc(Backend):
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
         rncards, dCards = util.expandCard(runcard)
         # check whether this is a socketed run
-        if "sockets_active" in dCards.keys():
+        if "port" in dCards.keys():
             sockets = True
             n_sockets = int(dCards["sockets_active"])
-            if "port" in dCards.keys():
-                port = int(dCards["port"])
-            else:
-                port = 8888
+            port = int(dCards["port"])
             job_type = "Socket={}".format(port)
         else:
             sockets = False

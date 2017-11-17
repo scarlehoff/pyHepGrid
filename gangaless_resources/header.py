@@ -101,7 +101,8 @@ DIRACSCRIPTDEFAULT = [
         ]
 
 port = None
-sockets_active = None
+# By default send 10 sockets, the server will decide how many of them survive
+sockets_active = 10
 
 from argument_parser import runcard as runcard_file
 if runcard_file:
