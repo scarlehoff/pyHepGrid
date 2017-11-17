@@ -15,7 +15,7 @@ class RunDirac(Backend):
     #
     # XRSL file utilities
     # 
-    def _write_JDL(self, list_data, filename = None):
+    def _write_JDL(self, list_data, start_seed, no_runs, filename = None):
         """ Writes a unique JDL file 
         which instructs the dirac job to run
         """
@@ -29,7 +29,11 @@ class RunDirac(Backend):
             for j in list_data:
                 f.write(j)
                 f.write(" ")
-            f.write("\";\n")
+            f.write("\";\n") 
+            f.write("Parameters = {0};\n".format(no_runs))
+            f.write("ParameterStart = {0};\n".format(start_seed))
+            f.write("ParameterStep = 1;\n".format(start_seed))
+            f.write("ParameterFactor = 1;\n".format(start_seed))
         return filename
 
     def _run_JDL(self, filename):
@@ -38,8 +42,9 @@ class RunDirac(Backend):
         """
         cmd = "dirac-wms-job-submit {}".format(filename)
         output  = util.getOutputCall(cmd.split())
-        jobid   = output.rstrip().strip().split(" ")[-1]
-        return jobid
+        jobids = output.rstrip().strip().split("]")[0].split("[")[-1]
+        jobids = jobids.split(", ")
+        return jobids
 
     # Run for DIRAC
     def run_wrap_production(self, runcard):
@@ -52,24 +57,13 @@ class RunDirac(Backend):
         from header    import baseSeed, producRun, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe
         for r in rncards:
             print("> Submitting {0} job(s) for {2} to Dirac, beginning at seed {1}.".format(producRun, baseSeed, r))
-            joblist = []
             self._checkfor_existing_output(r, dCards[r])
             jdlfile = None
-            for seed in range(baseSeed, baseSeed + producRun):
-                # From DIRAC.py
-                # RUNCARD = sys.argv[1]
-                # RUNNAME = sys.argv[2]
-                # SEED    = sys.argv[3] 
-                # lhapdf_grid_loc = sys.argv[4] 
-                # LFNDIR = sys.argv[5]
-                # LHAPDF_LOC = sys.argv[6]
-                # Genereate and run a file per seed number
-                argbase = [r, dCards[r]]
-                args    = argbase + [str(seed), lhapdf_grid_loc]
-                args = args + [lfndir, lhapdf_loc, NNLOJETexe]
-                jdlfile = self._write_JDL(args)
-                jobid   = self._run_JDL(jdlfile)
-                joblist.append(jobid)
+            argbase = [r, dCards[r]]
+            args    = argbase + ["%s", lhapdf_grid_loc]
+            args = args + [lfndir, lhapdf_loc, NNLOJETexe]
+            jdlfile = self._write_JDL(args, baseSeed, producRun)
+            joblist   = self._run_JDL(jdlfile)
             # Create daily path
             pathfolder = util.generatePath(False)
             # Create database entr

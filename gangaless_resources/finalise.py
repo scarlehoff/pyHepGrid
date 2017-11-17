@@ -18,7 +18,6 @@ rc = importlib.import_module(config.finalise_runcards)
 # can be removed by keeping better track of tmp files
 
 # CONFIG
-OUTDIR = config.production_base_dir
 no_processes = config.finalise_no_cores
 
 # Set up environment
@@ -30,8 +29,14 @@ def mkdir(directory):
     os.system('mkdir {0} > /dev/null 2>&1'.format(directory))
 
 
+def get_output_dir_name(runcard):
+    basedir = config.production_base_dir
+    subdir = "{0}{1}".format(config.finalise_prefix, runcard)
+    return os.path.join(basedir, subdir)
+
+
 def createdirs(currentdir, runcard):
-    targetdir = os.path.join(currentdir, OUTDIR, "{0}{1}".format(config.finalise_prefix,runcard))
+    targetdir = os.path.join(currentdir, get_output_dir_name(runcard))
     mkdir(targetdir)
     newdir = os.path.join(targetdir, 'log')
     mkdir(newdir)
