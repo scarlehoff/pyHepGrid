@@ -19,6 +19,8 @@ jobName    = "testjob"
 
 # Grid config 
 lfndir   = "/grid/pheno/jmartinez"
+lfn_output_dir = "output"
+lfn_warmup_dir = "warmup"
 
 # Lhapdf config
 lhapdf_grid_loc = "util/" 
