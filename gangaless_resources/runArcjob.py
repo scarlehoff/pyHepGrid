@@ -16,6 +16,10 @@ class RunArc(Backend):
         self.gridw     = util.GridWrap()
         self.tarw      = util.TarWrap()
 
+    def _format_args(self, args):
+        return "\" \"".join(str(i) for i in args)
+
+
     def _write_XRSL(self, dictData, filename = None):
         """ Writes a unique XRSL file 
         which instructs the arc job to run
@@ -69,21 +73,14 @@ class RunArc(Backend):
                 job_type = "Warmup"
 
         self.runfolder = header.runcardDir
-        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, jobName, \
-            warmup_base_dir, NNLOJETexe, lfn_warmup_dir
+        from header import warmupthr, jobName, warmup_base_dir
         # loop over al .run files defined in runcard.py
         for r in rncards:
             # Check whether this run has something on the gridStorage
             self._checkfor_existing_warmup(r, dCards[r])
             # Generate the XRSL file
-            argument_base  = "" + r + "\""
-            argument_base += " \"" + dCards[r] + "\""
-            argument_base += " \"" + str(warmupthr) + "\""
-            argument_base += " \"" + lhapdf_grid_loc + "\""
-            argument_base += " \"" + lfndir + "\""
-            argument_base += " \"" + lhapdf_loc + "\""
-            argument_base += " \"" + NNLOJETexe + "\""
-            argument_base += " \"" + lfn_warmup_dir + ""
+            argument_base = self._get_warmup_args(r, dCards[r])
+            argument_base = self._format_args(argument_base)
             jobids = []
             for i_socket in range(n_sockets):
                 arguments = argument_base
@@ -132,14 +129,8 @@ class RunArc(Backend):
             # we cannot multiprocess the arc submission
             xrslfile = None 
             for seed in range(baseSeed, baseSeed + producRun):
-                arguments  = "" + r + "\""
-                arguments += " \"" + dCards[r] + "\""
-                arguments += " \"" + str(seed) + "\""
-                arguments += " \"" + lhapdf_grid_loc + "\""
-                arguments += " \"" + lfndir + "\""
-                arguments += " \"" + lhapdf_loc + "\""
-                arguments += " \"" + NNLOJETexe + "\""
-                arguments += " \"" + lfn_output_dir + ""
+                arguments = self._get_prod_args(r, dCards[r], seed)
+                arguments = self._format_args(arguments)
                 dictData = {'arguments'   : arguments,
                             'jobName'     : jobName,
                             'count'       : str(1),
