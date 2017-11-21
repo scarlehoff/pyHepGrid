@@ -556,3 +556,24 @@ class Backend(object):
                 else:
                     multirun_flag = " ({0})".format(no_jobs)
             print(rid + " | " + ruc + " | " + run + " | " + dat + multirun_flag)
+
+
+    def _get_prod_args(self, runcard, runtag, seed):
+        """ Returns all arguments for production running. These arguments should 
+        match all those required by DIRAC.py"""
+        from header import baseSeed, producRun, lhapdf_grid_loc, \
+            lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
+        args = [runcard, runtag, seed, lhapdf_grid_loc, lfndir, \
+                lhapdf_loc, NNLOJETexe, lfn_output_dir]
+        return args
+
+    def _get_warmup_args(self, runcard, runtag):
+        """ Returns all necessary arguments for warmup running. These arguments 
+        should match those required by ARC.py. Socket arguments are added later 
+        if required in runArcjob"""
+        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, \
+            NNLOJETexe, lfn_warmup_dir
+        args = [runcard, runtag, warmupthr, lhapdf_grid_loc, lfndir,
+                lhapdf_loc, NNLOJETexe, lfn_warmup_dir]
+        return args
+
