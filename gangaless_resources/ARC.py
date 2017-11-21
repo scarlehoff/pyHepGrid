@@ -89,14 +89,17 @@ WARMDIR         = sys.argv[8]
 
 n_args = len(sys.argv)
 socketed = False
-if n_args == 10:
+print("Arguments for ARC.py: {0}".format(sys.argv))
+if n_args > 9:
+    HOST = "gridui1.dur.scotgrid.ac.uk"
     port = sys.argv[9]
-    socket_config = socket_sync_str("gridui1.dur.scotgrid.ac.uk", port)
+    print("Sockets active, trying to connect to {0}:{1}".format(HOST, port))
+    socket_config = socket_sync_str(HOST, port)
     if "die" in socket_config:
         print("Timeout'd by socket server")
         exit(0)
     socketed = True
-    extra_args = "-port {0} {1}".format(port, socket_config)
+    extra_args = "-port {0} -host {1} {2}".format(port, HOST,  socket_config)
 else:
     extra_args = ""
 
