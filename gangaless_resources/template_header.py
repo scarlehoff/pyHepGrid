@@ -27,6 +27,7 @@ lfn_warmup_dir = "warmup"
 lhapdf_grid_loc    = "util/lhapdf.tar.gz"
 lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
+lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = get_cmd_output("lhapdf-config","--prefix")
  
 # NNLOJET Database Parameters
