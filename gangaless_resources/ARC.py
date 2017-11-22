@@ -91,7 +91,7 @@ n_args = len(sys.argv)
 socketed = False
 print("Arguments for ARC.py: {0}".format(sys.argv))
 if n_args > 9:
-    HOST = "gridui1.dur.scotgrid.ac.uk"
+    HOST = "gridui2.dur.scotgrid.ac.uk"
     port = sys.argv[9]
     print("Sockets active, trying to connect to {0}:{1}".format(HOST, port))
     socket_config = socket_sync_str(HOST, port)

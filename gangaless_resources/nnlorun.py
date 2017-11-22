@@ -18,6 +18,7 @@ def parse_arguments():
         from getpass import getuser
         default_user_lfn = "/grid/pheno/{}".format(getuser())
     except:
+        # Check how to get username from enviromental variables in ARC (if possible)
         default_user_lfn = "/grid/pheno/jmartinez"
 
     parser = OptionParser(usage = "usage: %prog [options]")
@@ -132,7 +133,7 @@ def copy_to_grid(local_file, grid_file):
     print("Copying " + local_file + " to " + grid_file)
     filein = "file:$PWD/" + local_file
     fileout = lfn + grid_file
-    if gfal:
+    if gfal: # May need checking if we move to gfal
         from uuid import uuid1 as generateRandom
         today_str = datetime.today().strftime('%Y-%m-%d')
         unique_str = "ffilef" + str(generateRandom())
