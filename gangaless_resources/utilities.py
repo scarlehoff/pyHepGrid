@@ -151,13 +151,11 @@ def lhapdfIni():
     lhapdf_gridname = lhapdf_remote.rsplit("/")[-1]
     tar_w = TarWrap()
     grid_w = GridWrap()
-    tar_w.tarDir(lhapdf_gridname, lhapdf_gridname)
-    from pdb import set_trace
-    set_trace()
+    tar_w.tarDir(lhapdf, lhapdf_gridname)
     if grid_w.checkForThis(lhapdf_gridname, lhapdf_griddir):
         print("Removing previous version of lhapdf in the grid")
         grid_w.delete(lhapdf_gridname, lhapdf_griddir)
-    grid_w.send(lhapdf_gridname, lhapdf_remote)
+    grid_w.send(lhapdf_gridname, lhapdf_griddir)
     shutil.rmtree(lhapdf)
     os.remove(lhapdf_gridname)
 
