@@ -18,6 +18,7 @@ def parse_arguments():
         from getpass import getuser
         default_user_lfn = "/grid/pheno/{}".format(getuser())
     except:
+        # Check how to get username from enviromental variables in ARC (if possible)
         default_user_lfn = "/grid/pheno/jmartinez"
 
     parser = OptionParser(usage = "usage: %prog [options]")
