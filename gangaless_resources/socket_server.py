@@ -128,6 +128,8 @@ class Vegas_Socket(Generic_Socket):
         try:
             if data.decode() == "gree":
                 return -1
+            elif data.decode() == "bye!":
+                return -99 # Exit code
         except:
             pass
         return int.from_bytes(data, byteorder="little")
@@ -143,16 +145,19 @@ class Vegas_Socket(Generic_Socket):
         while len(job_sockets) < n_jobs:
             new_endpoint = self.wait_for_client()
 
-            if verbose:
-                adr = str(new_endpoint.address[0])
-                prt = str(new_endpoint.address[1])
-                print("New endpoint connected: %s:%s" % (adr, prt))
+            adr = str(new_endpoint.address[0])
+            prt = str(new_endpoint.address[1])
+            print("   New endpoint connected: %s:%s" % (adr, prt))
         
             # Get the size of the array of doubles we are going to receive
             size = new_endpoint.get_size()
             if size == -1:
                 new_endpoint.send_data(b'die')
+                print(" > Killed orphan instance of nnlorun.py")
                 continue
+            elif size == -99:
+                print(" > nnlorun.py sent exit code, exiting with success")
+                exit(0)
             doubles = int(size / 8)
             if verbose:
                 print("Size of array: " + str(size))
@@ -220,16 +225,13 @@ def timeout_handler(signum, frame):
     raise Exception("The time has passed, it's time to run")
 
 
-if __name__ == "__main__":
+def parse_all_arguments():
     from argparse import ArgumentParser
-    from sys import exit
-    import signal
     parser = ArgumentParser()
     parser.add_argument("-H", "--hostname", help = "Hostname", default = "")
     parser.add_argument("-p", "--port", help = "Port", default = "8888")
-    parser.add_argument("-n", "--nclients", help = "Number of clientes to wait for", default = "2")
     parser.add_argument("-w", "--wait", help = "Wait for a given number of seconds. This options is only to be used on the gridui")
-    parser.add_argument("-N", "--waitfor", help = "To be used alongside wait. Stop waiting after N clients are found", default = "10")
+    parser.add_argument("-N", "--N_clients", help = "Number of clients to wait for, if used alongside wait, stop waiting after N clients", default = "2")
     parser.add_argument("-m", "--manual", help = "Print the manual and exit", action = "store_true")
     args = parser.parse_args()
 
@@ -239,12 +241,20 @@ if __name__ == "__main__":
 
     if args.wait:
         if "gridui" not in socket.gethostname():
-            print("Wait only to be used in gridui")
-            exit(-1)
+            parser.error("Wait only to be used in gridui")
+
+    return args
+
+
+if __name__ == "__main__":
+    from sys import exit
+    import signal
+
+    args = parse_all_arguments()
 
     HOST = str(args.hostname)
     PORT = int(args.port)
-    n_clients = int(args.nclients)
+    n_clients = int(args.N_clients)
 
     # enable the server, and bind it to HOST:PORT
     server = Vegas_Socket()
@@ -261,19 +271,20 @@ if __name__ == "__main__":
 
     if args.wait:
         # Wait for a number of ARC jobs to start before allowing NNLOJET to run
-        # it will "capture" the different instances of ARC.py until it gets all of them
-        # TODO: If we capture a instance of NNLOJET instead, skip to the while loop or make it fail? What should I do?
+        # it will "capture" the different instances of nnlorun.py until it gets all of them
+        # TODO: If we capture a rogue instance of NNLOJET instead, skip to the while loop or make it fail? What should I do?
 
         clients = []
 
         signal.signal(signal.SIGALRM, timeout_handler)
 
+        n_clients_max = n_clients
+
         n_clients = 0
-        n_clients_max = int(args.waitfor)
 
         while n_clients < n_clients_max:
             try:
-                print("Waiting for {} more instances of ARC.py to salute".format(n_clients_max - n_clients))
+                print("Waiting for {} more instances of nnlorun.py to salute".format(n_clients_max - n_clients))
                 new_client = server.wait_for_client()
                 if not clients: # Start the timer
                     signal.alarm(int(args.wait))

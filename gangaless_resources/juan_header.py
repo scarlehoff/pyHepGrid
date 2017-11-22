@@ -19,11 +19,12 @@ jobName    = "testjob"
 
 # Grid config 
 lfndir   = "/grid/pheno/jmartinez"
+lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
 # Lhapdf config
-lhapdf_grid_loc = "util/" 
+lhapdf_grid_loc = "util/lhapdf.tar.gz"  
 lhapdf_loc = "lhapdf" 
 lhapdf_ignore_dirs = ["doc", "examples", "config"]
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
@@ -51,3 +52,7 @@ dirac_name = "juan.m.cruzmartinez"
 # finalise.py-only parameters
 finalise_runcards = None
 finalise_prefix = None
+
+# socket parameters
+server_host = "gridui1.dur.scotgrid.ac.uk"
+port = 8888

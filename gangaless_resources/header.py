@@ -65,6 +65,7 @@ dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', '
 #
 # Templates
 # 
+sockets_active = 1 # 1 socket == no sockets
 
 # # If a job is expected to run for long, use the following property (in minutes)
 # "(wallTime  =    \"3 days\")" 
@@ -72,11 +73,6 @@ dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', '
 # "(cpuTime = \"3 days\")"
 # if nothing is used, the end system will decide what the maximum is
 #
-
-port = None
-# By default send 10 sockets, the server will decide how many of them survive
-sockets_active = 10
-#sockets_active = None
 
 from argument_parser import runcard as runcard_file
 if runcard_file:
@@ -97,7 +93,7 @@ if runcard_file:
 ### Moved to the bottom to allow runcard to override jobName
 
 ARCSCRIPTDEFAULT = ["&",
-        "(executable   = \"ARC.py\")",
+        "(executable   = \"nnlorun.py\")",
         "(outputFiles  = (\"outfile.out\" \"\") )",
         "(stdout       = \"stdout\")",
         "(stderr       = \"stderr\")",
@@ -106,7 +102,7 @@ ARCSCRIPTDEFAULT = ["&",
         ]
 
 ARCSCRIPTDEFAULTPRODUCTION = ["&",
-        "(executable   = \"DIRAC.py\")",
+        "(executable   = \"nnlorun.py\")",
         "(outputFiles  = (\"outfile.out\" \"\") )",
         "(stdout       = \"stdout\")",
         "(stderr       = \"stderr\")",
@@ -116,9 +112,9 @@ ARCSCRIPTDEFAULTPRODUCTION = ["&",
 
 DIRACSCRIPTDEFAULT = [
         "JobName    = \"{0}\";".format(jobName),
-        "Executable = \"DIRAC.py\";",
+        "Executable = \"nnlorun.py\";",
         "StdOutput  = \"StdOut\";",
         "StdError   = \"StdErr\";",
-        "InputSandbox  = {\"DIRAC.py\"};",
+        "InputSandbox  = {\"nnlorun.py\"};",
         "OutputSandbox = {\"StdOut\",\"StdErr\"};",
         ]

@@ -18,21 +18,19 @@ baseSeed   = 100
 jobName    = "testjob"
 
 # Grid config 
-lfndir   = "/grid/pheno/dwalker"
-# The following options are not fully functional yet 
-# in particular they need to be propagated to DIRAC/ARC.py via ?cmd line args?
-# I may also have missed some hardcodings
+lfndir         = "/grid/pheno/dwalker"
+lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
 # Lhapdf config
-lhapdf_grid_loc = "input/" 
-lhapdf_loc = "lhapdf/"
+lhapdf_grid_loc    = "util/lhapdf.tar.gz"
+lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
-lhapdf = get_cmd_output("lhapdf-config","--prefix")
+lhapdf             = get_cmd_output("lhapdf-config","--prefix")
  
 # NNLOJET Database Parameters
-dbname     = "NNLOJET_november.dat"     
+dbname     = "NNLOJET_database.dat"     
 
 # Finalisation and storage options
 finalise_no_cores = 15
@@ -54,3 +52,7 @@ dirac_name = "duncan.walker"
 # finalise.py-only parameters
 finalise_runcards = None
 finalise_prefix = None
+
+# socket default parameters
+server_host = "gridui1.dur.scotgrid.ac.uk"
+port = 8080
