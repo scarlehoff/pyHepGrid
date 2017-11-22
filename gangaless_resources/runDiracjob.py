@@ -72,7 +72,7 @@ class RunDirac(Backend):
         from header    import baseSeed, producRun
         for r in rncards:
             print("> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
-            print("> Beginning at seed {1} in increments of 1000.".format(baseSeed))
+            print("> Beginning at seed {0} in increments of 1000.".format(baseSeed))
             self._checkfor_existing_output(r, dCards[r])
             jdlfile = None
             args = self._get_prod_args(r, dCards[r], "%s")
