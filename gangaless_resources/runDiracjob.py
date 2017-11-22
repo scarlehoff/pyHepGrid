@@ -80,7 +80,8 @@ class RunDirac(Backend):
             while remaining_seeds > 0:
                 no_seeds = min(1000,remaining_seeds)
                 jdlfile = self._write_JDL(args, seed_start, no_seeds)
-                print(" > jdl file path for seeds {0}-{1}: {2}".format(seed_start, seed_start+no_seeds-1,jdlfile))
+                max_seed =  seed_start+no_seeds-1
+                print(" > jdl file path for seeds {0}-{1}: {2}".format(seed_start,max_seed,jdlfile))
                 joblist += self._run_JDL(jdlfile)
                 remaining_seeds = remaining_seeds - no_seeds
                 seed_start = seed_start + no_seeds
