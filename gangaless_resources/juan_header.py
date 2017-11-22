@@ -26,7 +26,7 @@ lfn_warmup_dir = "warmup"
 # Lhapdf config
 lhapdf_grid_loc = "util/lhapdf.tar.gz"  
 lhapdf_loc = "lhapdf" 
-lhapdf_ignore_dirs = ["doc", "examples", "config"]
+lhapdf_ignore_dirs = []# ["doc", "examples", "config"]
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
  
 # NNLOJET Database Parameters

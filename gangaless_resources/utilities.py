@@ -124,45 +124,42 @@ def sanitiseGeneratedPath(dailyPath, rname):
 # Library initialisation
 #
 def lhapdfIni():
-    from header import lhapdf_grid_loc as ginput
-    import shutil, os
-    from header import lhapdf_ignore_dirs
-    lhaConf = "lhapdf-config"
-    testBin = ["which", lhaConf]
-    tarw    = TarWrap()
-    gridw   = GridWrap()
-    outputn = "lhapdf.tar.gz"
-    if getOutputCall(testBin) != "":
+    import shutil, os, header
+    lha_conf = "lhapdf-config"
+    if getOutputCall(["which", lha_conf]) != "":
         print("Using lhapdf-config to get lhapdf directory")
-        lhPath = [lhaConf, "--prefix"]
-        lhaRaw = getOutputCall(lhPath)
-        lhaDir = lhaRaw.rstrip()
+        lha_raw = getOutputCall([lha_conf, "--prefix"])
+        lha_dir = lha_raw.rstrip()
     else:
-        from header import lhapdf as lhaDir
-    # Bring lhapdf and create tar
-    lhapdf      = "lhapdf"
-    print("Copying lhapdf from {0} to {1}".format(lhaDir, lhapdf))
-    bringLhapdf = ["cp", "-LR", lhaDir, lhapdf]
-    spCall(bringLhapdf)
-    rmdirs = lhapdf_ignore_dirs
+        from header import lhapdf as lha_dir
+    lhapdf = header.lhapdf_loc
+    print("Copying lhapdf from {0} to {1}".format(lha_dir, lhapdf))
+    bring_lhapdf_pwd = ["cp", "-LR", lha_dir, lhapdf]
+    spCall(bring_lhapdf_pwd)
+    # Remove any unwatend directory from lhapdf
+    rmdirs = header.lhapdf_ignore_dirs
     for root, dirs, files in os.walk(lhapdf):
         for directory in dirs:
             directory_path = os.path.join(root, directory)
-            for rmname in rmdirs:
-                if rmname in directory_path:
+            for rname in rmdirs:
+                if rname in directory_path:
                     shutil.rmtree(directory_path)
                     break
-    tarw.tarDir(lhapdf, outputn)
-    # Send to grid util
-    if gridw.checkForThis(outputn, ginput): gridw.delete(outputn, ginput)
-    gridw.send(outputn, ginput)
+    # Tar lhapdf and prepare it to be sent
+    lhapdf_remote = header.lhapdf_grid_loc
+    lhapdf_griddir = lhapdf_remote.rsplit("/",1)[0]
+    lhapdf_gridname = lhapdf_remote.rsplit("/")[-1]
+    tar_w = TarWrap()
+    grid_w = GridWrap()
+    tar_w.tarDir(lhapdf_gridname, lhapdf_gridname)
+    from pdb import set_trace
+    set_trace()
+    if grid_w.checkForThis(lhapdf_gridname, lhapdf_griddir):
+        print("Removing previous version of lhapdf in the grid")
+        grid_w.delete(lhapdf_gridname, lhapdf_griddir)
+    grid_w.send(lhapdf_gridname, lhapdf_remote)
     shutil.rmtree(lhapdf)
-    os.remove(outputn)
-    # This is better than doing rm -rf and it will be removed in due time anyway
-    # movetotmp   = ["mv", "-f", lhapdf, "/tmp/"]
-    # spCall(movetotmp)
-    # movetotmp   = ["mv", "-f", outputn, "/tmp/"]
-    # spCall(movetotmp)
+    os.remove(lhapdf_gridname)
 
 #
 # Tar wrappers
