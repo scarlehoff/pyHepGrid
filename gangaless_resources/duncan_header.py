@@ -27,7 +27,7 @@ lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
 #Lhapdf config
-lhapdf_grid_loc = "input/" 
+lhapdf_grid_loc = "input/lhapdf.tar.gz" 
 lhapdf_loc = "lhapdf"
 lhapdf_ignore_dirs = ["doc", "examples", "config", "LHAPDF-6.2.1/share"]
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
