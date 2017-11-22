@@ -55,3 +55,7 @@ dirac_name = "duncan.walker"
 # finalise.py-only parameters
 finalise_runcards = "finalise_runcards"
 finalise_prefix = "results_"
+
+# socket parameters
+server_host = "gridui2.dur.scotgrid.ac.uk"
+port = 8010

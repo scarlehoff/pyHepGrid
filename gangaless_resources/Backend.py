@@ -1,5 +1,6 @@
 import os
 import utilities as util
+import header
 
 class Backend(object):
     """ Abstract class
@@ -214,8 +215,7 @@ class Backend(object):
         return idout.split(" ")
 
     def get_date(self, db_id):
-        """ Returns a list of DIRAC/ARC jobids
-        for a given database entry
+        """ Returns date from a given database entry 
         """
         jobid = self.dbase.list_data(self.table, ["date"], db_id)
         try:
@@ -557,23 +557,50 @@ class Backend(object):
                     multirun_flag = " ({0})".format(no_jobs)
             print(rid + " | " + ruc + " | " + run + " | " + dat + multirun_flag)
 
+    def _format_args(self):
+        raise Exception("Any children classes of Backend.py should override this method")
+
+    def _get_default_args(self):
+        # Defaults arguments that can always go in
+        dictionary = {
+                'executable' : header.NNLOJETexe,
+                'lfndir' : header.lfndir,
+                'input_folder' : header.lfn_input_dir,
+                'output_folder' : header.lfn_output_dir,
+                'warmup_folder' : header.lfn_warmup_dir,
+                'lhapdf_grid' : header.lhapdf_grid_loc,
+                'lhapdf_local' : header.lhapdf_loc
+                }
+        return dictionary
+
+    def _make_base_argstring(self, runcard, runtag):
+        dictionary = self._get_default_args()
+        dictionary['runcard'] = runcard
+        dictionary['runname'] = runtag
+        return self._format_args(dictionary)
 
     def _get_prod_args(self, runcard, runtag, seed):
         """ Returns all arguments for production running. These arguments should 
-        match all those required by DIRAC.py"""
-        from header import baseSeed, producRun, lhapdf_grid_loc, \
-            lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
-        args = [runcard, runtag, seed, lhapdf_grid_loc, lfndir, \
-                lhapdf_loc, NNLOJETexe, lfn_output_dir]
-        return args
+        match all those required by nnlorun.py"""
+        base_string = self._make_base_argstring(runcard, runtag)
+        production_dict = {'Production' : None,
+                        'seed' : seed }
 
-    def _get_warmup_args(self, runcard, runtag):
+        production_str = self._format_args(production_dict)
+        return base_string + production_str
+
+    def _get_warmup_args(self, runcard, runtag, threads = 1, sockets = None):
         """ Returns all necessary arguments for warmup running. These arguments 
-        should match those required by ARC.py. Socket arguments are added later 
-        if required in runArcjob"""
-        from header import warmupthr, lhapdf_grid_loc, lfndir, lhapdf_loc, \
-            NNLOJETexe, lfn_warmup_dir
-        args = [runcard, runtag, warmupthr, lhapdf_grid_loc, lfndir,
-                lhapdf_loc, NNLOJETexe, lfn_warmup_dir]
-        return args
+        should match those required by nnlorun.py."""
+        base_string = self._make_base_argstring(runcard, runtag)
+        warmup_dict = { 'Warmup' : None,
+                        'threads' : threads }
+        if sockets:
+                warmup_dict['port'] = header.port
+                warmup_dict['Host'] = header.server_host
+                warmup_dict['Sockets'] = None
+
+        warmup_str = self._format_args(warmup_dict)
+        return base_string + warmup_str
+
 

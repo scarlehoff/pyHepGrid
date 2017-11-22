@@ -15,7 +15,26 @@ class RunDirac(Backend):
     #
     # XRSL file utilities
     # 
-    def _write_JDL(self, list_data, start_seed, no_runs, filename = None):
+    def _format_args(self, input_args):
+        if isinstance(input_args, dict):
+            string_arg = ""
+            for key in input_args.keys():
+                arg_value = input_args[key]
+                if arg_value:
+                    string_arg += " --{0} {1}".format(key, arg_value)
+                else:
+                    string_arg += " --{0} ".format(key)
+            return string_arg
+        elif isinstance(input_args, str):
+            return " {}".format(input_args)
+        elif isinstance(input_args, list):
+            return " {}".format(" ".join(input_args))
+        else:
+            print("Arguments: {}".format(input_args))
+            raise Exception("Type of input arguments: {} not regocnised in DIRAC ._format_args".format(type(input_args)))
+
+
+    def _write_JDL(self, argument_string, start_seed, no_runs, filename = None):
         """ Writes a unique JDL file 
         which instructs the dirac job to run
         """
@@ -25,11 +44,7 @@ class RunDirac(Backend):
             for i in self.templ:
                 f.write(i)
                 f.write("\n")
-            f.write("Arguments = \"")
-            for j in list_data:
-                f.write(j)
-                f.write(" ")
-            f.write("\";\n") 
+            f.write("Arguments = \"{}\";\n".format(argument_string))
             f.write("Parameters = {0};\n".format(no_runs))
             f.write("ParameterStart = {0};\n".format(start_seed))
             f.write("ParameterStep = 1;\n".format(start_seed))
@@ -61,6 +76,7 @@ class RunDirac(Backend):
             jdlfile = None
             args = self._get_prod_args(r, dCards[r], "%s")
             jdlfile = self._write_JDL(args, baseSeed, producRun)
+            print(" > Path for jdl file: {}".format(jdlfile))
             joblist  = self._run_JDL(jdlfile)
             # Create daily path
             pathfolder = util.generatePath(False)

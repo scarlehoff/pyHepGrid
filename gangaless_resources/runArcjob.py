@@ -16,9 +16,23 @@ class RunArc(Backend):
         self.gridw     = util.GridWrap()
         self.tarw      = util.TarWrap()
 
-    def _format_args(self, args):
-        return "\" \"".join(str(i) for i in args)
-
+    def _format_args(self, input_args):
+        if isinstance(input_args, dict):
+            string_arg = ""
+            for key in input_args.keys():
+                arg_value = input_args[key]
+                if arg_value:
+                    string_arg += " \"--{0}\" \"{1}\"".format(key, arg_value)
+                else:
+                    string_arg += " \"--{0}\" ".format(key)
+            return string_arg
+        elif isinstance(input_args, str):
+            return "\"{}\"".format(input_args)
+        elif isinstance(input_args, list):
+            return "\"{}\"".format("\" \"".join(input_args))
+        else:
+            print("Arguments: {}".format(input_args))
+            raise Exception("Type of input arguments: {} not regocnised in ARC ._format_args".format(type(input_args)))
 
     def _write_XRSL(self, dictData, filename = None):
         """ Writes a unique XRSL file 
@@ -32,8 +46,11 @@ class RunArc(Backend):
                 f.write('\n')
             for key in dictData:
                 f.write("(" + key)
-                f.write(" = \"" + dictData[key])
-                f.write("\")\n")
+                argument_value = dictData[key].strip()
+                if argument_value[0] == "\"" and argument_value[-1] == "\"":
+                    f.write(" = {})\n".format(argument_value))
+                else:
+                    f.write(" = \"{}\")\n".format(argument_value))
         return filename
 
     def _run_XRSL(self, filename, test = False):
@@ -58,11 +75,11 @@ class RunArc(Backend):
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
         rncards, dCards = util.expandCard(runcard)
-        # check whether this is a socketed run
-        if "port" in dCards.keys():
+
+        if header.sockets_active > 1:
             sockets = True
-            n_sockets = int(dCards["sockets_active"])
-            port = int(dCards["port"])
+            n_sockets = header.sockets_active
+            port = header.port
             job_type = "Socket={}".format(port)
         else:
             sockets = False
@@ -75,26 +92,24 @@ class RunArc(Backend):
         self.runfolder = header.runcardDir
         from header import warmupthr, jobName, warmup_base_dir
         # loop over al .run files defined in runcard.py
+
         for r in rncards:
             # Check whether this run has something on the gridStorage
             self._checkfor_existing_warmup(r, dCards[r])
             # Generate the XRSL file
-            argument_base = self._get_warmup_args(r, dCards[r])
-            argument_base = self._format_args(argument_base)
+            arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr, sockets = sockets)
+            dictData = {'arguments'   : arguments,
+                        'jobName'     : jobName,
+                        'count'       : str(warmupthr),
+                        'countpernode': str(warmupthr),}
+            xrslfile = self._write_XRSL(dictData)
+            print(" > Path of xrsl file: {0}".format(xrslfile))
+
             jobids = []
             for i_socket in range(n_sockets):
-                arguments = argument_base
-                if sockets:
-                    arguments += "\" \"" + str(port) + "\""
-                    arguments += " \"" + str(n_sockets) + "\""
-                    arguments += " \"" + str(i_socket+1) + ""
-                dictData = {'arguments'   : arguments,
-                            'jobName'     : jobName,
-                            'count'       : str(warmupthr),
-                            'countpernode': str(warmupthr),}
-                xrslfile = self._write_XRSL(dictData)
                 # Run the file
                 jobids.append(self._run_XRSL(xrslfile, test=test))
+
             # Create daily path
             if warmup_base_dir is not None:
                 pathfolder = util.generatePath(warmup=True)
@@ -130,7 +145,6 @@ class RunArc(Backend):
             xrslfile = None 
             for seed in range(baseSeed, baseSeed + producRun):
                 arguments = self._get_prod_args(r, dCards[r], seed)
-                arguments = self._format_args(arguments)
                 dictData = {'arguments'   : arguments,
                             'jobName'     : jobName,
                             'count'       : str(1),
