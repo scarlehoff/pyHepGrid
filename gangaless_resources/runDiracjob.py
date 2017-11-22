@@ -71,13 +71,18 @@ class RunDirac(Backend):
         self.runfolder  = header.runcardDir
         from header    import baseSeed, producRun
         for r in rncards:
-            print("> Submitting {0} job(s) for {2} to Dirac, beginning at seed {1}.".format(producRun, baseSeed, r))
+            print("> Submitting {0} job(s) for {2} to Dirac, beginning at seed {1} in increments of 1000.".format(producRun, baseSeed, r))
             self._checkfor_existing_output(r, dCards[r])
             jdlfile = None
             args = self._get_prod_args(r, dCards[r], "%s")
-            jdlfile = self._write_JDL(args, baseSeed, producRun)
-            print(" > Path for jdl file: {}".format(jdlfile))
-            joblist  = self._run_JDL(jdlfile)
+            joblist, remaining_seeds, seed_start = [], producRun, baseSeed
+            while remaining_seeds > 0:
+                no_seeds = min(1000,remaining_seeds)
+                jdlfile = self._write_JDL(args, seed_start, no_seeds)
+                print(" > jdl file path for seeds {0}-{1}: {2}".format(seed_start, seed_start+no_seeds-1,jdlfile))
+                joblist += self._run_JDL(jdlfile)
+                remaining_seeds = remaining_seeds - no_seeds
+                seed_start = seed_start + no_seeds
             # Create daily path
             pathfolder = util.generatePath(False)
             # Create database entr
