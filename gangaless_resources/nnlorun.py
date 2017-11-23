@@ -25,7 +25,7 @@ def parse_arguments():
     # Run options
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
     parser.add_option("-e", "--executable", help = "Executable to be run", default = "NNLOJET")
-    parser.add_option("-d", "--debug", help = "Debug level", action = "count")
+    parser.add_option("-d", "--debug", help = "Debug level", type=int, default=0)
     parser.add_option("-s", "--seed", help = "Run seed for NNLOJET")
 
     # Grid configuration options
@@ -116,8 +116,11 @@ def copy_from_grid(grid_file, local_file):
     cmd += grid_file + " " + local_file
     os.system(cmd)
 
-def untar_file(local_file):
-    cmd = "tar zxf " + local_file
+def untar_file(local_file, debug):
+    if args.debug > 2:
+        cmd = "tar zxfv {0}".format(local_file)
+    else:
+        cmd = "tar zxf " + local_file
     os.system(cmd)
 
 def tar_this(tarfile, sourcefiles):
@@ -155,20 +158,21 @@ def socket_sync_str(host, port, handshake = "greetings"):
     sid.send(handshake)
     return sid.recv(32)
 
-def bring_lhapdf(lhapdf_grid):
+def bring_lhapdf(lhapdf_grid, debug):
     tmp_tar = "lhapdf.tar.gz"
     copy_from_grid(lhapdf_grid, tmp_tar)
-    untar_file(tmp_tar)
+    untar_file(tmp_tar, debug)
     os.system("rm {0}".format(tmp_tar))
     return 0
 
-def bring_nnlojet(input_grid, runcard, runname):
+def bring_nnlojet(input_grid, runcard, runname, debug):
     # Todo: this is not very general, is it?
     tmp_tar = "nnlojet.tar.gz"
     input_name = "{0}/{1}{2}.tar.gz".format(input_grid, runcard, runname)
     copy_from_grid(input_name, tmp_tar)
-    untar_file(tmp_tar)
+    untar_file(tmp_tar, debug)
     os.system("rm {0}".format(tmp_tar))
+    os.system("ls")
     return 0
 
 
@@ -176,8 +180,11 @@ def bring_nnlojet(input_grid, runcard, runname):
 #################################################################################
 
 if __name__ == "__main__":
-
     args = parse_arguments()
+    
+    if args.debug > 1:
+        from sys import version
+        print("Running Python version {0}".format(version))
 
     nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads, args.executable, args.runcard)
 
@@ -198,11 +205,17 @@ if __name__ == "__main__":
 
     set_environment(args.lfndir, args.lhapdf_local)
 
-    print("Downloading LHAPDF")
-    bring_lhapdf(args.lhapdf_grid)
-    
-    bring_nnlojet(args.input_folder, args.runcard, args.runname)
+    if args.debug > 2:
+        os.system("env")
 
+    print("Downloading LHAPDF")
+    bring_lhapdf(args.lhapdf_grid, args.debug)
+    bring_nnlojet(args.input_folder, args.runcard, args.runname, args.debug)
+
+    if args.debug > 1:
+        os.system("ls")
+        os.system("ldd -v {0}".format(args.executable))
+        
     os.system("chmod +x {0}".format(args.executable))
     nnlojet_command +=" 2>&1 outfile.out"
     print(" > Executed command: {0}".format(nnlojet_command))
@@ -214,6 +227,7 @@ if __name__ == "__main__":
     else:
         print("Something went wrong")
         os.system("cat outfile.out")
+        args.debug = 9999
 
     # Debug info
     os.system("voms-proxy-info --all")
@@ -226,6 +240,10 @@ if __name__ == "__main__":
     elif args.Warmup:
         local_out = warmup_name(args.runcard, args.runname)
         output_file = args.warmup_folder + "/" + local_out
+
+    if args.debug > 1:
+        os.system("ls")
+
     tar_this(local_out, "*")
 
     success = copy_to_grid(local_out, output_file)
