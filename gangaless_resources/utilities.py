@@ -133,18 +133,27 @@ def lhapdfIni():
     else:
         from header import lhapdf as lha_dir
     lhapdf = header.lhapdf_loc
-    print("Copying lhapdf from {0} to {1}".format(lha_dir, lhapdf))
+    print("> Copying lhapdf from {0} to {1}".format(lha_dir, lhapdf))
     bring_lhapdf_pwd = ["cp", "-LR", lha_dir, lhapdf]
     spCall(bring_lhapdf_pwd)
     # Remove any unwatend directory from lhapdf
     rmdirs = header.lhapdf_ignore_dirs
-    for root, dirs, files in os.walk(lhapdf):
-        for directory in dirs:
-            directory_path = os.path.join(root, directory)
-            for rname in rmdirs:
-                if rname in directory_path:
-                    shutil.rmtree(directory_path)
-                    break
+    if header.lhapdf_ignore_dirs is not None:
+        for root, dirs, files in os.walk(lhapdf):
+            for directory in dirs:
+                directory_path = os.path.join(root, directory)
+                for rname in rmdirs:
+                    if rname in directory_path:
+                        shutil.rmtree(directory_path)
+                        break
+    if header.lhapdf_central_scale_only:
+        print("> Removing non-central scales from lhapdf")
+        for root, dirs, files in os.walk(lhapdf):
+            for xfile in files:
+                fullpath = os.path.join(root,xfile)
+                if "share" and ".dat" in fullpath:
+                    if "_0000.dat" not in fullpath:
+                        os.remove(fullpath)
     # Tar lhapdf and prepare it to be sent
     lhapdf_remote = header.lhapdf_grid_loc
     lhapdf_griddir = lhapdf_remote.rsplit("/",1)[0]
@@ -152,9 +161,12 @@ def lhapdfIni():
     tar_w = TarWrap()
     grid_w = GridWrap()
     tar_w.tarDir(lhapdf, lhapdf_gridname)
+    size = os.path.getsize(lhapdf_gridname)/float(1<<20)
+    print("> LHAPDF tar size: {0:>6.3f} MB".format(size))
     if grid_w.checkForThis(lhapdf_gridname, lhapdf_griddir):
-        print("Removing previous version of lhapdf in the grid")
+        print("> Removing previous version of lhapdf in the grid")
         grid_w.delete(lhapdf_gridname, lhapdf_griddir)
+    print("> Sending new lhapdf to grid as {0}".format(lhapdf_gridname))
     grid_w.send(lhapdf_gridname, lhapdf_griddir)
     shutil.rmtree(lhapdf)
     os.remove(lhapdf_gridname)
