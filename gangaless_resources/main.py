@@ -35,16 +35,16 @@ db = database(dbname, tables = [arctable, diractable], fields = dbfields)
 
 #### Initialisation: send stuff to Grid Storage
 if rmode[:3] == "ini":
-    if args.runArc:
+    if args.lhapdf:
+        from utilities import lhapdfIni
+        lhapdfIni()
+        exit(0)
+    elif args.runArc:
         from runArcjob import iniWrapper
     elif args.runArcProduction:
         from runArcjob import iniWrapperProduction as iniWrapper
     elif args.runDirac:
         from runDiracjob import iniWrapper
-    elif args.lhapdf:
-        from utilities import lhapdfIni
-        lhapdfIni()
-        exit(0)
     else:
         raise Exception("Choose what do you want to initialise -(A/B/D/L)")
     if args.provWarm:
