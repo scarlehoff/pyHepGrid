@@ -16,7 +16,7 @@ def parse_arguments():
     from optparse import OptionParser
     try:
         from getpass import getuser
-        default_user_lfn = "/grid/pheno/{}".format(getuser())
+        default_user_lfn = "/grid/pheno/{0}".format(getuser())
     except:
         # Check how to get username from enviromental variables in ARC (if possible)
         default_user_lfn = "/grid/pheno/jmartinez"
