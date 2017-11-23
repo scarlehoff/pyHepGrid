@@ -14,13 +14,9 @@ def output_name(runcard, rname, seed):
 
 def parse_arguments():
     from optparse import OptionParser
-    try:
-        from getpass import getuser
-        default_user_lfn = "/grid/pheno/{0}".format(getuser())
-    except:
-        # Check how to get username from enviromental variables in ARC (if possible)
-        default_user_lfn = "/grid/pheno/jmartinez"
+    from getpass import getuser
 
+    default_user_lfn = "/grid/pheno/{0}".format(getuser())  
     parser = OptionParser(usage = "usage: %prog [options]")
 
     parser.add_option("-r","--runcard", help = "Runcard to be run")
