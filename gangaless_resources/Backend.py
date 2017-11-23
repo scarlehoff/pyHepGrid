@@ -1,4 +1,5 @@
 import os
+import sys
 import utilities as util
 import header
 
@@ -48,8 +49,7 @@ class Backend(object):
             if error:
                 raise Exception(error)
             else:
-                from sys import exit
-                exit(-1)
+                sys.exit(-1)
 
     def _db_list(self, fields, search_string = None, search_fields = ["runcard", "runfolder"]):
         """ Returns a list with a dict for each member of the list.
@@ -170,7 +170,9 @@ class Backend(object):
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
         tmpnm = "tmp.tar.gz"
-        self.gridw.bring(outnm, lfn_warmup_dir, tmpnm)
+        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm)
+        if not success:
+            sys.exit(-1)
         ## Now list the files inside the .tar.gz and extract only the Vegas grid file
         gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
         outlist = self.tarw.listFilesTar(tmpnm)

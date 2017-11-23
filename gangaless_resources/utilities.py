@@ -237,15 +237,18 @@ class GridWrap:
             cmd = self.sendto + what + gsiftp_wher + wher
         else:
             cmd = self.sendto + wher + what
-        spCall(cmd)
+        return spCall(cmd)
 
     def bring(self, tarfile, whereFrom, whereTo):
         args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
-        spCall(self.retriv + args)
+        success = spCall(self.retriv + args)
+        # lcg-cp returns always 0 even when it fails :___
+        from os import path
+        return path.isfile(whereTo)
 
     def delete(self, tarfile, whereFrom):
         args = [self.lfn + whereFrom + "/" + tarfile]
-        spCall(self.delcmd + args)
+        return spCall(self.delcmd + args)
 
     def checkForThis(self, filename, where):
         if self.gfal:
