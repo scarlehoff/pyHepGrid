@@ -12,15 +12,18 @@ def output_name(runcard, rname, seed):
     out = "output" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 
+#### Override os.system with custom version that auto sets debug level on failure
+# Abusive...
 syscall = os.system
 def do_shell(*args):
     global debug_level
     retval = syscall(*args)
     if retval != 0:
         debug_level = 9999
-    print("Error in {0}. Raising debug level to 9999".format(*args))
+        print("Error in {0}. Raising debug level to 9999".format(*args))
     return retval
 os.system = do_shell
+####
 
 def parse_arguments():
     from optparse import OptionParser
