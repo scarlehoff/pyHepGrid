@@ -16,6 +16,7 @@ warmupthr  = 16
 producRun  = 500
 baseSeed   = 100
 jobName    = "testjob"
+debug_level = 0
 
 # Grid config 
 lfndir   = "/grid/pheno/jmartinez"
