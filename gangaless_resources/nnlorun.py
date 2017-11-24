@@ -26,7 +26,7 @@ def parse_arguments():
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
     parser.add_option("-e", "--executable", help = "Executable to be run", default = "NNLOJET")
     parser.add_option("-d", "--debug", help = "Debug level", default="0")
-    parser.add_option("-s", "--seed", help = "Run seed for NNLOJET")
+    parser.add_option("-s", "--seed", help = "Run seed for NNLOJET", default="1")
 
     # Grid configuration options
     parser.add_option("-l", "--lfndir", help = "LFNDIR", default = default_user_lfn)

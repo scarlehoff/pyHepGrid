@@ -312,8 +312,14 @@ class Backend(object):
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            util.spCall(["rm", i, tarfile] + warmupFiles)
-        util.spCall(["rm"] + files)
+            if provided_warmup:
+                util.spCall(["rm", i, tarfile])
+            else:
+                util.spCall(["rm", i, tarfile] + warmupFiles)
+        if provided_warmup:
+            util.spCall(["rm"] + files + warmupFiles)
+        else:
+            util.spCall(["rm"] + files)
 
     # Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
@@ -610,7 +616,7 @@ def generic_initialise(runcard, warmup=False, production=False, grid=None):
     print("Initialising runcard: {0}".format(runcard))
     back = Backend()
     if warmup:
-        back.init_warmup(runcard)
+        back.init_warmup(runcard, grid)
     elif production:
         back.init_production(runcard, grid)
     else:
