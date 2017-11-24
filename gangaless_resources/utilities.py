@@ -219,6 +219,8 @@ class GridWrap:
     sendto = ["lcg-cr", "--vo", "pheno", "-l"]
     retriv = ["lcg-cp"]
     delcmd = ["lcg-del", "-a"]
+    delete_dir = ["lfc-rm", "-r"]
+    rename = ["lfc-rename"]
     listfi = ["lfc-ls"]
     lfn = "lfn:"
     gfal = False
@@ -228,6 +230,8 @@ class GridWrap:
 #    sendto = ["gfal-copy", "-p"]
 #    retriv = ["gfal-copy"]
 #    delcmd = ["gfal-rm"]
+#    delete_dir = ["gfal-rm"]
+#    rename = ["gfal-rename"]
 #    listfi = ["gfal-ls"]
     def init(self, sendto = None, retriv = None, delete = None, lfn = None):
         if sendto: self.sendto = sendto
@@ -283,8 +287,13 @@ class GridWrap:
         output = getOutputCall(cmd)
         return output
 
-
-
+    def delete_directory(self, directory):
+        # Get contents and delete them one by one (there is no recursive for this that I could find)
+        files = self.get_dir_contents(directory).split()
+        for filename in files:
+            self.delete(filename, directory)
+        return spCall(self.delete_dir + [directory])
+        
 if __name__ == '__main__':
     from sys import version_info
     tar  = TarWrap()
