@@ -605,4 +605,15 @@ class Backend(object):
         warmup_str = self._format_args(warmup_dict)
         return base_string + warmup_str
 
+def generic_initialise(runcard, warmup=False, production=False, grid=None):
+    print("Initialising runcard: {0}".format(runcard))
+    back = Backend()
+    if warmup:
+        back.init_warmup(runcard)
+    elif production:
+        back.init_production(runcard, grid)
+    else:
+        print("What do you want me to initialise?")
+        sys.exit(-1)
+
 

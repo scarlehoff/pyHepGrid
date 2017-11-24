@@ -177,6 +177,10 @@ def runWrapperProduction(runcard, test=None):
     arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
     arc.run_wrap_production(runcard, test)
 
+
+
+
+# Code graveyard
 def iniWrapper(runcard, warmup=None):
     print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()

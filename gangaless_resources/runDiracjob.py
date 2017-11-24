@@ -99,11 +99,13 @@ class RunDirac(Backend):
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
 
+
 def runWrapper(runcard, test = None):
     print("Running dirac job for {0}".format(runcard))
     dirac = RunDirac()
     dirac.run_wrap_production(runcard)
 
+# code graveyard
 def iniWrapper(runcard, warmupProvided = None):
     print("Initialising dirac for {0}".format(runcard))
     dirac = RunDirac()
