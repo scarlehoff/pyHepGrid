@@ -203,7 +203,7 @@ if __name__ == "__main__":
         nnlojet_command += " -port {0} -host {1} {2}".format(port, host,  socket_config)
 
     if args.Production:
-        nnlojet_command += " -seed {0}".format(args.seed)
+        nnlojet_command += " -iseed {0}".format(args.seed)
 
     set_environment(args.lfndir, args.lhapdf_local)
 
