@@ -7,9 +7,11 @@ try:
     caller_script = os.path.basename(os.path.realpath(__main__.__file__)) 
 except:
     caller_script = "None"
+
 if caller_script == "main.py":
-    from argparse import ArgumentParser
-    parser = ArgumentParser()
+
+    import argparse
+    parser = argparse.ArgumentParser()
 
     parser.add_argument("mode", help = "Mode [initialize/run/manage/proxy] ")
     parser.add_argument("runcard", nargs = "?", help = "Runcard to act upon")
@@ -19,8 +21,15 @@ if caller_script == "main.py":
     parser.add_argument("-B", "--runArcProduction",   help = "Run/manage an Arc job (production)", action = "store_true")
     parser.add_argument("-D", "--runDirac", help = "Run/manage a dirac job (production)", action = "store_true")
 
-    # Initialisation options
-    parser.add_argument("-L", "--lhapdf",    help = "Send LHAPDF to Grid", action = "store_true")
+    # LHAPDF initialisation
+    class LHAPDF_initAction(argparse.Action):
+        def __init__(self, nargs=0, **kw):
+            super().__init__(nargs=nargs, **kw)
+        def __call__(self, parser, namespace, values, option_string=None):
+            from utilities import lhapdfIni
+            lhapdfIni()
+            parser.exit(0)
+    parser.add_argument("-L", "--lhapdf", help = "Send LHAPDF to Grid", action = LHAPDF_initAction)
 
     parser.add_argument("-n", "--noProxy", help = "Bypasses proxy creation", action = "store_true")
 
