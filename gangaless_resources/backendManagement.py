@@ -135,7 +135,7 @@ class Dirac(Backend):
                                   '--Owner={0}'.format(header.dirac_name),
                                   '--Date={0}'.format(date)]).split("\n")[-2].split(", "))
 
-    def stats_job_cheat(self, jobids, date):
+    def stats_job_cheat(self, jobids, runcard_info):
         """ When using Dirac, instead of asking for each job individually
         we can ask for batchs of jobs in a given state and compare.
         In order to use this function you need to modify 
@@ -143,7 +143,7 @@ class Dirac(Backend):
         lines 87-89.
         """
         print("Stats function under testing/debugging. Use with care...")
-        date = date.split()[0]
+        date = runcard_info["date"].split()[0]
         jobids = set(jobids)
         waiting_jobs = self.get_status('Waiting', date)
         done_jobs = self.get_status('Done', date)
@@ -155,6 +155,8 @@ class Dirac(Backend):
         fail = len(jobids & fail_jobs)
         done = len(jobids & done_jobs)
         unk = len(jobids & unk_jobs)
+        print("=> {0}: {1}".format(runcard_info["runcard"], 
+                                    runcard_info["runfolder"]))
         self.print_stats(done, wait, run, fail, unk, jobids)
 
 

@@ -571,7 +571,8 @@ class Backend(object):
                 'output_folder' : header.lfn_output_dir,
                 'warmup_folder' : header.lfn_warmup_dir,
                 'lhapdf_grid' : header.lhapdf_grid_loc,
-                'lhapdf_local' : header.lhapdf_loc
+                'lhapdf_local' : header.lhapdf_loc,
+                'debug' : header.debug_level
                 }
         return dictionary
 
