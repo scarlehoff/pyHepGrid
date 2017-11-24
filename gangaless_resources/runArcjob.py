@@ -21,7 +21,7 @@ class RunArc(Backend):
             string_arg = ""
             for key in input_args.keys():
                 arg_value = input_args[key]
-                if arg_value:
+                if arg_value is not None:
                     string_arg += " \"--{0}\" \"{1}\"".format(key, arg_value)
                 else:
                     string_arg += " \"--{0}\" ".format(key)
