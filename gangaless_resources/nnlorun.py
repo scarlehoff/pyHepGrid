@@ -25,7 +25,7 @@ def parse_arguments():
     # Run options
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
     parser.add_option("-e", "--executable", help = "Executable to be run", default = "NNLOJET")
-    parser.add_option("-d", "--debug", help = "Debug level", type=int, default=0)
+    parser.add_option("-d", "--debug", help = "Debug level", default="0")
     parser.add_option("-s", "--seed", help = "Run seed for NNLOJET")
 
     # Grid configuration options
@@ -117,7 +117,7 @@ def copy_from_grid(grid_file, local_file):
     os.system(cmd)
 
 def untar_file(local_file, debug):
-    if args.debug > 2:
+    if debug_level > 2:
         cmd = "tar zxfv {0}".format(local_file)
     else:
         cmd = "tar zxf " + local_file
@@ -181,8 +181,10 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
 
 if __name__ == "__main__":
     args = parse_arguments()
+
+    debug_level = int(args.debug)
     
-    if args.debug > 1:
+    if debug_level > 1:
         from sys import version
         print("Running Python version {0}".format(version))
 
@@ -205,14 +207,14 @@ if __name__ == "__main__":
 
     set_environment(args.lfndir, args.lhapdf_local)
 
-    if args.debug > 2:
+    if debug_level > 2:
         os.system("env")
 
     print("Downloading LHAPDF")
-    bring_lhapdf(args.lhapdf_grid, args.debug)
-    bring_nnlojet(args.input_folder, args.runcard, args.runname, args.debug)
+    bring_lhapdf(args.lhapdf_grid, debug_level)
+    bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
 
-    if args.debug > 1:
+    if debug_level > 1:
         os.system("ls")
         os.system("ldd -v {0}".format(args.executable))
         
@@ -227,7 +229,7 @@ if __name__ == "__main__":
     else:
         print("Something went wrong")
         os.system("cat outfile.out")
-        args.debug = 9999
+        debug_level = 9999
 
     # Debug info
     os.system("voms-proxy-info --all")
@@ -241,7 +243,7 @@ if __name__ == "__main__":
         local_out = warmup_name(args.runcard, args.runname)
         output_file = args.warmup_folder + "/" + local_out
 
-    if args.debug > 1:
+    if debug_level > 1:
         os.system("ls")
 
     tar_this(local_out, "*")
