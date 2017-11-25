@@ -424,6 +424,8 @@ class Backend(object):
         pathfolder   = util.sanitiseGeneratedPath(pathfolderTp, self.rfolder)
         jobids       = data["jobid"].split(" ")
         finalSeed    = int(initial_seed) + len(jobids)
+        if initial_seed == "None":
+            initial_seed = self.bSeed
         while True:
             firstName = self.output_name(self.rcard, self.rfolder, initial_seed)
             finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
@@ -432,7 +434,7 @@ class Backend(object):
             yn = input("Are these parameters correct? (y/n) ").lower()
             if yn.startswith("y"): 
                 break
-            self.bSeed = int(input("Please, introduce the starting seed (ex: 400): "))
+            initial_seed = int(input("Please, introduce the starting seed (ex: 400): "))
             finalSeed  = int(input("Please, introduce the final seed (ex: 460): ")) 
         try:
             os.makedirs(self.rfolder)
@@ -449,7 +451,7 @@ class Backend(object):
             os.makedirs("dat")
         except: # todo: macho... this is like mkdir -p :P
             pass
-        seeds    =  range(self.bSeed, finalSeed)
+        seeds    =  range(initial_seed, finalSeed)
         from header import finalise_no_cores as n_threads
         tarfiles =  self._multirun(self._do_get_data, seeds, n_threads)
         # Don't try to untar files that do not exist...
