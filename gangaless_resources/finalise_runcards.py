@@ -20,8 +20,8 @@ dictCard = {
     # 'R_fix_scale.run':'R_DM_FIX',
     # 'V_fix_scale.run':'V_DM_FIX',
     # 'LO_fix_scale.run':'LO_DM_FIX',
-    'RRa_fix_scale_Janfix.run': 'RRa_DM_JAN',
-    'RRb_fix_scale_Janfix.run': 'RRb_DM_JAN',
+    # 'RRa_fix_scale_Janfix.run': 'RRa_DM_JAN',
+    # 'RRb_fix_scale_Janfix.run': 'RRb_DM_JAN',
 
     # 'ubgRa.run':'Ra',
     # 'ubgRb.run':'Rb',
