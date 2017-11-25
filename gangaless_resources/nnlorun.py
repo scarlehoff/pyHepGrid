@@ -12,6 +12,19 @@ def output_name(runcard, rname, seed):
     out = "output" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 
+#### Override os.system with custom version that auto sets debug level on failure
+# Abusive...
+syscall = os.system
+def do_shell(*args):
+    global debug_level
+    retval = syscall(*args)
+    if retval != 0:
+        debug_level = 9999
+        print("Error in {0}. Raising debug level to 9999".format(*args))
+    return retval
+os.system = do_shell
+####
+
 def parse_arguments():
     from optparse import OptionParser
     from getpass import getuser
@@ -188,7 +201,9 @@ if __name__ == "__main__":
         from sys import version
         print("Running Python version {0}".format(version))
 
-    nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads, args.executable, args.runcard)
+    nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads, 
+                                                                  args.executable, 
+                                                                  args.runcard)
 
     if args.Sockets:
         host = args.Host
@@ -207,12 +222,10 @@ if __name__ == "__main__":
 
     set_environment(args.lfndir, args.lhapdf_local)
 
-    if debug_level > 2:
-        os.system("env")
-
-    print("Downloading LHAPDF")
     bring_lhapdf(args.lhapdf_grid, debug_level)
     bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
+    if debug_level > 2:
+        os.system("env")
 
     if debug_level > 1:
         os.system("ls")
