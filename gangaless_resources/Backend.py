@@ -426,6 +426,8 @@ class Backend(object):
         finalSeed    = int(initial_seed) + len(jobids)
         if initial_seed == "None":
             initial_seed = self.bSeed
+        else:
+            initial_seed = int(initial_seed)
         while True:
             firstName = self.output_name(self.rcard, self.rfolder, initial_seed)
             finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
