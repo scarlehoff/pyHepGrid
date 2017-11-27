@@ -44,6 +44,8 @@ finalisation_script = None
 warmup_base_dir = "/WarmupsRunGrids"
 production_base_dir = "/ResultsRunGrids"
 
+short_stats = False
+
 # ARC parameters
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"

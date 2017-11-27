@@ -50,6 +50,8 @@ finalisation_script = "finalise"
 warmup_base_dir = None
 production_base_dir = os.path.expanduser("~/working/RESULTS/")
 
+short_stats = True
+
 # ARC parameters
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"

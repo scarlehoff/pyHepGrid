@@ -324,31 +324,54 @@ class Backend(object):
     # Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
     # for both ARC and DIRAC)
-    def stats_job(self, jobids):
+    def stats_job(self, jobids, runcard_info):
         """ Given a list of jobs, returns the number of jobs which
         are in each possible state (done/waiting/running/etc)
         """
         from header import finalise_no_cores as n_threads
+        from header import short_stats
         status = self._multirun(self._do_stats_job, jobids, n_threads)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)
         fail = status.count(self.cFAIL)
         unk = status.count(self.cUNK)
+        if not short_stats:
+            print("=> {0}: {1}".format(runcard_info["runcard"], 
+                                       runcard_info["runfolder"]))
+        else:
+            print("{0:20} {1:10}".format(runcard_info["runcard"], 
+                                         runcard_info["runfolder"]), end="")
         self.print_stats(done, wait, run, fail, unk, jobids)
 
     def print_stats(self, done, wait, run, fail, unk, jobids):
         import datetime
+        from header import short_stats
         total = len(jobids)
         total2 = done + wait + run + fail + unk 
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-        print(" >> Total number of subjobs: {0:<20} {1}".format(total, time))
-        print("    >> Done:    {0}".format(done))
-        print("    >> Waiting: {0}".format(wait))
-        print("    >> Running: {0}".format(run))
-        print("    >> Failed:  {0}".format(fail))
-        print("    >> Unknown: {0}".format(unk))
-        print("    >> Sum      {0}".format(total2))
+
+        if short_stats:
+            def addline(name, val, colour):
+                if val > 0:
+                    return "{0}{1}: {2} \033[0m".format(colour, name, val)
+                else:
+                    return  "{0}: {1} ".format(name, val)
+
+            string = addline("Done", done, '\033[92m')
+            string += addline("Waiting", wait, '\033[93m')
+            string += addline("Running", run, '\033[94m')
+            string += addline("Failed", fail, '\033[91m')
+            string += "Total {0}".format(total2)
+            print(string)
+        else:
+            print(" >> Total number of subjobs: {0:<20} {1}".format(total, time))
+            print("    >> Done:    {0}".format(done))
+            print("    >> Waiting: {0}".format(wait))
+            print("    >> Running: {0}".format(run))
+            print("    >> Failed:  {0}".format(fail))
+            print("    >> Unknown: {0}".format(unk))
+            print("    >> Sum      {0}".format(total2))
 
     def _do_stats_job(self, jobid):
         """ version of stats job multithread ready
