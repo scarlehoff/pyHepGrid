@@ -142,7 +142,12 @@ class Dirac(Backend):
         "DIRAC/Interfaces/scripts/dirac-wms-select-jobs.py" to comment out 
         lines 87-89.
         """
-        print("Stats function under testing/debugging. Use with care...")
+        from header import short_stats
+        try:
+            self.__first_call_stats
+        except AttributeError as e:
+            print("Stats function under testing/debugging. Use with care...")
+            self.__first_call_stats = False
         date = runcard_info["date"].split()[0]
         jobids = set(jobids)
         waiting_jobs = self.get_status('Waiting', date)
@@ -155,8 +160,12 @@ class Dirac(Backend):
         fail = len(jobids & fail_jobs)
         done = len(jobids & done_jobs)
         unk = len(jobids & unk_jobs)
-        print("=> {0}: {1}".format(runcard_info["runcard"], 
-                                    runcard_info["runfolder"]))
+        if not short_stats:
+            print("=> {0}: {1}".format(runcard_info["runcard"], 
+                                       runcard_info["runfolder"]))
+        else:
+            print("{0:20} {1:10}".format(runcard_info["runcard"], 
+                                         runcard_info["runfolder"]), end="")
         self.print_stats(done, wait, run, fail, unk, jobids)
 
 
