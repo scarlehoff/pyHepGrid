@@ -154,6 +154,9 @@ def lhapdfIni():
                 if "share" and ".dat" in fullpath:
                     if "_0000.dat" not in fullpath:
                         os.remove(fullpath)
+                    else:
+                        prettyname = fullpath.split("/")[-1].replace("_0000.dat","")
+                        print("Including central PDF for {0}".format(prettyname))
     # Tar lhapdf and prepare it to be sent
     lhapdf_remote = header.lhapdf_grid_loc
     lhapdf_griddir = lhapdf_remote.rsplit("/",1)[0]

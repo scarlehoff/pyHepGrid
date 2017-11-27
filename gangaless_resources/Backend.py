@@ -135,7 +135,7 @@ class Backend(object):
         print("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, "warmup"):
-            self._press_yes_to_continue("File {} already exists at lfn:warmup, do wou want to remove it?".format(checkname))
+            self._press_yes_to_continue("File {} already exists at lfn:warmup, do you want to remove it?".format(checkname))
             self.gridw.delete(checkname, "warmup")
 
     def _checkfor_existing_output(self, r, rname):

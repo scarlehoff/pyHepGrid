@@ -15,7 +15,7 @@ NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
 producRun  = 1000
-baseSeed   = 4000
+baseSeed   = 1
 jobName    = "gridjob"
 debug_level = 0
 
@@ -38,7 +38,7 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
-dbname     = "/mt/home/dwalker/submit/gangaless_resources/alljobs.dat"     
+dbname     = "/mt/home/dwalker/submit/gangaless_resources/wpt.dat"     
 
 # Finalisation and storage options
 finalise_no_cores = 15
