@@ -39,6 +39,7 @@ lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
 dbname     = "/mt/home/dwalker/submit/gangaless_resources/wpt.dat"     
+#dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
 
 # Finalisation and storage options
 finalise_no_cores = 15

@@ -354,9 +354,9 @@ class Backend(object):
         if short_stats:
             def addline(name, val, colour):
                 if val > 0:
-                    return "{0}{1}: {2:4} \033[0m".format(colour, name, val)
+                    return "{0}{1}: {2:4}  \033[0m".format(colour, name, val)
                 else:
-                    return  "{0}: {1:4} ".format(name, val)
+                    return  "{0}: {1:4}  ".format(name, val)
 
             string = addline("Done", done, '\033[92m')
             string += addline("Waiting", wait, '\033[93m')
