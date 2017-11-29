@@ -99,11 +99,11 @@ elif rmode[:3] == "man":
         if args.stats:
             tags = ["runcard", "runfolder", "date"]
             info = backend.dbase.list_data(backend.table, tags, db_id)[0]
-            backend.stats_job(jobid, info)
+            backend.stats_job(jobid, info, dbid=db_id)
         elif args.statsCheat:
             tags = ["runcard", "runfolder", "date"]
             info = backend.dbase.list_data(backend.table, tags, db_id)[0]
-            backend.stats_job_cheat(jobid, info)
+            backend.stats_job_cheat(jobid, info, dbid=db_id)
         elif args.info or args.infoVerbose:
             print("Retrieving information . . . ")
             backend.status_job(jobid, args.infoVerbose)

@@ -135,14 +135,13 @@ class Dirac(Backend):
                                   '--Owner={0}'.format(header.dirac_name),
                                   '--Date={0}'.format(date)]).split("\n")[-2].split(", "))
 
-    def stats_job_cheat(self, jobids, runcard_info):
+    def stats_job_cheat(self, jobids, runcard_info, dbid = ""):
         """ When using Dirac, instead of asking for each job individually
         we can ask for batchs of jobs in a given state and compare.
         In order to use this function you need to modify 
         "DIRAC/Interfaces/scripts/dirac-wms-select-jobs.py" to comment out 
         lines 87-89.
         """
-        from header import short_stats
         try:
             self.__first_call_stats
         except AttributeError as e:
@@ -160,12 +159,7 @@ class Dirac(Backend):
         fail = len(jobids & fail_jobs)
         done = len(jobids & done_jobs)
         unk = len(jobids & unk_jobs)
-        if not short_stats:
-            print("=> {0}: {1}".format(runcard_info["runcard"], 
-                                       runcard_info["runfolder"]))
-        else:
-            print("{0:20} {1:10}".format(runcard_info["runcard"], 
-                                         runcard_info["runfolder"]), end="")
+        self.stats_print_setup(runcard_info,dbid = dbid)
         self.print_stats(done, wait, run, fail, unk, jobids)
 
 
