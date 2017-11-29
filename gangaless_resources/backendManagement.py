@@ -127,7 +127,7 @@ class Dirac(Backend):
     def do_status_job(self, jobid):
         """ multiproc wrapper for status_job """
         cmd = [self.cmd_stat, jobid]
-        util.spCall(cmd)
+        util.spCall(cmd, suppress_errors=True)
         return 0
 
     def get_status(self, status, date):

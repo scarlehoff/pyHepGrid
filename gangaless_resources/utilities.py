@@ -42,19 +42,25 @@ def expandCard(runcard, dicRuns = None):
 #
 # Subprocess Wrappers
 # 
-def spCall(cmd):
-    from subprocess import call
+def spCall(cmd, suppress_errors = False):
+    from subprocess import call, DEVNULL
     try:
-        call(cmd)
+        if not suppress_errors:
+            call(cmd)
+        else:
+            call(cmd, stderr=DEVNULL, stdout=DEVNULL)
         return 0
     except:
         raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
         return -1
 
-def getOutputCall(cmd):
-    from subprocess import Popen, PIPE
+def getOutputCall(cmd, suppress_errors = False):
+    from subprocess import Popen, PIPE, DEVNULL
     try:
-        outbyt = Popen(cmd, stdout = PIPE).communicate()[0]
+        if not suppress_errors:
+            outbyt = Popen(cmd, stdout = PIPE).communicate()[0]
+        else:
+            outbyt = Popen(cmd, stdout = PIPE, stderr=DEVNULL).communicate()[0]
         outstr = outbyt.decode("utf-8")
         return outstr
     except:

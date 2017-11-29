@@ -379,7 +379,7 @@ class Backend(object):
         """
         # When used with ARC, it assumes -j database is not needed (ie, default db is being used)
         cmd = [self.cmd_stat, jobid.strip()]
-        strOut = util.getOutputCall(cmd)
+        strOut = util.getOutputCall(cmd, suppress_errors=True)
         if "Done" in strOut or "Finished" in strOut:
             return self.cDONE
         elif "Waiting" in strOut or "Queuing" in strOut:
