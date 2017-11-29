@@ -67,10 +67,11 @@ class Backend(object):
             to be locked 
         """
         from multiprocessing import Pool 
-        if str(self) == "Arc":
-            threads = 1
-        else:
-            threads = n_threads
+        # if str(self) == "Arc":
+        #     threads = 1
+        # else:
+        #     threads = n_threads
+        threads = n_threads
         pool   = Pool(threads)
         result = pool.map(function, arguments)
         pool.close()
