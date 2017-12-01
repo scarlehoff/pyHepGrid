@@ -34,7 +34,7 @@ class Backend(object):
                                        runcard_info["runfolder"])
             print(string)
         else:
-            string += "{0:20} {1:7}".format(runcard_info["runcard"], 
+            string += "{0:20}: {1:10} ".format(runcard_info["runcard"], 
                                          runcard_info["runfolder"])
             print(string, end="")
 
