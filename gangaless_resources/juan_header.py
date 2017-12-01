@@ -32,7 +32,7 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
  
 # NNLOJET Database Parameters
-dbname     = "NNLOJET_november.dat"     
+dbname     = "NNLOJET_december.dat"     
 
 # Finalisation and storage options
 finalise_no_cores = 15
@@ -47,7 +47,9 @@ production_base_dir = "/ResultsRunGrids"
 short_stats = True
 
 # ARC parameters
-ce_base = "ce2.dur.scotgrid.ac.uk"
+ce_base = "ce1.dur.scotgrid.ac.uk"
+# ce_base = "ce02.tier2.hep.manchester.ac.uk"
+# ce_base = "svr009.gla.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 
 # DIRAC parameters
