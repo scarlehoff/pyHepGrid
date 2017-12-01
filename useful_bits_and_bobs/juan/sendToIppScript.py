@@ -107,7 +107,7 @@ runme() {{
     echo tar xfz tmp.tar.gz >> {9}
     echo rm tmp.tar.gz >> {9}
 
-    echo "Runfolder: " ${dailypath}
+    echo "Runfolder: " $dailypath
 
 }}
 runme
