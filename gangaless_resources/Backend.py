@@ -78,6 +78,17 @@ class Backend(object):
         else:
             return self.dbase.list_data(self.table, fields)
 
+    def _get_computing_element(self, id_example):
+        """ Given a list jobids, returns the computing elements they are being run on
+        if it is not Durham. Since there is no pattern? let's assume anything relevant
+        happens before .ac.uk _and_ after the first ."""
+        comp_element = id_example.split('.ac.uk')[0]
+        if "dur" not in comp_element:
+            return " at {}".format(comp_element.split('.',1)[1])
+        else:
+            return ""
+
+
     def _multirun(self, function, arguments, n_threads = 5):
         """ Wrapper for multiprocessing
             For ARC only single thread is allow as the arc database needs
@@ -586,23 +597,24 @@ class Backend(object):
         fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype", "iseed"]
         dictC  = self._db_list(fields, search_string)
         print("Active runs: " + str(len(dictC)))
-        print("id".center(5) + " | " + "runcard".center(22) + " | " + "runname".center(25) + " |" +  "date".center(20))
+        print("id".center(5) + " | " + "runcard".center(22) + " | " + "runname".center(25) + " | " +  "date".center(22) + " | " + "misc".center(20))
         for i in dictC:
-            multirun_flag = ""
             rid = str(i['rowid']).center(5)
             ruc = str(i['runcard']).center(22)
             run = str(i['runfolder']).center(25)
-            dat = str(i['date']).split('.')[0] + " " + str(i['jobtype'])
-            dat = dat.center(20)
+            dat = str(i['date']).split('.')[0].center(22)
+            misc = str(i['jobtype'])
             jobids = str(i['jobid'])
             initial_seed = str(i['iseed'])
             no_jobs = len(jobids.split(" "))
             if no_jobs > 1:
                 if initial_seed and initial_seed != "None":
-                    multirun_flag = " ({0}, is: {1})".format(no_jobs, initial_seed)
+                    misc += " ({0}, is: {1})".format(no_jobs, initial_seed)
                 else:
-                    multirun_flag = " ({0})".format(no_jobs)
-            print(rid + " | " + ruc + " | " + run + " | " + dat + multirun_flag)
+                    misc += " ({0})".format(no_jobs)
+            misc += self._get_computing_element(jobids)
+            misc_text = misc.center(20)
+            print(rid + " | " + ruc + " | " + run + " | " + dat + " | " + misc_text)
 
     def _format_args(self):
         raise Exception("Any children classes of Backend.py should override this method")

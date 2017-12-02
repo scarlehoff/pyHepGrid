@@ -212,7 +212,7 @@ if __name__ == "__main__":
         socket_config = socket_sync_str(host, port)
         if "die" in socket_config:
             print("Timeout'd by socket server")
-            exit(0)
+            exit(-1)
         socketed = True
         print("Connected to socket server")
         nnlojet_command += " -port {0} -host {1} {2}".format(port, host,  socket_config)
