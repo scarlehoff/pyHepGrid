@@ -1,3 +1,7 @@
-Send production as subjobs for arc [if possible]
+- Send production as subjobs for arc [if possible]
 
-Warmup and dat files in ARC/DIRAC sandbox - if job fails halfway through you can retrieve output... Alternatively, find whether there is a "backup" system so that we can copy the files somewhere else. It might also be a problem with lfc-ls?...
+- Warmup and dat files in ARC/DIRAC sandbox - if job fails halfway through you can retrieve output... Alternatively, find whether there is a "backup" system so that we can copy the files somewhere else. It might also be a problem with lfc-ls?...
+
+- Store in database a string tih the jobs that are already done/failed fo we don't query them again (which is quite costly in ARC). Store a string with 0 1 -1, for instance, keeping the order.
+
+- Bonus, when printing, don't print jobs with a -1!
