@@ -83,7 +83,7 @@ class Backend(object):
         if it is not Durham. Since there is no pattern? let's assume anything relevant
         happens before .ac.uk _and_ after the first ."""
         comp_element = id_example.split('.ac.uk')[0]
-        if "dur" not in comp_element:
+        if "dur" not in comp_element and "." in comp_element:
             return " at {}".format(comp_element.split('.',1)[1])
         else:
             return ""
@@ -289,12 +289,7 @@ class Backend(object):
         for i in rncards:
             # Check whether warmup/production is active in the runcard
             if not os.path.isfile(runFol + "/" + i):
-                print("Could not find runcard %s" % i)
-                yn = input("Do you want to continue? (y/n): ").lower()
-                if yn.startswith('y'):
-                    continue
-                else:
-                    raise Exception("Could not find runcard")
+                self._pres_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
             self._check_warmup(i, runFol)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -334,6 +329,7 @@ class Backend(object):
             if provided_warmup:
                 warmupFiles = [provided_warmup]
             else:
+                print("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname)
             self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
