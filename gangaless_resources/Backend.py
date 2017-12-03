@@ -6,11 +6,11 @@ import header
 class Backend(object):
     """ Abstract class
     """
-    cDONE = 0
-    cWAIT = 1
-    cRUN = 2
+    cDONE = 1
+    cWAIT = 0
     cFAIL = -1
-    cUNK = 99
+    cRUN  = 2
+    cUNK  = 99
 
     ### IMPORTANT: NAMING FUNCTIONS SHOULD BE THE SAME IN ARC.py AND DIRAC.py
     def warmup_name(self, runcard, rname):
@@ -353,20 +353,48 @@ class Backend(object):
         """ Given a list of jobs, returns the number of jobs which
         are in each possible state (done/waiting/running/etc)
         """
-        from header import finalise_no_cores as n_threads
-        status = self._multirun(self._do_stats_job, jobids, n_threads)
+        if dbid != "":
+            current_status = self._get_old_status(dbid)
+        else:
+            current_status = None
+        if isinstance(current_status, list):
+            jobids_lst = zip(jobids, current_status)
+        else:
+            jobids_lst = jobids
+        n_threads = header.finalise_no_cores
+        status = self._multirun(self._do_stats_job, jobids_lst, n_threads)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)
         fail = status.count(self.cFAIL)
         unk = status.count(self.cUNK)
         self.stats_print_setup(runcard_info, dbid=dbid)
-        self.print_stats(done, wait, run, fail, unk, jobids)
+        total = len(jobids)
+        self.print_stats(done, wait, run, fail, unk, total)
+        if dbid != "":
+            self._set_new_status(dbid, status)
 
-    def print_stats(self, done, wait, run, fail, unk, jobids):
+    def _get_old_status(self, db_id):
+        field_name = "sub_status"
+        status_dic = self.dbase.list_data(self.table, [field_name], db_id)
+        try:
+            status_str = status_dic[0][field_name]
+            if status_str.lower() == "none":
+                return None
+            else:
+                outlst = [int(i) for i in status_str.split()]
+                return outlst
+        except:
+            return None
+
+    def _set_new_status(self, db_id, status):
+        field_name = "sub_status"
+        status_str = ' '.join(map(str,status))
+        self.dbase.update_entry(self.table, db_id, field_name, status_str)
+
+    def print_stats(self, done, wait, run, fail, unk, total):
         import datetime
         from header import short_stats
-        total = len(jobids)
         total2 = done + wait + run + fail + unk 
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
@@ -392,10 +420,17 @@ class Backend(object):
             print("    >> Unknown: {0}".format(unk))
             print("    >> Sum      {0}".format(total2))
 
-    def _do_stats_job(self, jobid):
+    def _do_stats_job(self, jobid_raw):
         """ version of stats job multithread ready
         """
         # When used with ARC, it assumes -j database is not needed (ie, default db is being used)
+        if isinstance(jobid_raw, tuple):
+            if jobid_raw[1] == self.cDONE or jobid_raw[1] == self.cFAIL:
+                return jobid_raw[1]
+            else:
+                jobid = jobid_raw[0]
+        else:
+            jobid = jobid_raw
         cmd = [self.cmd_stat, jobid.strip()]
         strOut = util.getOutputCall(cmd, suppress_errors=True)
         if "Done" in strOut or "Finished" in strOut:

@@ -3,25 +3,22 @@ import sqlite3 as dbapi
 class database(object):
     def __init__(self, db, tables = None, fields = None):
         self.db = dbapi.connect(db)
-        if tables: # check whether table exists and create it othewise
+        if tables: 
+            # check whether table exists and create it othewise
             for table in tables:
                 if self._is_this_table_here(table):
-                    pass
+                    # if table does exist, check the list of tables is correct and correct it otherwise
+                    self._protect_fields(table, fields) 
                 else:
                     self._create_table(table, fields)
 
-    def _protect_fields(self, keys, table):
-        """ Wrapper function for a change that was one
-        on 25/10/2017 to add a new field job_type 
-        to the database"""
-        if "jobtype" in keys:
-            if not self._is_field_in_table(table, "jobtype"):
-                print("Updating database: table {} with jobtype".format(table))
-                self._insert_field_in_table(table, "jobtype", "text")
-        if "iseed" in keys:
-            if not self._is_field_in_table(table, "iseed"):
-                print("Updating database: table {} with iseed".format(table))
-                self._insert_field_in_table(table, "iseed", "text")
+    def _protect_fields(self, table, fields):
+        """ Make sure all the necessary fields exist in the table
+            assumes text-type fields, but that's all we are using..."""
+        old_fields = self._get_fields_in_table(table)
+        new_fields = list(set(old_fields) ^ set(fields))
+        for field in new_fields:
+            self._insert_field_in_table(table, field, "text")
 
     def _execute_and_commit(self, query, verbose = False):
         """ Executes a query and commits to the database """
@@ -63,7 +60,16 @@ class database(object):
             return True
         c.close()
         return False
-    
+
+    def _get_fields_in_table(self, table):
+        """ Return list with all the fields in the table """
+        query = "pragma table_info({})".format(table)
+        c = self._execute_and_retrieve(query)
+        fields = [i[1] for i in c]
+        c.close()
+        return fields
+
+
     def _is_field_in_table(self, table, field):
         """ Check whether field exists on table"""
         query = "pragma table_info({})".format(table)
@@ -93,7 +99,6 @@ class database(object):
     def insert_data(self, table, dataDict):
         """ Insert dataDict in table table """
         keys = [key for key in dataDict]
-        self._protect_fields(keys, table)
         data = [dataDict[k] for k in keys]
         head = "insert into {0} ({1})".format(table, ", ".join(keys))
         tail = "values ('{}');".format("', '".join(data))
@@ -103,7 +108,6 @@ class database(object):
     def list_data(self, table, keys, job_id = None):
         """ List fields keys for active entries in database unless job_id is provided
         in which case only list job_id run"""
-        self._protect_fields(keys, table)
         keystr = ",".join(keys)
         if job_id:
             optional = "where rowid = {}".format(job_id)
@@ -123,7 +127,6 @@ class database(object):
     def find_and_list(self, table, keys, find_in, find_this):
         """ List fields keys for active entries in database
         such that the find_this is found in the list of fields find_in"""
-        self._protect_fields(keys, table)
         keystr = ",".join(keys)
         search_string = "where (status = \"active\") AND ("
         search_queries = []
@@ -140,6 +143,12 @@ class database(object):
             dataList.append(tmpDic)
         c.close()
         return dataList
+
+    def update_entry(self, table, rowid, field, new_value):
+        """ Update a given field for a given table for a given dbid! """
+        query_raw = "update {0} set {1} = \"{2}\" where rowid = {3} ;"
+        query = query_raw.format(table, field, new_value, rowid)
+        self._execute_and_commit(query)
 
     def disable_entry(self, table, rowid, revert = None):
         """ Disables (or enables) rowid entry"""
