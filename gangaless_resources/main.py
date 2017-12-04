@@ -116,6 +116,9 @@ elif rmode[:3] == "man":
         elif args.printmelog:
             print("Printing information . . . ")
             backend.cat_log_job(jobid)
+        elif args.getmewarmup:
+            print("Retrieving warmup")
+            backend.bring_current_warmup(db_id)
 
         # Options that deactivate the database entry once they're done
         elif args.get_data:

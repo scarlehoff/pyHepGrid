@@ -87,6 +87,23 @@ class Arc(Backend):
                 if ".log" in text:
                     util.spCall((cmd_str + text).split())
 
+    def bring_current_warmup(self, db_id):
+        """ Sometimes we want to retrieve the warmup before the job finishes """
+        output_folder = ["file:///tmp/"]
+        cmd_base =  ["globus-url-copy", "-v"]
+        fields = ["pathfolder", "runfolder", "jobid"]
+        data = self.dbase.list_data(self.table, fields, db_id)[0]
+        runfolder =  data["runfolder"]
+        finfolder =  data["pathfolder"] + "/" + runfolder + "/"
+        jobids    =  data["jobid"].split()
+        output_folder = ["file://" + finfolder]
+        for jobid in jobids:
+            cmd = cmd_base + [jobid + "/*.y*"] + output_folder
+            util.spCall(cmd)
+            cmd = cmd_base + [jobid + "/*.log"] + output_folder
+            util.spCall(cmd)
+        print("Warmup stored at {0}".format(finfolder))
+
     def status_job(self, jobids, verbose = False):
         """ print the current status of a given job """
         # for jobid in jobids:

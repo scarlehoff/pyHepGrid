@@ -50,6 +50,7 @@ if caller_script == "main.py":
     parser.add_argument("-u", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")
     parser.add_argument("-r", "--renewArc", help = "renew the proxy of one given job", action = "store_true")
     parser.add_argument("-c", "--clean", help = "clean given job from the remote cluster", action = "store_true")
+    parser.add_argument("-G", "--getmewarmup", help = "Force the retrieval of the warmup file from an unfinished job", action = "store_true")
     parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes)", action = "store_true")
 
     # Dirac only
