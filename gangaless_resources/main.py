@@ -85,6 +85,8 @@ elif rmode[:3] == "man":
 
     id_list_raw = str(id_str).split(",")
     id_list = []
+    if len(id_list_raw) == 1 and id_list_raw[0].lower() == "all":
+        id_list_raw = ','.join(backend.get_active_dbids())
     for id_selected in id_list_raw:
         if "-" in id_selected:
             id_limits = id_selected.split("-")

@@ -647,6 +647,17 @@ class Backend(object):
             misc_text = misc.center(20)
             print(rid + " | " + ruc + " | " + run + " | " + dat + " | " + misc_text)
 
+    def get_active_dbids(self):
+        field_name = "rowid"
+        dictC = self._db_list([field_name])
+        all_ids = []
+        for i in dictC:
+            all_ids.append(str(i[field_name]))
+        return all_ids
+
+
+        
+
     def _format_args(self):
         raise Exception("Any children classes of Backend.py should override this method")
 
