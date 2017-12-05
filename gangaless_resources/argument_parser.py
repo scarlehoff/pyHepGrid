@@ -42,9 +42,10 @@ if caller_script == "main.py":
     parser.add_argument("-P", "--printmelog", help = "do arccat to the *.log files of a given job (only ARC)", action = "store_true")
     parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
     parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
-    parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
     parser.add_argument("-f", "--find", help = "Only database entries in which a certain string is found are shown")
     parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
+    parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
+    parser.add_argument("-d", "--disableme", help = "disable database entry", action = "store_true")
 
     # Arc only
     parser.add_argument("-u", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")

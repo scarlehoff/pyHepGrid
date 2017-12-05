@@ -138,6 +138,8 @@ elif rmode[:3] == "man":
         # Enable back any database entry
         elif args.enableme:
             backend.enable_db_entry(db_id)
+        elif args.disableme:
+            backend.disable_db_entry(db_id)
         else:
             print(jobid)
 
