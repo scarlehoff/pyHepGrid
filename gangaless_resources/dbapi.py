@@ -25,7 +25,11 @@ class database(object):
         if verbose:
             print(query)
         c = self.db.cursor()
-        c.execute(query)
+        try:
+            c.execute(query)
+        except:
+            print("Executed query: {0}".format(query))
+            raise
         c.close()
         self.db.commit()
 
@@ -34,7 +38,11 @@ class database(object):
         if verbose:
             print(query)
         c = self.db.cursor()
-        c.execute(query)
+        try:
+            c.execute(query)
+        except:
+            print("Executed query: {0}".format(query))
+            raise Exception
         return c
 
     def _create_table(self, tablename, fields):
