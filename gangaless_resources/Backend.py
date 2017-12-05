@@ -349,18 +349,20 @@ class Backend(object):
     # Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
     # for both ARC and DIRAC)
-    def stats_job(self, jobids, runcard_info, dbid = ""):
+    def stats_job(self, dbid):
         """ Given a list of jobs, returns the number of jobs which
         are in each possible state (done/waiting/running/etc)
         """
-        if dbid != "":
-            current_status = self._get_old_status(dbid)
-        else:
-            current_status = None
+        jobids = self.get_id(dbid)
+        current_status = self._get_old_status(dbid)
         if isinstance(current_status, list):
             jobids_lst = zip(jobids, current_status)
         else:
             jobids_lst = jobids
+
+        tags = ["runcard", "runfolder", "date"]
+        runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
+
         n_threads = header.finalise_no_cores
         status = self._multirun(self._do_stats_job, jobids_lst, n_threads)
         done = status.count(self.cDONE)
@@ -368,11 +370,11 @@ class Backend(object):
         run = status.count(self.cRUN)
         fail = status.count(self.cFAIL)
         unk = status.count(self.cUNK)
+
         self.stats_print_setup(runcard_info, dbid=dbid)
         total = len(jobids)
         self.print_stats(done, wait, run, fail, unk, total)
-        if dbid != "":
-            self._set_new_status(dbid, status)
+        self._set_new_status(dbid, status)
 
     def _get_old_status(self, db_id):
         field_name = "sub_status"
@@ -655,9 +657,6 @@ class Backend(object):
             all_ids.append(str(i[field_name]))
         return all_ids
 
-
-        
-
     def _format_args(self):
         raise Exception("Any children classes of Backend.py should override this method")
 
@@ -704,6 +703,10 @@ class Backend(object):
 
         warmup_str = self._format_args(warmup_dict)
         return base_string + warmup_str
+
+    def stats_job_cheat(self, dbid):
+        print("Warning: The selected backend does not override the cheat version of the status command, falling back to the standard version")
+        self.stats_job(dbid)
 
 def generic_initialise(runcard, warmup=False, production=False, grid=None):
     print("Initialising runcard: {0}".format(runcard))

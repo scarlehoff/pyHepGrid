@@ -99,13 +99,9 @@ elif rmode[:3] == "man":
         jobid = backend.get_id(db_id) # a list
         # Options that keep the database entry after they are done
         if args.stats:
-            tags = ["runcard", "runfolder", "date"]
-            info = backend.dbase.list_data(backend.table, tags, db_id)[0]
-            backend.stats_job(jobid, info, dbid=db_id)
+            backend.stats_job(db_id)
         elif args.statsCheat:
-            tags = ["runcard", "runfolder", "date"]
-            info = backend.dbase.list_data(backend.table, tags, db_id)[0]
-            backend.stats_job_cheat(jobid, info, dbid=db_id)
+            backend.stats_job_cheat(db_id)
         elif args.info or args.infoVerbose:
             print("Retrieving information . . . ")
             backend.status_job(jobid, args.infoVerbose)
