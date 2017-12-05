@@ -118,7 +118,6 @@ class Arc(Backend):
             cmd += ["-l"]
         util.spCall(cmd)
 
-
 class Dirac(Backend):
     cmd_print = "dirac-wms-job-peek"
     cmd_kill  = "dirac-wms-job-kill"
@@ -152,13 +151,17 @@ class Dirac(Backend):
                                   '--Owner={0}'.format(header.dirac_name),
                                   '--Date={0}'.format(date)]).split("\n")[-2].split(", "))
 
-    def stats_job_cheat(self, jobids, runcard_info, dbid = ""):
+    def stats_job_cheat(self, dbid):
         """ When using Dirac, instead of asking for each job individually
         we can ask for batchs of jobs in a given state and compare.
         In order to use this function you need to modify 
         "DIRAC/Interfaces/scripts/dirac-wms-select-jobs.py" to comment out 
         lines 87-89.
         """
+        jobids = self.get_id(dbid)
+        tags = ["runcard", "runfolder", "date"]
+        runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
+
         try:
             self.__first_call_stats
         except AttributeError as e:

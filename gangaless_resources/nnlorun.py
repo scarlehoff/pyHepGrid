@@ -275,4 +275,5 @@ if __name__ == "__main__":
             _ = socket_sync_str(host, port, "bye!") # Be polite
         except:
             pass
+
     sys.exit(status)
