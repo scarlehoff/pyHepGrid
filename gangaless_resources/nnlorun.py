@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os
+import os, sys
 
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
@@ -212,7 +212,7 @@ if __name__ == "__main__":
         socket_config = socket_sync_str(host, port)
         if "die" in socket_config:
             print("Timeout'd by socket server")
-            exit(-1)
+            sys.exit(0)
         socketed = True
         print("Connected to socket server")
         nnlojet_command += " -port {0} -host {1} {2}".format(port, host,  socket_config)
@@ -275,3 +275,4 @@ if __name__ == "__main__":
             _ = socket_sync_str(host, port, "bye!") # Be polite
         except:
             pass
+    sys.exit(status)
