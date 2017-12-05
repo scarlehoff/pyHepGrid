@@ -2,7 +2,6 @@
 
 Known to work [28/11/17]:
 svr009.gla.scotgrid.ac.uk        UKI-SCOTGRID-GLASGOW
-ce02.tier2.hep.manchester.ac.uk  UKI-NORTHGRID-MAN-HEP  [lcg-cp command not found?]
 arc-ce01.gridpp.rl.ac.uk         RAL-LCG2               [High (~60%) failure rate 28/11/17, Job info issues as well.]
 arc-ce04.gridpp.rl.ac.uk         RAL-LCG2               [Works well, high # of cores]
 arc-ce03.gridpp.rl.ac.uk         RAL-LCG2               [Works well 05-Dec-2017]
@@ -13,7 +12,8 @@ hepgrid5.ph.liv.ac.uk            UKI-NORTHGRID-LIV-HEP
 t2arc00.physics.ox.ac.uk         UKI-SOUTHGRID-OX-HEP
 
 Work but can't be used with the current form of nnlojet.py [05-Dec-2017]:
-dc2-grid-25.brunel.ac.uk         BRUNEL                 [lcg-cp  not available 05-Dec-2017]
+dc2-grid-25.brunel.ac.uk         BRUNEL                 [lcg-cp, dont seem to have access to Durham lfn? not available 05-Dec-2017]
+ce02.tier2.hep.manchester.ac.uk  UKI-NORTHGRID-MAN-HEP  [lcg-cp command not found and gfal-copy fails silently ???? 05-Dec-2017] 
 
 ###### Others ######
 
