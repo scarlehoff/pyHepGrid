@@ -705,7 +705,12 @@ class Backend(object):
         return base_string + warmup_str
 
     def stats_job_cheat(self, dbid):
-        print("Warning: The selected backend does not override the cheat version of the status command, falling back to the standard version")
+        try:
+            if self.__first_stats_job_cheat:
+                pass
+        except AttributeError as e:
+             print("Warning: The selected backend does not override the cheat version of the status command, falling back to the standard version")
+             self.__first_stats_job_cheat = False
         self.stats_job(dbid)
 
 def generic_initialise(runcard, warmup=False, production=False, grid=None):
