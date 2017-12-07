@@ -10,10 +10,12 @@ Known NOT to work [28/11/17]:
 hepgrid2.ph.liv.ac.uk:           UKI-NORTHGRID-LIV-HEP
 hepgrid5.ph.liv.ac.uk            UKI-NORTHGRID-LIV-HEP
 t2arc00.physics.ox.ac.uk         UKI-SOUTHGRID-OX-HEP
+ce04.esc.qmul.ac.uk              
 
 Work but can't be used with the current form of nnlojet.py [05-Dec-2017]:
 dc2-grid-25.brunel.ac.uk         BRUNEL                 [lcg-cp, dont seem to have access to Durham lfn? not available 05-Dec-2017]
 ce02.tier2.hep.manchester.ac.uk  UKI-NORTHGRID-MAN-HEP  [lcg-cp command not found and gfal-copy fails silently ???? 05-Dec-2017] 
+
 
 ###### Others ######
 
