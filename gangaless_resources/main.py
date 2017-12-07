@@ -110,7 +110,7 @@ elif rmode[:3] == "man":
             backend.renew_proxy(jobid)
         elif args.printme:
             print("Printing information . . . ")
-            backend.cat_job(jobid)
+            backend.cat_job(jobid, print_stderr = args.error)
         elif args.printmelog:
             print("Printing information . . . ")
             backend.cat_log_job(jobid)

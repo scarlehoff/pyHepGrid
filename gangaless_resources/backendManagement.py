@@ -68,10 +68,12 @@ class Arc(Backend):
             cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
 
-    def cat_job(self, jobids):
+    def cat_job(self, jobids, print_stderr = None):
         """ print stdandard output of a given job"""
         for jobid in jobids:
             cmd = [self.cmd_print, "-j", header.arcbase, jobid.strip()]
+            if print_stderr:
+                cmd += ["-e"]
             util.spCall(cmd)
 
     def cat_log_job(self, jobids):
@@ -130,7 +132,7 @@ class Dirac(Backend):
     def __str__(self):
         return "Dirac"
     
-    def cat_job(self, jobids):
+    def cat_job(self, jobids, print_stderr = None):
         print("Printing the last 20 lines of the last job")
         jobid = jobids[-1]
         cmd = [self.cmd_print, jobid.strip()]

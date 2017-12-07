@@ -2,6 +2,8 @@
 
 - Warmup and dat files in ARC/DIRAC sandbox - if job fails halfway through you can retrieve output... Alternatively, find whether there is a "backup" system so that we can copy the files somewhere else. It might also be a problem with lfc-ls?...
 
-- Store in database a string tih the jobs that are already done/failed fo we don't query them again (which is quite costly in ARC). Store a string with 0 1 -1, for instance, keeping the order.
+- When printing a multijob in arc, don't print jobs which have a -1 in the database! 
 
-- Bonus, when printing, don't print jobs with a -1!
+- Use this information in the retrieval script so we don't query jobs that are not finished. Make this "conservative" feature to be an extra option so the default behavoir do not change
+
+- Make the script gfal ready...
