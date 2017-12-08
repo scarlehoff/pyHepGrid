@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, datetime
 
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
@@ -193,6 +193,9 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
 #################################################################################
 
 if __name__ == "__main__":
+    start_time = datetime.datetime.now()
+    print("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
+
     args = parse_arguments()
 
     debug_level = int(args.debug)
@@ -275,5 +278,7 @@ if __name__ == "__main__":
             _ = socket_sync_str(host, port, "bye!") # Be polite
         except:
             pass
+    end_time = datetime.datetime.now()
+    print("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
 
     sys.exit(status)
