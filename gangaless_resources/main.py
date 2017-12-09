@@ -65,7 +65,7 @@ elif rmode[:3] == "man":
         from backendManagement import Arc as backend_class
     if args.runDirac: 
         from backendManagement import Dirac as backend_class
-    backend = backend_class()
+    backend = backend_class(act_only_on_done = args.done)
 
     from header import finalisation_script
     if args.get_data and finalisation_script:
@@ -122,7 +122,8 @@ elif rmode[:3] == "man":
         elif args.get_data:
             print("Retrieving job data")
             backend.get_data(db_id)
-            backend.disable_db_entry(db_id)
+            if not args.done: # if --done is used we assume there are jobs which are _not_ done
+                backend.disable_db_entry(db_id)
         elif args.kill_job:
             print("Killing the job")
             backend.kill_job(jobid)

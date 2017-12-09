@@ -4,8 +4,8 @@ import utilities as util
 import header
 
 class RunDirac(Backend):
-    def __init__(self):
-        super(RunDirac, self).__init__()
+    def __init__(self, **kwargs):
+        super(RunDirac, self).__init__(**kwargs)
         self.table     = header.diractable
         self.templ     = header.DIRACSCRIPTDEFAULT
         self.runfolder = None

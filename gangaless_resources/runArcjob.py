@@ -4,8 +4,8 @@ import utilities as util
 import header
 
 class RunArc(Backend):
-    def __init__(self, arcscript = None): 
-        super(RunArc, self).__init__()
+    def __init__(self, arcscript = None, **kwargs): 
+        super(RunArc, self).__init__(**kwargs)
         self.table     = header.arctable
         self.arcbd     = header.arcbase
         if arcscript:
