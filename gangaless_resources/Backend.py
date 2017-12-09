@@ -39,7 +39,7 @@ class Backend(object):
             print(string, end="")
 
 
-    def __init__(self):
+    def __init__(self, act_only_on_done = False):
         from header import dbname, baseSeed
         import dbapi
         self.tarw  = util.TarWrap()
@@ -52,6 +52,8 @@ class Backend(object):
                 'W' : self._get_data_warmup,
                 'S' : self._get_data_warmup
                 }
+        # I'm 100% sure there is a better way of doing this...
+        self.act_only_on_done = act_only_on_done
 
     # Helper functions and wrappers
     def _press_yes_to_continue(self, msg, error = None):
@@ -243,7 +245,20 @@ class Backend(object):
             print("Selected job is %s out of bounds" % jobid)
             idt   = input("> Select id to act upon: ")
             idout = self.get_id(idt)
-        return idout.split(" ")
+        jobid_list = idout.split(" ")
+        if self.act_only_on_done:
+            new_list = []
+            status_list = self._get_old_status(db_id)
+            if status_list:
+                for jobid, stat in zip(jobid_list, status_list):
+                    if stat == self.cDONE:
+                        new_list.append(jobid)
+                return new_list
+            else:
+                print("In order to act only on 'done' jobs you need to have that info in the db!")
+                sys.exit(-1)
+        else:
+            return jobid_list
 
     def get_date(self, db_id):
         """ Returns date from a given database entry 
@@ -494,7 +509,7 @@ class Backend(object):
         """
         print("You are going to download all folders corresponding to this runcard from lfn:output")
         print("Make sure all runs are finished using the -s or -S options!")
-        fields       = ["runfolder", "jobid", "runcard", "pathfolder", "iseed"]
+        fields       = ["runfolder", "runcard", "jobid", "pathfolder", "iseed"]
         data         = self.dbase.list_data(self.table, fields, db_id)[0]
         self.rcard   = data["runcard"]
         self.rfolder = data["runfolder"]
@@ -533,6 +548,16 @@ class Backend(object):
         except: # todo: macho... this is like mkdir -p :P
             pass
         seeds    =  range(initial_seed, finalSeed)
+        # If we are only act on a subrange of jobids (ie, the ones which are done...) choose only those seeds
+        if self.act_only_on_done:
+            old_status = self._get_old_status(db_id)
+            if old_status:
+                new_seed = []
+                for seed, stat in zip(seeds, old_status):
+                    if stat == self.cDONE:
+                        new_seed.append(seed)
+            seeds = new_seed
+
         from header import finalise_no_cores as n_threads
         tarfiles =  self._multirun(self._do_get_data, seeds, n_threads)
         # Don't try to untar files that do not exist...

@@ -17,9 +17,9 @@ class Arc(Backend):
     cmd_stat  = "arcstat"
     cmd_renew = "arcrenew"
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         # Might not work on python2?
-        super(Arc, self).__init__()
+        super(Arc, self).__init__(**kwargs)
         self.table = header.arctable
 
     def __str__(self):
@@ -125,8 +125,8 @@ class Dirac(Backend):
     cmd_kill  = "dirac-wms-job-kill"
     cmd_stat  = "dirac-wms-job-status"
 
-    def __init__(self):
-        super(Dirac, self).__init__()
+    def __init__(self, **kwargs):
+        super(Dirac, self).__init__(**kwargs)
         self.table = header.diractable
 
     def __str__(self):
@@ -170,19 +170,30 @@ class Dirac(Backend):
             print("Stats function under testing/debugging. Use with care...")
             self.__first_call_stats = False
         date = runcard_info["date"].split()[0]
-        jobids = set(jobids)
+        jobids_set = set(jobids)
+        # Get all jobs in each state
         waiting_jobs = self.get_status('Waiting', date)
         done_jobs = self.get_status('Done', date)
         running_jobs = self.get_status('Running', date)
         fail_jobs = self.get_status('Failed', date)
         unk_jobs = self.get_status('Unknown', date)
-        wait = len(jobids & waiting_jobs)
-        run = len(jobids & running_jobs)
-        fail = len(jobids & fail_jobs)
-        done = len(jobids & done_jobs)
-        unk = len(jobids & unk_jobs)
+        failed_jobs_set = jobids_set & fail_jobs
+        done_jobs_set = jobids_set & done_jobs
+        # Count how many jobs we have in each state
+        fail = len(failed_jobs_set)
+        done = len(done_jobs_set)
+        wait = len(jobids_set & waiting_jobs)
+        run = len(jobids_set & running_jobs)
+        unk = len(jobids_set & unk_jobs)
+        # Save done and failed jobs to the database
+        status = len(jobids)*[0]
+        for jobid in failed_jobs_set:
+            status[jobids.index(jobid)] = self.cFAIL
+        for jobid in done_jobs_set:
+            status[jobids.index(jobid)] = self.cDONE
         self.stats_print_setup(runcard_info,dbid = dbid)
         self.print_stats(done, wait, run, fail, unk, jobids)
+        self._set_new_status(dbid, status)
 
 
     def kill_job(self, jobids):
