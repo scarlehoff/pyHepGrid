@@ -57,9 +57,11 @@ if caller_script == "main.py":
     parser.add_argument("-G", "--getmewarmup", help = "Force the retrieval of the warmup file from an unfinished job", action = "store_true")
     parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes)", action = "store_true")
     parser.add_argument("--error", help = "When doing arccat, print the standard error instead of std output", action = "store_true")
+    parser.add_argument("-mf","--most_free_cores",  help = "Override ce_base with ce with most free cores", action = "store_true")
 
     # Dirac only
     parser.add_argument("-S", "--statsCheat", help = "Dirac only, use a modified version of dirac to speed up the information retrieval process", action = "store_true")
 
     arguments = parser.parse_args()
     runcard = arguments.runcard
+    override_ce_base = arguments.most_free_cores

@@ -49,6 +49,7 @@ short_stats = False
 # ARC parameters
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
+ce_listfile = "computing_elements.txt"
 
 # DIRAC parameters
 dirac_name = "duncan.walker"
