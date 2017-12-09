@@ -11,7 +11,6 @@ ce1.dur.scotgrid.ac.uk
 ce2.dur.scotgrid.ac.uk
 ce3.dur.scotgrid.ac.uk
 ce4.dur.scotgrid.ac.uk
-ce-test.dur.scotgrid.ac.uk
 
 
 Known NOT to work [28/11/17]:
@@ -26,6 +25,7 @@ ce02.tier2.hep.manchester.ac.uk  UKI-NORTHGRID-MAN-HEP  [lcg-cp command not foun
 hepgrid2.ph.liv.ac.uk:           UKI-NORTHGRID-LIV-HEP  [lcg-cp not found 07-Dec-2017]
 
 Testing
+ce-test.dur.scotgrid.ac.uk
 
 
 ###### Others ######
