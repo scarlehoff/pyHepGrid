@@ -52,19 +52,26 @@ class Backend(object):
                 'W' : self._get_data_warmup,
                 'S' : self._get_data_warmup
                 }
-        # I'm 100% sure there is a better way of doing this...
+        self.assume_yes = False
         self.act_only_on_done = act_only_on_done
 
     # Helper functions and wrappers
-    def _press_yes_to_continue(self, msg, error = None):
+    def dont_ask_dont_tell(self):
+        self.assume_yes = True
+
+    def _press_yes_to_continue(self, msg, error = None, fallback = None):
         """ Press y to continue
             or n to exit the program
         """
+        if self.assume_yes:
+            return 0
         print(msg)
         yn = input("Do you want to continue (y/n) ").lower()
         if yn.startswith("y"):
             return 0
         else:
+            if fallback:
+                return fallback
             if error:
                 raise Exception(error)
             else:
@@ -527,8 +534,8 @@ class Backend(object):
             finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
             print("The starting filename is {}".format(firstName))
             print("The final filename is {}".format(finalName))
-            yn = input("Are these parameters correct? (y/n) ").lower()
-            if yn.startswith("y"): 
+            yn = self._press_yes_to_continue("Do you want to change these or", fallback = -1)
+            if yn == 0:
                 break
             initial_seed = int(input("Please, introduce the starting seed (ex: 400): "))
             finalSeed  = int(input("Please, introduce the final seed (ex: 460): ")) 

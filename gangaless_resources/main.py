@@ -66,6 +66,8 @@ elif rmode[:3] == "man":
     if args.runDirac: 
         from backendManagement import Dirac as backend_class
     backend = backend_class(act_only_on_done = args.done)
+    if args.yes:
+        backend.dont_ask_dont_tell()
 
     from header import finalisation_script
     if args.get_data and finalisation_script:
