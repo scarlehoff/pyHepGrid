@@ -20,3 +20,7 @@ dictCard = {
 # E.g to set the number of jobs 99999 for this runcard, you could include the line
 # producRun = 999999
 
+# You can even import and use other functions here, such as the following to auto pick the
+# CE with most cores free
+# import get_site_info
+# ce_base = get_site_info.get_most_free_cores()

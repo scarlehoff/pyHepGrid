@@ -3,7 +3,7 @@ import sys
 from types import ModuleType
 import getpass
 import importlib
-
+import get_site_info
  
 header_mappings = {"jmartinez":"juan_header",
                    "dwalker":"duncan_header",
@@ -79,7 +79,9 @@ if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py",""))
     # todo: some safety checks
     for attr_name in dir(runcard):
-        if not attr_name.startswith("__") and attr_name != "dictCard":
+#        print(attr_name, runcard)
+        if not attr_name.startswith("__") and attr_name != "dictCard" and \
+                not isinstance(getattr(runcard, attr_name), ModuleType):
             if not hasattr(this_file, attr_name):
                 print("> Warning! {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
                 print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
@@ -88,7 +90,13 @@ if runcard_file:
             attr_value = getattr(runcard, attr_name)
             print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
             setattr(this_file, attr_name, attr_value)
-
+try:
+    from argument_parser import override_ce_base as use_best_ce
+    if use_best_ce:
+        setattr(this_file, "ce_base", get_site_info.get_most_free_cores())
+        print("> Setting value of {0} to {1} due to most_free_cores override".format("ce_base", ce_base))
+except ImportError as e:
+    pass
 
 ### Moved to the bottom to allow runcard to override jobName
 

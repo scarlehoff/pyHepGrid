@@ -51,6 +51,7 @@ ce_base = "ce1.dur.scotgrid.ac.uk"
 # ce_base = "ce02.tier2.hep.manchester.ac.uk"
 # ce_base = "svr009.gla.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
+ce_listfile = "computing_elements.txt"
 
 # DIRAC parameters
 dirac_name = "juan.m.cruzmartinez"

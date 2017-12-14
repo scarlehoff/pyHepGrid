@@ -7,6 +7,11 @@ arc-ce04.gridpp.rl.ac.uk         RAL-LCG2               [Works well, high # of c
 arc-ce03.gridpp.rl.ac.uk         RAL-LCG2               [Works well 05-Dec-2017]
 hepgrid5.ph.liv.ac.uk            UKI-NORTHGRID-LIV-HEP  [Works well 09-Dec-2017]
 heplnv147.pp.rl.ac.uk                                   [Works well 09-Dec-2017]
+ce1.dur.scotgrid.ac.uk
+ce2.dur.scotgrid.ac.uk
+ce3.dur.scotgrid.ac.uk
+ce4.dur.scotgrid.ac.uk
+
 
 Known NOT to work [28/11/17]:
 t2arc00.physics.ox.ac.uk         UKI-SOUTHGRID-OX-HEP
@@ -20,6 +25,7 @@ ce02.tier2.hep.manchester.ac.uk  UKI-NORTHGRID-MAN-HEP  [lcg-cp command not foun
 hepgrid2.ph.liv.ac.uk:           UKI-NORTHGRID-LIV-HEP  [lcg-cp not found 07-Dec-2017]
 
 Testing
+ce-test.dur.scotgrid.ac.uk
 
 
 ###### Others ######

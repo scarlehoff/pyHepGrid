@@ -10,7 +10,7 @@ def enablePrint():
 
 # RUNCARDS USED ONLY FOR PULLING DATA WITH FINALISE.PY 
 blockPrint()
-import Wp, Wm, Z, WpJ, WmJ, ZJ
+import Wp, Wm, Z, WpJ, WmJ, ZJ, WpJ_TC
 enablePrint()
 
 dictCard = {}
