@@ -32,6 +32,7 @@ if caller_script == "main.py":
     parser.add_argument("-L", "--lhapdf", help = "Send LHAPDF to Grid", action = LHAPDF_initAction)
 
     parser.add_argument("-n", "--noProxy", help = "Bypasses proxy creation", action = "store_true")
+    parser.add_argument("--yes", help = "Assume yes to all questions in management (use with care!)", action = "store_true")
 
     # Global management
     parser.add_argument("-g", "--get_data", help = "getdata from an ARC job", action = "store_true")
@@ -49,6 +50,7 @@ if caller_script == "main.py":
 
     # Options that modify the jobs we can act onto
     parser.add_argument("--done", help = "For multiruns, only act on jobs which have the done status store in the database", action = "store_true")
+
 
     # Arc only
     parser.add_argument("-u", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")
