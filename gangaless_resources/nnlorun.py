@@ -170,8 +170,7 @@ def bring_lhapdf(lhapdf_grid, debug):
     tmp_tar = "lhapdf.tar.gz"
     copy_from_grid(lhapdf_grid, tmp_tar)
     untar_file(tmp_tar, debug)
-    os.system("rm {0}".format(tmp_tar))
-    return 0
+    return os.system("rm {0}".format(tmp_tar))
 
 def bring_nnlojet(input_grid, runcard, runname, debug):
     # Todo: this is not very general, is it?
@@ -261,7 +260,7 @@ if __name__ == "__main__":
 
     status_copy = copy_to_grid(local_out, output_file)
 
-    if status_copy:
+    if status_copy == 0:
         print("Copied over to grid storage!")
     elif args.Sockets:
         print("This was a socketed run so we are copying the grid to stderr just in case")
