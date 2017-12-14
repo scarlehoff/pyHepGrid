@@ -155,12 +155,7 @@ def copy_to_grid(local_file, grid_file):
     else:
         cmd = lcg_cr + " " + fileout + " " + filein
     print(cmd)
-    fail = os.system(cmd)
-    if fail == 0:
-    # success!
-        return True
-    else:
-        return False
+    return os.system(cmd)
 
 def socket_sync_str(host, port, handshake = "greetings"):
     # Blocking call, it will receive a str of the form
@@ -239,8 +234,8 @@ if __name__ == "__main__":
     print(" > Executed command: {0}".format(nnlojet_command))
 
     # Run command
-    status = os.system(nnlojet_command)
-    if status == 0:
+    status_nnlojet = os.system(nnlojet_command)
+    if status_nnlojet == 0:
         print("Command successfully executed")
     else:
         print("Something went wrong")
@@ -264,10 +259,14 @@ if __name__ == "__main__":
 
     tar_this(local_out, "*")
 
-    success = copy_to_grid(local_out, output_file)
+    status_copy = copy_to_grid(local_out, output_file)
 
-    if success:
+    if status_copy:
         print("Copied over to grid storage!")
+    elif args.Sockets:
+        print("This was a socketed run so we are copying the grid to stderr just in case")
+        os.system("cat $(ls *.y* | grep -v .txt) 1>&2")
+        status_copy = 0
     elif args.Warmup:
         print("Failure! Outputing vegas warmup to stdout")
         os.system("cat $(ls *.y* | grep -v .txt)")
@@ -281,4 +280,6 @@ if __name__ == "__main__":
     end_time = datetime.datetime.now()
     print("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
 
-    sys.exit(status)
+    final_state = abs(status_nnlojet) + abs(status_copy)
+
+    sys.exit(final_state)
