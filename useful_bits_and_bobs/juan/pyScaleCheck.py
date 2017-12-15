@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 
-# Physical parameters
+import sys
+
+# Parameters that can be overriden in the runcard
+
+# Physical parameters 
 N = 3.0 ; CA = N ; Tr = 1.0/2.0; Cf = (N**2 - 1.0)/(2.0*N)
+# Define some global defaults
+png_basename = "scales"
+plot_basetitle = ""
+legend = "lower right"
 
 def parse_all():
     import argparse
@@ -50,30 +58,32 @@ def populate_variables(args):
     if "n" in keys:
         n = runcard["n"]
     else:
-        n = args.alpha_lo
+        runcard["n"] = args.n
 
     if "quiet" in keys:
         quiet = runcard["quiet"]
     else:
-        quiet = args.quiet
+        runcard["quiet"] = args.quiet
 
     if "colour" in keys:
         colour = runcard["colour"]
     else:
-        colour = args.colour
+        runcard["colour"] = args.colour
 
     if "plotFl" in keys:
         plotFl = runcard["plotFl"]
     else:
         if args.plot:
-            plotFl = 1
+            runcard["plotFl"] = 1
         else:
-            plotFl = 0
+            runcard["plotFl"] = 0
 
-    muR = runcard["muR"]
     if "mu0" in keys:
         mu0 = runcard["mu0"]
-    muR = [mu0] + muR
+        if mu0 not in muR:
+            runcard["muR"] = runcard["muR"] + [mu0]
+    runcard["muR_lst"] = runcard["muR"]
+    del runcard["muR"]
 
     slo = {}
     snlo = {}
@@ -86,16 +96,17 @@ def populate_variables(args):
     else:
         for mu in muR:
             slo[mu] = 0.0
+        runcard["slo"] = slo
     if "snlo" in keys:
         snlo = runcard["snlo"]
     else:
-        snlo = None
+        runcard["snlo"] = None
     if "snnlo" in keys:
         snnlo = runcard["snnlo"]
     else:
-        snnlo = None
+        runcard["snnlo"] = None
 
-    return n, quiet, colour, plotFl, muR, slo, snlo, snnlo
+    return runcard
 
 def get_betas(colour, Nf):
     if colour == 'all':
@@ -174,7 +185,7 @@ def make_value(dictionary):
         new_d[key] = value(dictionary[key])
     return new_d
 
-def plot_me(scales, th, nnlojet, title, pngfile = "scales.png"):
+def plot_me(scales, th, nnlojet, title, level, pngname = "scales", legend = "lower right"):
     from matplotlib import pyplot
     x_val = scales
     th_val = []
@@ -193,18 +204,24 @@ def plot_me(scales, th, nnlojet, title, pngfile = "scales.png"):
     pyplot.xlim((min(x_val) - xxx, max(x_val) + xxx))
     pyplot.ylabel('$\sigma$ (fb)')
     pyplot.xlabel('$\mu_R$ (GeV)')
-    pyplot.title(title)
-    pyplot.legend(loc='lower right')
+    pyplot.title(title + " " + level)
+    pyplot.legend(loc=legend)
+
+    pngfile = "{0}_{1}.png".format(pngname, level)
     pyplot.savefig(pngfile, bbox_inches = 'tight')
+    pyplot.close()
 
 
 if __name__ == "__main__":
 
     args = parse_all()
 
-    n, quiet, colour, plotFl, muR_lst, slo, snlo, snnlo = populate_variables(args)
+    runcard_vessel = populate_variables(args)
+    do_nlo, do_nnlo = what_to_do(runcard_vessel["snlo"], runcard_vessel["snnlo"])
 
-    do_nlo, do_nnlo = what_to_do(snlo, snnlo)
+    this_file = sys.modules[__name__]
+    for i in runcard_vessel:
+        setattr(this_file, i, runcard_vessel[i])
 
     beta_not, beta_one = get_betas(colour, args.nf)
 
@@ -220,7 +237,7 @@ if __name__ == "__main__":
         snlo = make_value(snlo)
         c_nlo = snlo[mu0]
     if do_nnlo:
-        snnlo = make_valie(snnlo)
+        snnlo = make_value(snnlo)
         c_nnlo = snnlo[mu0]
 
     ## Compute th values
@@ -283,10 +300,7 @@ if __name__ == "__main__":
 
     if plotFl == 1:
         if do_nlo:
-            plot_me(muR_lst, th_nlo, snlo, "NLO")
+            plot_me(muR_lst, th_nlo, snlo, plot_basetitle, "NLO", pngname = png_basename, legend = legend)
         if do_nnlo:
-            plot_me(muR_lst, th_nnlo, snnlo, "NNLO")
-
-        
-
+            plot_me(muR_lst, th_nnlo, snnlo, plot_basetitle, "NNLO", pngname = png_basename, legend = legend)
 
