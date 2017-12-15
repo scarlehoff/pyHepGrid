@@ -311,7 +311,7 @@ class Backend(object):
         for i in rncards:
             # Check whether warmup/production is active in the runcard
             if not os.path.isfile(runFol + "/" + i):
-                self._pres_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
+                self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
             self._check_warmup(i, runFol)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
