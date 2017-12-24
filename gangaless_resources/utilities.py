@@ -157,12 +157,12 @@ def lhapdfIni():
         for root, dirs, files in os.walk(lhapdf):
             for xfile in files:
                 fullpath = os.path.join(root,xfile)
-                if "share" and ".dat" in fullpath:
+                if "share" and ".dat" in fullpath and "._" not in fullpath:
                     if "_0000.dat" not in fullpath:
                         os.remove(fullpath)
                     else:
                         prettyname = fullpath.split("/")[-1].replace("_0000.dat","")
-                        print("Including central PDF for {0}".format(prettyname))
+                        print("Including central PDF for {0} from {1}".format(prettyname,root))
     # Tar lhapdf and prepare it to be sent
     lhapdf_remote = header.lhapdf_grid_loc
     lhapdf_griddir = lhapdf_remote.rsplit("/",1)[0]

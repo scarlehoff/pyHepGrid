@@ -1,4 +1,6 @@
-import sys, os
+import sys, os, importlib
+runcards = ["WpJ_TC", "ppb_nnlo"]
+
 
 # Disable
 def blockPrint():
@@ -10,9 +12,9 @@ def enablePrint():
 
 # RUNCARDS USED ONLY FOR PULLING DATA WITH FINALISE.PY 
 blockPrint()
-import WpJ, WmJ, WpJ_TC
+modules = [importlib.import_module(rc) for rc in runcards]
 enablePrint()
 
 dictCard = {}
-for x in [WpJ, WmJ, WpJ_TC]:
+for x in modules:
     dictCard.update(x.dictCard)
