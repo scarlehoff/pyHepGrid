@@ -1,5 +1,5 @@
 import sys, os, importlib
-runcards = ["WpJ_TC", "ppb_nnlo"]
+runcards = ["WpJ_TC", "ppb_nnlo", "Njetti", "Njetti_CT14nnlo"]
 
 
 # Disable

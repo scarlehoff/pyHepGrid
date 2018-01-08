@@ -98,7 +98,8 @@ class Backend(object):
             return ""
 
 
-    def _multirun(self, function, arguments, n_threads = 5):
+    def _multirun(self, function, arguments, n_threads = 5, 
+                  arglen=None):
         """ Wrapper for multiprocessing
             For ARC only single thread is allow as the arc database needs
             to be locked 
@@ -108,7 +109,10 @@ class Backend(object):
         #     threads = 1
         # else:
         #     threads = n_threads
-        threads = n_threads
+        # If required # calls is lower than the # threads given, use the minimum
+        if arglen is None:
+            arglen = n_threads
+        threads = max(min(n_threads, arglen),1)
         pool   = Pool(threads)
         result = pool.map(function, arguments)
         pool.close()
@@ -377,8 +381,13 @@ class Backend(object):
         """
         jobids = self.get_id(dbid)
         current_status = self._get_old_status(dbid)
+        arglen = len(jobids)
+
         if isinstance(current_status, list):
-            jobids_lst = zip(jobids, current_status)
+            if len(current_status)==arglen:
+                jobids_lst = zip(jobids, current_status)
+            else: # Current status corrupted somehow... Start again
+                jobids_lst = jobids
         else:
             jobids_lst = jobids
 
@@ -386,7 +395,8 @@ class Backend(object):
         runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
 
         n_threads = header.finalise_no_cores
-        status = self._multirun(self._do_stats_job, jobids_lst, n_threads)
+        status = self._multirun(self._do_stats_job, jobids_lst,
+                                n_threads, arglen=arglen)
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)
@@ -741,7 +751,7 @@ class Backend(object):
             if self.__first_stats_job_cheat:
                 pass
         except AttributeError as e:
-             print("Warning: The selected backend does not override the cheat version of the status command, falling back to the standard version")
+             print("Warning: The selected backend does not override the cheat version of the status command. Falling back to the standard version.")
              self.__first_stats_job_cheat = False
         self.stats_job(dbid)
 
