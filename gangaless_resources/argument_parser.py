@@ -35,6 +35,7 @@ if caller_script == "main.py":
     parser.add_argument("--yes", help = "Assume yes to all questions in management (use with care!)", action = "store_true")
 
     # Global management
+    parser.add_argument("-cw", "--continue_warmup", help = "Continue a previous warmup", action = "store_true")
     parser.add_argument("-g", "--get_data", help = "getdata from an ARC job", action = "store_true")
     parser.add_argument("-k", "--kill_job", help = "kill a given job", action = "store_true")
     parser.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
@@ -42,7 +43,7 @@ if caller_script == "main.py":
     parser.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
     parser.add_argument("-P", "--printmelog", help = "do arccat to the *.log files of a given job (only ARC)", action = "store_true")
     parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
-    parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an DIRAC run (only with ini)")
+    parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an production run (only with ini)")
     parser.add_argument("-f", "--find", help = "Only database entries in which a certain string is found are shown")
     parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
     parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")

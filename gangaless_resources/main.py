@@ -41,7 +41,7 @@ if rmode[:3] == "ini":
     from Backend import generic_initialise
 
     if mode_Warmup:
-        generic_initialise(rcard, warmup=True, grid=args.provWarm)
+        generic_initialise(rcard, warmup=True, grid=args.provWarm, overwrite_grid=args.continue_warmup)
     elif mode_Production:
         generic_initialise(rcard, production=True, grid=args.provWarm)
     else:

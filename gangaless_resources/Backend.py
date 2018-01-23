@@ -42,6 +42,7 @@ class Backend(object):
     def __init__(self, act_only_on_done = False):
         from header import dbname, baseSeed
         import dbapi
+        self.overwrite_warmup = False
         self.tarw  = util.TarWrap()
         self.gridw = util.GridWrap()
         self.dbase = dbapi.database(dbname)
@@ -171,14 +172,17 @@ class Backend(object):
     def _check_warmup(self, r, runcard_dir):
         self._check_production_warmup(r, runcard_dir, warmup = True, production = False)
 
+    def set_overwrite_warmup(self):
+        self.overwrite_warmup = True
+
     # Checks for the grid storage system
     def _checkfor_existing_warmup(self, r, rname):
         """ Check whether given runcard already has a warmup output in the grid """
         print("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
-        if self.gridw.checkForThis(checkname, "warmup"):
-            self._press_yes_to_continue("File {} already exists at lfn:warmup, do you want to remove it?".format(checkname))
-            self.gridw.delete(checkname, "warmup")
+        if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
+            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(header.lfn_warmup_dir,checkname))
+            self.gridw.delete(checkname, header.lfn_warmup_dir)
 
     def _checkfor_existing_output(self, r, rname):
         """ Check whether given runcard already has output in the grid
@@ -313,6 +317,7 @@ class Backend(object):
         if provided_warmup: 
             files = files + [provided_warmup]
         for i in rncards:
+            warmupFiles = []
             # Check whether warmup/production is active in the runcard
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
@@ -320,13 +325,20 @@ class Backend(object):
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
+            if self.overwrite_warmup:
+                checkname = self.warmup_name(i, rname)
+                if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
+                    print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
+                    warmup_files = self._bring_warmup_files(i, rname)
+                    files += warmup_files
+
             self.tarw.tarFiles(files + [i], tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
                 print("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            util.spCall(["rm", i, tarfile])
+            util.spCall(["rm", i, tarfile] + warmupFiles)
         util.spCall(["rm", NNLOJETexe])
 
     def init_production(self, runcard, provided_warmup = None):
@@ -755,10 +767,12 @@ class Backend(object):
              self.__first_stats_job_cheat = False
         self.stats_job(dbid)
 
-def generic_initialise(runcard, warmup=False, production=False, grid=None):
+def generic_initialise(runcard, warmup=False, production=False, grid=None, overwrite_grid=False):
     print("Initialising runcard: {0}".format(runcard))
     back = Backend()
     if warmup:
+        if overwrite_grid:
+            back.set_overwrite_warmup()
         back.init_warmup(runcard, grid)
     elif production:
         back.init_production(runcard, grid)
