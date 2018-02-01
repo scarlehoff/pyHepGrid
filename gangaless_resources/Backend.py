@@ -60,6 +60,9 @@ class Backend(object):
     def dont_ask_dont_tell(self):
         self.assume_yes = True
 
+    def set_list_disabled(self):
+        self.dbase.set_list_disabled()
+
     def _press_yes_to_continue(self, msg, error = None, fallback = None):
         """ Press y to continue
             or n to exit the program

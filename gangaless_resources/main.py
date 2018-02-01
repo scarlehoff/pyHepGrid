@@ -65,21 +65,20 @@ elif rmode[:3] == "run":
 #### Management: 
 elif rmode[:3] == "man":
     import main_routines as mr
+    backends = []
     if (args.runArc or args.runArcProduction) and args.runDirac:
-        print(" > > > Looping thorugh ARC runs: ")
         from backendManagement import Arc as backend_Arc
-        backend = backend_Arc(act_only_on_done = args.done)
-        mr.management_routine(backend, args)
-        print(" > > > Looping thorugh Dirac runs: ")
+        backends.append(backend_Arc(act_only_on_done = args.done))
         from backendManagement import Dirac as backend_Dirac
-        backend = backend_Dirac(act_only_on_done = args.done)
-        mr.management_routine(backend, args)
+        backends.append(backend_Dirac(act_only_on_done = args.done))
     else:
         if args.runArc or args.runArcProduction:
             from backendManagement import Arc as backend_class
         if args.runDirac: 
             from backendManagement import Dirac as backend_class
-        backend = backend_class(act_only_on_done = args.done)
+        backends.append(backend_class(act_only_on_done = args.done))
+
+    for backend in backends:
         mr.management_routine(backend, args)
 
     
