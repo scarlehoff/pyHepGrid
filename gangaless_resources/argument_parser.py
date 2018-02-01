@@ -48,6 +48,7 @@ if caller_script == "main.py":
     parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
     parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
     parser.add_argument("-d", "--disableme", help = "disable database entry", action = "store_true")
+    parser.add_argument("--list_disabled", help = "List also disabled entries", action = "store_true")
 
     # Options that modify the jobs we can act onto
     parser.add_argument("--done", help = "For multiruns, only act on jobs which have the done status store in the database", action = "store_true")
