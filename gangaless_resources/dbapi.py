@@ -144,9 +144,9 @@ class database(object):
         such that the find_this is found in the list of fields find_in"""
         keystr = ",".join(keys)
         if self.list_disabled:
-            search_string = "where (status = \"active\") AND ("
-        else:
             search_string = "where ("
+        else:
+            search_string = "where (status = \"active\") AND ("
         search_queries = []
         for field in find_in:
             search_queries.append("{0} like '%{1}%'".format(field, find_this))

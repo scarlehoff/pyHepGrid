@@ -81,7 +81,7 @@ class Backend(object):
             else:
                 sys.exit(-1)
 
-    def _db_list(self, fields, search_string = None, search_fields = ["runcard", "runfolder"]):
+    def _db_list(self, fields, search_string = None, search_fields = ["runcard", "runfolder", "jobtype"]):
         """ Returns a list with a dict for each member of the list.
             If a search_string is provided, only entries matching searc_string in search_fields
             will be returned
