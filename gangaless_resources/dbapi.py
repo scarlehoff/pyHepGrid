@@ -119,7 +119,7 @@ class database(object):
         keystr = ",".join(keys)
         if job_id:
             optional = "where rowid = {}".format(job_id)
-        else:
+        elif not list_disabled:
             optional = "where status = \"active\""
         query = "select {0} from {1} {2};".format(keystr, table, optional)
         c = self._execute_and_retrieve(query)
