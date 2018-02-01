@@ -3,6 +3,7 @@ import sqlite3 as dbapi
 class database(object):
     def __init__(self, db, tables = None, fields = None):
         self.db = dbapi.connect(db)
+        self.list_disabled = False
         if tables: 
             # check whether table exists and create it othewise
             for table in tables:
@@ -104,6 +105,10 @@ class database(object):
         c.close()
         return k
 
+    def set_list_disabled(self):
+        """ Ignore the status field, treat all entries as active """
+        self.list_disabled = True
+
     def insert_data(self, table, dataDict):
         """ Insert dataDict in table table """
         keys = [key for key in dataDict]
@@ -119,8 +124,10 @@ class database(object):
         keystr = ",".join(keys)
         if job_id:
             optional = "where rowid = {}".format(job_id)
-        elif not list_disabled:
+        elif not self.list_disabled:
             optional = "where status = \"active\""
+        else:
+            optional = ""
         query = "select {0} from {1} {2};".format(keystr, table, optional)
         c = self._execute_and_retrieve(query)
         dataList = []
@@ -136,7 +143,10 @@ class database(object):
         """ List fields keys for active entries in database
         such that the find_this is found in the list of fields find_in"""
         keystr = ",".join(keys)
-        search_string = "where (status = \"active\") AND ("
+        if self.list_disabled:
+            search_string = "where (status = \"active\") AND ("
+        else:
+            search_string = "where ("
         search_queries = []
         for field in find_in:
             search_queries.append("{0} like '%{1}%'".format(field, find_this))

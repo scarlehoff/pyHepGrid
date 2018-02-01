@@ -3,6 +3,8 @@
 def management_routine(backend, args):
     if args.yes:
         backend.dont_ask_dont_tell()
+    if args.list_disabled:
+        backend.set_list_disabled()
 
     from header import finalisation_script
     if args.get_data and finalisation_script:
