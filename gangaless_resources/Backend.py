@@ -228,11 +228,11 @@ class Backend(object):
         logfile = ""
         for fileRaw in outlist:
             if ".log" in fileRaw:
-                file = fileRaw.split(" ")[-1]
+                file = fileRaw.split()[-1]
                 logfile = file
             if len(fileRaw.split(".y")) == 1: 
                 continue
-            file = fileRaw.split(" ")[-1]
+            file = fileRaw.split()[-1]
             for grid in gridp:
                 if grid in file: 
                     gridFiles.append(file)
@@ -241,6 +241,9 @@ class Backend(object):
         self.tarw.extractThese(tmpnm, extractFiles)
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
+        if logfile == "":
+            print("> ERROR: Logfile not found. Did the warmup complete successfully?")
+            sys.exit(-1)
         cmd = ["mv", logfile, newlog]
         util.spCall(cmd)
         # Remove temporary tar files
