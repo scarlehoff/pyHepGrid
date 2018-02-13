@@ -96,7 +96,9 @@ class Arc(Backend):
         fields = ["pathfolder", "runfolder", "jobid"]
         data = self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
-        finfolder =  data["pathfolder"] + "/" + runfolder + "/"
+        finfolder =  pathfolder = data["pathfolder"] + "/" + runfolder + "/"
+        if header.finalisation_script is not None:
+            finfolder = header.default_runfolder
         jobids    =  data["jobid"].split()
         output_folder = ["file://" + finfolder]
         for jobid in jobids:
