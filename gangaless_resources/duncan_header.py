@@ -35,7 +35,7 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
-dbname     = "/mt/home/dwalker/submit/gangaless_resources/njetti.dat"     
+dbname     = "/mt/home/dwalker/submit/gangaless_resources/CCDIS.dat"     
 #dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
 
 # Finalisation and storage options
@@ -44,6 +44,9 @@ finalise_no_cores = 15
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_finalise()
 finalisation_script = "finalise"
+# Default folder for use only if finalisation script != None
+# Gives a default destination for warmup files pulled whilst run is in progress
+default_runfolder = os.path.expanduser("~/warmups/")
 
 warmup_base_dir = None
 production_base_dir = os.path.expanduser("~/working/RESULTS/")
