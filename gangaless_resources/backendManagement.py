@@ -21,6 +21,7 @@ class Arc(Backend):
         # Might not work on python2?
         super(Arc, self).__init__(**kwargs)
         self.table = header.arctable
+        self.kill_skip = False
 
     def __str__(self):
         return "Arc"
@@ -55,7 +56,9 @@ class Arc(Backend):
 
     def kill_job(self, jobids):
         """ kills given job """
-        self._press_yes_to_continue("WARNING! You are about to kill the job!")
+        if not self.kill_skip: # Don't need to say yes for multiple warmups being killed
+            self._press_yes_to_continue("WARNING! You are about to kill the job!")
+            self.kill_skip = True
         for jobid in jobids:
             cmd = [self.cmd_kill, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)

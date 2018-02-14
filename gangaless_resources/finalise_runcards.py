@@ -1,6 +1,8 @@
 import sys, os, importlib
-runcards = ["WpJ_TC", "ppb_nnlo", "Njetti", "Njetti_CT14nnlo"]
-
+#runcards = ["WpJ_TC", "ppb_nnlo", "Njetti", "Njetti_CT14nnlo"]
+#runcards = ["WpJ_TC", "ppb_nnlo", "Njetti_CT14nnlo"]
+#runcards = ["CCDIS","Z_trip_diff","LHCb"]
+runcards = ["LHCb"]
 
 # Disable
 def blockPrint():
