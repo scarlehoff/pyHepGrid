@@ -318,9 +318,14 @@ class Backend(object):
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
             raise Exception("Could not find NNLOJET executable")
-        copy(nnlojetfull, os.getcwd())
+        copy(nnlojetfull, os.getcwd()) 
         files = [NNLOJETexe]
         if provided_warmup: 
+            # Copy warmup to current dir if not already there
+            if os.path.relpath(os.path.expanduser(provided_warmup), os.getcwd())\
+                    ==os.path.basename(provided_warmup):
+                copy(provided_warmup,os.path.basename(provided_warmup))
+                provided_warmup = os.path.basename(provided_warmup)
             files = files + [provided_warmup]
         for i in rncards:
             warmupFiles = []
