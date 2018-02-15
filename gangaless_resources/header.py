@@ -7,7 +7,8 @@ import get_site_info
  
 header_mappings = {"jmartinez":"juan_header",
                    "dwalker":"duncan_header",
-                   "jniehues":"jan_header"}
+                   "jniehues":"jan_header",
+                   "jwhitehead":"james_header"}
 
 grid_username = getpass.getuser()
 head = importlib.import_module(header_mappings[grid_username])
