@@ -35,7 +35,7 @@ class LFNFile():
     def __repr__(self):
         ln = self.__split
         return "{3:45} {4} {1} {0} {2:17} No. files: {5:7}  {6}".format(
-            *ln[-4:], self.time, ln[1], ln[0])
+            ln[-4],ln[-3],ln[-2],ln[-1], self.time, ln[1], ln[0])
 
 
 def bash_call(*args, **kwargs):
