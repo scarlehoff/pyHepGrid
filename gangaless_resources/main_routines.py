@@ -66,6 +66,7 @@ def management_routine(backend, args):
         elif args.printme:
             print(printstr.format("Printing information"))
             backend.cat_job(jobid, print_stderr = args.error)
+            print("\n") # As our % complete sometimes has a carriage return :P
         elif args.printmelog:
             print(printstr.format("Printing information from logfile"))
             backend.cat_log_job(jobid)
