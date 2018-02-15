@@ -20,18 +20,23 @@ def management_routine(backend, args):
         id_str = args.idjob
     else:
         backend.list_runs(args.find)
-        id_str = input("> Select id to act on: ")
+        id_str = input("> Select id(s): ")
 
     id_list_raw = str(id_str).split(",")
     id_list = []
     if len(id_list_raw) == 1 and id_list_raw[0].lower() == "all":
         id_list_raw = backend.get_active_dbids()
+
+    # Expand out id ranges using delimiters
     for id_selected in id_list_raw:
-        if "-" in id_selected:
-            id_limits = id_selected.split("-")
-            for id_int in range(int(id_limits[0]), int(id_limits[1]) + 1):
-                id_list.append(str(id_int))
-        else:
+        added = False
+        for range_delimiter in ["-",":"]:
+            if range_delimiter in id_selected:
+                added = True
+                id_limits = id_selected.split(range_delimiter)
+                for id_int in range(int(id_limits[0]), int(id_limits[1]) + 1):
+                    id_list.append(str(id_int))
+        if not added:
             id_list.append(id_selected)
 
     no_ids = len(id_list)
