@@ -1,0 +1,64 @@
+README
+
+###################################################################################################
+Follow certificate setup as per Jeppe's tutorial
+
+
+###################################################################################################
+LFN SETUP
+source gcc in grid-ui bash:
+
+put this into your bashrc:
+export CC=gcc
+export XX=g++
+export LCG_CATALOG_TYPE="lfc"
+export LFC_HOME=/grid/pheno/<LFN_NAME>
+export LFC_HOST="lfc01.dur.scotgrid.ac.uk"
+
+then
+source ~/.bashrc
+
+
+create lfndir
+lfc-mkdir /grid/pheno/<LFN_NAME>
+
+then do
+
+lfc-mkdir input
+lfc-mkdir output
+lfc-mkdir warmup
+
+should be able to see
+lfc-ls
+
+input
+output
+warmup
+
+generate more directories in analogy
+
+
+###################################################################################################
+GRID SCRIPTS SETUP [GANGALESS]
+
+stored in repo ssh://<hepforgeuser>@login.hepforge.prg//hepforge/hg/nnlojet/private/grid
+
+gangaless_resources: create own header, copy template header
+adjust personal header
+adjust headername in general header.py file (only add the name of your header file to top)
+
+generate runcard.py following template_runcard.py example
+
+
+initialise libraries [LHAPDF,(OPENLOOPS?)]
+python3 main.py ini -L 
+
+initialise runcard
+python3 main ini runcard.py -Bn -w warmup.file
+ -B is production in arc -D in dirac
+ -A is warmup in arc 
+
+send the jobs with one of:
+python3 main.py run runcard.py -Bn # ARC WARMUP
+python3 main.py run runcard.py -An # ARC PRODUCTION
+python3 main.py run runcard.py -Dn # DIRAC PRODUCTION
