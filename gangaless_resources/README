@@ -3,6 +3,13 @@ README
 ###################################################################################################
 Follow certificate setup as per Jeppe's tutorial
 
+###################################################################################################
+NNLOJET setup:
+As usual - pull the NNLOJET repository, update to modules and make -jXX
+YOU MUST INSTALL WITH LHAPDF-6.1.6. 6.2.1 IS BROKEN, and will not work on the grid outside of Durham(!) 
+-> When installing lhapdf, don't have the default prefix $HOME for installation as the entire home 
+   directory will be tarred up when initialising the grid libraries for LHAPDF(!)
+-> For this you will also need to install and link against boost (painful I know...)
 
 ###################################################################################################
 LFN SETUP
@@ -14,6 +21,7 @@ export XX=g++
 export LCG_CATALOG_TYPE="lfc"
 export LFC_HOME=/grid/pheno/<LFN_NAME>
 export LFC_HOST="lfc01.dur.scotgrid.ac.uk"
+source /opt/rh/devtoolset-4/enable              # Default gcc is version 4 and this DOES NOT WORK!
 
 then
 source ~/.bashrc
@@ -46,9 +54,9 @@ stored in repo ssh://<hepforgeuser>@login.hepforge.prg//hepforge/hg/nnlojet/priv
 gangaless_resources: create own header, copy template header
 adjust personal header
 adjust headername in general header.py file (only add the name of your header file to top)
+create folder for runcard storage and add to header file
 
 generate runcard.py following template_runcard.py example
-
 
 initialise libraries [LHAPDF,(OPENLOOPS?)]
 python3 main.py ini -L 
@@ -62,3 +70,6 @@ send the jobs with one of:
 python3 main.py run runcard.py -Bn # ARC WARMUP
 python3 main.py run runcard.py -An # ARC PRODUCTION
 python3 main.py run runcard.py -Dn # DIRAC PRODUCTION
+
+For running anything on the grid, the help text in main.py (python3 main.py -h) is useful for 
+hidden options that aren't all necessarily documented
