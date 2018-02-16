@@ -1,0 +1,63 @@
+######
+
+Known to work [28/11/17]:
+svr009.gla.scotgrid.ac.uk        UKI-SCOTGRID-GLASGOW
+arc-ce01.gridpp.rl.ac.uk         RAL-LCG2               [High (~60%) failure rate 28/11/17, Job info issues as well.]
+arc-ce04.gridpp.rl.ac.uk         RAL-LCG2               [Works well, high # of cores]
+arc-ce03.gridpp.rl.ac.uk         RAL-LCG2               [Works well 05-Dec-2017]
+hepgrid5.ph.liv.ac.uk            UKI-NORTHGRID-LIV-HEP  [Works well 09-Dec-2017]
+heplnv147.pp.rl.ac.uk                                   [Works well 09-Dec-2017]
+ce1.dur.scotgrid.ac.uk
+ce2.dur.scotgrid.ac.uk
+ce3.dur.scotgrid.ac.uk
+ce4.dur.scotgrid.ac.uk
+
+
+Known NOT to work [28/11/17]:
+t2arc00.physics.ox.ac.uk         UKI-SOUTHGRID-OX-HEP
+ce0[4-7].esc.qmul.ac.uk              
+ce01.tier2.hep.manchester.ac.uk  [07-Dec-2017, cream]
+lcgce2.shef.ac.uk                [07-Dec-2017, cream]
+
+Work but can't be used with the current form of nnlojet.py [05-Dec-2017]:
+dc2-grid-25.brunel.ac.uk         BRUNEL                 [lcg-cp, dont seem to have access to Durham lfn? not available 05-Dec-2017]
+ce02.tier2.hep.manchester.ac.uk  UKI-NORTHGRID-MAN-HEP  [lcg-cp command not found and gfal-copy fails silently ???? 05-Dec-2017] 
+hepgrid2.ph.liv.ac.uk:           UKI-NORTHGRID-LIV-HEP  [lcg-cp not found 07-Dec-2017]
+
+Testing
+ce-test.dur.scotgrid.ac.uk
+
+
+###### Others ######
+
+arc-ce01.gridpp.rl.ac.uk:2811/nordugrid-Condor-EL7                     RAL-LCG2
+arc-ce01.gridpp.rl.ac.uk:2811/nordugrid-Condor-grid3000M               RAL-LCG2
+arc-ce02.gridpp.rl.ac.uk:2811/nordugrid-Condor-EL7                     RAL-LCG2
+arc-ce02.gridpp.rl.ac.uk:2811/nordugrid-Condor-grid3000M               RAL-LCG2
+arc-ce03.gridpp.rl.ac.uk:2811/nordugrid-Condor-grid3000M               RAL-LCG2
+arc-ce04.gridpp.rl.ac.uk:2811/nordugrid-Condor-grid3000M               RAL-LCG2
+
+ce02.tier2.hep.manchester.ac.uk:2811/nordugrid-Condor-grid             UKI-NORTHGRID-MAN-HEP
+
+dc2-grid-21.brunel.ac.uk:2811/nordugrid-Condor-default                 UKI-LT2-Brunel
+dc2-grid-22.brunel.ac.uk:2811/nordugrid-Condor-default                 UKI-LT2-Brunel
+dc2-grid-25.brunel.ac.uk:2811/nordugrid-Condor-default                 UKI-LT2-Brunel
+dc2-grid-26.brunel.ac.uk:2811/nordugrid-Condor-default                 UKI-LT2-Brunel
+
+hepgrid2.ph.liv.ac.uk:2811/nordugrid-Condor-grid                       UKI-NORTHGRID-LIV-HEP
+hepgrid5.ph.liv.ac.uk:2811/nordugrid-Condor-grid                       UKI-NORTHGRID-LIV-HEP
+
+heplnv146.pp.rl.ac.uk:2811/nordugrid-Condor-grid                       UKI-SOUTHGRID-RALPP
+heplnv147.pp.rl.ac.uk:2811/nordugrid-Condor-grid                       UKI-SOUTHGRID-RALPP
+heplnx206.pp.rl.ac.uk:2811/nordugrid-Condor-grid                       UKI-SOUTHGRID-RALPP
+heplnx207.pp.rl.ac.uk:2811/nordugrid-Condor-grid                       UKI-SOUTHGRID-RALPP
+heplnx208.pp.rl.ac.uk:2811/nordugrid-Condor-grid                       UKI-SOUTHGRID-RALPP
+
+svr010.gla.scotgrid.ac.uk:2811/nordugrid-Condor-condor_q2d             UKI-SCOTGRID-GLASGOW
+svr011.gla.scotgrid.ac.uk:2811/nordugrid-Condor-condor_q2d             UKI-SCOTGRID-GLASGOW
+svr019.gla.scotgrid.ac.uk:2811/nordugrid-Condor-condor_q2d             UKI-SCOTGRID-GLASGOW
+
+t2arc00.physics.ox.ac.uk:2811/nordugrid-Condor-condorDEV               UKI-SOUTHGRID-OX-HEP
+t2arc01.physics.ox.ac.uk:2811/nordugrid-Condor-gridAMD                 UKI-SOUTHGRID-OX-HEP
+
+vm3.tier2.hep.manchester.ac.uk:2811/nordugrid-Condor-grid              UKI-NORTHGRID-MAN-HEP
