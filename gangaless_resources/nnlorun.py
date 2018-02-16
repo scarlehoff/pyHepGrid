@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-
 import os, sys, datetime
+
+# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
 
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
