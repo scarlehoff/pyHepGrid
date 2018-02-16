@@ -1,9 +1,10 @@
-gangaless_resources/__pycache__/*
+__pycache__/*
 syntax:glob
 *.orig
 *~
 *.dat
 *.xrsl
 *.jdl
-gangaless_resources/runcard.py
-gangaless_resources/runjobs
+runcard.py
+runjobs
+*.pyc
