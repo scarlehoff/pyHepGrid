@@ -14,7 +14,7 @@ def enablePrint():
 
 # RUNCARDS USED ONLY FOR PULLING DATA WITH FINALISE.PY 
 blockPrint()
-modules = [importlib.import_module(rc) for rc in runcards]
+modules = [importlib.import_module("runcards.{0}".format(rc)) for rc in runcards]
 enablePrint()
 
 dictCard = {}
