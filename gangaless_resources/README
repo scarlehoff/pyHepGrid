@@ -2,6 +2,8 @@ README
 (Incomplete, and always will be. The grid is a mysterious thing...)
 
 ###################################################################################################
+INITIAL SETUP
+
 Follow certificate setup as per Jeppe's tutorial @
 https://www.ippp.dur.ac.uk/~andersen/GridTutorial/gridtutorial.html
 
@@ -9,7 +11,8 @@ Make a careful note of passwords (can get confusing). Don't use passwords used e
 want to automate proxy renewal (like me and Juan)
 
 ###################################################################################################
-NNLOJET setup:
+NNLOJET SETUP
+
 As usual - pull the NNLOJET repository, update to modules and make -jXX
 YOU MUST INSTALL WITH LHAPDF-6.1.6. 6.2.1 IS BROKEN, and will not work on the grid outside of Durham(!) 
 -> When installing lhapdf, don't have the default prefix $HOME for installation as the entire home 
@@ -78,6 +81,7 @@ Make sure .proxy.sh is set up for your user (directories should point to your ga
 Then set up .proxy.sh to run as a cron job at least once per day (I suggest 2x in case of failure)
 
 ############ GRID SCRIPTS USAGE ############
+[Must be run with python3.4 python3.6 breaks it. Don't ask why...]
 
 initialise libraries [LHAPDF,(OPENLOOPS?)]
 python3 main.py ini -L 
@@ -87,16 +91,28 @@ python3 main ini runcard.py -Bn -w warmup.file
  -B is production in arc -D in dirac
  -A is warmup in arc 
 
-send the jobs with one of:
-python3 main.py run runcard.py -An # ARC WARMUP
-python3 main.py run runcard.py -Bn # ARC PRODUCTION
-python3 main.py run runcard.py -Dn # DIRAC PRODUCTION
+send the jobs to run with one of:
+python3 main.py run <runcard.py> -An # ARC WARMUP
+python3 main.py run <runcard.py> -Bn # ARC PRODUCTION
+python3 main.py run <runcard.py> -Dn # DIRAC PRODUCTION
 
-manage the jobs with:
-python3 main.py man runcard.py -(A/B/D)n
+manage the jobs/view the database of runs with:
+python3 main.py man <runcard.py> -(A/B/D)n
+	include the flags:
+		 -S/-s for job stats
+		 -p to print the stdout of the job (selects last job of set if production) 
+		 -P to print the job log file (selects last job of set if production)
+		 -I/-i for job info
 
 For running anything on the grid, the help text in main.py (python3 main.py -h) is useful for 
 hidden options that aren't all necessarily documented(!)
+       -> These features include warmup continuation, getting warmup data from running warmup jobs,
+       	   initialising withx your own warmup from elsewhere, database management stuff
+
+When running, the python script nnlorun.py is sent to the run location. This script then runs 
+     automatically, and pulls all of the appropriate files from grid storage (NNLOJET exe, runcard 
+     (warmups)). It then runs NNLOJET in the appropriate mode, before tarring up output files and
+     sending them back to the grid storage.
 
 #######################################
 Finalising results [Juan, can we have your input on your setup here?]
@@ -124,14 +140,31 @@ Finalising results [Juan, can we have your input on your setup here?]
  [./finalise.py, ./main.py man --get_data]
 
 #######################################
-WORKFLOW
+NORMAL WORKFLOW
 
+0) Make sure you have a working proxy
 1) initialise warmup runcard
 2) run warmup runcard
 3) switch warmup -> production in runcard
 4) When warmup complete, reinitialise runcard for production
 5) run production runcard as many times as you like w/ different seeds
 6) pull down the results (finalisation)
+
+######################################
+RUNCARD.PY FILES DETAILS
+-> Include a dictionary of all of the runcards you want to submit/initialise/manage, along with an
+   identification tag that you can use for local accounting
+-> template_runcard.py is the canonical example
+-> Must be valid python to be used
+-> Has a functionality whereby you can override any parameters in your header file for by specifying
+   them in the runcard file. So you can e.g specify a different submission location for specific
+   runs/ give different starting seeds/ numbers of production runs.
+-> You can even link/import functions to e.g dynamically find the best submission location
+
+######################################
+DIRAC
+
+TBC
 
 #######################################
 DURHAM ARC MONITORING WEBSITE
@@ -140,6 +173,8 @@ https://grafana.dur.scotgrid.ac.uk/dashboard/db/uki-scotgrid-durham-grid-queues?
 DIRAC MONITORING WEBSITE
 https://dirac.gridpp.ac.uk:8443/DIRAC/
 
+UK ARC INFO
+./get_site_info.py
 #######################################
 GRID STORAGE MANAGEMENT
 I've written a wrapper to the lfn commands (lscp.py) in order to simplify manual navigation of
