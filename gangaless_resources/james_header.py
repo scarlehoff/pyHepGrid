@@ -1,4 +1,5 @@
 import subprocess as sp
+import os
 
 ##################################################
 #                Helper Functions                #
@@ -12,9 +13,13 @@ def get_cmd_output(*args,**kwargs):
 runcardDir = "/mt/home/jwhitehead/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/jwhitehead/NNLOJET/"
 NNLOJETexe = "NNLOJET"
+#don't set warmupthr > 16 (not permitted by arc)
 warmupthr  = 16
+#no. separate production jobs submitted concurrently
 producRun  = 100
+#first seed (runs from baseseed to baseseed+producRun-1)
 baseSeed   = 100
+#how arc/dirac identifies the job
 jobName    = "testjob"
 debug_level = 0
 
@@ -26,7 +31,7 @@ lfn_warmup_dir = "warmup"
 
 # Lhapdf config
 lhapdf_grid_loc    = "util/lhapdf.tar.gz"
-lhapdf_loc         = "LHAPDF"
+lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = get_cmd_output("lhapdf-config","--prefix")
@@ -39,15 +44,15 @@ finalise_no_cores = 15
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_finalise()
-finalisation_script = None
+finalisation_script = "finalise"
 # Default folder for use only if finalisation script != None
 # Gives a default destination for warmup files pulled whilst run is in progress
 default_runfolder = None
 
-warmup_base_dir = "/WarmupsRunGrids"
-production_base_dir = "/ResultsRunGrids"
+warmup_base_dir = os.path.expanduser("~/warmups")
+production_base_dir = os.path.expanduser("~/results")
 
-short_stats = False
+short_stats = True
 
 # ARC parameters
 ce_base = "ce2.dur.scotgrid.ac.uk"
@@ -58,8 +63,8 @@ ce_listfile = "computing_elements.txt"
 dirac_name = "james.whitehead"
 
 # finalise.py-only parameters
-finalise_runcards = None
-finalise_prefix = None
+finalise_runcards = "finalise_runcards_james"
+finalise_prefix = ""
 
 # socket default parameters
 server_host = "gridui1.dur.scotgrid.ac.uk"
