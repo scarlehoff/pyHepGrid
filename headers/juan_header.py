@@ -1,5 +1,5 @@
 import subprocess as sp
-
+import os
 ##################################################
 #                Helper Functions                #
 # Can't use src.utilities due to circular imports :( #
@@ -32,10 +32,10 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
  
 # NNLOJET Database Parameters
-dbname     = "NNLOJET_december.dat"     
+dbname     = "NNLOJET_march.dat"     
 
 # Finalisation and storage options
-src.finalise_no_cores = 15
+finalise_no_cores = 15
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_src.finalise()
@@ -60,8 +60,8 @@ ce_listfile = "computing_elements.txt"
 dirac_name = "juan.m.cruzmartinez"
 
 # src.finalise.py-only parameters
-src.finalise_runcards = None
-src.finalise_prefix = None
+finalise_runcards = None
+finalise_prefix = None
 
 # socket parameters
 server_host = "gridui1.dur.scotgrid.ac.uk"

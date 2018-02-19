@@ -55,7 +55,7 @@ dirac_name = "jan.niehues"
 dbname     = "NNLOJET_november.dat"     
 
 # Finalisation and storage options
-src.finalise_no_cores = 15
+finalise_no_cores = 15
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_src.finalise()
@@ -68,5 +68,5 @@ warmup_base_dir = "/WarmupsRunGrids"
 production_base_dir = "/ResultsRunGrids"
 
 # src.finalise.py-only parameters
-src.finalise_runcards = None
-src.finalise_prefix = None
+finalise_runcards = None
+finalise_prefix = None
