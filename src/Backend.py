@@ -675,11 +675,11 @@ class Backend(object):
         """ External interface for the get_data routines.
         If a custom_get is defined in the src.header, it will be used
         instead of the 'native' _get_data_{production/warmup}.
-        Custom scripts need to have a public "do_src.finalise()" function for this to work
+        Custom scripts need to have a public "do_finalise()" function for this to work
         """
         if custom_get:
             from importlib import import_module
-            import_module(custom_get).do_src.finalise()
+            import_module(custom_get).do_finalise()
         else:
             # Check whether we are in a production or a warmup run before continuing
             # and call the corresponding get_function
