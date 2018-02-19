@@ -10,7 +10,7 @@ def get_cmd_output(*args,**kwargs):
     return outbyt.decode("utf-8")
 
 # Global Variables (default values, can be changed by runcard.py)
-runcardDir = "/mt/home/jwhitehead/NNLOJET/driver/grid/"
+runcardDir = "/mt/home/jwhitehead/runcards/"
 NNLOJETdir = "/mt/home/jwhitehead/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 #don't set warmupthr > 16 (not permitted by arc)
@@ -44,7 +44,7 @@ finalise_no_cores = 15
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_finalise()
-finalisation_script = "finalise"
+finalisation_script = "src/finalise"
 # Default folder for use only if finalisation script != None
 # Gives a default destination for warmup files pulled whilst run is in progress
 default_runfolder = None
@@ -63,7 +63,7 @@ ce_listfile = "computing_elements.txt"
 dirac_name = "james.whitehead"
 
 # finalise.py-only parameters
-finalise_runcards = "finalise_runcards_james"
+finalise_runcards = "runcards/finalise_runcards"
 finalise_prefix = ""
 
 # socket default parameters
