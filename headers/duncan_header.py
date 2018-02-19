@@ -43,7 +43,7 @@ finalise_no_cores = 15
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_src.finalise()
-finalisation_script = "finalise"
+finalisation_script = "src/finalise"
 # Default folder for use only if finalisation script != None
 # Gives a default destination for warmup files pulled whilst run is in progress
 default_runfolder = os.path.expanduser("~/warmups/")
