@@ -10,7 +10,7 @@ import itertools as it
 import importlib
 import src.header as config
 
-rc = importlib.import_module(config.finalise_runcards)
+rc = importlib.import_module(config.finalise_runcards.replace("/","."))
 
 # TODO
 # Remove as many mkdir/rmtree calls as possible. 
