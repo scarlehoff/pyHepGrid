@@ -2,7 +2,7 @@ import sys, os, importlib
 #runcards = ["WpJ_TC", "ppb_nnlo", "Njetti", "Njetti_CT14nnlo"]
 #runcards = ["WpJ_TC", "ppb_nnlo", "Njetti_CT14nnlo"]
 #runcards = ["CCDIS","Z_trip_diff","LHCb"]
-runcards = ["LHCb"]
+runcards = ["triple_differential"]
 
 # Disable
 def blockPrint():
@@ -14,7 +14,7 @@ def enablePrint():
 
 # RUNCARDS USED ONLY FOR PULLING DATA WITH FINALISE.PY 
 blockPrint()
-modules = [importlib.import_module(rc) for rc in runcards]
+modules = [importlib.import_module("{0}".format(rc)) for rc in runcards]
 enablePrint()
 
 dictCard = {}
