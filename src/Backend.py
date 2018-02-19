@@ -679,6 +679,7 @@ class Backend(object):
         """
         if custom_get:
             from importlib import import_module
+            custom_get = custom_get.replace("/",".")
             import_module(custom_get).do_finalise()
         else:
             # Check whether we are in a production or a warmup run before continuing
