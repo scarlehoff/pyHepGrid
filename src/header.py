@@ -77,7 +77,7 @@ sockets_active = 1 # 1 socket == no sockets
 
 from src.argument_parser import runcard as runcard_file
 if runcard_file:
-    runcard = importlib.import_module(runcard_file.replace(".py",""))
+    runcard = importlib.import_module(runcard_file.replace(".py","").replace("/","."))
     # todo: some safety checks
     for attr_name in dir(runcard):
 #        print(attr_name, runcard)
