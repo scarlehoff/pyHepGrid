@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.4
 from __future__ import print_function
 import datetime
 import itertools
