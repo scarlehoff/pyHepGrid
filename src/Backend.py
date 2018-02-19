@@ -184,8 +184,8 @@ class Backend(object):
         print("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
-            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(src.header.lfn_warmup_dir,checkname))
-            self.gridw.delete(checkname, src.header.lfn_warmup_dir)
+            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(header.lfn_warmup_dir,checkname))
+            self.gridw.delete(checkname, header.lfn_warmup_dir)
 
     def _checkfor_existing_output(self, r, rname):
         """ Check whether given runcard already has output in the grid
@@ -417,7 +417,7 @@ class Backend(object):
         tags = ["runcard", "runfolder", "date"]
         runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
 
-        n_threads = src.header.src.finalise_no_cores
+        n_threads = header.finalise_no_cores
         status = self._multirun(self._do_stats_job, jobids_lst,
                                 n_threads, arglen=arglen)
         done = status.count(self.cDONE)
@@ -728,14 +728,14 @@ class Backend(object):
     def _get_default_args(self):
         # Defaults arguments that can always go in
         dictionary = {
-                'executable' : src.header.NNLOJETexe,
-                'lfndir' : src.header.lfndir,
-                'input_folder' : src.header.lfn_input_dir,
-                'output_folder' : src.header.lfn_output_dir,
-                'warmup_folder' : src.header.lfn_warmup_dir,
-                'lhapdf_grid' : src.header.lhapdf_grid_loc,
-                'lhapdf_local' : src.header.lhapdf_loc,
-                'debug' : str(src.header.debug_level),
+                'executable' : header.NNLOJETexe,
+                'lfndir' : header.lfndir,
+                'input_folder' : header.lfn_input_dir,
+                'output_folder' : header.lfn_output_dir,
+                'warmup_folder' : header.lfn_warmup_dir,
+                'lhapdf_grid' : header.lhapdf_grid_loc,
+                'lhapdf_local' : header.lhapdf_loc,
+                'debug' : str(header.debug_level),
                 }
         return dictionary
 
@@ -762,8 +762,8 @@ class Backend(object):
         warmup_dict = { 'Warmup' : None,
                         'threads' : threads }
         if sockets:
-                warmup_dict['port'] = src.header.port
-                warmup_dict['Host'] = src.header.server_host
+                warmup_dict['port'] = header.port
+                warmup_dict['Host'] = header.server_host
                 warmup_dict['Sockets'] = None
 
         warmup_str = self._format_args(warmup_dict)

@@ -4,7 +4,7 @@
 # src.Backend Management classes
 #
 import src.utilities as util
-import src.header
+import src.header as header
 from src.Backend import Backend
 
 import os
@@ -20,7 +20,7 @@ class Arc(Backend):
     def __init__(self, **kwargs):
         # Might not work on python2?
         super(Arc, self).__init__(**kwargs)
-        self.table = src.header.arctable
+        self.table = header.arctable
         self.kill_skip = False
 
     def __str__(self):
@@ -60,7 +60,7 @@ class Arc(Backend):
             self._press_yes_to_continue("WARNING! You are about to kill the job!")
             self.kill_skip = True
         for jobid in jobids:
-            cmd = [self.cmd_kill, "-j", src.header.arcbase, jobid.strip()]
+            cmd = [self.cmd_kill, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
 
     def clean_job(self, jobids):
@@ -68,13 +68,13 @@ class Arc(Backend):
         the arc storage """
         self._press_yes_to_continue("WARNING! You are about to clean the job!")
         for jobid in jobids:
-            cmd = [self.cmd_clean, "-j", src.header.arcbase, jobid.strip()]
+            cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
 
     def cat_job(self, jobids, print_stderr = None):
         """ print stdandard output of a given job"""
         for jobid in jobids:
-            cmd = [self.cmd_print, "-j", src.header.arcbase, jobid.strip()]
+            cmd = [self.cmd_print, "-j", header.arcbase, jobid.strip()]
             if print_stderr:
                 cmd += ["-e"]
             util.spCall(cmd)
@@ -100,8 +100,8 @@ class Arc(Backend):
         data = self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
         finfolder =  pathfolder = data["pathfolder"] + "/" + runfolder + "/"
-        if src.header.finalisation_script is not None:
-            finfolder = src.header.default_runfolder
+        if header.finalisation_script is not None:
+            finfolder = header.default_runfolder
         jobids    =  data["jobid"].split()
         output_folder = ["file://" + finfolder]
         for jobid in jobids:
@@ -114,11 +114,11 @@ class Arc(Backend):
     def status_job(self, jobids, verbose = False):
         """ print the current status of a given job """
         # for jobid in jobids:
-        #     cmd = [self.cmd_stat, "-j", src.header.arcbase, jobid.strip()]
+        #     cmd = [self.cmd_stat, "-j", header.arcbase, jobid.strip()]
         #     if verbose:
         #         cmd += ["-l"]
         #     util.spCall(cmd)
-        cmd = [self.cmd_stat, "-j", src.header.arcbase]
+        cmd = [self.cmd_stat, "-j", header.arcbase]
         jobids = [jobid.strip() for jobid in jobids]
         cmd = cmd + jobids
         if verbose:
@@ -132,7 +132,7 @@ class Dirac(Backend):
 
     def __init__(self, **kwargs):
         super(Dirac, self).__init__(**kwargs)
-        self.table = src.header.diractable
+        self.table = header.diractable
 
     def __str__(self):
         return "Dirac"
@@ -145,7 +145,7 @@ class Dirac(Backend):
 
     def status_job(self, jobids, verbose = False):
         """ query dirac on a job-by-job basis about the status of the job """
-        self._multirun(self.do_status_job, jobids, src.header.src.finalise_no_cores)
+        self._multirun(self.do_status_job, jobids, header.finalise_no_cores)
 
     def do_status_job(self, jobid):
         """ multiproc wrapper for status_job """
@@ -155,7 +155,7 @@ class Dirac(Backend):
 
     def get_status(self, status, date):
         return set(util.getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
-                                  '--Owner={0}'.format(src.header.dirac_name),
+                                  '--Owner={0}'.format(header.dirac_name),
                                   '--Date={0}'.format(date)]).split("\n")[-2].split(", "))
 
     def stats_job_cheat(self, dbid):

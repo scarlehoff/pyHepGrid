@@ -1,7 +1,7 @@
-from Backend import Backend
+from src.Backend import Backend
 from datetime import datetime
-import utilities as util
-import header
+import src.utilities as util
+import src.header as header
 
 class RunDirac(Backend):
     def __init__(self, **kwargs):
@@ -69,7 +69,7 @@ class RunDirac(Backend):
         """
         rncards, dCards = util.expandCard(runcard)
         self.runfolder  = header.runcardDir
-        from header    import baseSeed, producRun
+        from src.header    import baseSeed, producRun
         for r in rncards:
             print("> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
             print("> Beginning at seed {0} in increments of 1000.".format(baseSeed))
