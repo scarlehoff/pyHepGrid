@@ -780,7 +780,7 @@ class Backend(object):
 
 def generic_initialise(runcard, warmup=False, production=False, grid=None, overwrite_grid=False):
     print("Initialising runcard: {0}".format(runcard))
-    back = src.Backend()
+    back = Backend()
     if warmup:
         if overwrite_grid:
             back.set_overwrite_warmup()

@@ -1,125 +1,120 @@
-#!/usr/bin/env python 
-
-import os,sys
+#!/usr/bin/env python3
+from __future__ import division, print_function
+import os
+import sys
 import subprocess
 import glob
 import shutil
-import config as c
+import multiprocessing as mp
+import itertools as it
+import importlib
+import src.header as config
 
-os.environ["LFC_HOST"]="lfc.grid.sara.nl"
-os.environ["LCG_CATALOG_TYPE"]="lfc"
-#os.environ["LFC_HOME"]="/grid/pheno/morgan"
-os.environ["LFC_HOME"] = c.LFNDIR
-#os.environ["LCG_GFAL_INFOSYS"]="lcgbdii.gridpp.rl.ac.uk:2170"
-#os.environ["LD_LIBRARY_PATH"]="./LHAPDF/Lib"
-os.environ["LD_LIBRARY_PATH"] = c.LHAPDFDIR + "/lib"
-SRM='srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/morgan_dir/'
+rc = importlib.import_module(config.finalise_runcards)
 
-#runcarddir = '/mt/home/morgan/NNLOJET/driver/grid'
-runcarddir = c.RUNCARDS
+# TODO
+# Remove as many mkdir/rmtree calls as possible. 
+# These take a lot of time/system resources, and probably 
+# can be removed by keeping better track of tmp files
 
-runcards = os.listdir(runcarddir)
+# CONFIG
+no_processes = config.finalise_no_cores
 
-warm = ''
-try:
-    warm = sys.argv[1]
-except IndexError:
-    pass
+# Set up environment
+os.environ["LFC_HOST"] = config.LFC_HOST
+os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
+os.environ["LFC_HOME"] = config.lfndir
 
-if warm == 'warmup':
-    warmup=True
-else:
-    warmup=False
+def mkdir(directory):
+    os.system('mkdir {0} > /dev/null 2>&1'.format(directory))
 
 
-
-if warmup:
-    cmd = ['lfc-ls','warmup']
-    seedList = ['w']
-    processList = []
-else:
-    cmd = ['lfc-ls','output']
-    seedList = [str(i) for i in range(1,10000)]
-    processList = [] # no longer separate processes for modules
-
-output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
-
-currentdir = os.getcwd()
-
-def getid(run):
-    direct = os.path.join(runcarddir,run)
-    f = open(direct,'r')
-    text = f.readlines()
-    id = text[1].split('!')
-    id = id[0].strip()    
-    sproc = text[2].split('!')
-    sproc = sproc[0].strip()
-    f.close()
-    return id,sproc
+def get_output_dir_name(runcard):
+    basedir = config.production_base_dir
+    subdir = "{0}{1}".format(config.finalise_prefix, runcard)
+    return os.path.join(basedir, subdir)
 
 
-for run in runcards:
-    targetdir = os.path.join(currentdir,'results_'+run)
-    os.system('mkdir '+targetdir)
-    if not warmup:
-        for subdir in ['tmp','log']+processList:
-            newdir = os.path.join(targetdir,subdir)
-            os.system('mkdir '+newdir)
-    else:
-        newdir = os.path.join(targetdir,'tmp')
-        os.system('mkdir '+newdir)         
+def createdirs(currentdir, runcard):
+    targetdir = os.path.join(currentdir, get_output_dir_name(runcard))
+    mkdir(targetdir)
+    newdir = os.path.join(targetdir, 'log')
+    mkdir(newdir)
 
-    if not warmup:
-        newdir = os.path.join(targetdir,'log')
-    else:
-        newdir = targetdir
-    os.chdir(newdir)
+    logdir = os.path.join(targetdir, 'log')
+    os.chdir(logdir)
     logcheck = glob.glob('*.log')
-    tmpdir = os.path.join(targetdir,'tmp')
-    os.chdir(tmpdir)
 
-    for seed in seedList:
-        name = 'output'+run+'-'+seed+'.tar.gz'
-        runid,sproc = getid(run)
-        # for now ZJ is a hack
-        if warmup:
-            checkname = sproc+'.'+runid+'.'+'s1.log'
+    return logcheck, targetdir
+
+
+def seed_present(logcheck, seedstr):
+    return any(seedstr in logfile for logfile in logcheck)
+
+
+def move_logfile_to_log_dir(tmpfiles):
+    logfile = next(x for x in tmpfiles if x.endswith(".log"))
+    direct = os.path.join('../log/', logfile)
+    os.rename(logfile, direct)
+
+
+def move_dat_files_to_root_dir(tmpfiles):
+    for f in tmpfiles:
+        if f.endswith('.dat'):
+            os.rename(f, '../' + f)
+
+
+def pullrun(name, seed, run, output, logcheck, tmpdir):
+    seedstr = ".s{0}.log".format(seed)
+    if name in output and not seed_present(logcheck, seedstr):
+        os.mkdir(tmpdir)
+        os.chdir(tmpdir)
+        status = 0
+        print("Pulling {0}, seed {1}".format(run, seed))
+        command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null'.format(name)
+        os.system(command)
+        out = os.system('tar -xf ' + name + ' -C .')
+        tmpfiles = os.listdir('.')
+        if seed_present(tmpfiles, seedstr):
+            move_logfile_to_log_dir(tmpfiles)
+            move_dat_files_to_root_dir(tmpfiles)
         else:
-            checkname = sproc+'.'+runid+'.s'+seed+'.log'
-#        output = [name] # HACK for now
-        if name in output and checkname not in logcheck:
-            status = 0
-            print run,seed
-            if warmup:
-                command = 'lcg-cp lfn:warmup/'+name+' '+name
-            else:
-                command = 'lcg-cp lfn:output/'+name+' '+name
-            os.system(command)
-            os.system('tar -xf '+name+' -C .')
-            tmpfiles = os.listdir('.')
-            
-            if checkname in tmpfiles:
-                if warmup:
-                    direct = os.path.join('../',checkname)
-                else:
-                    direct = os.path.join('../log/',checkname)
-                os.rename(checkname,direct)
-                for f in tmpfiles:
-                    splitname = f.split('.')
-                    if splitname[-1] == 'dat':
-                        os.rename(f,'../'+f)
-                    elif splitname[-1] in ['RRa','RRb','vRa','vRb','txt'] and warmup:
-                        os.rename(f,'../'+f)
-            else:
-                status = 1
+            status = 1
+            # Hits if seed not found in any of the output files
+            print("Deleting {0}, seed {1}. Corrupted output".format(run, seed))
+            os.system('lcg-del -a lfn:output/{0}'.format(name))
+        shutil.rmtree(tmpdir)
+        
 
-            if status != 0:
-                print "deleting: ", run,seed
-                os.system('lcg-del -a lfn:output/'+name) 
-            shutil.rmtree(tmpdir)
-            os.mkdir(tmpdir)
-            os.chdir(tmpdir)
+def pull_seed_data(rc_tar, runcard, output, logcheck, targetdir):
+    pid = mp.current_process().pid
+    # Separate tmpdir for each process
+    tmpdir = os.path.join(targetdir, '.process_{0}_tmp'.format(pid))
+    seed = rc_tar.split(".")[-3].split("-")[-1]
+    pullrun(rc_tar, seed, runcard, output, logcheck, tmpdir)
 
 
+def do_finalise():
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
+    cmd = ['lfc-ls', 'output']
+    output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+    currentdir = os.getcwd()
+    output = [x for x in str(output).split("\\n")]
+
+    pool = mp.Pool(processes=no_processes)
+    tot_rc_no = len(rc.dictCard)
+    for rc_no, runcard in enumerate(rc.dictCard):
+        print("> Checking output for {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no))
+        dirtag = runcard + "-" + rc.dictCard[runcard]
+        runcard_name_no_seed = "output{0}-".format(dirtag)
+        runcard_output = [i for i in output if runcard_name_no_seed in i]
+        logcheck, targetdir = createdirs(currentdir, dirtag)
+        pool.starmap(pull_seed_data, zip(runcard_output, it.repeat(runcard), 
+                                         it.repeat(output), it.repeat(logcheck),
+                                         it.repeat(targetdir)))
 
 
+if __name__ == "__main__":
+    do_finalise()

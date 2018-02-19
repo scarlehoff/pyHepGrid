@@ -63,7 +63,7 @@ ce_listfile = "computing_elements.txt"
 dirac_name = "duncan.walker"
 
 # finalise.py-only parameters
-finalise_runcards = "src.finalise_runcards"
+finalise_runcards = "finalise_runcards"
 finalise_prefix = "results_"
 
 # socket parameters

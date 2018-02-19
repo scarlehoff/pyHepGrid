@@ -1,7 +1,7 @@
-from Backend import Backend
+from src.Backend import Backend
 from datetime import datetime
-import utilities as util
-import header
+import src.utilities as util
+import src.header as header
 
 class RunArc(Backend):
     def __init__(self, arcscript = None, **kwargs): 
@@ -58,9 +58,9 @@ class RunArc(Backend):
         If test = True, use test queue
         """
         if test:
-            from header import ce_test as ce
+            from src.header import ce_test as ce
         else:
-            from header import ce_base as ce
+            from src.header import ce_base as ce
         cmd = "arcsub -c {0} {1}".format(ce, filename)
         output = util.getOutputCall(cmd.split())
         jobid = output.split("jobid:")[-1].rstrip().strip()
@@ -90,7 +90,7 @@ class RunArc(Backend):
                 job_type = "Warmup"
 
         self.runfolder = header.runcardDir
-        from header import warmupthr, jobName, warmup_base_dir
+        from src.header import warmupthr, jobName, warmup_base_dir
         # loop over al .run files defined in runcard.py
 
         for r in rncards:
@@ -135,7 +135,7 @@ class RunArc(Backend):
         rncards, dCards = util.expandCard(runcard)
         self.runfolder = header.runcardDir
         job_type = "Production"
-        from header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
+        from src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
