@@ -118,6 +118,28 @@ When running, the python script nnlorun.py is sent to the run location. This scr
 Finalising results [Juan, can we have your input on your setup here?]
 -> The process of pulling the production results from grid storage to the gridui
 -> You have a choice of setups for this (or you can implement your own)
+=> DEFAULT SETUP
+   By default, ./main.py ships a "--get_data" script that allows you to retrieve jobs looking
+   at the database.
+
+       ./main.py man -A --get_data
+   For ARC runs (either production or warmup)
+   or
+       ./main.py man -D --get_data
+   for DIRAC runs.
+
+   The script will then ask you which database entry do you want to retrieve and will put the contents in the folders defined in your header.
+        warmup_base_dir/date/of/job/RUNNAME
+   for warmups or
+        production_base_dir/date/of/job/RUNNAME
+   for production.
+
+   For instance, let's supposse you sent 4000 production runs to Dirac on the 1st of March 
+   and this job's entry is 14, you can do
+       ./main.py man -D -g -j 14
+   and it will download all .dat and .log files to
+       warmup_base_dir/March/1/RUNNAME
+
 => DUNCAN'S SETUP
        ./finalise.py 
    or 
@@ -129,7 +151,6 @@ Finalising results [Juan, can we have your input on your setup here?]
    The output will be stored in production_base_dir (as set in the header) with one folder 
    for each set of runs, and the prefix as set in finalise_prefix. Corrupted data in the 
    grid storage will be deleted.
-=> JUAN'S SETUP
    ???
 => CUSTOM SETUPS
    For your own custom setup, you just need to write a finalisation script which exposes a
@@ -164,7 +185,31 @@ RUNCARD.PY FILES DETAILS
 ######################################
 DIRAC
 
-TBC
+Installing Dirac is quite easy nowadays! This information comes 
+directly from https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac. 
+Running all commands will install dirac version $DIRAC_VERSION to $HOME/dirac_ui.
+You can change this by modifying the variable DIRAC_FOLDER
+
+DIRAC_FOLDER="~/dirac_ui"
+DIRAC_VERSION="-r v6r19p10 -i 27 -g v13r0"
+
+mkdir $DIRAC_FOLDER
+cd $DIRAC_FOLDER
+wget -np -O dirac-install https://raw.githubusercontent.com/DIRACGrid/DIRAC/integration/Core/scripts/dirac-install.py
+chmod u+x dirac-install
+source $DIRAC_FOLDER/bashrc # this is not your .bashrc but Dirac's bashrc, see note below
+./dirac-install $DIRAC_VERSION
+dirac-proxy-init -x  ## Here you will need to give your grid certificate password
+dirac-configure -F -S GridPP -C dips://dirac01.grid.hep.ph.ic.ac.uk:9135/Configuration/Server -I
+dirac-proxy-init -g pheno_user -M 
+
+
+### Note:
+You need to source $DIRAC_FOLDER/bashrc every time you want to use dirac. 
+Running the following command will put the "source" in your own .bashrc
+
+echo "source $DIRAC_FOLDER/bashrc" >> $HOME/.bashrc
+
 
 #######################################
 DURHAM ARC MONITORING WEBSITE
