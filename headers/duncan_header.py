@@ -35,7 +35,7 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
-dbname     = "/mt/home/dwalker/reorganised_grid/databases/CCDIS.dat"     
+dbname     = "/mt/home/dwalker/jobscripts/databases/CCDIS.dat"     
 #dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
 
 # Finalisation and storage options
