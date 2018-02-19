@@ -2,9 +2,11 @@ __pycache__/*
 syntax:glob
 *.orig
 *~
+*#
 *.dat
 *.xrsl
 *.jdl
 runcard.py
 runjobs
+finalise
 *.pyc
