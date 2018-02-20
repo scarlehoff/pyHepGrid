@@ -223,7 +223,6 @@ class TarWrap:
 # GridUtilities
 # 
 class GridWrap:
-    from src.header import grid_username as username
     # Defaults
     sendto = ["lcg-cr", "--vo", "pheno", "-l"]
     retriv = ["lcg-cp"]
@@ -233,7 +232,8 @@ class GridWrap:
     listfi = ["lfc-ls"]
     lfn = "lfn:"
     gfal = False
-    # Gfal time
+    # Gfal time (testing)
+#     from src.header import grid_username as username
 #    gfal = True
 #    lfn = "lfn://grid/pheno/{0}/".format(username)
 #    sendto = ["gfal-copy", "-p"]
