@@ -21,7 +21,7 @@ if rmode[:3] == "run" or rmode[:3] == "man":
 ########################################
 
 #### Step1, invoke proxy
-if not args.noProxy:
+if args.genProxy:
     import src.proxyUtil as proxyUtil
     if args.runArc or args.runArcProduction:   proxyUtil.arcProxyWiz()
     if args.runDirac: proxyUtil.diracProxy()

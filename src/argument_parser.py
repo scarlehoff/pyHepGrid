@@ -31,8 +31,9 @@ if caller_script == "main.py":
             parser.exit(0)
     parser.add_argument("-L", "--lhapdf", help = "Send LHAPDF to Grid", action = LHAPDF_initAction)
 
-    parser.add_argument("-n", "--noProxy", help = "Bypasses proxy creation", action = "store_true")
-    parser.add_argument("--yes", help = "Assume yes to all questions in management (use with care!)", action = "store_true")
+    parser.add_argument("-gp", "--genProxy", help = "Generates proxy for the chosen backend", action = "store_true")
+    parser.add_argument("-n", "--noProxy", help = "[DEPRECATED] Bypasses proxy creation", action = "store_true")
+    parser.add_argument("--yes", help = "Assume answer yes to all questions in management (use with care!)", action = "store_true")
 
     # Global management
     parser.add_argument("-cw", "--continue_warmup", help = "Continue a previous warmup", action = "store_true")
@@ -51,7 +52,7 @@ if caller_script == "main.py":
     parser.add_argument("--list_disabled", help = "List also disabled entries", action = "store_true")
 
     # Options that modify the jobs we can act onto
-    parser.add_argument("--done", help = "For multiruns, only act on jobs which have the done status store in the database", action = "store_true")
+    parser.add_argument("--done", help = "For multiruns, only act on jobs which have the done status stored in the database", action = "store_true")
 
 
     # Arc only
