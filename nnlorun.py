@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-
 import os, sys, datetime
 
+# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
+
 def warmup_name(runcard, rname):
-    # This function must always be the same as the one in src.Backend.py
+    # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-warm-" + rname + ".tar.gz"
     return out
 
 def output_name(runcard, rname, seed):
-    # This function must always be the same as the one in src.Backend.py
+    # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 

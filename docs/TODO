@@ -11,3 +11,9 @@
 - Play around with priority systems for get_site_info.py hooks
 
 - Runcard test function which takes the setup to be initialised and check it runs ok
+
+- shell script that sets up:
+  - proxy generation crontabs
+  - LFC directories
+  - additional necessary lines in .bashrc
+  - 
