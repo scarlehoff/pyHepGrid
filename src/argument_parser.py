@@ -13,7 +13,7 @@ if caller_script == "main.py":
     import argparse
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("mode", help = "Mode [initialize/run/manage/proxy] ")
+    parser.add_argument("mode", help = "Mode [initialize/run/manage] ")
     parser.add_argument("runcard", nargs = "?", help = "Runcard to act upon")
 
     # src.Backend selection
