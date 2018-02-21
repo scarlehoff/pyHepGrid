@@ -77,9 +77,10 @@ class CE_Data():
         string += "Total: {0:4}".format(self.TotJobs)
         return string
 
-
 def get_ces(all_ces):
-    with open(src.header.ce_listfile) as cefile:
+    from src.header import ce_listfile
+
+    with open(ce_listfile) as cefile:
         celines = cefile.readlines()
 
     if not all_ces:

@@ -93,6 +93,7 @@ class RunArc(Backend):
         from src.header import warmupthr, jobName, warmup_base_dir
         # loop over al .run files defined in runcard.py
 
+        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:
             # Check whether this run has something on the gridStorage
             self._checkfor_existing_warmup(r, dCards[r])
@@ -136,6 +137,8 @@ class RunArc(Backend):
         self.runfolder = header.runcardDir
         job_type = "Production"
         from src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
+
+        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
