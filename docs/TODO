@@ -6,7 +6,6 @@
 
 - Option to do arcsync from main.py so that it queries the database and we only do arcsync for jobs and CEs that are actually being used.
 
-- Support for passing multiple runcards for initialisation/submission at once (requires modules reloading for runcard.py overrides)
 
 - Play around with priority systems for get_site_info.py hooks
 
@@ -17,3 +16,7 @@
   - LFC directories
   - additional necessary lines in .bashrc
   - 
+
+
+###### Done in the form of a bash script
+- Support for passing multiple runcards for initialisation/submission at once (requires modules reloading for runcard.py overrides)
