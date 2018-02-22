@@ -79,7 +79,12 @@ class CE_Data():
 
 
 def get_ces(all_ces):
-    with open(src.header.ce_listfile) as cefile:
+    # workaround since i don't have time right now to investigate what the problem was
+    try:
+        import header
+    except:
+        import src.header
+    with open(header.ce_listfile) as cefile:
         celines = cefile.readlines()
 
     if not all_ces:
