@@ -183,7 +183,18 @@ def runWrapperProduction(runcard, test=None):
     arc.run_wrap_production(runcard, test)
 
 
+####### Testing routines - just a wrapper to get the args for nnlojob
 
+def testWrapper(r, dCards):
+    print("Running arc job for {0}".format(r))
+    arc = RunArc(header.ARCSCRIPTDEFAULT)
+    return arc._get_warmup_args(r, dCards[r], threads=header.warmupthr,
+                                                        sockets=False)
+
+def testWrapperProduction(r, dCards):
+    print("Running arc job for {0}".format(r))
+    arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
+    return arc._get_prod_args(r, dCards[r], 1)
 
 # Code graveyard
 def iniWrapper(runcard, warmup=None):

@@ -57,6 +57,9 @@ arcbase  = "/mt/home/{}/.arc/jobs.dat".format(grid_username) # arc database
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
 LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
 LFC_CATALOG_TYPE = "lfc"
+runfile = "nnlorun.py"
+sandbox_dir = "test_sandbox"
+
 
 # Database config
 arctable   = "arcjobs"
@@ -102,7 +105,7 @@ except ImportError as e:
 ### Moved to the bottom to allow runcard to override jobName
 
 ARCSCRIPTDEFAULT = ["&",
-        "(executable   = \"nnlorun.py\")",
+        "(executable   = \"{0}\")".format(runfile),
         "(outputFiles  = (\"outfile.out\" \"\") )",
         "(stdout       = \"stdout\")",
         "(stderr       = \"stderr\")",
@@ -111,7 +114,7 @@ ARCSCRIPTDEFAULT = ["&",
         ]
 
 ARCSCRIPTDEFAULTPRODUCTION = ["&",
-        "(executable   = \"nnlorun.py\")",
+        "(executable   = \"{0}\")".format(runfile),
         "(outputFiles  = (\"outfile.out\" \"\") )",
         "(stdout       = \"stdout\")",
         "(stderr       = \"stderr\")",
@@ -121,9 +124,9 @@ ARCSCRIPTDEFAULTPRODUCTION = ["&",
 
 DIRACSCRIPTDEFAULT = [
         "JobName    = \"{0}\";".format(jobName),
-        "Executable = \"nnlorun.py\";",
+        "Executable = \"{0}\";".format(runfile),
         "StdOutput  = \"StdOut\";",
         "StdError   = \"StdErr\";",
-        "InputSandbox  = {\"nnlorun.py\"};",
+        "InputSandbox  = {{\"{0}\"}};".format(runfile),
         "OutputSandbox = {\"StdOut\",\"StdErr\"};",
         ]
