@@ -10,3 +10,4 @@ runcard.py
 runjobs
 finalise
 *.pyc
+test_sandbox/*

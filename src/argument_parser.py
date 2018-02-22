@@ -13,13 +13,13 @@ if caller_script == "main.py":
     import argparse
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("mode", help = "Mode [initialize/run/manage] ")
+    parser.add_argument("mode", help = "Mode [initialize/run/manage/test] ")
     parser.add_argument("runcard", nargs = "?", help = "Runcard to act upon")
 
     # src.Backend selection
-    parser.add_argument("-A", "--runArc",   help = "Run/manage an Arc job (warmup)", action = "store_true")
-    parser.add_argument("-B", "--runArcProduction",   help = "Run/manage an Arc job (production)", action = "store_true")
-    parser.add_argument("-D", "--runDirac", help = "Run/manage a dirac job (production)", action = "store_true")
+    parser.add_argument("-A", "--runArc",   help = "Run/manage/test an Arc job (warmup)", action = "store_true")
+    parser.add_argument("-B", "--runArcProduction",   help = "Run/manage/test an Arc job (production)", action = "store_true")
+    parser.add_argument("-D", "--runDirac", help = "Run/manage/test a dirac job (production)", action = "store_true")
 
     # LHAPDF initialisation
     class LHAPDF_initAction(argparse.Action):
@@ -60,7 +60,7 @@ if caller_script == "main.py":
     parser.add_argument("-r", "--renewArc", help = "renew the proxy of one given job", action = "store_true")
     parser.add_argument("-c", "--clean", help = "clean given job from the remote cluster", action = "store_true")
     parser.add_argument("-G", "--getmewarmup", help = "Force the retrieval of the warmup file from an unfinished job", action = "store_true")
-    parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes)", action = "store_true")
+    parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes). NB this is different to the test mode, which runs nnlojob with the intended submission arguments locally for testing before submission. Also, the test queue was broken as of 22/2/18, so this option is a little bit broken.", action = "store_true")
     parser.add_argument("--error", help = "When doing arccat, print the standard error instead of std output", action = "store_true")
     parser.add_argument("-mf","--most_free_cores",  help = "Override ce_base with ce with most free cores", action = "store_true")
 
