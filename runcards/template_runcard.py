@@ -24,3 +24,5 @@ dictCard = {
 # CE with most cores free
 # import get_site_info
 # ce_base = get_site_info.get_most_free_cores()
+# or use the aliases defined at the top of get_site_info.py
+# ce_base = get_site_info.liverpool

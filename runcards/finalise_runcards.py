@@ -13,7 +13,7 @@ def enablePrint():
     sys.stdout = sys.__stdout__
 
 # RUNCARDS USED ONLY FOR PULLING DATA WITH FINALISE.PY 
-print("Pulling data for runcard(s): {0}".format("".join(i for i in runcards)))
+print("Pulling data for runcard(s): {0}".format(" ".join(i for i in runcards)))
 blockPrint()
 modules = [importlib.import_module("runcards.{0}".format(rc)) for rc in runcards]
 enablePrint()
