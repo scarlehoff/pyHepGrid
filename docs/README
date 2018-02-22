@@ -1,8 +1,22 @@
 README 
 (Incomplete, and always will be. The grid is a mysterious thing...)
 
+CONTENTS
+1)  INITIAL SETUP
+2)  NNLOJET SETUP
+3)  LFN SETUP
+4)  GRID SCRIPTS SETUP [GANGALESS]
+5)  PROXY SETUP
+6)  GRID SCRIPTS USAGE
+7)  FINALISING RESULTS
+8)  WORKFLOW
+9)  RUNCARD.PY FILES DETAILS
+10) DIRAC
+11) MONITORING WEBSITES
+12) GRID STORAGE MANAGEMENT
+
 ###################################################################################################
-INITIAL SETUP
+1) INITIAL SETUP
 
 Follow certificate setup as per Jeppe's tutorial @
 https://www.ippp.dur.ac.uk/~andersen/GridTutorial/gridtutorial.html
@@ -11,7 +25,7 @@ Make a careful note of passwords (can get confusing). Don't use passwords used e
 want to automate proxy renewal (like me and Juan)
 
 ###################################################################################################
-NNLOJET SETUP
+2) NNLOJET SETUP
 
 As usual - pull the NNLOJET repository, update to modules and make -jXX
 YOU MUST INSTALL WITH LHAPDF-6.1.6. 6.2.1 IS BROKEN, and will not work on the grid outside of Durham(!) 
@@ -20,7 +34,8 @@ YOU MUST INSTALL WITH LHAPDF-6.1.6. 6.2.1 IS BROKEN, and will not work on the gr
 -> For this you will also need to install and link against boost (painful I know...)
 
 ###################################################################################################
-LFN SETUP
+3) LFN SETUP
+
 put this into your bashrc:
 export CC=gcc
 export XX=g++
@@ -48,7 +63,7 @@ generate more directories in analogy. A nice wrapper is included as described in
 	 STORAGE MANAGEMENT section later on.
 
 ###################################################################################################
-GRID SCRIPTS SETUP [GANGALESS]
+4) GRID SCRIPTS SETUP [GANGALESS]
 
 stored in repo ssh://<hepforgeuser>@login.hepforge.prg//hepforge/hg/nnlojet/private/grid
 
@@ -61,7 +76,9 @@ add yourname_header.py file and altered header.py file to the repo, and COMMIT
 
 generate runcard.py following template_runcard.py example
 
-############ PROXY SETUP ##########
+###################################################################################################
+5) PROXY SETUP 
+
 By default, jobs will fail if the proxy ends before they finish running, so it's a good idea 
 to keep them synced with new proxies as you need:
 
@@ -80,7 +97,9 @@ Make sure .proxy.sh is set up for your user (directories should point to your ga
 -> Run by hand to check (shouldn't need your password)
 Then set up .proxy.sh to run as a cron job at least once per day (I suggest 2x in case of failure)
 
-############ GRID SCRIPTS USAGE ############
+###################################################################################################
+6) GRID SCRIPTS USAGE
+
 [Must be run with python3.4 python3.6 breaks it. Don't ask why...]
 
 initialise libraries [LHAPDF,(OPENLOOPS?)]
@@ -107,15 +126,17 @@ python3 main.py man <runcard.py> -(A/B/D)n
 For running anything on the grid, the help text in main.py (python3 main.py -h) is useful for 
 hidden options that aren't all necessarily documented(!)
        -> These features include warmup continuation, getting warmup data from running warmup jobs,
-       	   initialising withx your own warmup from elsewhere, database management stuff
+       	   initialising with your own warmup from elsewhere, database management stuff, local 
+	   runcard testing
 
 When running, the python script nnlorun.py is sent to the run location. This script then runs 
      automatically, and pulls all of the appropriate files from grid storage (NNLOJET exe, runcard 
      (warmups)). It then runs NNLOJET in the appropriate mode, before tarring up output files and
      sending them back to the grid storage.
 
-#######################################
-Finalising results [Juan, can we have your input on your setup here?]
+###################################################################################################
+7) FINALISING RESULTS
+
 -> The process of pulling the production results from grid storage to the gridui
 -> You have a choice of setups for this (or you can implement your own)
 => DEFAULT SETUP
@@ -158,10 +179,10 @@ Finalising results [Juan, can we have your input on your setup here?]
    then set the variable finalisation_script to the name of your script (without the .py suffix)
    Happy days!
 
- [./finalise.py, ./main.py man --get_data]
+ [./src/finalise.py, ./main.py man --get_data]
 
-#######################################
-NORMAL WORKFLOW
+###################################################################################################
+8) NORMAL WORKFLOW
 
 0) Make sure you have a working proxy
 1) initialise warmup runcard
@@ -171,8 +192,8 @@ NORMAL WORKFLOW
 5) run production runcard as many times as you like w/ different seeds
 6) pull down the results (finalisation)
 
-######################################
-RUNCARD.PY FILES DETAILS
+###################################################################################################
+9) RUNCARD.PY FILES DETAILS
 -> Include a dictionary of all of the runcards you want to submit/initialise/manage, along with an
    identification tag that you can use for local accounting
 -> template_runcard.py is the canonical example
@@ -182,8 +203,8 @@ RUNCARD.PY FILES DETAILS
    runs/ give different starting seeds/ numbers of production runs.
 -> You can even link/import functions to e.g dynamically find the best submission location
 
-######################################
-DIRAC
+###################################################################################################
+10) DIRAC
 
 Installing Dirac is quite easy nowadays! This information comes 
 directly from https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac. 
@@ -216,8 +237,8 @@ as follows:
 
 Modify "DIRAC/Interfaces/scripts/dirac-wms-select-jobs.py" to comment out lines 87-89
 
-#######################################
-DURHAM ARC MONITORING WEBSITE
+###################################################################################################
+11) DURHAM ARC MONITORING WEBSITE
 https://grafana.dur.scotgrid.ac.uk/dashboard/db/uki-scotgrid-durham-grid-queues?refresh=15s&orgId=1
 
 DIRAC MONITORING WEBSITE
@@ -225,8 +246,8 @@ https://dirac.gridpp.ac.uk:8443/DIRAC/
 
 UK ARC INFO
 ./get_site_info.py
-#######################################
-GRID STORAGE MANAGEMENT
+###################################################################################################
+12) GRID STORAGE MANAGEMENT
 I've written a wrapper to the lfn commands (lscp.py) in order to simplify manual navigation of
 the LFN filesystem, stored in useful_bits_and_bobs/duncan/grid_helpers/ (I suggest adding it to
 your path or symlinking it somewhere nice)
