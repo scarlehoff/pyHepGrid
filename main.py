@@ -81,4 +81,10 @@ elif rmode[:3] == "man":
     for backend in backends:
         mr.management_routine(backend, args)
 
+elif rmode[:3] == "tes":
+    from src.test_nnlojob import run_test
+    run_test(args, rcard)
+
     
+else:
+    print("Invalid mode selected. Exiting")

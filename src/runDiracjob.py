@@ -1,3 +1,4 @@
+
 from src.Backend import Backend
 from datetime import datetime
 import src.utilities as util
@@ -105,6 +106,11 @@ def runWrapper(runcard, test = None):
     print("Running dirac job for {0}".format(runcard))
     dirac = RunDirac()
     dirac.run_wrap_production(runcard)
+
+def testWrapper(r, dCards):
+    print("Running dirac job for {0}".format(r))
+    dirac = RunDirac()
+    return dirac._get_prod_args(r, dCards[r], 1)
 
 # code graveyard
 def iniWrapper(runcard, warmupProvided = None):
