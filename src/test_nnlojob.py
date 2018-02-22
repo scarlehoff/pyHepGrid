@@ -18,7 +18,7 @@ def setup():
     header.dbname = os.path.join(path_to_orig,header.dbname)
 
 def run_test(args, runcard):
-    header.debug_level = 99999
+    # header.debug_level = 99999
     
     if args.runArc:
         from src.runArcjob import testWrapper
@@ -37,4 +37,3 @@ def run_test(args, runcard):
         nnlojob_args = testWrapper(r, dCards).replace("\"","").split()
         util.spCall(["chmod","+x",header.runfile])
         util.spCall(["./{0}".format(header.runfile)] + nnlojob_args)
-#        print(len(nnlojob_args))
