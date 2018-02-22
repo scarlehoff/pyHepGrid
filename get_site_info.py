@@ -4,6 +4,18 @@ import src.header
 import subprocess as sp
 import sys
 
+# Aliases for quick reference when imported
+liverpool = "hepgrid5.ph.liv.ac.uk"
+glasgow = "svr009.gla.scotgrid.ac.uk"
+durham = "ce1.dur.scotgrid.ac.uk"
+durham2 = "ce2.dur.scotgrid.ac.uk"
+durham3 = "ce3.dur.scotgrid.ac.uk"
+durham4 = "ce4.dur.scotgrid.ac.uk"
+rl1 = "arc-ce01.gridpp.rl.ac.uk"
+rl3 = "arc-ce03.gridpp.rl.ac.uk"
+rl4 = "arc-ce04.gridpp.rl.ac.uk"
+rlpheno = "heplnv147.pp.rl.ac.uk"
+
 def get_ce(line):
     return line.split()[0].strip()
 
