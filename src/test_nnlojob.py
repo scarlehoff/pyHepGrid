@@ -6,13 +6,20 @@ import src.header as header
 import subprocess 
 
 def setup():
-    shutil.rmtree(header.sandbox_dir)
+    oldpath = os.getcwd()
+    try:
+        shutil.rmtree(header.sandbox_dir)
+    except FileNotFoundError as e:
+        pass
     os.mkdir(header.sandbox_dir)
     shutil.copyfile(header.runfile, os.path.join(header.sandbox_dir,header.runfile))
     os.chdir(header.sandbox_dir)
-    
+    path_to_orig = os.path.relpath(oldpath,os.getcwd())
+    header.dbname = os.path.join(path_to_orig,header.dbname)
 
 def run_test(args, runcard):
+    header.debug_level = 99999
+    
     if args.runArc:
         from src.runArcjob import testWrapper
     elif args.runArcProduction:
