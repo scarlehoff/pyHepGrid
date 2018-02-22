@@ -384,6 +384,9 @@ class Backend(object):
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
+                if not provided_warmup in os.listdir(sys.path[0]):
+                    copy(provided_warmup,os.path.basename(provided_warmup))
+                    provided_warmup = os.path.basename(provided_warmup)
                 warmupFiles = [provided_warmup]
             else:
                 print("Retrieving warmup file from grid")
