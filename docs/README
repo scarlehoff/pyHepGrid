@@ -210,6 +210,11 @@ Running the following command will put the "source" in your own .bashrc
 
 echo "source $DIRAC_FOLDER/bashrc" >> $HOME/.bashrc
 
+### Note: 
+To enable fast dirac statistics (using -DS rather than -Ds), you will need to alter your dirac src 
+as follows:
+
+Modify "DIRAC/Interfaces/scripts/dirac-wms-select-jobs.py" to comment out lines 87-89
 
 #######################################
 DURHAM ARC MONITORING WEBSITE

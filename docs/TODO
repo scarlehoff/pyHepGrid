@@ -17,6 +17,5 @@
   - additional necessary lines in .bashrc
   - 
 
-
 ###### Done in the form of a bash script
 - Support for passing multiple runcards for initialisation/submission at once (requires modules reloading for runcard.py overrides)
