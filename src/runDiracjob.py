@@ -68,6 +68,7 @@ class RunDirac(Backend):
         to the diract management system
         """
         rncards, dCards = util.expandCard(runcard)
+        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         self.runfolder  = header.runcardDir
         from src.header    import baseSeed, producRun
         for r in rncards:

@@ -150,7 +150,7 @@ class Backend(object):
                 return warmup
    
     # Checks for the runcard
-    def _check_production_warmup(self, r, runcard_dir, warmup, production):
+    def _check_production_warmup(self, r, runcard_dir, warmup, production, continue_warmup=False):
         """ Check whether production/warmup are active in the runcard """
         warm_string = "warmup"
         prod_string = "production"
@@ -159,21 +159,29 @@ class Backend(object):
             for line_raw in f:
                 line = line_raw.lower()
                 if warm_string in line:
-                    if warmup and ".false." in line:
-                        self._press_yes_to_continue("Warmup is not active")
-                    elif not warmup and ".true." in line:
-                        self._press_yes_to_continue("Warmup is active")
+                    if continue_warmup and not warmup:
+                        print("Continue warmup selected, but submission not in warmup mode. Exiting")
+                        sys.exit(-1)
+                    elif continue_warmup and warmup and (warmup and "2" not in line):
+                        self._press_yes_to_continue("Continue warmup is not active in runcard")
+                    elif (warmup and ".false." in line) or (warmup and "0" in line):
+                        self._press_yes_to_continue("Warmup is not active in runcard")
+                    elif (not warmup and ".true." in line) or (not warmup and "1" in line):
+                        self._press_yes_to_continue("Warmup is active in runcard")
                 if prod_string in line:
-                    if production and ".false." in line:
-                        self._press_yes_to_continue("Production is not active")
-                    elif not production and ".true." in line:
-                        self._press_yes_to_continue("Production is active")
+                    if (production and ".false." in line) or (production and "0" in line) \
+                            or (production and "2" in line):
+                        self._press_yes_to_continue("Production is not active in runcard")
+                    elif (not production and ".true." in line) or (not production and "1" in line):
+                        self._press_yes_to_continue("Production is active in runcard")
 
-    def _check_production(self, r, runcard_dir):
-        self._check_production_warmup(r, runcard_dir, warmup = False, production = True)
+    def _check_production(self, r, runcard_dir, continue_warmup = False):
+        self._check_production_warmup(r, runcard_dir, warmup = False, production = True, 
+                                      continue_warmup = continue_warmup)
 
-    def _check_warmup(self, r, runcard_dir):
-        self._check_production_warmup(r, runcard_dir, warmup = True, production = False)
+    def _check_warmup(self, r, runcard_dir, continue_warmup = False):
+        self._check_production_warmup(r, runcard_dir, warmup = True, production = False, 
+                                      continue_warmup = continue_warmup)
 
     def set_overwrite_warmup(self):
         self.overwrite_warmup = True
@@ -304,7 +312,7 @@ class Backend(object):
         self.dbase.disable_entry(self.table, db_id, revert = True)
 
     ### Initialisation functions
-    def init_warmup(self, runcard, provided_warmup = None):
+    def init_warmup(self, runcard, provided_warmup = None, continue_warmup=False):
         """ Initialises a warmup run. An warmup file can be provided and it will be 
         added to the .tar file sent to the grid storage. 
         Steps are:
@@ -332,7 +340,7 @@ class Backend(object):
             # Check whether warmup/production is active in the runcard
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
-            self._check_warmup(i, runFol)
+            self._check_warmup(i, runFol, continue_warmup=continue_warmup)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
@@ -352,7 +360,7 @@ class Backend(object):
             util.spCall(["rm", i, tarfile] + warmupFiles)
         util.spCall(["rm", NNLOJETexe])
 
-    def init_production(self, runcard, provided_warmup = None):
+    def init_production(self, runcard, provided_warmup = None, continue_warmup=False):
         """ Initialises a production run. If a warmup file is provided
         retrieval step is skipped
         Steps are:
@@ -371,7 +379,7 @@ class Backend(object):
         files = [NNLOJETexe]
         for i in rncards:
             # Check whether warmup/production is active in the runcard
-            self._check_production(i, runFol)
+            self._check_production(i, runFol, continue_warmup = continue_warmup)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
@@ -782,12 +790,13 @@ class Backend(object):
 def generic_initialise(runcard, warmup=False, production=False, grid=None, overwrite_grid=False):
     print("Initialising runcard: {0}".format(runcard))
     back = Backend()
+
     if warmup:
         if overwrite_grid:
             back.set_overwrite_warmup()
-        back.init_warmup(runcard, grid)
+        back.init_warmup(runcard, grid, continue_warmup=overwrite_grid)
     elif production:
-        back.init_production(runcard, grid)
+        back.init_production(runcard, grid, continue_warmup=overwrite_grid)
     else:
         print("What do you want me to initialise?")
         sys.exit(-1)
