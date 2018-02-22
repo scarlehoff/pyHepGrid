@@ -17,6 +17,11 @@ runcards=${arguments_raw%$options*}
 # echo runcards: $runcards
 # echo options: $options
 
+if [ -z "$runcards" ]
+then
+    $SCRIPT_NAME $mode $@
+fi
+
 for runcard in $runcards
 do
     $SCRIPT_NAME $mode $runcard $options
