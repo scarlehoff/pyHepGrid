@@ -14,9 +14,9 @@ if len(rmode) < 3:
 if rmode[:3] == "run" or rmode[:3] == "man":
     if args.runDirac and args.runArc:
         if not args.idjob == "all":
-            raise Exception("Please, choose only Dirac (-D) or Arc (-A) or Arc Production Mode (-B) (unless using -j all)")
+            raise Exception("Please choose only Dirac (-D) or Arc (-A) or Arc Production Mode (-B) (unless using -j all)")
     if not args.runDirac and not args.runArc and not args.runArcProduction:
-        raise Exception("Please , choose either Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
+        raise Exception("Please choose either Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
 
 ########################################
 

@@ -5,6 +5,9 @@ import subprocess as sp
 import sys
 
 # Aliases for quick reference when imported
+_old_dir=None # Line requred to add _old_dir to namespace of first dir() call
+_old_dir=dir()
+#
 liverpool = "hepgrid5.ph.liv.ac.uk"
 glasgow = "svr009.gla.scotgrid.ac.uk"
 durham = "ce1.dur.scotgrid.ac.uk"
@@ -15,6 +18,9 @@ rl1 = "arc-ce01.gridpp.rl.ac.uk"
 rl3 = "arc-ce03.gridpp.rl.ac.uk"
 rl4 = "arc-ce04.gridpp.rl.ac.uk"
 rlpheno = "heplnv147.pp.rl.ac.uk"
+#
+aliases=set(dir()).difference(set(_old_dir))
+#####
 
 def get_ce(line):
     return line.split()[0].strip()
@@ -46,6 +52,9 @@ def get_args():
                         default = False)
     parser.add_argument("--print_sort_possibilities","-psp",
                         help="Print all attributes that you can sort by. There will be some duplicates.",
+                        action = "store_true")
+    parser.add_argument("--aliases","-al",
+                        help="Print all aliases that can be used in runcards/headers.",
                         action = "store_true")
     args = parser.parse_args()
     return args
@@ -122,6 +131,13 @@ if __name__ == "__main__":
     args = get_args()
     site_info = get_ces(args.all)
     sortval = "Free"
+
+    if args.aliases:
+        this_file = sys.modules[__name__]
+        print("> get_site_info.py ce aliases:")
+        for alias in sorted(aliases):
+            print("{0:20} {1}".format(alias+":",getattr(this_file, alias)))
+        sys.exit(0)
 
     if args.print_sort_possibilities:
         attributes = [i for i in dir(site_info[0]) if not i.startswith("__") 
