@@ -268,7 +268,7 @@ class GridWrap:
                 if self.checkForThis(tarfile, whereTo):
                     break
                 else:
-                    print("   ERROR: {0} could not be copied to the grid storage /for some reason/".format(what))
+                    print("   ERROR: {0} could not be copied to the grid storage /for some reason/".format(tarfile))
                     yn = input(" Try again? (y/n) ")
                     if not yn.startswith("y"):
                         break
