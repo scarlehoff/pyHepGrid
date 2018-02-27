@@ -101,7 +101,6 @@ class Backend(object):
         else:
             return ""
 
-
     def _multirun(self, function, arguments, n_threads = 5, 
                   arglen=None):
         """ Wrapper for multiprocessing
