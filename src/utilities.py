@@ -262,7 +262,17 @@ class GridWrap:
             cmd = self.sendto + what + gsiftp_wher + wher
         else:
             cmd = self.sendto + wher + what
-        return spCall(cmd)
+            while True:
+                success = spCall(cmd)
+                # Check whether we actually sent what we wanted to send
+                if self.checkForThis(tarfile, whereTo):
+                    break
+                else:
+                    print("   ERROR: {0} could not be copied to the grid storage /for some reason/".format(what))
+                    yn = input(" Try again? (y/n) ")
+                    if not yn.startswith("y"):
+                        break
+        return success
 
     def bring(self, tarfile, whereFrom, whereTo):
         args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
