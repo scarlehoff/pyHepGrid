@@ -26,3 +26,9 @@ dictCard = {
 # ce_base = get_site_info.get_most_free_cores()
 # or use the aliases defined at the top of get_site_info.py
 # ce_base = get_site_info.liverpool
+
+# Automatically pick the next seed you haven't run (uses seeds stored in the database for this ;)
+# import src.dbapi as dbapi
+# baseseed = dbapi.get_next_seed()
+# If overwriting dbname in this runcard.py file, pass through the name here:
+# baseseed = dbapi.get_next_seed(dbname = dbname)
