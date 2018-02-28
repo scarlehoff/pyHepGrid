@@ -156,7 +156,22 @@ def copy_to_grid(local_file, grid_file):
     else:
         cmd = lcg_cr + " " + fileout + " " + filein
     print(cmd)
-    return os.system(cmd)
+    dirname = os.path.dirname(grid_file)
+    maxrange = 10
+    for i in range(maxrange): # try max 10 times for now ;)
+        exit_code=1
+        output = os.popen(cmd).read().strip()
+        print(output)
+        if "guid" in output: # Don't want to lfc-ls in case it's not present...
+            exit_code = 0
+            break
+        elif i != maxrange-1:
+            print("Copy failure. Trying again. [Attempt "+str(i+1)+"]")
+        else:
+            print("Copy failed after "+str(i+1)+" attempts.")
+            print("Giving up now.")
+            exit_code=500
+    return exit_code
 
 def socket_sync_str(host, port, handshake = "greetings"):
     # Blocking call, it will receive a str of the form
