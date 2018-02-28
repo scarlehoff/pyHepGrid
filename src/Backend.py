@@ -258,7 +258,7 @@ class Backend(object):
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
         if logfile == "":
-            print("> ERROR: Logfile not found. Did the warmup complete successfully?")
+            print("  \033[91m ERROR:\033[0m Logfile not found. Did the warmup complete successfully?")
             sys.exit(-1)
         cmd = ["mv", logfile, newlog]
         util.spCall(cmd)

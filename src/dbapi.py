@@ -182,7 +182,6 @@ def get_next_seed(dbname=None):
     from src.header import arctable, diractable, dbfields
     if dbname is None:
         from src.header import dbname
-    print(dbname)
     db = database(dbname, tables = [arctable, diractable], 
                   fields=dbfields)
     db.list_disabled = True
