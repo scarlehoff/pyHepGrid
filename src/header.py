@@ -36,7 +36,7 @@ for i in dir(head):
         # Give warnings if you've added any new attributes and not put them in the template.
         if i not in template_attributes and not isinstance(attr,ModuleType)\
                 and not callable(attr):
-            print(">\033[93m WARNING:\033[0m attribute {0} not present in {1}".format(i, template.__name__))
+            print("  \033[93m WARNING:\033[0m attribute {0} not present in {1}".format(i, template.__name__))
             print("> Please add it in before committing so you don't break compatibility(!)")
 
 
@@ -87,7 +87,7 @@ if runcard_file:
         if not attr_name.startswith("__") and attr_name != "dictCard" and \
                 not isinstance(getattr(runcard, attr_name), ModuleType):
             if not hasattr(this_file, attr_name):
-                print("> Warning! {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
+                print(">\033[93m WARNING!\033[0m {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
                 print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
                 print("> Or even if they do.")
 
