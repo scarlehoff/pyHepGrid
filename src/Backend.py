@@ -153,9 +153,10 @@ class Backend(object):
         """ Check whether production/warmup are active in the runcard """
         warm_string = "warmup"
         prod_string = "production"
+        info = {}
         print("Checking warmup/production in runcard %s" % r)
         with open(runcard_dir + "/" + r, 'r') as f:
-            for line_raw in f:
+            for idx,line_raw in enumerate(f):
                 line = line_raw.lower()
                 if warm_string in line:
                     if continue_warmup and not warmup:
@@ -173,13 +174,21 @@ class Backend(object):
                         self._press_yes_to_continue("Production is not active in runcard")
                     elif (not production and ".true." in line) or (not production and "1" in line):
                         self._press_yes_to_continue("Production is active in runcard")
+                if idx == 1:
+                    info["id"] = line_raw.split()[0].strip()
+                if idx == 2:
+                    info["proc"] = line_raw.split()[0].strip()
+                if idx == 14:
+                    info["tc"] = line_raw.split()[0].strip()
+                    break # Shouldn't need to go past line 14 :)
+        return info
 
     def _check_production(self, r, runcard_dir, continue_warmup = False):
-        self._check_production_warmup(r, runcard_dir, warmup = False, production = True, 
+        return self._check_production_warmup(r, runcard_dir, warmup = False, production = True, 
                                       continue_warmup = continue_warmup)
 
     def _check_warmup(self, r, runcard_dir, continue_warmup = False):
-        self._check_production_warmup(r, runcard_dir, warmup = True, production = False, 
+        return self._check_production_warmup(r, runcard_dir, warmup = True, production = False, 
                                       continue_warmup = continue_warmup)
 
     def set_overwrite_warmup(self):
@@ -327,19 +336,16 @@ class Backend(object):
             raise Exception("Could not find NNLOJET executable")
         copy(nnlojetfull, os.getcwd()) 
         files = [NNLOJETexe]
-        if provided_warmup: 
-            # Copy warmup to current dir if not already there
-            if os.path.relpath(os.path.expanduser(provided_warmup), os.getcwd())\
-                    ==os.path.basename(provided_warmup):
-                copy(provided_warmup,os.path.basename(provided_warmup))
-                provided_warmup = os.path.basename(provided_warmup)
-            files = files + [provided_warmup]
         for i in rncards:
             warmupFiles = []
             # Check whether warmup/production is active in the runcard
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
-            self._check_warmup(i, runFol, continue_warmup=continue_warmup)
+            info = self._check_warmup(i, runFol, continue_warmup=continue_warmup)
+            if provided_warmup: 
+                # Copy warmup to current dir if not already there
+                match = self.get_local_warmup_name(info,provided_warmup)
+                files += [match]
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
@@ -378,15 +384,13 @@ class Backend(object):
         files = [NNLOJETexe]
         for i in rncards:
             # Check whether warmup/production is active in the runcard
-            self._check_production(i, runFol, continue_warmup = continue_warmup)
+            info = self._check_production(i, runFol, continue_warmup = continue_warmup)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
-                if not provided_warmup in os.listdir(sys.path[0]):
-                    copy(provided_warmup,os.path.basename(provided_warmup))
-                    provided_warmup = os.path.basename(provided_warmup)
-                warmupFiles = [provided_warmup]
+                match = self.get_local_warmup_name(info,provided_warmup)
+                warmupFiles = [match]
             else:
                 print("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname)
@@ -404,6 +408,35 @@ class Backend(object):
             util.spCall(["rm"] + files + warmupFiles)
         else:
             util.spCall(["rm"] + files)
+
+    def get_local_warmup_name(self,info,provided_warmup):
+        from shutil import copy
+        if os.path.isdir(provided_warmup):
+            matches = []
+            potential_files = os.listdir(provided_warmup)
+            for potfile in potential_files:
+                matchname = "{0}.{1}.y{2}.".format(info["proc"],info["id"],info["tc"])
+                if matchname in potfile and\
+                        not potfile.endswith(".txt") and not potfile.endswith(".log"):
+                    matches.append(potfile)
+            if len(matches) > 1:
+                print("Multiple warmup matches found in {1}: {0}".format(" ".join(i for i in matches), provided_warmup))
+                print("Exiting.")
+                sys.exit()
+            elif len(matches) ==0 :
+                print("No warmup matches found in {0}.".format(provided_warmup))
+                print("Exiting.")
+                sys.exit()
+            else:
+                match = os.path.join(provided_warmup,matches[0])
+        else:
+            match = provided_warmup
+        print("Using warmup {0}".format(match))
+        if not match in os.listdir(sys.path[0]):
+            copy(match,os.path.basename(match))
+            match = os.path.basename(match)
+        return match
+
 
     # src.Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
