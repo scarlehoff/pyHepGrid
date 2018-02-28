@@ -160,7 +160,7 @@ class Backend(object):
                 line = line_raw.lower()
                 if warm_string in line:
                     if continue_warmup and not warmup:
-                        print("Continue warmup selected, but submission not in warmup mode. Exiting")
+                        print("\033[93m Continue warmup selected, but submission not in warmup mode. Exiting. \033[0m ")
                         sys.exit(-1)
                     elif continue_warmup and warmup and (warmup and "2" not in line):
                         self._press_yes_to_continue("Continue warmup is not active in runcard")
@@ -422,11 +422,11 @@ class Backend(object):
                         not potfile.endswith(".txt") and not potfile.endswith(".log"):
                     matches.append(potfile)
             if len(matches) > 1:
-                print("Multiple warmup matches found in {1}: {0}".format(" ".join(i for i in matches), provided_warmup))
+                print("\033[93m Multiple warmup matches found in {1}: {0}\033[0m ".format(" ".join(i for i in matches), provided_warmup))
                 print("Exiting.")
                 sys.exit()
             elif len(matches) ==0 :
-                print("No warmup matches found in {0}.".format(provided_warmup))
+                print("\033[93m No warmup matches found in {0}.\033[0m ".format(provided_warmup))
                 print("Exiting.")
                 sys.exit()
             else:
