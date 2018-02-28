@@ -130,7 +130,8 @@ def sanitiseGeneratedPath(dailyPath, rname):
 # Library initialisation
 #
 def lhapdfIni():
-    import shutil, os, src.header
+    import shutil, os 
+    import src.header as header
     lha_conf = "lhapdf-config"
     if getOutputCall(["which", lha_conf]) != "":
         print("Using lhapdf-config to get lhapdf directory")
