@@ -36,7 +36,7 @@ for i in dir(head):
         # Give warnings if you've added any new attributes and not put them in the template.
         if i not in template_attributes and not isinstance(attr,ModuleType)\
                 and not callable(attr):
-            print("> WARNING: attribute {0} not present in {1}".format(i, template.__name__))
+            print(">\033[93m WARNING:\033[0m attribute {0} not present in {1}".format(i, template.__name__))
             print("> Please add it in before committing so you don't break compatibility(!)")
 
 
@@ -45,7 +45,7 @@ for i in template_attributes:
     try:
         assert(hasattr(this_file, i))
     except AssertionError as e:
-        print("> ERROR: Missing {0} attribute inside {1}.py file that is present in {2}.py.".format(
+        print("  \033[91m ERROR:\033[0m Missing attribute {0} inside {1}.py that is present in {2}.py.".format(
                 i, head.__name__, template.__name__))
         print("> Check that {0}.py file is up to date as functionality may be broken otherwise.".format(head.__name__))
         sys.exit(1)

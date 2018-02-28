@@ -270,10 +270,10 @@ class GridWrap:
                 if self.checkForThis(tarfile, whereTo):
                     break
                 elif count < 3: # 3 attempts before asking for input...
-                    print("   ERROR: {0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                    print("  \033[93m ERROR:\033[0m {0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
                     print("Automatically trying again...")
                 else:
-                    print("   ERROR: {0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                    print("  \033[93m ERROR:\033[0m {0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
                     yn = input(" Try again? (y/n) ")
                     if not yn.startswith("y"):
                         break
