@@ -823,7 +823,7 @@ class Backend(object):
             if self.__first_stats_job_cheat:
                 pass
         except AttributeError as e:
-             print("Warning: The selected backend does not override the cheat version of the status command. Falling back to the standard version.")
+             print("  \033[93m WARNING:\033[0m The selected backend does not override the cheat version of the status command. Falling back to the standard version.")
              self.__first_stats_job_cheat = False
         self.stats_job(dbid)
 
