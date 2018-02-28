@@ -337,6 +337,7 @@ class Backend(object):
         copy(nnlojetfull, os.getcwd()) 
         files = [NNLOJETexe]
         for i in rncards:
+            local = False
             warmupFiles = []
             # Check whether warmup/production is active in the runcard
             if not os.path.isfile(runFol + "/" + i):
@@ -344,7 +345,7 @@ class Backend(object):
             info = self._check_warmup(i, runFol, continue_warmup=continue_warmup)
             if provided_warmup: 
                 # Copy warmup to current dir if not already there
-                match = self.get_local_warmup_name(info,provided_warmup)
+                match, local = self.get_local_warmup_name(info,provided_warmup)
                 files += [match]
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -362,7 +363,10 @@ class Backend(object):
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            util.spCall(["rm", i, tarfile] + warmupFiles)
+            if local:
+                util.spCall(["rm", i, tarfile])
+            else:
+                util.spCall(["rm", i, tarfile] + warmupFiles)
         util.spCall(["rm", NNLOJETexe])
 
     def init_production(self, runcard, provided_warmup = None, continue_warmup=False):
@@ -383,13 +387,14 @@ class Backend(object):
         copy(nnlojetfull, os.getcwd())
         files = [NNLOJETexe]
         for i in rncards:
+            local = False
             # Check whether warmup/production is active in the runcard
             info = self._check_production(i, runFol, continue_warmup = continue_warmup)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
-                match = self.get_local_warmup_name(info,provided_warmup)
+                match, local = self.get_local_warmup_name(info,provided_warmup)
                 warmupFiles = [match]
             else:
                 print("Retrieving warmup file from grid")
@@ -400,14 +405,11 @@ class Backend(object):
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            if provided_warmup:
+            if local:
                 util.spCall(["rm", i, tarfile])
             else:
                 util.spCall(["rm", i, tarfile] + warmupFiles)
-        if provided_warmup:
-            util.spCall(["rm"] + files + warmupFiles)
-        else:
-            util.spCall(["rm"] + files)
+        util.spCall(["rm"] + files)
 
     def get_local_warmup_name(self,info,provided_warmup):
         from shutil import copy
@@ -433,9 +435,12 @@ class Backend(object):
             match = provided_warmup
         print("Using warmup {0}".format(match))
         if not match in os.listdir(sys.path[0]):
+            local_match  =False
             copy(match,os.path.basename(match))
             match = os.path.basename(match)
-        return match
+        else:
+            local_match = True
+        return match, local_match
 
 
     # src.Backend "independent" management options
