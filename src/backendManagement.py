@@ -55,7 +55,7 @@ class Arc(Backend):
 
     def kill_job(self, jobids):
         """ kills given job """
-        self._press_yes_to_continue("WARNING! You are about to kill the job!")
+        self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill the job!")
         for jobid in jobids:
             cmd = [self.cmd_kill, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
@@ -63,7 +63,7 @@ class Arc(Backend):
     def clean_job(self, jobids):
         """ remove the sandbox of a given job (including its stdout!) from
         the arc storage """
-        self._press_yes_to_continue("WARNING! You are about to clean the job!")
+        self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to clean the job!")
         for jobid in jobids:
             cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
@@ -200,7 +200,7 @@ class Dirac(Backend):
 
     def kill_job(self, jobids):
         """ kill all jobs associated with this run """
-        self._press_yes_to_continue("WARNING! You are about to kill all jobs for this run!")
+        self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill all jobs for this run!")
         cmd = [self.cmd_kill] + jobids
         util.spCall(cmd)
 
