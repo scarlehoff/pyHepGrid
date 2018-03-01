@@ -22,7 +22,7 @@ def do_shell(*args):
     if retval != 0:
         debug_level = 9999
         print("Error in {0}. Raising debug level to 9999".format(*args))
-    return retval
+    return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok
 os.system = do_shell
 ####
 
@@ -128,19 +128,20 @@ gfal   = False
 def copy_from_grid(grid_file, local_file):
     cmd = lcg_cp + " " + lfn
     cmd += grid_file + " " + local_file
-    os.system(cmd)
+    return os.system(cmd)
 
 def untar_file(local_file, debug):
     if debug_level > 2:
         cmd = "tar zxfv {0}".format(local_file)
     else:
         cmd = "tar zxf " + local_file
-    os.system(cmd)
+    return os.system(cmd)
 
 def tar_this(tarfile, sourcefiles):
     cmd = "tar -czf " + tarfile + " " + sourcefiles
-    os.system(cmd)
+    stat = os.system(cmd)
     os.system("ls")
+    return stat
 
 def copy_to_grid(local_file, grid_file):
     print("Copying " + local_file + " to " + grid_file)
@@ -155,7 +156,7 @@ def copy_to_grid(local_file, grid_file):
         cmd = lcg_cr + " " + filein + " " + midfile + " " + fileout
     else:
         cmd = lcg_cr + " " + fileout + " " + filein
-    print(cmd)
+    print("> Sandbox -> LFN copy command: {0}".format(cmd))
     dirname = os.path.dirname(grid_file)
     maxrange = 10
     for i in range(maxrange): # try max 10 times for now ;)
@@ -184,19 +185,19 @@ def socket_sync_str(host, port, handshake = "greetings"):
 
 def bring_lhapdf(lhapdf_grid, debug):
     tmp_tar = "lhapdf.tar.gz"
-    copy_from_grid(lhapdf_grid, tmp_tar)
-    untar_file(tmp_tar, debug)
-    return os.system("rm {0}".format(tmp_tar))
+    stat = copy_from_grid(lhapdf_grid, tmp_tar)
+    stat += untar_file(tmp_tar, debug)
+    return os.system("rm {0}".format(tmp_tar))+stat
 
 def bring_nnlojet(input_grid, runcard, runname, debug):
     # Todo: this is not very general, is it?
     tmp_tar = "nnlojet.tar.gz"
     input_name = "{0}/{1}{2}.tar.gz".format(input_grid, runcard, runname)
-    copy_from_grid(input_name, tmp_tar)
-    untar_file(tmp_tar, debug)
-    os.system("rm {0}".format(tmp_tar))
-    os.system("ls")
-    return 0
+    stat = copy_from_grid(input_name, tmp_tar)
+    stat += untar_file(tmp_tar, debug)
+    stat += os.system("rm {0}".format(tmp_tar))
+    stat += os.system("ls")
+    return stat
 
 
 #################################################################################
@@ -235,8 +236,8 @@ if __name__ == "__main__":
 
     set_environment(args.lfndir, args.lhapdf_local)
 
-    bring_lhapdf(args.lhapdf_grid, debug_level)
-    bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
+    bring_status = bring_lhapdf(args.lhapdf_grid, debug_level)
+    bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
     if debug_level > 2:
         os.system("env")
 
@@ -272,7 +273,7 @@ if __name__ == "__main__":
     if debug_level > 1:
         os.system("ls")
 
-    tar_this(local_out, "*")
+    status_tar = tar_this(local_out, "*")
 
     status_copy = copy_to_grid(local_out, output_file)
 
@@ -295,6 +296,6 @@ if __name__ == "__main__":
     end_time = datetime.datetime.now()
     print("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
 
-    final_state = abs(status_nnlojet) + abs(status_copy)
-
+    final_state = sum(abs(i) for i in [status_nnlojet,status_copy,status_tar,bring_status])
+    print("Final Error Code: {0}".format(final_state))
     sys.exit(final_state)
