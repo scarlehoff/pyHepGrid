@@ -102,27 +102,29 @@ try:
 except ImportError as e:
     pass
 # try:
-from src.argument_parser import additional_arguments
-for attr_name in additional_arguments:
-    if not hasattr(this_file, attr_name):
-        print(">\033[93m WARNING!\033[0m {0} defined in command line args but not in {1}.py.".format(attr_name, template.__name__))
-        print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
-        print("> Or even if they do.")
+try:
+    from src.argument_parser import additional_arguments
+    for attr_name in additional_arguments:
+        if not hasattr(this_file, attr_name):
+            print(">\033[93m WARNING!\033[0m {0} defined in command line args but not in {1}.py.".format(attr_name, template.__name__))
+            print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
+            print("> Or even if they do.")
 
-    attr_value = additional_arguments[attr_name]
-    try:
-        attrtype = type(getattr(this_file,attr_name))
-        if attrtype is not type(None):
-            attr_value = attrtype(attr_value) # Casts the value to the type of the value found already in the header. If not found or the type is None, defaults to a string.
-    except AttributeError as e:
-        print(">\033[93m WARNING!\033[0m {0} default type not found.".format(attr_name))
-        print("> Will be passed through as a string.")
-    except ValueError as e:
-        print("  \033[91m ERROR:\033[0m Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
-        sys.exit(-1)
-    print("> Overriding value of {0} to {1} from command line args".format(attr_name, attr_value))
-    setattr(this_file, attr_name, attr_value)
-
+        attr_value = additional_arguments[attr_name]
+        try:
+            attrtype = type(getattr(this_file,attr_name))
+            if attrtype is not type(None):
+                attr_value = attrtype(attr_value) # Casts the value to the type of the value found already in the header. If not found or the type is None, defaults to a string.
+        except AttributeError as e:
+            print(">\033[93m WARNING!\033[0m {0} default type not found.".format(attr_name))
+            print("> Will be passed through as a string.")
+        except ValueError as e:
+            print("  \033[91m ERROR:\033[0m Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
+            sys.exit(-1)
+        print("> Overriding value of {0} to {1} from command line args".format(attr_name, attr_value))
+        setattr(this_file, attr_name, attr_value)
+except ImportError as e:
+    pass
 ### Moved to the bottom to allow runcard to override jobName
 
 ARCSCRIPTDEFAULT = ["&",
