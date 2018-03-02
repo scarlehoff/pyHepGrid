@@ -1,25 +1,21 @@
 #!/usr/bin/env python3
 from __future__ import division, print_function
-import os
-import sys
-import subprocess
+import datetime
 import glob
-import shutil
-import multiprocessing as mp
-import itertools as it
 import importlib
-import src.header as config
-import tarfile
+import itertools as it
+import multiprocessing as mp
+import os
 import re
+import shutil
+import src.header as config
+import subprocess
+import sys
+import tarfile
 
 rc = importlib.import_module(config.finalise_runcards.replace("/","."))
 logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
 tarfile_regex = re.compile(r"-([0-9]+)\.tar.gz+$")
-
-# TODO
-# Remove as many mkdir/rmtree calls as possible. 
-# These take a lot of time/system resources, and probably 
-# can be removed by keeping better track of tmp files
 
 # CONFIG
 no_processes = config.finalise_no_cores
@@ -46,7 +42,8 @@ def createdirs(currentdir, runcard):
     mkdir(logdir)
     tmpdir = os.path.join(targetdir, '.tmp')
     mkdir(tmpdir)
-    logcheck = set([logseed_regex.search(i).group(1) for i in glob.glob('{0}/*.log'.format(logdir))])
+    logcheck = set([logseed_regex.search(i).group(1) for i 
+                    in glob.glob('{0}/*.log'.format(logdir))])
     return logcheck, targetdir, tmpdir
 
 
@@ -79,7 +76,8 @@ def pullrun(name, seed, run, tmpdir):
         status = 1
         # Hits if seed not found in any of the output files
         print("Deleting {0}, seed {1}. Corrupted output".format(run, seed))
-        os.system('lcg-del -a lfn:output/{0}'.format(name))
+        os.system('lcg-del -a lfn:output/{0} 2>/dev/null'.format(name))
+        os.system('lfc-rm output/{0} -f 2>/dev/null'.format(name))
         
 
 def pull_seed_data(seed, runcard, targetdir, runcardname):
@@ -97,6 +95,8 @@ def print_no_files_found(no_files):
 
 
 def do_finalise():
+    start_time = datetime.datetime.now()
+
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     os.chdir(dname)
@@ -108,33 +108,47 @@ def do_finalise():
 
     pool = mp.Pool(processes=no_processes)
     tot_rc_no = len(rc.dictCard)
+
+    tot_no_new_files = 0
     for rc_no, runcard in enumerate(rc.dictCard):
-        printstr = "> Checking output for {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no)
-        print("{0:<70}".format(printstr), end="")
+        printstr = "> {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no)
+        print("{0:<60}".format(printstr), end="")
+
         dirtag = runcard + "-" + rc.dictCard[runcard]
         runcard_name_no_seed = "output{0}-".format(dirtag)
-        lfn_seeds = [i.split(".")[-3].split("-")[-1] for i in output 
-                     if i.startswith(runcard_name_no_seed)]
         
         output_file_names,lfn_seeds = [],[]
         for i in output: 
-            if i.startswith(runcard_name_no_seed):
+            if i in runcard_name_no_seed:
                 lfn_seeds.append(tarfile_regex.search(i).group(1))
                 output_file_names.append(i)
 
-        # Makes the second runcard slightly quicker :)
-        output = output.difference(set(output_file_names)) # Remove already matched files
+        if not output_file_names: # Shortcircuit logfile check if nothing in lfn
+            print_no_files_found(0)
+            continue
+
+        # Makes the second runcard slightly quicker by removing matched files:)
+        output = output.difference(set(output_file_names)) 
 
         logseeds, targetdir, tmpdir = createdirs(currentdir, dirtag)
         pull_seeds = set(lfn_seeds).difference(logseeds)
         
         no_files_found = len(pull_seeds)
         print_no_files_found(no_files_found)
-        
+        tot_no_new_files += no_files_found
+
         if no_files_found>0:
-            pool.starmap(pull_seed_data, zip(pull_seeds, it.repeat(runcard_name_no_seed),
-                                         it.repeat(targetdir),it.repeat(runcard)))
+            pool.starmap(pull_seed_data, zip(pull_seeds, 
+                                             it.repeat(runcard_name_no_seed),
+                                             it.repeat(targetdir),
+                                             it.repeat(runcard)))
         shutil.rmtree(tmpdir)
+    
+    end_time = datetime.datetime.now()
+    total_time = (end_time-start_time).__str__().split(".")[0]
+    print("\033[92m{0:^80}\033[0m".format("Finalisation finished!"))
+    print("Total time: {0} ".format(total_time))
+    print("New files found: {0}".format(tot_no_new_files)) 
 
 if __name__ == "__main__":
     do_finalise()
