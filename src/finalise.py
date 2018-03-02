@@ -10,8 +10,11 @@ import itertools as it
 import importlib
 import src.header as config
 import tarfile
+import re
 
 rc = importlib.import_module(config.finalise_runcards.replace("/","."))
+logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
+tarfile_regex = re.compile(r"-([0-9]+)\.tar.gz+$")
 
 # TODO
 # Remove as many mkdir/rmtree calls as possible. 
@@ -43,7 +46,7 @@ def createdirs(currentdir, runcard):
     mkdir(logdir)
     tmpdir = os.path.join(targetdir, '.tmp')
     mkdir(tmpdir)
-    logcheck = glob.glob('{0}/*.log'.format(logdir))
+    logcheck = set([logseed_regex.search(i).group(1) for i in glob.glob('{0}/*.log'.format(logdir))])
     return logcheck, targetdir, tmpdir
 
 
@@ -51,16 +54,16 @@ def seed_present(logcheck, seedstr):
     return any(seedstr in logfile for logfile in logcheck)
 
 
-def pullrun(name, seed, run, output, logcheck, tmpdir):
+def pullrun(name, seed, run, tmpdir):
     seedstr = ".s{0}.log".format(seed)
-    if name in output and not seed_present(logcheck, seedstr):
-        os.chdir(tmpdir)
-        status = 0
-        print("Pulling {0}, seed {1}".format(run, seed))
-        command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null'.format(name)
-        os.system(command)
-        # Use python tar extraction here
-        corrupted = True
+    os.chdir(tmpdir)
+    status = 0
+    print("Pulling {0}, seed {1}".format(run, seed))
+    command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null'.format(name)
+    os.system(command)
+
+    corrupted = True
+    try:
         with tarfile.open(name, 'r|gz') as tfile:
             for t in tfile:
                 if t.name.endswith(".dat"):
@@ -69,17 +72,28 @@ def pullrun(name, seed, run, output, logcheck, tmpdir):
                 elif t.name.endswith(".log"):
                     tfile.extract(t,"../log/")
                     corrupted = False
-        if corrupted:
-            status = 1
-            # Hits if seed not found in any of the output files
-            print("Deleting {0}, seed {1}. Corrupted output".format(run, seed))
-            os.system('lcg-del -a lfn:output/{0}'.format(name))
+    except FileNotFoundError as e:
+        # pull error - corrupted stays True
+        pass
+    if corrupted:
+        status = 1
+        # Hits if seed not found in any of the output files
+        print("Deleting {0}, seed {1}. Corrupted output".format(run, seed))
+        os.system('lcg-del -a lfn:output/{0}'.format(name))
         
 
-def pull_seed_data(rc_tar, runcard, output, logcheck, targetdir):
+def pull_seed_data(seed, runcard, targetdir, runcardname):
+    tarname = "{0}{1}.tar.gz".format(runcard,seed)
     tmpdir = os.path.join(targetdir, ".tmp")
-    seed = rc_tar.split(".")[-3].split("-")[-1]
-    pullrun(rc_tar, seed, runcard, output, logcheck, tmpdir)
+    pullrun(tarname, seed, runcardname, tmpdir)
+
+
+def print_no_files_found(no_files):
+    if no_files>0:
+        colour = "\033[92m"
+    else:
+        colour = "\033[93m"
+    print("{1}{0:>5} new output file(s)\033[0m".format(no_files, colour))
 
 
 def do_finalise():
@@ -89,19 +103,37 @@ def do_finalise():
     cmd = ['lfc-ls', config.lfn_output_dir]
     output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
     currentdir = os.getcwd()
+    
     output = set([x for x in str(output).split("\\n")])
 
     pool = mp.Pool(processes=no_processes)
     tot_rc_no = len(rc.dictCard)
     for rc_no, runcard in enumerate(rc.dictCard):
-        print("> Checking output for {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no))
+        printstr = "> Checking output for {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no)
+        print("{0:<70}".format(printstr), end="")
         dirtag = runcard + "-" + rc.dictCard[runcard]
         runcard_name_no_seed = "output{0}-".format(dirtag)
-        runcard_output = [i for i in output if runcard_name_no_seed in i]
-        logcheck, targetdir, tmpdir = createdirs(currentdir, dirtag)
-        pool.starmap(pull_seed_data, zip(runcard_output, it.repeat(runcard), 
-                                         it.repeat(output), it.repeat(logcheck),
-                                         it.repeat(targetdir)))
+        lfn_seeds = [i.split(".")[-3].split("-")[-1] for i in output 
+                     if i.startswith(runcard_name_no_seed)]
+        
+        output_file_names,lfn_seeds = [],[]
+        for i in output: 
+            if i.startswith(runcard_name_no_seed):
+                lfn_seeds.append(tarfile_regex.search(i).group(1))
+                output_file_names.append(i)
+
+        # Makes the second runcard slightly quicker :)
+        output = output.difference(set(output_file_names)) # Remove already matched files
+
+        logseeds, targetdir, tmpdir = createdirs(currentdir, dirtag)
+        pull_seeds = set(lfn_seeds).difference(logseeds)
+        
+        no_files_found = len(pull_seeds)
+        print_no_files_found(no_files_found)
+        
+        if no_files_found>0:
+            pool.starmap(pull_seed_data, zip(pull_seeds, it.repeat(runcard_name_no_seed),
+                                         it.repeat(targetdir),it.repeat(runcard)))
         shutil.rmtree(tmpdir)
 
 if __name__ == "__main__":
