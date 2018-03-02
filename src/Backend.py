@@ -160,7 +160,7 @@ class Backend(object):
                 line = line_raw.lower()
                 if warm_string in line:
                     if continue_warmup and not warmup:
-                        print("\033[93m Continue warmup selected, but submission not in warmup mode. Exiting. \033[0m ")
+                        print("    \033[91m ERROR:\033[0m Continue warmup selected, but submission not in warmup mode. Exiting. ")
                         sys.exit(-1)
                     elif continue_warmup and warmup and (warmup and "2" not in line):
                         self._press_yes_to_continue("Continue warmup is not active in runcard")
@@ -333,7 +333,8 @@ class Backend(object):
         rncards, dCards = util.expandCard(runcard)
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
-            raise Exception("Could not find NNLOJET executable")
+            print("    \033[91mERROR:\033[0m Could not find NNLOJET executable at {0}".format(nnlojetfull))
+            sys.exit(-1)
         copy(nnlojetfull, os.getcwd()) 
         files = [NNLOJETexe]
         for i in rncards:
@@ -355,7 +356,11 @@ class Backend(object):
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
                     print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
                     warmup_files = self._bring_warmup_files(i, rname)
+                    if not warmup_files:
+                        print("    \033[91mERROR:\033[0m No warmup grids found in warmup tar!")
+                        sys.exit(-1)
                     files += warmup_files
+                    print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
@@ -383,7 +388,8 @@ class Backend(object):
         rncards, dCards = util.expandCard(runcard)
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
-            raise Exception("Could not find NNLOJET executable")
+            print("    \033[91mERROR:\033[0m Could not find NNLOJET executable at {0}".format(nnlojetfull))
+            sys.exit(-1)
         copy(nnlojetfull, os.getcwd())
         files = [NNLOJETexe]
         for i in rncards:
