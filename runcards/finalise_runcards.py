@@ -1,5 +1,5 @@
 import sys, os, importlib
-#runcards = ["triple_differential"]
+#runcards = ["test"]
 # Auto select all runcards
 runcard_files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 runcards = [rc.replace(".py","") for rc in runcard_files if rc.endswith(".py") 
