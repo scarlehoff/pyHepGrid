@@ -47,10 +47,6 @@ def createdirs(currentdir, runcard):
     return logcheck, targetdir, tmpdir
 
 
-def seed_present(logcheck, seedstr):
-    return any(seedstr in logfile for logfile in logcheck)
-
-
 def pullrun(name, seed, run, tmpdir):
     seedstr = ".s{0}.log".format(seed)
     os.chdir(tmpdir)
@@ -73,9 +69,8 @@ def pullrun(name, seed, run, tmpdir):
         # pull error - corrupted stays True
         pass
     if corrupted:
-        status = 1
         # Hits if seed not found in any of the output files
-        print("Deleting {0}, seed {1}. Corrupted output".format(run, seed))
+        print("\033[93mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
         os.system('lcg-del -a lfn:output/{0} 2>/dev/null'.format(name))
         os.system('lfc-rm output/{0} -f 2>/dev/null'.format(name))
         
