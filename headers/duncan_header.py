@@ -39,7 +39,7 @@ dbname     = "/mt/home/dwalker/jobscripts/databases/CCDIS.dat"
 #dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
 
 # Finalisation and storage options
-finalise_no_cores = 15
+finalise_no_cores = 25
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_src.finalise()

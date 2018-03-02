@@ -40,11 +40,9 @@ def createdirs(currentdir, runcard):
     mkdir(targetdir)
     logdir = os.path.join(targetdir, 'log')
     mkdir(logdir)
-    tmpdir = os.path.join(targetdir, '.tmp')
-    mkdir(tmpdir)
     logcheck = set([logseed_regex.search(i).group(1) for i 
                     in glob.glob('{0}/*.log'.format(logdir))])
-    return logcheck, targetdir, tmpdir
+    return logcheck, targetdir
 
 
 def pullrun(name, seed, run, tmpdir):
@@ -65,19 +63,21 @@ def pullrun(name, seed, run, tmpdir):
                 elif t.name.endswith(".log"):
                     tfile.extract(t,"../log/")
                     corrupted = False
+        os.remove(name)
     except FileNotFoundError as e:
         # pull error - corrupted stays True
         pass
+
     if corrupted:
         # Hits if seed not found in any of the output files
-        print("\033[93mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
+        print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
         os.system('lcg-del -a lfn:output/{0} 2>/dev/null'.format(name))
         os.system('lfc-rm output/{0} -f 2>/dev/null'.format(name))
         
 
 def pull_seed_data(seed, runcard, targetdir, runcardname):
     tarname = "{0}{1}.tar.gz".format(runcard,seed)
-    tmpdir = os.path.join(targetdir, ".tmp")
+    tmpdir = os.path.join(targetdir, "log")
     pullrun(tarname, seed, runcardname, tmpdir)
 
 
@@ -114,7 +114,7 @@ def do_finalise():
         
         output_file_names,lfn_seeds = [],[]
         for i in output: 
-            if i in runcard_name_no_seed:
+            if runcard_name_no_seed in i:
                 lfn_seeds.append(tarfile_regex.search(i).group(1))
                 output_file_names.append(i)
 
@@ -125,7 +125,7 @@ def do_finalise():
         # Makes the second runcard slightly quicker by removing matched files:)
         output = output.difference(set(output_file_names)) 
 
-        logseeds, targetdir, tmpdir = createdirs(currentdir, dirtag)
+        logseeds, targetdir = createdirs(currentdir, dirtag)
         pull_seeds = set(lfn_seeds).difference(logseeds)
         
         no_files_found = len(pull_seeds)
@@ -137,13 +137,13 @@ def do_finalise():
                                              it.repeat(runcard_name_no_seed),
                                              it.repeat(targetdir),
                                              it.repeat(runcard)))
-        shutil.rmtree(tmpdir)
     
     end_time = datetime.datetime.now()
     total_time = (end_time-start_time).__str__().split(".")[0]
     print("\033[92m{0:^80}\033[0m".format("Finalisation finished!"))
     print("Total time: {0} ".format(total_time))
     print("New files found: {0}".format(tot_no_new_files)) 
+
 
 if __name__ == "__main__":
     do_finalise()
