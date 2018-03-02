@@ -9,6 +9,7 @@ import multiprocessing as mp
 import itertools as it
 import importlib
 import src.header as config
+import tarfile
 
 rc = importlib.import_module(config.finalise_runcards.replace("/","."))
 
@@ -52,18 +53,6 @@ def seed_present(logcheck, seedstr):
     return any(seedstr in logfile for logfile in logcheck)
 
 
-def move_logfile_to_log_dir(tmpfiles):
-    logfile = next(x for x in tmpfiles if x.endswith(".log"))
-    direct = os.path.join('../log/', logfile)
-    os.rename(logfile, direct)
-
-
-def move_dat_files_to_root_dir(tmpfiles):
-    for f in tmpfiles:
-        if f.endswith('.dat'):
-            os.rename(f, '../' + f)
-
-
 def pullrun(name, seed, run, output, logcheck, tmpdir):
     seedstr = ".s{0}.log".format(seed)
     if name in output and not seed_present(logcheck, seedstr):
@@ -73,12 +62,18 @@ def pullrun(name, seed, run, output, logcheck, tmpdir):
         print("Pulling {0}, seed {1}".format(run, seed))
         command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null'.format(name)
         os.system(command)
-        out = os.system('tar -xf ' + name + ' -C .')
-        tmpfiles = os.listdir('.')
-        if seed_present(tmpfiles, seedstr):
-            move_logfile_to_log_dir(tmpfiles)
-            move_dat_files_to_root_dir(tmpfiles)
-        else:
+        # Use python tar extraction here
+        #out = os.system('tar -xf ' + name + ' -C .')
+        corrupted = True
+        with tarfile.open(name, 'r|gz') as tfile:
+            for t in tfile:
+                if t.name.endswith(".dat"):
+                    tfile.extract(t,path="../")
+                    corrupted = False
+                elif t.name.endswith(".log"):
+                    tfile.extract(t,"../log/")
+                    corrupted = False
+        if corrupted:
             status = 1
             # Hits if seed not found in any of the output files
             print("Deleting {0}, seed {1}. Corrupted output".format(run, seed))
