@@ -7,10 +7,8 @@ import itertools as it
 import multiprocessing as mp
 import os
 import re
-import shutil
 import src.header as config
 import subprocess
-import sys
 import tarfile
 
 rc = importlib.import_module(config.finalise_runcards.replace("/","."))
@@ -73,7 +71,7 @@ def pullrun(name, seed, run, tmpdir):
         print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
         os.system('lcg-del -a lfn:output/{0} 2>/dev/null'.format(name))
         os.system('lfc-rm output/{0} -f 2>/dev/null'.format(name))
-        
+
 
 def pull_seed_data(seed, runcard, targetdir, runcardname):
     tarname = "{0}{1}.tar.gz".format(runcard,seed)
