@@ -15,13 +15,17 @@ rc = importlib.import_module(config.finalise_runcards.replace("/","."))
 logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
 tarfile_regex = re.compile(r"-([0-9]+)\.tar.gz+$")
 
+
 # CONFIG
 no_processes = config.finalise_no_cores
+verbose = config.verbose_finalise
 
 # Set up environment
 os.environ["LFC_HOST"] = config.LFC_HOST
 os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
 os.environ["LFC_HOME"] = config.lfndir
+
+
 
 def mkdir(directory):
     os.system('mkdir {0} > /dev/null 2>&1'.format(directory))
@@ -47,7 +51,8 @@ def pullrun(name, seed, run, tmpdir):
     seedstr = ".s{0}.log".format(seed)
     os.chdir(tmpdir)
     status = 0
-    print("Pulling {0}, seed {1}".format(run, seed))
+    if verbose:
+        print("Pulling {0}, seed {1}".format(run, seed))
     command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null'.format(name)
     os.system(command)
 
@@ -68,15 +73,17 @@ def pullrun(name, seed, run, tmpdir):
 
     if corrupted:
         # Hits if seed not found in any of the output files
-        print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
+        if verbose:
+            print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
         os.system('lcg-del -a lfn:output/{0} 2>/dev/null'.format(name))
         os.system('lfc-rm output/{0} -f 2>/dev/null'.format(name))
-
+        return 1
+    return 0
 
 def pull_seed_data(seed, runcard, targetdir, runcardname):
     tarname = "{0}{1}.tar.gz".format(runcard,seed)
     tmpdir = os.path.join(targetdir, "log")
-    pullrun(tarname, seed, runcardname, tmpdir)
+    return pullrun(tarname, seed, runcardname, tmpdir)
 
 
 def print_no_files_found(no_files):
@@ -85,6 +92,28 @@ def print_no_files_found(no_files):
     else:
         colour = "\033[93m"
     print("{1}{0:>5} new output file(s)\033[0m".format(no_files, colour))
+
+
+def print_run_stats(no_files_found, corrupt_no):
+    success_no = no_files_found-corrupt_no
+    if success_no > 0:
+        suc_col = "\033[92m"
+    else:
+        suc_col = ""
+    if corrupt_no > 0:
+        cor_col = "\033[91m"
+    else:
+        cor_col = ""
+    print("    {2}Successful: {0:<5}\033[0m  {3}Corrupted: {1:<5}\033[0m".format(success_no,corrupt_no,suc_col,cor_col))
+
+
+def print_final_stats(start_time, tot_no_new_files):
+    end_time = datetime.datetime.now()
+    total_time = (end_time-start_time).__str__().split(".")[0]
+    print("\033[92m{0:^80}\033[0m".format("Finalisation finished!"))
+    print("Total time: {0} ".format(total_time))
+    print("New files found: {0}".format(tot_no_new_files)) 
+
 
 
 def do_finalise():
@@ -102,6 +131,7 @@ def do_finalise():
     pool = mp.Pool(processes=no_processes)
     tot_rc_no = len(rc.dictCard)
 
+    print("Finalisation setup complete. Preparing to pull data.")
     tot_no_new_files = 0
     for rc_no, runcard in enumerate(rc.dictCard):
         printstr = "> {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no)
@@ -128,20 +158,18 @@ def do_finalise():
         
         no_files_found = len(pull_seeds)
         print_no_files_found(no_files_found)
-        tot_no_new_files += no_files_found
 
         if no_files_found>0:
-            pool.starmap(pull_seed_data, zip(pull_seeds, 
+            tot_no_new_files += no_files_found
+            results = pool.starmap(pull_seed_data, zip(pull_seeds, 
                                              it.repeat(runcard_name_no_seed),
                                              it.repeat(targetdir),
-                                             it.repeat(runcard)))
-    
-    end_time = datetime.datetime.now()
-    total_time = (end_time-start_time).__str__().split(".")[0]
-    print("\033[92m{0:^80}\033[0m".format("Finalisation finished!"))
-    print("Total time: {0} ".format(total_time))
-    print("New files found: {0}".format(tot_no_new_files)) 
+                                             it.repeat(runcard)),
+                                   chunksize=1)
+            corrupt_no = sum(results)
+            print_run_stats(no_files_found, corrupt_no)
 
+    print_final_stats(start_time,tot_no_new_files)
 
 if __name__ == "__main__":
     do_finalise()
