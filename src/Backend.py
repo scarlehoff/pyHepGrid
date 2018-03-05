@@ -521,7 +521,7 @@ class Backend(object):
     def _do_stats_job(self, jobid_raw):
         """ version of stats job multithread ready
         """
-        # When used with ARC, it assumes -j database is not needed (ie, default db is being used)
+        import src.header as header
         if isinstance(jobid_raw, tuple):
             if jobid_raw[1] == self.cDONE or jobid_raw[1] == self.cFAIL:
                 return jobid_raw[1]
@@ -529,7 +529,7 @@ class Backend(object):
                 jobid = jobid_raw[0]
         else:
             jobid = jobid_raw
-        cmd = [self.cmd_stat, jobid.strip()]
+        cmd = [self.cmd_stat, jobid.strip(), "-j", header.arcbase]
         strOut = util.getOutputCall(cmd, suppress_errors=True)
         if "Done" in strOut or "Finished" in strOut:
             return self.cDONE
