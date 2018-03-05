@@ -237,31 +237,23 @@ class Backend(object):
         tmpnm = "tmp.tar.gz"
         success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm)
         if not success:
+            print("  \033[91m ERROR:\033[0m Grid files failed to copy from the LFN. Did the warmup complete successfully?")
             sys.exit(-1)
-        ## Now list the files inside the .tar.gz and extract only the Vegas grid file
+        ## Now extract only the Vegas grid files and log file
         gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
-        outlist = self.tarw.listFilesTar(tmpnm)
-        logfile = ""
-        for fileRaw in outlist:
-            if ".log" in fileRaw:
-                logfile = fileRaw
-            if len(fileRaw.split(".y")) == 1: 
-                continue
-            for grid in gridp:
-                if grid in fileRaw: 
-                    gridFiles.append(fileRaw)
-        ## And now extract only those files
-        extractFiles = gridFiles + [logfile]
-        self.tarw.extractThese(tmpnm, extractFiles)
-        ## Tag log file as -warmup
-        newlog = logfile + "-warmup"
-        if logfile == "":
+        extractFiles = self.tarw.extract_extensions(tmpnm, gridp+[".log"])
+        try:
+            gridFiles = [i for i in extractFiles if ".log" not in i]
+            logfile = [i for i in extractFiles if ".log" in i][0]
+        except IndexError as e:
             print("  \033[91m ERROR:\033[0m Logfile not found. Did the warmup complete successfully?")
             sys.exit(-1)
-        cmd = ["mv", logfile, newlog]
-        util.spCall(cmd)
+
+        ## Tag log file as -warmup
+        newlog = logfile + "-warmup"
+        os.rename(logfile, newlog)
         # Remove temporary tar files
-        util.spCall(["rm", "tmp.tar.gz"])
+        os.remove(tmpnm)
         gridFiles.append(newlog)
         # Make sure access to the file is correct!
         for i in gridFiles:

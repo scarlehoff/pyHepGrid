@@ -220,6 +220,17 @@ class TarWrap:
             for t in tfile:
                 tfile.extract(t)
 
+    def extract_extensions(self, tarred_file, extensions):
+        import tarfile
+        matches = []
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            for t in tfile:
+                for ext in extensions:
+                    if ext in t.name:
+                        tfile.extract(t)
+                        matches.append(t.name)
+                        break
+        return matches
 #
 # GridUtilities
 # 
