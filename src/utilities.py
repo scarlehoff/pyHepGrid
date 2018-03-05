@@ -187,38 +187,38 @@ def lhapdfIni():
 
 class TarWrap:
     # Defaults
-    cmdbase = ["tar"]
-    targz   = "-czf"
-    tarlist = "-tvf"
-    untar   = "-xzf"
-    def init(self, cmdbase = None, targz = None, tarlist = None, untar = None):
-        if cmdbase: self.cmdbase = cmdbase
-        if targz:   self.targz   = targz
-        if tarlist: self.tarlist = tarlist
-        if untar:   self.untar   = untar
+    def init(self):
+        pass
     
     def tarDir(self, inputDir, output_name):
-        args = [self.targz, output_name, inputDir]
-        cmd  = self.cmdbase + args
-        spCall(cmd)
-
+        import tarfile
+        with tarfile.open(output_name, "w:gz") as output_tar:
+            output_tar.add(inputDir)
+            
     def tarFiles(self, inputList, output_name):
-        args = [self.targz, output_name] +  inputList
-        cmd  = self.cmdbase + args
-        spCall(cmd)
+        import tarfile
+        with tarfile.open(output_name, "w:gz") as output_tar:
+            for infile in inputList:
+                output_tar.add(infile)
 
-    def listFilesTar(self, tarfile):
-        args = [self.tarlist, tarfile]
-        outp = getOutputCall(self.cmdbase + args).split('\n')
+    def listFilesTar(self, tarred_file):
+        import tarfile
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            outp = tfile.getnames()
         return outp
 
-    def extractThese(self, tarfile, listFiles):
-        args = [self.untar, tarfile] + listFiles
-        spCall(self.cmdbase + args)
+    def extractThese(self, tarred_file, listFiles):
+        import tarfile
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            for t in tfile:
+                if t.name in listFiles:
+                    tfile.extract(t)
 
-    def extractAll(self, tarfile):
-        args = [self.untar, tarfile]
-        spCall(self.cmdbase + args)
+    def extractAll(self, tarred_file):
+        import tarfile
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            for t in tfile:
+                tfile.extract(t)
 
 #
 # GridUtilities

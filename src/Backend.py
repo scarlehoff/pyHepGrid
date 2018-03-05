@@ -244,14 +244,12 @@ class Backend(object):
         logfile = ""
         for fileRaw in outlist:
             if ".log" in fileRaw:
-                file = fileRaw.split()[-1]
-                logfile = file
+                logfile = fileRaw
             if len(fileRaw.split(".y")) == 1: 
                 continue
-            file = fileRaw.split()[-1]
             for grid in gridp:
-                if grid in file: 
-                    gridFiles.append(file)
+                if grid in fileRaw: 
+                    gridFiles.append(fileRaw)
         ## And now extract only those files
         extractFiles = gridFiles + [logfile]
         self.tarw.extractThese(tmpnm, extractFiles)
@@ -687,17 +685,15 @@ class Backend(object):
         logw = None
         runf = None
         for fil in files:
-            f = fil.strip()
-            f = f.split(" ")[-1].strip()
             if ".dat" in fil and "lhapdf/" not in fil:
-                datf.append(f)
+                datf.append(fil)
             elif ".log" in fil:
                 if "warm" in fil:
-                    logw = f
+                    logw = fil
                 else:
-                    logf.append(f)
+                    logf.append(fil)
             elif ".run" in fil:
-                runf = f
+                runf = fil
         dtarfile = "../" + tarfile
 
         try:
