@@ -116,6 +116,7 @@ class Arc(Backend):
         #         cmd += ["-l"]
         #     util.spCall(cmd)
         cmd = [self.cmd_stat, "-j", header.arcbase]
+        print(header.arcbase)
         jobids = [jobid.strip() for jobid in jobids]
         cmd = cmd + jobids
         if verbose:
