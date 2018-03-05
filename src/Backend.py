@@ -108,10 +108,6 @@ class Backend(object):
             to be locked 
         """
         from multiprocessing import Pool 
-        # if str(self) == "Arc":
-        #     threads = 1
-        # else:
-        #     threads = n_threads
         # If required # calls is lower than the # threads given, use the minimum
         if arglen is None:
             arglen = n_threads
@@ -358,11 +354,12 @@ class Backend(object):
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            if local:
-                util.spCall(["rm", i, tarfile])
-            else:
-                util.spCall(["rm", i, tarfile] + warmupFiles)
-        util.spCall(["rm", NNLOJETexe])
+            if not local:
+                for j in warmupFiles:
+                    os.remove(j)
+            os.remove(i)
+            os.remove(tarfile)
+        os.remove(NNLOJETexe)
 
     def init_production(self, runcard, provided_warmup = None, continue_warmup=False):
         """ Initialises a production run. If a warmup file is provided
@@ -405,7 +402,7 @@ class Backend(object):
                 util.spCall(["rm", i, tarfile])
             else:
                 util.spCall(["rm", i, tarfile] + warmupFiles)
-        util.spCall(["rm"] + files)
+        os.remove(NNLOJETexe)
 
     def get_local_warmup_name(self,info,provided_warmup):
         from shutil import copy

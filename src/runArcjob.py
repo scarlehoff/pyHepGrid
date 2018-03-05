@@ -61,7 +61,7 @@ class RunArc(Backend):
             from src.header import ce_test as ce
         else:
             from src.header import ce_base as ce
-        cmd = "arcsub -c {0} {1}".format(ce, filename)
+        cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
         output = util.getOutputCall(cmd.split())
         jobid = output.split("jobid:")[-1].rstrip().strip()
         return jobid
