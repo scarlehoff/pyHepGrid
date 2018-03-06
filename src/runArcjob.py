@@ -74,7 +74,7 @@ class RunArc(Backend):
         """
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
 
         if header.sockets_active > 1:
             sockets = True
@@ -133,7 +133,7 @@ class RunArc(Backend):
         """
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
         self.runfolder = header.runcardDir
         job_type = "Production"
         from src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir

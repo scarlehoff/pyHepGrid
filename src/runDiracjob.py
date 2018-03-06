@@ -68,7 +68,7 @@ class RunDirac(Backend):
         Writes JDL file with the appropiate information and send procrun number of jobs
         to the diract management system
         """
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
         print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         self.runfolder  = header.runcardDir
         from src.header    import baseSeed, producRun

@@ -17,12 +17,10 @@ def pythonVersion():
 #
 # Runcard parser
 #
-def expandCard(runcard, dicRuns = None):
+def expandCard():
     import src.header as header
-    rcards = []
     dictCard = header.dictCard
-    for key in dictCard:
-        rcards.append(key)
+    rcards = dictCard.keys()
     return rcards, dictCard
 
 #
@@ -343,7 +341,7 @@ if __name__ == '__main__':
 #    spCall(["rm", a, b])
     print("--------------------------")
     print("Runcard parser:")
-    runcards, dictCards, runfolder = expandCard("runcard.py")
+    runcards, dictCards, runfolder = expandCard()
     print("Runcards: ", runcards)
     print("Dictionary: ", dictCards)
     print("Runfolder: ", runfolder)
