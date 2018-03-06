@@ -316,7 +316,7 @@ class Backend(object):
         from shutil import copy
         from src.header import NNLOJETdir, NNLOJETexe
         from src.header import runcardDir as runFol
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
             print("    \033[91mERROR:\033[0m Could not find NNLOJET executable at {0}".format(nnlojetfull))
@@ -372,7 +372,7 @@ class Backend(object):
         from shutil import copy
         from src.header import runcardDir as runFol
         from src.header import NNLOJETexe, NNLOJETdir
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
             print("    \033[91mERROR:\033[0m Could not find NNLOJET executable at {0}".format(nnlojetfull))
