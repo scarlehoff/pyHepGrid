@@ -23,10 +23,6 @@ def expandCard(runcard, dicRuns = None):
     dictCard = header.dictCard
     for key in dictCard:
         rcards.append(key)
-    if header.sockets_active: 
-        dictCard["sockets_active"] = header.sockets_active
-    if header.port: 
-        dictCard["port"] = header.port
     return rcards, dictCard
 
 #
