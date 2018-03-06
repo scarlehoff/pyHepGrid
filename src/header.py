@@ -78,6 +78,8 @@ sockets_active = 1 # 1 socket == no sockets
 # if nothing is used, the end system will decide what the maximum is
 #
 
+
+#### RUNCARD OVERRIDES ####
 from src.argument_parser import runcard as runcard_file
 if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py","").replace("/","."))
@@ -101,20 +103,30 @@ try:
         print("> Setting value of {0} to {1} due to most_free_cores override".format("ce_base", ce_base))
 except ImportError as e:
     pass
-# try:
+
+
+#### CMD LINE ARG OVERRIDES ####
+
 try:
     from src.argument_parser import additional_arguments
     for attr_name in additional_arguments:
-        if not hasattr(this_file, attr_name):
+        if not hasattr(this_file, attr_name) and attr_name is not "dictCard":
             print(">\033[93m WARNING!\033[0m {0} defined in command line args but not in {1}.py.".format(attr_name, template.__name__))
             print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
             print("> Or even if they do.")
 
         attr_value = additional_arguments[attr_name]
         try:
-            attrtype = type(getattr(this_file,attr_name))
-            if attrtype is not type(None):
-                attr_value = attrtype(attr_value) # Casts the value to the type of the value found already in the header. If not found or the type is None, defaults to a string.
+            if attr_name is "dictCard":
+                import ast
+                attr_value = ast.literal_eval(attr_value)
+            else:
+                attrtype = type(getattr(this_file,attr_name))
+                if attrtype is type(dict()):
+                    import ast
+                    attr_value = ast.literal_eval(attr_value)
+                elif attrtype is not type(None):
+                    attr_value = attrtype(attr_value) # Casts the value to the type of the value found already in the header. If not found or the type is None, defaults to a string.
         except AttributeError as e:
             print(">\033[93m WARNING!\033[0m {0} default type not found.".format(attr_name))
             print("> Will be passed through as a string.")
