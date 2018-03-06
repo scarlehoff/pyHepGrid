@@ -18,25 +18,15 @@ def pythonVersion():
 # Runcard parser
 #
 def expandCard(runcard, dicRuns = None):
+    import src.header as header
     rcards = []
-    if ".py" in runcard:
-        vessel = {}
-        if pythonVersion() == 3:
-            with open(runcard) as source_file:
-               exec(source_file.read(), vessel)
-        else:
-            execfile(runcard, vessel) 
-        dictCard = vessel['dictCard']
-        for key in dictCard:
-            rcards.append(key)
-        # If more runcard-only variables are defined, they will be added to dictCard
-        if "sockets_active" in vessel: 
-            dictCard["sockets_active"] = vessel["sockets_active"]
-        if "port" in vessel: 
-            dictCard["port"] = vessel["port"]
-    else:
-        rcards.append(runcard)
-        dictCard = {}
+    dictCard = header.dictCard
+    for key in dictCard:
+        rcards.append(key)
+    if header.sockets_active: 
+        dictCard["sockets_active"] = header.sockets_active
+    if header.port in vessel: 
+        dictCard["port"] = header.port
     return rcards, dictCard
 
 #

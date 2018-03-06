@@ -86,15 +86,16 @@ if runcard_file:
     # todo: some safety checks
     for attr_name in dir(runcard):
 #        print(attr_name, runcard)
-        if not attr_name.startswith("__") and attr_name != "dictCard" and \
-                not isinstance(getattr(runcard, attr_name), ModuleType):
-            if not hasattr(this_file, attr_name):
+        if not attr_name.startswith("__") and not \
+                isinstance(getattr(runcard, attr_name), ModuleType):
+            if not hasattr(this_file, attr_name) and attr_name != "dictCard" :
                 print(">\033[93m WARNING!\033[0m {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
                 print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
                 print("> Or even if they do.")
 
             attr_value = getattr(runcard, attr_name)
-            print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
+            if attr_name != "dictCard":
+                print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
             setattr(this_file, attr_name, attr_value)
 try:
     from src.argument_parser import override_ce_base as use_best_ce
@@ -116,8 +117,9 @@ try:
             print("> Or even if they do.")
 
         attr_value = additional_arguments[attr_name]
+        print(attr_name, attr_value)
         try:
-            if attr_name is "dictCard":
+            if attr_name == "dictCard":
                 import ast
                 attr_value = ast.literal_eval(attr_value)
             else:
