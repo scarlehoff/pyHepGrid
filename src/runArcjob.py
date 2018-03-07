@@ -67,7 +67,7 @@ class RunArc(Backend):
         return jobid
 
     # Runs for ARC
-    def run_wrap_warmup(self, runcard, test = None):
+    def run_wrap_warmup(self, test = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
             Writes XRSL file with the appropiate information and send one single job
             (or n_sockets jobs) to the queue
@@ -126,7 +126,7 @@ class RunArc(Backend):
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
 
-    def run_wrap_production(self, runcard, test = None):
+    def run_wrap_production(self, test = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
             Writes XRSL file with the appropiate information and send a producrun 
             number of jobs to the arc queue
@@ -175,12 +175,12 @@ class RunArc(Backend):
 def runWrapper(runcard, test = None):
     print("Running arc job for {0}".format(runcard))
     arc = RunArc(header.ARCSCRIPTDEFAULT)
-    arc.run_wrap_warmup(runcard, test)
+    arc.run_wrap_warmup(test)
 
 def runWrapperProduction(runcard, test=None):
     print("Running arc job for {0}".format(runcard))
     arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
-    arc.run_wrap_production(runcard, test)
+    arc.run_wrap_production(test)
 
 
 ####### Testing routines - just a wrapper to get the args for nnlojob
@@ -200,12 +200,12 @@ def testWrapperProduction(r, dCards):
 def iniWrapper(runcard, warmup=None):
     print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
-    arc.init_warmup(runcard, warmup)
+    arc.init_warmup(warmup)
 
 def iniWrapperProduction(runcard, warmup=None):
     print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
     if warmup:
-        arc.init_warmup(runcard, warmup)
+        arc.init_warmup(warmup)
     else:
-        arc.init_production(runcard)
+        arc.init_production()

@@ -63,7 +63,7 @@ class RunDirac(Backend):
         return jobids
 
     # Run for DIRAC
-    def run_wrap_production(self, runcard):
+    def run_wrap_production(self):
         """ Wrapper function. It assumes the initialisation stage has already happened
         Writes JDL file with the appropiate information and send procrun number of jobs
         to the diract management system
@@ -105,7 +105,7 @@ class RunDirac(Backend):
 def runWrapper(runcard, test = None):
     print("Running dirac job for {0}".format(runcard))
     dirac = RunDirac()
-    dirac.run_wrap_production(runcard)
+    dirac.run_wrap_production()
 
 def testWrapper(r, dCards):
     print("Running dirac job for {0}".format(r))
@@ -116,4 +116,4 @@ def testWrapper(r, dCards):
 def iniWrapper(runcard, warmupProvided = None):
     print("Initialising dirac for {0}".format(runcard))
     dirac = RunDirac()
-    dirac.init_production(runcard, warmupProvided)
+    dirac.init_production(warmupProvided)

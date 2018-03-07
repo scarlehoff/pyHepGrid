@@ -117,7 +117,6 @@ try:
             print("> Or even if they do.")
 
         attr_value = additional_arguments[attr_name]
-        print(attr_name, attr_value)
         try:
             if attr_name == "dictCard":
                 import ast

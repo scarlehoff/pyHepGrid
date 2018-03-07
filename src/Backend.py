@@ -306,7 +306,7 @@ class Backend(object):
         self.dbase.disable_entry(self.table, db_id, revert = True)
 
     ### Initialisation functions
-    def init_warmup(self, runcard, provided_warmup = None, continue_warmup=False):
+    def init_warmup(self, provided_warmup = None, continue_warmup=False):
         """ Initialises a warmup run. An warmup file can be provided and it will be 
         added to the .tar file sent to the grid storage. 
         Steps are:
@@ -361,7 +361,7 @@ class Backend(object):
             os.remove(tarfile)
         os.remove(NNLOJETexe)
 
-    def init_production(self, runcard, provided_warmup = None, continue_warmup=False):
+    def init_production(self, provided_warmup = None, continue_warmup=False):
         """ Initialises a production run. If a warmup file is provided
         retrieval step is skipped
         Steps are:
@@ -825,9 +825,9 @@ def generic_initialise(runcard, warmup=False, production=False, grid=None, overw
     if warmup:
         if overwrite_grid:
             back.set_overwrite_warmup()
-        back.init_warmup(runcard, grid, continue_warmup=overwrite_grid)
+        back.init_warmup(grid, continue_warmup=overwrite_grid)
     elif production:
-        back.init_production(runcard, grid, continue_warmup=overwrite_grid)
+        back.init_production(grid, continue_warmup=overwrite_grid)
     else:
         print("What do you want me to initialise?")
         sys.exit(-1)
