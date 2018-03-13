@@ -37,6 +37,7 @@ lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 # NNLOJET Database Parameters
 dbname     = "/mt/home/dwalker/jobscripts/databases/CCDIS.dat"     
 #dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
+arcbase    = None
 
 # Finalisation and storage options
 finalise_no_cores = 25

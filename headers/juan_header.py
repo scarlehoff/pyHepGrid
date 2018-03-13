@@ -56,6 +56,7 @@ ce_base = "ce1.dur.scotgrid.ac.uk"
 # ce_base = "svr009.gla.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 ce_listfile = "computing_elements.txt"
+arcbase  = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
 
 # DIRAC parameters
 dirac_name = "juan.m.cruzmartinez"

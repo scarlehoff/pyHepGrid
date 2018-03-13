@@ -54,6 +54,7 @@ short_stats = False
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 ce_listfile = "computing_elements.txt"
+arcbase  = "/mt/home/dwalker/.arc/jobs.dat" # arc database
 
 # DIRAC parameters
 dirac_name = "duncan.walker"
