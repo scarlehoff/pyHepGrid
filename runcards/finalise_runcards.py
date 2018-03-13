@@ -1,5 +1,5 @@
 import sys, os, importlib
-#runcards = ["triple_differential"]
+#runcards = ["test"]
 # Auto select all runcards
 runcard_files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 runcards = [rc.replace(".py","") for rc in runcard_files if rc.endswith(".py") 
@@ -13,7 +13,7 @@ def enablePrint():
     sys.stdout = sys.__stdout__
 
 # RUNCARDS USED ONLY FOR PULLING DATA WITH FINALISE.PY 
-print("Pulling data for runcard(s): {0}".format(" ".join(i for i in runcards)))
+print("Pulling data for runcard(s): \n{0}.py".format(".py\n".join(i for i in runcards)))
 blockPrint()
 modules = [importlib.import_module("runcards.{0}".format(rc)) for rc in runcards]
 enablePrint()

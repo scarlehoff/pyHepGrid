@@ -36,7 +36,7 @@ for i in dir(head):
         # Give warnings if you've added any new attributes and not put them in the template.
         if i not in template_attributes and not isinstance(attr,ModuleType)\
                 and not callable(attr):
-            print("> WARNING: attribute {0} not present in {1}".format(i, template.__name__))
+            print("  \033[93m WARNING:\033[0m attribute {0} not present in {1}".format(i, template.__name__))
             print("> Please add it in before committing so you don't break compatibility(!)")
 
 
@@ -45,7 +45,7 @@ for i in template_attributes:
     try:
         assert(hasattr(this_file, i))
     except AssertionError as e:
-        print("> ERROR: Missing {0} attribute inside {1}.py file that is present in {2}.py.".format(
+        print("  \033[91m ERROR:\033[0m Missing attribute {0} inside {1}.py that is present in {2}.py.".format(
                 i, head.__name__, template.__name__))
         print("> Check that {0}.py file is up to date as functionality may be broken otherwise.".format(head.__name__))
         sys.exit(1)
@@ -78,21 +78,24 @@ sockets_active = 1 # 1 socket == no sockets
 # if nothing is used, the end system will decide what the maximum is
 #
 
+
+#### RUNCARD OVERRIDES ####
 from src.argument_parser import runcard as runcard_file
 if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py","").replace("/","."))
     # todo: some safety checks
     for attr_name in dir(runcard):
 #        print(attr_name, runcard)
-        if not attr_name.startswith("__") and attr_name != "dictCard" and \
-                not isinstance(getattr(runcard, attr_name), ModuleType):
-            if not hasattr(this_file, attr_name):
-                print("> Warning! {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
+        if not attr_name.startswith("__") and not \
+                isinstance(getattr(runcard, attr_name), ModuleType):
+            if not hasattr(this_file, attr_name) and attr_name != "dictCard" :
+                print(">\033[93m WARNING!\033[0m {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
                 print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
                 print("> Or even if they do.")
 
             attr_value = getattr(runcard, attr_name)
-            print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
+            if attr_name != "dictCard":
+                print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
             setattr(this_file, attr_name, attr_value)
 try:
     from src.argument_parser import override_ce_base as use_best_ce
@@ -102,6 +105,39 @@ try:
 except ImportError as e:
     pass
 
+
+#### CMD LINE ARG OVERRIDES ####
+
+try:
+    from src.argument_parser import additional_arguments
+    for attr_name in additional_arguments:
+        if not hasattr(this_file, attr_name) and attr_name is not "dictCard":
+            print(">\033[93m WARNING!\033[0m {0} defined in command line args but not in {1}.py.".format(attr_name, template.__name__))
+            print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
+            print("> Or even if they do.")
+
+        attr_value = additional_arguments[attr_name]
+        try:
+            if attr_name == "dictCard":
+                import ast
+                attr_value = ast.literal_eval(attr_value)
+            else:
+                attrtype = type(getattr(this_file,attr_name))
+                if attrtype is type(dict()):
+                    import ast
+                    attr_value = ast.literal_eval(attr_value)
+                elif attrtype is not type(None):
+                    attr_value = attrtype(attr_value) # Casts the value to the type of the value found already in the header. If not found or the type is None, defaults to a string.
+        except AttributeError as e:
+            print(">\033[93m WARNING!\033[0m {0} default type not found.".format(attr_name))
+            print("> Will be passed through as a string.")
+        except ValueError as e:
+            print("  \033[91m ERROR:\033[0m Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
+            sys.exit(-1)
+        print("> Overriding value of {0} to {1} from command line args".format(attr_name, attr_value))
+        setattr(this_file, attr_name, attr_value)
+except ImportError as e:
+    pass
 ### Moved to the bottom to allow runcard to override jobName
 
 ARCSCRIPTDEFAULT = ["&",

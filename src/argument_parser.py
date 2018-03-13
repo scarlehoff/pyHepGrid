@@ -67,6 +67,21 @@ if caller_script == "main.py":
     # Dirac only
     parser.add_argument("-S", "--statsCheat", help = "Dirac only, use a modified version of dirac to speed up the information retrieval process", action = "store_true")
 
+
+    # further overrides
+    parser.add_argument("-a", "--args", help = "Extra arguments that override those in BOTH the header and the runcard. Syntax:> var_name_1 val_1 var_name_2 val_2 var_name_3 val_3 ...",nargs="+")
+
     arguments = parser.parse_args()
     runcard = arguments.runcard
     override_ce_base = arguments.most_free_cores
+    additional_arguments = {}
+
+    if arguments.args is not None:
+        if len(arguments.args)%2!=0:
+            print("  \033[91m ERROR:\033[0m Not all additional arguments specified at prompt have values.")
+            import sys
+            sys.exit(-1)
+        else:
+            for i in range(0,len(arguments.args),2):
+                additional_arguments[arguments.args[i]]=arguments.args[i+1]
+        

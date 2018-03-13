@@ -11,7 +11,7 @@ from src.dbapi  import database
 ##### Checks go here
 if len(rmode) < 3:
     raise Exception("Mode ", rmode, " not valid")
-if rmode[:3] == "run" or rmode[:3] == "man":
+if rmode[:3] == "run" or rmode[:3] == "man" and not "runcard" in rmode:
     if args.runDirac and args.runArc:
         if not args.idjob == "all":
             raise Exception("Please choose only Dirac (-D) or Arc (-A) or Arc Production Mode (-B) (unless using -j all)")
@@ -50,7 +50,7 @@ if rmode[:3] == "ini":
 
         
 #### Run: run an ARC or DIRAC job for the given runcard
-elif rmode[:3] == "run":
+elif rmode[:3] == "run" and not "runcard" in rmode:
     if args.runArc:
         from src.runArcjob import runWrapper
     elif args.runArcProduction:
@@ -87,4 +87,4 @@ elif rmode[:3] == "tes":
 
     
 else:
-    print("Invalid mode selected. Exiting")
+    print("Invalid mode {0} selected. Exiting".format(rmode))

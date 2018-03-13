@@ -1,29 +1,31 @@
 #!/usr/bin/env python3
 from __future__ import division, print_function
-import os
-import sys
-import subprocess
+import datetime
 import glob
-import shutil
-import multiprocessing as mp
-import itertools as it
 import importlib
+import itertools as it
+import multiprocessing as mp
+import os
+import re
 import src.header as config
+import subprocess
+import tarfile
 
 rc = importlib.import_module(config.finalise_runcards.replace("/","."))
+logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
+tarfile_regex = re.compile(r"-([0-9]+)\.tar.gz+$")
 
-# TODO
-# Remove as many mkdir/rmtree calls as possible. 
-# These take a lot of time/system resources, and probably 
-# can be removed by keeping better track of tmp files
 
 # CONFIG
 no_processes = config.finalise_no_cores
+verbose = config.verbose_finalise
 
 # Set up environment
 os.environ["LFC_HOST"] = config.LFC_HOST
 os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
 os.environ["LFC_HOME"] = config.lfndir
+
+
 
 def mkdir(directory):
     os.system('mkdir {0} > /dev/null 2>&1'.format(directory))
@@ -38,83 +40,136 @@ def get_output_dir_name(runcard):
 def createdirs(currentdir, runcard):
     targetdir = os.path.join(currentdir, get_output_dir_name(runcard))
     mkdir(targetdir)
-    newdir = os.path.join(targetdir, 'log')
-    mkdir(newdir)
-
     logdir = os.path.join(targetdir, 'log')
-    os.chdir(logdir)
-    logcheck = glob.glob('*.log')
-
+    mkdir(logdir)
+    logcheck = set([logseed_regex.search(i).group(1) for i 
+                    in glob.glob('{0}/*.log'.format(logdir))])
     return logcheck, targetdir
 
 
-def seed_present(logcheck, seedstr):
-    return any(seedstr in logfile for logfile in logcheck)
-
-
-def move_logfile_to_log_dir(tmpfiles):
-    logfile = next(x for x in tmpfiles if x.endswith(".log"))
-    direct = os.path.join('../log/', logfile)
-    os.rename(logfile, direct)
-
-
-def move_dat_files_to_root_dir(tmpfiles):
-    for f in tmpfiles:
-        if f.endswith('.dat'):
-            os.rename(f, '../' + f)
-
-
-def pullrun(name, seed, run, output, logcheck, tmpdir):
+def pullrun(name, seed, run, tmpdir):
     seedstr = ".s{0}.log".format(seed)
-    if name in output and not seed_present(logcheck, seedstr):
-        os.mkdir(tmpdir)
-        os.chdir(tmpdir)
-        status = 0
+    os.chdir(tmpdir)
+    status = 0
+    if verbose:
         print("Pulling {0}, seed {1}".format(run, seed))
-        command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null'.format(name)
-        os.system(command)
-        out = os.system('tar -xf ' + name + ' -C .')
-        tmpfiles = os.listdir('.')
-        if seed_present(tmpfiles, seedstr):
-            move_logfile_to_log_dir(tmpfiles)
-            move_dat_files_to_root_dir(tmpfiles)
-        else:
-            status = 1
-            # Hits if seed not found in any of the output files
-            print("Deleting {0}, seed {1}. Corrupted output".format(run, seed))
-            os.system('lcg-del -a lfn:output/{0}'.format(name))
-        shutil.rmtree(tmpdir)
-        
+    command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null'.format(name)
+    os.system(command)
 
-def pull_seed_data(rc_tar, runcard, output, logcheck, targetdir):
-    pid = mp.current_process().pid
-    # Separate tmpdir for each process
-    tmpdir = os.path.join(targetdir, '.process_{0}_tmp'.format(pid))
-    seed = rc_tar.split(".")[-3].split("-")[-1]
-    pullrun(rc_tar, seed, runcard, output, logcheck, tmpdir)
+    corrupted = True
+    try:
+        with tarfile.open(name, 'r|gz') as tfile:
+            for t in tfile:
+                if t.name.endswith(".dat"):
+                    tfile.extract(t,path="../")
+                    corrupted = False
+                elif t.name.endswith(".log"):
+                    tfile.extract(t,"../log/")
+                    corrupted = False
+        os.remove(name)
+    except FileNotFoundError as e:
+        # pull error - corrupted stays True
+        pass
+
+    if corrupted:
+        # Hits if seed not found in any of the output files
+        if verbose:
+            print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
+        os.system('lcg-del -a lfn:output/{0} 2>/dev/null'.format(name))
+        os.system('lfc-rm output/{0} -f 2>/dev/null'.format(name))
+        return 1
+    return 0
+
+def pull_seed_data(seed, runcard, targetdir, runcardname):
+    tarname = "{0}{1}.tar.gz".format(runcard,seed)
+    tmpdir = os.path.join(targetdir, "log")
+    return pullrun(tarname, seed, runcardname, tmpdir)
+
+
+def print_no_files_found(no_files):
+    if no_files>0:
+        colour = "\033[92m"
+    else:
+        colour = "\033[93m"
+    print("{1}{0:>5} new output file(s)\033[0m".format(no_files, colour))
+
+
+def print_run_stats(no_files_found, corrupt_no):
+    success_no = no_files_found-corrupt_no
+    if success_no > 0:
+        suc_col = "\033[92m"
+    else:
+        suc_col = ""
+    if corrupt_no > 0:
+        cor_col = "\033[91m"
+    else:
+        cor_col = ""
+    print("    {2}Successful: {0:<5}\033[0m  {3}Corrupted: {1:<5}\033[0m".format(success_no,corrupt_no,suc_col,cor_col))
+
+
+def print_final_stats(start_time, tot_no_new_files):
+    end_time = datetime.datetime.now()
+    total_time = (end_time-start_time).__str__().split(".")[0]
+    print("\033[92m{0:^80}\033[0m".format("Finalisation finished!"))
+    print("Total time: {0} ".format(total_time))
+    print("New files found: {0}".format(tot_no_new_files)) 
+
 
 
 def do_finalise():
+    start_time = datetime.datetime.now()
+
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     os.chdir(dname)
-    cmd = ['lfc-ls', 'output']
+    cmd = ['lfc-ls', config.lfn_output_dir]
     output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
     currentdir = os.getcwd()
-    output = [x for x in str(output).split("\\n")]
+    
+    output = set([x for x in str(output).split("\\n")])
 
     pool = mp.Pool(processes=no_processes)
     tot_rc_no = len(rc.dictCard)
+
+    print("Finalisation setup complete. Preparing to pull data.")
+    tot_no_new_files = 0
     for rc_no, runcard in enumerate(rc.dictCard):
-        print("> Checking output for {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no))
+        printstr = "> {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no)
+        print("{0:<60}".format(printstr), end="")
+
         dirtag = runcard + "-" + rc.dictCard[runcard]
         runcard_name_no_seed = "output{0}-".format(dirtag)
-        runcard_output = [i for i in output if runcard_name_no_seed in i]
-        logcheck, targetdir = createdirs(currentdir, dirtag)
-        pool.starmap(pull_seed_data, zip(runcard_output, it.repeat(runcard), 
-                                         it.repeat(output), it.repeat(logcheck),
-                                         it.repeat(targetdir)))
+        
+        output_file_names,lfn_seeds = [],[]
+        for i in output: 
+            if runcard_name_no_seed in i:
+                lfn_seeds.append(tarfile_regex.search(i).group(1))
+                output_file_names.append(i)
 
+        if not output_file_names: # Shortcircuit logfile check if nothing in lfn
+            print_no_files_found(0)
+            continue
+
+        # Makes the second runcard slightly quicker by removing matched files:)
+        output = output.difference(set(output_file_names)) 
+
+        logseeds, targetdir = createdirs(currentdir, dirtag)
+        pull_seeds = set(lfn_seeds).difference(logseeds)
+        
+        no_files_found = len(pull_seeds)
+        print_no_files_found(no_files_found)
+
+        if no_files_found>0:
+            tot_no_new_files += no_files_found
+            results = pool.starmap(pull_seed_data, zip(pull_seeds, 
+                                             it.repeat(runcard_name_no_seed),
+                                             it.repeat(targetdir),
+                                             it.repeat(runcard)),
+                                   chunksize=1)
+            corrupt_no = sum(results)
+            print_run_stats(no_files_found, corrupt_no)
+
+    print_final_stats(start_time,tot_no_new_files)
 
 if __name__ == "__main__":
     do_finalise()

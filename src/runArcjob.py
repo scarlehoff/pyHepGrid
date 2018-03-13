@@ -61,20 +61,20 @@ class RunArc(Backend):
             from src.header import ce_test as ce
         else:
             from src.header import ce_base as ce
-        cmd = "arcsub -c {0} {1}".format(ce, filename)
+        cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
         output = util.getOutputCall(cmd.split())
         jobid = output.split("jobid:")[-1].rstrip().strip()
         return jobid
 
     # Runs for ARC
-    def run_wrap_warmup(self, runcard, test = None):
+    def run_wrap_warmup(self, test = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
             Writes XRSL file with the appropiate information and send one single job
             (or n_sockets jobs) to the queue
         """
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
 
         if header.sockets_active > 1:
             sockets = True
@@ -126,14 +126,14 @@ class RunArc(Backend):
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
 
-    def run_wrap_production(self, runcard, test = None):
+    def run_wrap_production(self, test = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
             Writes XRSL file with the appropiate information and send a producrun 
             number of jobs to the arc queue
         """
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
         self.runfolder = header.runcardDir
         job_type = "Production"
         from src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
@@ -175,12 +175,12 @@ class RunArc(Backend):
 def runWrapper(runcard, test = None):
     print("Running arc job for {0}".format(runcard))
     arc = RunArc(header.ARCSCRIPTDEFAULT)
-    arc.run_wrap_warmup(runcard, test)
+    arc.run_wrap_warmup(test)
 
 def runWrapperProduction(runcard, test=None):
     print("Running arc job for {0}".format(runcard))
     arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
-    arc.run_wrap_production(runcard, test)
+    arc.run_wrap_production(test)
 
 
 ####### Testing routines - just a wrapper to get the args for nnlojob
@@ -200,12 +200,12 @@ def testWrapperProduction(r, dCards):
 def iniWrapper(runcard, warmup=None):
     print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
-    arc.init_warmup(runcard, warmup)
+    arc.init_warmup(warmup)
 
 def iniWrapperProduction(runcard, warmup=None):
     print("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
     if warmup:
-        arc.init_warmup(runcard, warmup)
+        arc.init_warmup(warmup)
     else:
-        arc.init_production(runcard)
+        arc.init_production()
