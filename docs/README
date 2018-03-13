@@ -218,8 +218,8 @@ mkdir $DIRAC_FOLDER
 cd $DIRAC_FOLDER
 wget -np -O dirac-install https://raw.githubusercontent.com/DIRACGrid/DIRAC/integration/Core/scripts/dirac-install.py
 chmod u+x dirac-install
-source $DIRAC_FOLDER/bashrc # this is not your .bashrc but Dirac's bashrc, see note below
 ./dirac-install $DIRAC_VERSION
+source $DIRAC_FOLDER/bashrc # this is not your .bashrc but Dirac's bashrc, see note below
 dirac-proxy-init -x  ## Here you will need to give your grid certificate password
 dirac-configure -F -S GridPP -C dips://dirac01.grid.hep.ph.ic.ac.uk:9135/Configuration/Server -I
 dirac-proxy-init -g pheno_user -M 
