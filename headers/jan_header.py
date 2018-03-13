@@ -45,6 +45,7 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 ce_listfile = "computing_elements.txt"
+arcbase  = "/mt/home/jniehues/.arc/jobs.dat" # arc database
 
 # DIRAC parameters
 dirac_name = "jan.niehues"
