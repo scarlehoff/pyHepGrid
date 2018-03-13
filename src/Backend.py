@@ -108,10 +108,6 @@ class Backend(object):
             to be locked 
         """
         from multiprocessing import Pool 
-        # if str(self) == "Arc":
-        #     threads = 1
-        # else:
-        #     threads = n_threads
         # If required # calls is lower than the # threads given, use the minimum
         if arglen is None:
             arglen = n_threads
@@ -153,13 +149,14 @@ class Backend(object):
         """ Check whether production/warmup are active in the runcard """
         warm_string = "warmup"
         prod_string = "production"
+        info = {}
         print("Checking warmup/production in runcard %s" % r)
         with open(runcard_dir + "/" + r, 'r') as f:
-            for line_raw in f:
+            for idx,line_raw in enumerate(f):
                 line = line_raw.lower()
                 if warm_string in line:
                     if continue_warmup and not warmup:
-                        print("Continue warmup selected, but submission not in warmup mode. Exiting")
+                        print("    \033[91m ERROR:\033[0m Continue warmup selected, but submission not in warmup mode. Exiting. ")
                         sys.exit(-1)
                     elif continue_warmup and warmup and (warmup and "2" not in line):
                         self._press_yes_to_continue("Continue warmup is not active in runcard")
@@ -173,13 +170,21 @@ class Backend(object):
                         self._press_yes_to_continue("Production is not active in runcard")
                     elif (not production and ".true." in line) or (not production and "1" in line):
                         self._press_yes_to_continue("Production is active in runcard")
+                if idx == 1:
+                    info["id"] = line_raw.split()[0].strip()
+                if idx == 2:
+                    info["proc"] = line_raw.split()[0].strip()
+                if idx == 14:
+                    info["tc"] = line_raw.split()[0].strip()
+                    break # Shouldn't need to go past line 14 :)
+        return info
 
     def _check_production(self, r, runcard_dir, continue_warmup = False):
-        self._check_production_warmup(r, runcard_dir, warmup = False, production = True, 
+        return self._check_production_warmup(r, runcard_dir, warmup = False, production = True, 
                                       continue_warmup = continue_warmup)
 
     def _check_warmup(self, r, runcard_dir, continue_warmup = False):
-        self._check_production_warmup(r, runcard_dir, warmup = True, production = False, 
+        return self._check_production_warmup(r, runcard_dir, warmup = True, production = False, 
                                       continue_warmup = continue_warmup)
 
     def set_overwrite_warmup(self):
@@ -228,33 +233,23 @@ class Backend(object):
         tmpnm = "tmp.tar.gz"
         success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm)
         if not success:
+            print("  \033[91m ERROR:\033[0m Grid files failed to copy from the LFN. Did the warmup complete successfully?")
             sys.exit(-1)
-        ## Now list the files inside the .tar.gz and extract only the Vegas grid file
+        ## Now extract only the Vegas grid files and log file
         gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
-        outlist = self.tarw.listFilesTar(tmpnm)
-        logfile = ""
-        for fileRaw in outlist:
-            if ".log" in fileRaw:
-                file = fileRaw.split()[-1]
-                logfile = file
-            if len(fileRaw.split(".y")) == 1: 
-                continue
-            file = fileRaw.split()[-1]
-            for grid in gridp:
-                if grid in file: 
-                    gridFiles.append(file)
-        ## And now extract only those files
-        extractFiles = gridFiles + [logfile]
-        self.tarw.extractThese(tmpnm, extractFiles)
+        extractFiles = self.tarw.extract_extensions(tmpnm, gridp+[".log"])
+        try:
+            gridFiles = [i for i in extractFiles if ".log" not in i]
+            logfile = [i for i in extractFiles if ".log" in i][0]
+        except IndexError as e:
+            print("  \033[91m ERROR:\033[0m Logfile not found. Did the warmup complete successfully?")
+            sys.exit(-1)
+
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
-        if logfile == "":
-            print("> ERROR: Logfile not found. Did the warmup complete successfully?")
-            sys.exit(-1)
-        cmd = ["mv", logfile, newlog]
-        util.spCall(cmd)
+        os.rename(logfile, newlog)
         # Remove temporary tar files
-        util.spCall(["rm", "tmp.tar.gz"])
+        os.remove(tmpnm)
         gridFiles.append(newlog)
         # Make sure access to the file is correct!
         for i in gridFiles:
@@ -311,7 +306,7 @@ class Backend(object):
         self.dbase.disable_entry(self.table, db_id, revert = True)
 
     ### Initialisation functions
-    def init_warmup(self, runcard, provided_warmup = None, continue_warmup=False):
+    def init_warmup(self, provided_warmup = None, continue_warmup=False):
         """ Initialises a warmup run. An warmup file can be provided and it will be 
         added to the .tar file sent to the grid storage. 
         Steps are:
@@ -321,25 +316,24 @@ class Backend(object):
         from shutil import copy
         from src.header import NNLOJETdir, NNLOJETexe
         from src.header import runcardDir as runFol
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
-            raise Exception("Could not find NNLOJET executable")
+            print("    \033[91mERROR:\033[0m Could not find NNLOJET executable at {0}".format(nnlojetfull))
+            sys.exit(-1)
         copy(nnlojetfull, os.getcwd()) 
         files = [NNLOJETexe]
-        if provided_warmup: 
-            # Copy warmup to current dir if not already there
-            if os.path.relpath(os.path.expanduser(provided_warmup), os.getcwd())\
-                    ==os.path.basename(provided_warmup):
-                copy(provided_warmup,os.path.basename(provided_warmup))
-                provided_warmup = os.path.basename(provided_warmup)
-            files = files + [provided_warmup]
         for i in rncards:
+            local = False
             warmupFiles = []
             # Check whether warmup/production is active in the runcard
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
-            self._check_warmup(i, runFol, continue_warmup=continue_warmup)
+            info = self._check_warmup(i, runFol, continue_warmup=continue_warmup)
+            if provided_warmup: 
+                # Copy warmup to current dir if not already there
+                match, local = self.get_local_warmup_name(info,provided_warmup)
+                files += [match]
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
@@ -348,7 +342,11 @@ class Backend(object):
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
                     print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
                     warmup_files = self._bring_warmup_files(i, rname)
+                    if not warmup_files:
+                        print("    \033[91mERROR:\033[0m No warmup grids found in warmup tar!")
+                        sys.exit(-1)
                     files += warmup_files
+                    print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
@@ -356,10 +354,14 @@ class Backend(object):
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            util.spCall(["rm", i, tarfile] + warmupFiles)
-        util.spCall(["rm", NNLOJETexe])
+            if not local:
+                for j in warmupFiles:
+                    os.remove(j)
+            os.remove(i)
+            os.remove(tarfile)
+        os.remove(NNLOJETexe)
 
-    def init_production(self, runcard, provided_warmup = None, continue_warmup=False):
+    def init_production(self, provided_warmup = None, continue_warmup=False):
         """ Initialises a production run. If a warmup file is provided
         retrieval step is skipped
         Steps are:
@@ -370,23 +372,23 @@ class Backend(object):
         from shutil import copy
         from src.header import runcardDir as runFol
         from src.header import NNLOJETexe, NNLOJETdir
-        rncards, dCards = util.expandCard(runcard)
+        rncards, dCards = util.expandCard()
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
-            raise Exception("Could not find NNLOJET executable")
+            print("    \033[91mERROR:\033[0m Could not find NNLOJET executable at {0}".format(nnlojetfull))
+            sys.exit(-1)
         copy(nnlojetfull, os.getcwd())
         files = [NNLOJETexe]
         for i in rncards:
+            local = False
             # Check whether warmup/production is active in the runcard
-            self._check_production(i, runFol, continue_warmup = continue_warmup)
+            info = self._check_production(i, runFol, continue_warmup = continue_warmup)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
-                if not provided_warmup in os.listdir(sys.path[0]):
-                    copy(provided_warmup,os.path.basename(provided_warmup))
-                    provided_warmup = os.path.basename(provided_warmup)
-                warmupFiles = [provided_warmup]
+                match, local = self.get_local_warmup_name(info,provided_warmup)
+                warmupFiles = [match]
             else:
                 print("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname)
@@ -396,14 +398,43 @@ class Backend(object):
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input")
-            if provided_warmup:
+            if local:
                 util.spCall(["rm", i, tarfile])
             else:
                 util.spCall(["rm", i, tarfile] + warmupFiles)
-        if provided_warmup:
-            util.spCall(["rm"] + files + warmupFiles)
+        os.remove(NNLOJETexe)
+
+    def get_local_warmup_name(self,info,provided_warmup):
+        from shutil import copy
+        if os.path.isdir(provided_warmup):
+            matches = []
+            potential_files = os.listdir(provided_warmup)
+            for potfile in potential_files:
+                matchname = "{0}.{1}.y{2}.".format(info["proc"],info["id"],info["tc"])
+                if matchname in potfile and\
+                        not potfile.endswith(".txt") and not potfile.endswith(".log"):
+                    matches.append(potfile)
+            if len(matches) > 1:
+                print("\033[93m Multiple warmup matches found in {1}: {0}\033[0m ".format(" ".join(i for i in matches), provided_warmup))
+                print("Exiting.")
+                sys.exit()
+            elif len(matches) ==0 :
+                print("\033[93m No warmup matches found in {0}.\033[0m ".format(provided_warmup))
+                print("Exiting.")
+                sys.exit()
+            else:
+                match = os.path.join(provided_warmup,matches[0])
         else:
-            util.spCall(["rm"] + files)
+            match = provided_warmup
+        print("Using warmup {0}".format(match))
+        if not match in os.listdir(sys.path[0]):
+            local_match  =False
+            copy(match,os.path.basename(match))
+            match = os.path.basename(match)
+        else:
+            local_match = True
+        return match, local_match
+
 
     # src.Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
@@ -490,7 +521,7 @@ class Backend(object):
     def _do_stats_job(self, jobid_raw):
         """ version of stats job multithread ready
         """
-        # When used with ARC, it assumes -j database is not needed (ie, default db is being used)
+        import src.header as header
         if isinstance(jobid_raw, tuple):
             if jobid_raw[1] == self.cDONE or jobid_raw[1] == self.cFAIL:
                 return jobid_raw[1]
@@ -498,7 +529,7 @@ class Backend(object):
                 jobid = jobid_raw[0]
         else:
             jobid = jobid_raw
-        cmd = [self.cmd_stat, jobid.strip()]
+        cmd = [self.cmd_stat, jobid.strip(), "-j", header.arcbase]
         strOut = util.getOutputCall(cmd, suppress_errors=True)
         if "Done" in strOut or "Finished" in strOut:
             return self.cDONE
@@ -643,17 +674,15 @@ class Backend(object):
         logw = None
         runf = None
         for fil in files:
-            f = fil.strip()
-            f = f.split(" ")[-1].strip()
             if ".dat" in fil and "lhapdf/" not in fil:
-                datf.append(f)
+                datf.append(fil)
             elif ".log" in fil:
                 if "warm" in fil:
-                    logw = f
+                    logw = fil
                 else:
-                    logf.append(f)
+                    logf.append(fil)
             elif ".run" in fil:
-                runf = f
+                runf = fil
         dtarfile = "../" + tarfile
 
         try:
@@ -785,7 +814,7 @@ class Backend(object):
             if self.__first_stats_job_cheat:
                 pass
         except AttributeError as e:
-             print("Warning: The selected backend does not override the cheat version of the status command. Falling back to the standard version.")
+             print("  \033[93m WARNING:\033[0m The selected backend does not override the cheat version of the status command. Falling back to the standard version.")
              self.__first_stats_job_cheat = False
         self.stats_job(dbid)
 
@@ -796,9 +825,9 @@ def generic_initialise(runcard, warmup=False, production=False, grid=None, overw
     if warmup:
         if overwrite_grid:
             back.set_overwrite_warmup()
-        back.init_warmup(runcard, grid, continue_warmup=overwrite_grid)
+        back.init_warmup(grid, continue_warmup=overwrite_grid)
     elif production:
-        back.init_production(runcard, grid, continue_warmup=overwrite_grid)
+        back.init_production(grid, continue_warmup=overwrite_grid)
     else:
         print("What do you want me to initialise?")
         sys.exit(-1)

@@ -17,26 +17,10 @@ def pythonVersion():
 #
 # Runcard parser
 #
-def expandCard(runcard, dicRuns = None):
-    rcards = []
-    if ".py" in runcard:
-        vessel = {}
-        if pythonVersion() == 3:
-            with open(runcard) as source_file:
-               exec(source_file.read(), vessel)
-        else:
-            execfile(runcard, vessel) 
-        dictCard = vessel['dictCard']
-        for key in dictCard:
-            rcards.append(key)
-        # If more runcard-only variables are defined, they will be added to dictCard
-        if "sockets_active" in vessel: 
-            dictCard["sockets_active"] = vessel["sockets_active"]
-        if "port" in vessel: 
-            dictCard["port"] = vessel["port"]
-    else:
-        rcards.append(runcard)
-        dictCard = {}
+def expandCard():
+    import src.header as header
+    dictCard = header.dictCard
+    rcards = dictCard.keys()
     return rcards, dictCard
 
 #
@@ -130,7 +114,8 @@ def sanitiseGeneratedPath(dailyPath, rname):
 # Library initialisation
 #
 def lhapdfIni():
-    import shutil, os, src.header
+    import shutil, os 
+    import src.header as header
     lha_conf = "lhapdf-config"
     if getOutputCall(["which", lha_conf]) != "":
         print("Using lhapdf-config to get lhapdf directory")
@@ -186,39 +171,50 @@ def lhapdfIni():
 
 class TarWrap:
     # Defaults
-    cmdbase = ["tar"]
-    targz   = "-czf"
-    tarlist = "-tvf"
-    untar   = "-xzf"
-    def init(self, cmdbase = None, targz = None, tarlist = None, untar = None):
-        if cmdbase: self.cmdbase = cmdbase
-        if targz:   self.targz   = targz
-        if tarlist: self.tarlist = tarlist
-        if untar:   self.untar   = untar
+    def init(self):
+        pass
     
     def tarDir(self, inputDir, output_name):
-        args = [self.targz, output_name, inputDir]
-        cmd  = self.cmdbase + args
-        spCall(cmd)
-
+        import tarfile
+        with tarfile.open(output_name, "w:gz") as output_tar:
+            output_tar.add(inputDir)
+            
     def tarFiles(self, inputList, output_name):
-        args = [self.targz, output_name] +  inputList
-        cmd  = self.cmdbase + args
-        spCall(cmd)
+        import tarfile
+        with tarfile.open(output_name, "w:gz") as output_tar:
+            for infile in inputList:
+                output_tar.add(infile)
 
-    def listFilesTar(self, tarfile):
-        args = [self.tarlist, tarfile]
-        outp = getOutputCall(self.cmdbase + args).split('\n')
+    def listFilesTar(self, tarred_file):
+        import tarfile
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            outp = tfile.getnames()
         return outp
 
-    def extractThese(self, tarfile, listFiles):
-        args = [self.untar, tarfile] + listFiles
-        spCall(self.cmdbase + args)
+    def extractThese(self, tarred_file, listFiles):
+        import tarfile
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            for t in tfile:
+                if t.name in listFiles:
+                    tfile.extract(t)
 
-    def extractAll(self, tarfile):
-        args = [self.untar, tarfile]
-        spCall(self.cmdbase + args)
+    def extractAll(self, tarred_file):
+        import tarfile
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            for t in tfile:
+                tfile.extract(t)
 
+    def extract_extensions(self, tarred_file, extensions):
+        import tarfile
+        matches = []
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            for t in tfile:
+                for ext in extensions:
+                    if ext in t.name:
+                        tfile.extract(t)
+                        matches.append(t.name)
+                        break
+        return matches
 #
 # GridUtilities
 # 
@@ -262,16 +258,21 @@ class GridWrap:
             cmd = self.sendto + what + gsiftp_wher + wher
         else:
             cmd = self.sendto + wher + what
+            count = 1
             while True:
                 success = spCall(cmd)
                 # Check whether we actually sent what we wanted to send
                 if self.checkForThis(tarfile, whereTo):
                     break
+                elif count < 3: # 3 attempts before asking for input...
+                    print("  \033[93m ERROR:\033[0m {0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                    print("Automatically trying again...")
                 else:
-                    print("   ERROR: {0} could not be copied to the grid storage /for some reason/".format(what))
+                    print("  \033[93m ERROR:\033[0m {0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
                     yn = input(" Try again? (y/n) ")
                     if not yn.startswith("y"):
                         break
+                count +=1
         return success
 
     def bring(self, tarfile, whereFrom, whereTo):
@@ -340,7 +341,7 @@ if __name__ == '__main__':
 #    spCall(["rm", a, b])
     print("--------------------------")
     print("Runcard parser:")
-    runcards, dictCards, runfolder = expandCard("runcard.py")
+    runcards, dictCards, runfolder = expandCard()
     print("Runcards: ", runcards)
     print("Dictionary: ", dictCards)
     print("Runfolder: ", runfolder)

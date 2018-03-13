@@ -178,6 +178,20 @@ class database(object):
         total_query = query + rid
         self._execute_and_commit(total_query, verbose = True)
 
-
-
-
+def get_next_seed(dbname=None):
+    from src.header import arctable, diractable, dbfields
+    if dbname is None:
+        from src.header import dbname
+    db = database(dbname, tables = [arctable, diractable], 
+                  fields=dbfields)
+    db.list_disabled = True
+    alldata = db.list_data(arctable,["iseed","jobid"])
+    alldata += db.list_data(diractable,["iseed","jobid"])
+    ret_seed = 1
+    for run in alldata:
+        try:
+            max_seed = int(run["iseed"])+len(run["jobid"].split())
+        except TypeError as e:
+            max_seed = ret_seed
+        ret_seed = max(max_seed,ret_seed)
+    return ret_seed
