@@ -9,7 +9,7 @@ class Generic_Socket:
     https://docs.python.org/3.6/howto/sockets.html
     """
 
-    def __init__(self, sock=None, address=2*["UNK"]):
+    def __init__(self, sock=None, address=2*["UNK"], logger=None):
         self.double_size = 8
         """Create a IPv4 TCP socket
         """
@@ -19,6 +19,11 @@ class Generic_Socket:
         else:
             self.sock = sock
             self.address = address
+
+        if logger:
+            self._info_print = logger.info
+        else:
+            self._info_print = print
 
     def connect(self, host, port):
         """ Connects socket to given host-port
@@ -57,7 +62,7 @@ class Generic_Socket:
         bytes_received = 0
         while bytes_received < msg_len:
             if verbose:
-                print("Waiting for a connection")
+                self._info_print("Waiting for a connection")
             chunk = self.sock.recv(min(msg_len - bytes_received, 2048))
             if chunk == b'': 
                 raise RuntimeError("socket connection broken")
@@ -72,6 +77,16 @@ class Generic_Socket:
         while total_sent < len(msg):
             sent = self.sock.send(msg)
             total_sent += sent
+
+    def get_host_by_address(self, host_addr):
+        """ Given an ip address, get hostname
+        """
+        try:
+            info = socket.gethostbyaddr(host_addr)
+            hostname = info[0]
+            return hostname
+        except: # Assume your failure
+            return host_addr
 
     def close(self):
         self.sock.close()
@@ -145,18 +160,18 @@ class Vegas_Socket(Generic_Socket):
         while len(job_sockets) < n_jobs:
             new_endpoint = self.wait_for_client()
 
-            adr = str(new_endpoint.address[0])
+            adr = self.get_host_by_address(str(new_endpoint.address[0]))
             prt = str(new_endpoint.address[1])
-            print("   New endpoint connected: %s:%s" % (adr, prt))
+            self._info_print("   New endpoint connected: {0}:{1}".format(adr, prt))
         
             # Get the size of the array of doubles we are going to receive
             size = new_endpoint.get_size()
             if size == -1:
                 new_endpoint.send_data(b'die')
-                print(" > Killed orphan instance of nnlorun.py")
+                self._info_print(" > Killed orphan instance of nnlorun.py")
                 continue
             elif size == -99:
-                print(" > nnlorun.py sent exit code, exiting with success")
+                self._info_print(" > nnlorun.py sent exit code, exiting with success")
                 exit(0)
             doubles = int(size / 8)
             if verbose:
@@ -181,7 +196,7 @@ class Vegas_Socket(Generic_Socket):
 
         if verbose:
             print("Total value of the integral received: " + str(integral_value))
-            print("Sending it back to all clients")
+            self._info_print("Sending it back to all clients")
         while job_sockets:
             job_socket = job_sockets.pop()
             job_socket.send_total_integral(integral_value)
@@ -224,6 +239,25 @@ ie, if for three sockets you need to have run
 def timeout_handler(signum, frame):
     raise Exception("The time has passed, it's time to run")
 
+def create_stdout_log():
+    import logging
+    import sys
+    # TODO: add more logging levels
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    h = logging.StreamHandler(sys.stdout)
+    h.setLevel(logging.INFO)
+
+    formatter = logging.Formatter("%(asctime) 8s %(message)s", datefmt="[%H:%M:%S %d/%m]")
+    h.setFormatter(formatter)
+
+    logger.addHandler(h)
+
+    return logger
+
+
 
 def parse_all_arguments():
     from argparse import ArgumentParser
@@ -252,12 +286,14 @@ if __name__ == "__main__":
 
     args = parse_all_arguments()
 
+    log = create_stdout_log()
+
     HOST = str(args.hostname)
     PORT = int(args.port)
     n_clients = int(args.N_clients)
 
     # enable the server, and bind it to HOST:PORT
-    server = Vegas_Socket()
+    server = Vegas_Socket(logger = log)
     server.bind(HOST, PORT)
 
     if HOST == "":
@@ -265,10 +301,9 @@ if __name__ == "__main__":
     else:
         host_str = HOST
 
-    print("Server up. Connect to " + host_str + ":" + str(PORT))
+    log.info("Server up. Connect to " + host_str + ":" + str(PORT))
 
-    counter = 0
-
+    #### If wait (this whole block is for its use with the grid scripts)
     if args.wait:
         # Wait for a number of ARC jobs to start before allowing NNLOJET to run
         # it will "capture" the different instances of nnlorun.py until it gets all of them
@@ -284,7 +319,7 @@ if __name__ == "__main__":
 
         while n_clients < n_clients_max:
             try:
-                print("Waiting for {} more instances of nnlorun.py to salute".format(n_clients_max - n_clients))
+                log.info("Waiting for {} more instances of nnlorun.py to salute".format(n_clients_max - n_clients))
                 new_client = server.wait_for_client()
                 if not clients: # Start the timer
                     signal.alarm(int(args.wait))
@@ -292,12 +327,13 @@ if __name__ == "__main__":
                 break
             greetings = new_client.receive_str()
                 
-            if greetings == "greetings":
-                print("ARC.py captured")
+            if greetings == "greetings": 
+                # nnlorun.py sends the word "greetins" at the start
+                #print("ARC.py captured")
                 clients.append(new_client)
             else:
-                print("Waiting for ARC.py instance, got nonsense instead:")
-                print(greetings)
+                log.info("Waiting for nnlorun.py instance, got nonsense instead:")
+                log.info(greetings)
                 server.close()
                 exit(-1)
             n_clients = len(clients)
@@ -305,16 +341,18 @@ if __name__ == "__main__":
         signal.alarm(0)
 
         if n_clients == 0:
-            print("Something went wrong, no clients registered")
+            print("[WARNING] Something went wrong, no clients registered")
             exit(-1)
 
         for i in range(n_clients):
             socket_str = "-sockets {0} -ns {1}".format(n_clients, i+1)
             client_out = clients.pop()
             client_out.send_data(socket_str.encode())
+    #### endif wait
 
+    counter = 0
 
-    print("Waiting for " + str(n_clients) + " clients")
+    log.info("Waiting for " + str(n_clients) + " clients")
 
     # set a number of iterations
     while True:
@@ -324,9 +362,9 @@ if __name__ == "__main__":
         # Once every client has sent its share of the data, sum it 
         # together and send it back
         success = server.harmonize_integral(n_clients, verbose = False)
-        print("Iteration {} completed".format(counter))
+        log.info("Iteration {} completed".format(counter))
 
         if success < 0:
-            print("Something went wrong")
+            print("[WARNING] Something went wrong")
 
     server.close()
