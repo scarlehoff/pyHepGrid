@@ -143,7 +143,7 @@ def tar_this(tarfile, sourcefiles):
     os.system("ls")
     return stat
 
-def copy_to_grid(local_file, grid_file):
+def copy_to_grid(local_file, grid_file, maxrange = 10):
     print("Copying " + local_file + " to " + grid_file)
     filein = "file:$PWD/" + local_file
     fileout = lfn + grid_file
@@ -158,7 +158,6 @@ def copy_to_grid(local_file, grid_file):
         cmd = lcg_cr + " " + fileout + " " + filein
     print("> Sandbox -> LFN copy command: {0}".format(cmd))
     dirname = os.path.dirname(grid_file)
-    maxrange = 10
     for i in range(maxrange): # try max 10 times for now ;)
         exit_code=1
         output = os.popen(cmd).read().strip()
@@ -275,7 +274,10 @@ if __name__ == "__main__":
 
     status_tar = tar_this(local_out, "*")
 
-    status_copy = copy_to_grid(local_out, output_file)
+    if args.Sockets:
+        status_copy = copy_to_grid(local_out, output_file, maxrange = 1)
+    else:
+        status_copy = copy_to_grid(local_out, output_file)
 
     if status_copy == 0:
         print("Copied over to grid storage!")
