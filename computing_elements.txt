@@ -5,7 +5,6 @@ svr009.gla.scotgrid.ac.uk        UKI-SCOTGRID-GLASGOW
 arc-ce01.gridpp.rl.ac.uk         RAL-LCG2               [High (~60%) failure rate 28/11/17, Job info issues as well.]
 arc-ce04.gridpp.rl.ac.uk         RAL-LCG2               [Works well, high # of cores]
 arc-ce03.gridpp.rl.ac.uk         RAL-LCG2               [Works well 05-Dec-2017]
-hepgrid5.ph.liv.ac.uk            UKI-NORTHGRID-LIV-HEP  [Works well 09-Dec-2017]
 heplnv147.pp.rl.ac.uk                                   [Works well 09-Dec-2017]
 ce1.dur.scotgrid.ac.uk
 ce2.dur.scotgrid.ac.uk
@@ -14,6 +13,7 @@ ce4.dur.scotgrid.ac.uk
 
 
 Known NOT to work [28/11/17]:
+hepgrid5.ph.liv.ac.uk            UKI-NORTHGRID-LIV-HEP  [Works well 09-Dec-2017]
 t2arc00.physics.ox.ac.uk         UKI-SOUTHGRID-OX-HEP
 ce0[4-7].esc.qmul.ac.uk              
 ce01.tier2.hep.manchester.ac.uk  [07-Dec-2017, cream]

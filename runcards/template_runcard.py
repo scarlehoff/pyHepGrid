@@ -29,6 +29,6 @@ dictCard = {
 
 # Automatically pick the next seed you haven't run (uses seeds stored in the database for this ;)
 # import src.dbapi as dbapi
-# baseseed = dbapi.get_next_seed()
+# baseSeed = dbapi.get_next_seed()
 # If overwriting dbname in this runcard.py file, pass through the name here:
-# baseseed = dbapi.get_next_seed(dbname = dbname)
+# baseSeed = dbapi.get_next_seed(dbname = dbname)
