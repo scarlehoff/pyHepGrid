@@ -17,7 +17,7 @@ def pythonVersion():
 #
 # Runcard parser
 #
-def expandCard():
+def expandCard(dummy=None):
     import src.header as header
     dictCard = header.dictCard
     rcards = dictCard.keys()
