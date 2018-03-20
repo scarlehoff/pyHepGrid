@@ -53,7 +53,7 @@ for i in template_attributes:
 ############ General header #################
 # This should not be changed unless you really know what you are doing!
 # Grid config
-arcbase  = "/mt/home/{}/.arc/jobs.dat".format(grid_username) # arc database
+
 gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
 LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
 LFC_CATALOG_TYPE = "lfc"
@@ -85,7 +85,6 @@ if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py","").replace("/","."))
     # todo: some safety checks
     for attr_name in dir(runcard):
-#        print(attr_name, runcard)
         if not attr_name.startswith("__") and not \
                 isinstance(getattr(runcard, attr_name), ModuleType):
             if not hasattr(this_file, attr_name) and attr_name != "dictCard" :
@@ -138,7 +137,12 @@ try:
         setattr(this_file, attr_name, attr_value)
 except ImportError as e:
     pass
-### Moved to the bottom to allow runcard to override jobName
+
+### Moved to the bottom to allow runcard to override jobName/arcbase
+
+if arcbase is None:
+        print("  \033[91m ERROR:\033[0m arcbase (location of arc submission database) set to None. Please check your header/runcard.")
+        sys.exit(-1)
 
 ARCSCRIPTDEFAULT = ["&",
         "(executable   = \"{0}\")".format(runfile),
