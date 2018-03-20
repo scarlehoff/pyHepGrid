@@ -6,16 +6,21 @@
 
 - Option to do arcsync from main.py so that it queries the database and we only do arcsync for jobs and CEs that are actually being used.
 
-
 - Play around with priority systems for get_site_info.py hooks
 
 - Runcard test function which takes the setup to be initialised and check it runs ok
+
+- Make all print-with-color into functions "print_warning", "print_error", etc
+
+- Make main.py to run the socket server automagically
 
 - shell script that sets up:
   - proxy generation crontabs
   - LFC directories
   - additional necessary lines in .bashrc
   - 
+
+- add a parameter to the runcard so the warmup folder directory (for initialisation) can also be given there instead of using -w warmup.warm.vRa
 
 ###### Done in the form of a bash script
 - Support for passing multiple runcards for initialisation/submission at once (requires modules reloading for runcard.py overrides)
