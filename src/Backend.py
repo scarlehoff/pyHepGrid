@@ -151,6 +151,12 @@ class Backend(object):
         prod_string = "production"
         info = {}
         print("Checking warmup/production in runcard %s" % r)
+        channels_flag = False
+        channels_string = "channels"
+        born = "vB"
+        real = "vR"
+        dreal = "RR"
+        sufix_dict = {'b' : born, 'lo' : born, 'v': born, 'vv': born, 'r' : real, 'rv' : real, 'rr': dreal}
         with open(runcard_dir + "/" + r, 'r') as f:
             for idx,line_raw in enumerate(f):
                 line = line_raw.lower()
@@ -174,9 +180,21 @@ class Backend(object):
                     info["id"] = line_raw.split()[0].strip()
                 if idx == 2:
                     info["proc"] = line_raw.split()[0].strip()
+                if idx == 17:
+                    region = line_raw.split()[0].strip()
                 if idx == 14:
                     info["tc"] = line_raw.split()[0].strip()
-                    break # Shouldn't need to go past line 14 :)
+                if channels_flag:
+                    # This will fail if you try to send a job with "all" in regions
+                    # It is not a bug, it's a feature
+                    if line.strip() in sufix_dict: # Only works for LO/R/V/RV/VV/RR
+                        info["channel_sufix"] = sufix_dict[line.strip()] + region
+                    else:
+                        info["channel_sufix"] = ""
+                    channels_flag = False
+                if channels_string == line.strip():
+                    channels_flag = True
+
         return info
 
     def _check_production(self, r, runcard_dir, continue_warmup = False):
@@ -409,8 +427,8 @@ class Backend(object):
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
+            matchname = "{0}.{1}.y{2}.{3}".format(info["proc"],info["id"],info["tc"],info["channel_sufix"])
             for potfile in potential_files:
-                matchname = "{0}.{1}.y{2}.".format(info["proc"],info["id"],info["tc"])
                 if matchname in potfile and\
                         not potfile.endswith(".txt") and not potfile.endswith(".log"):
                     matches.append(potfile)
