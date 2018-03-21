@@ -71,3 +71,4 @@ finalise_prefix = "results_"
 # socket parameters
 server_host = "gridui2.dur.scotgrid.ac.uk"
 port = 8010
+wait_time = 3600 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)

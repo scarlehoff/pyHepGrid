@@ -2,6 +2,7 @@ from src.Backend import Backend
 from datetime import datetime
 import src.utilities as util
 import src.header as header
+import src.socket_api as sapi
 
 class RunArc(Backend):
     def __init__(self, arcscript = None, **kwargs): 
@@ -79,7 +80,8 @@ class RunArc(Backend):
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
-            port = header.port
+            # Automagically activates the socket and finds the best port for it!
+            port = sapi.fire_up_socket_server(header.server_host, header.port, n_sockets, header.wait_time, header.socket_exe)
             job_type = "Socket={}".format(port)
         else:
             sockets = False
