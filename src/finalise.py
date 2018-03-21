@@ -15,7 +15,6 @@ rc = importlib.import_module(config.finalise_runcards.replace("/","."))
 logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
 tarfile_regex = re.compile(r"-([0-9]+)\.tar.gz+$")
 
-
 # CONFIG
 no_processes = config.finalise_no_cores
 verbose = config.verbose_finalise

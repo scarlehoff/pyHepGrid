@@ -141,7 +141,7 @@ except ImportError as e:
 
 ### Moved to the bottom to allow runcard to override jobName/arcbase
 
-if arcbase is None:
+if arcbase is None and os.path.basename(os.path.realpath(sys.argv[0]))=="main.py":
         print("  \033[91m ERROR:\033[0m arcbase (location of arc submission database) set to None. Please check your header/runcard.")
         sys.exit(-1)
 
