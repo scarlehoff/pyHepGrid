@@ -69,3 +69,4 @@ finalise_prefix = ""
 # socket default parameters
 server_host = "gridui1.dur.scotgrid.ac.uk"
 port = 8080
+wait_time = 3600 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)

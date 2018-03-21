@@ -332,10 +332,11 @@ if __name__ == "__main__":
                 #print("ARC.py captured")
                 clients.append(new_client)
             else:
-                log.info("Waiting for nnlorun.py instance, got nonsense instead:")
-                log.info(greetings)
-                server.close()
-                exit(-1)
+                log.info("Waiting for nnlorun.py instance, got nonsense instead.")
+                log.info("Received msg: {0}".format(greetings))
+                log.info("Sending kill signal...")
+                new_client.close()
+                continue
             n_clients = len(clients)
 
         signal.alarm(0)

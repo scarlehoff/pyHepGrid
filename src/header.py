@@ -1,5 +1,5 @@
 import headers.template_header as template
-import sys
+import sys, os
 from types import ModuleType
 import getpass
 import importlib
@@ -65,6 +65,7 @@ sandbox_dir = "test_sandbox"
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status']
+socket_exe = "{0}/src/socket_server.py".format(os.getcwd()) # Eventually will need to point towards NNLOJET/bin
 
 #
 # Templates

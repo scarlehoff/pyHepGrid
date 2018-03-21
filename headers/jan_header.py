@@ -72,3 +72,4 @@ production_base_dir = "/ResultsRunGrids"
 # src.finalise.py-only parameters
 finalise_runcards = None
 finalise_prefix = None
+wait_time = 3600 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)
