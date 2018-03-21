@@ -162,7 +162,7 @@ class Vegas_Socket(Generic_Socket):
 
             adr = self.get_host_by_address(str(new_endpoint.address[0]))
             prt = str(new_endpoint.address[1])
-            self._info_print("   New endpoint connected: {0}:{1}".format(adr, prt))
+            self._info_print("   New endpoint connected: {0}:{1} [{2}/{3}]".format(adr, prt,len(job_sockets)+1,n_jobs))
         
             # Get the size of the array of doubles we are going to receive
             size = new_endpoint.get_size()
