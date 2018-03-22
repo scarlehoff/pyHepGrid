@@ -672,14 +672,9 @@ class Backend(object):
         tarfiles = list(filter(None, tarfiles))
         print("Downloaded {0} files, extracting...".format(len(tarfiles)))
 
-        from pdb import set_trace
-        set_trace()
-
         # Extract all
         dummy    =  self._multirun(self._do_extract_outputData, tarfiles, n_threads)
         os.chdir("..")
-        from sys import exit
-        exit(0)
         print("Everything saved at {0}".format(pathfolder))
         util.spCall(["mv", self.rfolder, pathfolder])
 
