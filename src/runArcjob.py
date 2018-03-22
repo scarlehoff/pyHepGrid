@@ -76,13 +76,10 @@ class RunArc(Backend):
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
         rncards, dCards = util.expandCard()
-
+        
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
-            # Automagically activates the socket and finds the best port for it!
-            port = sapi.fire_up_socket_server(header.server_host, header.port, n_sockets, header.wait_time, header.socket_exe)
-            job_type = "Socket={}".format(port)
         else:
             sockets = False
             n_sockets = 1
@@ -97,10 +94,16 @@ class RunArc(Backend):
 
         print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:
+            if n_sockets > 1:
+                # Automagically activates the socket and finds the best port for it!
+                port = sapi.fire_up_socket_server(header.server_host, header.port, n_sockets, header.wait_time, header.socket_exe)
+                job_type = "Socket={}".format(port)
+
             # Check whether this run has something on the gridStorage
             self._checkfor_existing_warmup(r, dCards[r])
             # Generate the XRSL file
-            arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr, sockets = sockets)
+            arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr,
+                                              sockets=sockets, port=port)
             dictData = {'arguments'   : arguments,
                         'jobName'     : jobName,
                         'count'       : str(warmupthr),
