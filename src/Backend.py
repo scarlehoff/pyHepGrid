@@ -20,6 +20,9 @@ class Backend(object):
     def output_name(self, runcard, rname, seed):
         out = "output" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
         return out
+
+    def output_name_array(self, runcard, rname, seeds):
+        return [self.output_name(runcard, rname, seed) for seed in seeds]
     #########################################################################
 
 
@@ -626,7 +629,7 @@ class Backend(object):
             finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
             print("The starting filename is {}".format(firstName))
             print("The final filename is {}".format(finalName))
-            yn = self._press_yes_to_continue("Do you want to change these or", fallback = -1)
+            yn = self._press_yes_to_continue("If you are ok with this, press y", fallback = -1)
             if yn == 0:
                 break
             initial_seed = int(input("Please, introduce the starting seed (ex: 400): "))
@@ -658,27 +661,43 @@ class Backend(object):
             seeds = new_seed
 
         from src.header import finalise_no_cores as n_threads
-        tarfiles =  self._multirun(self._do_get_data, seeds, n_threads)
-        # Don't try to untar files that do not exist...
+        # Check which of the seeds actually produced some data
+        all_remote = self.output_name_array(self.rcard, self.rfolder, seeds)
+        all_output = self.gridw.get_dir_contents(header.lfn_output_dir).split()
+        remote_tarfiles = list(set(all_remote) & set(all_output))
+        print("Found data for {0} of the {1} seeds.".format(len(remote_tarfiles), len(seeds)))
+        
+        # Download said data
+        tarfiles = self._multirun(self._do_get_data, remote_tarfiles, n_threads)
+        tarfiles = list(filter(None, tarfiles))
+        print("Downloaded {0} files, extracting...".format(len(tarfiles)))
+
+        from pdb import set_trace
+        set_trace()
+
+        # Extract all
         dummy    =  self._multirun(self._do_extract_outputData, tarfiles, n_threads)
         os.chdir("..")
-        print("Everything saved at %s" % pathfolder)
+        from sys import exit
+        exit(0)
+        print("Everything saved at {0}".format(pathfolder))
         util.spCall(["mv", self.rfolder, pathfolder])
 
-
-    def _do_get_data(self, seed):
+    def _do_get_data(self, filename):
         """ Multithread wrapper used in get_data_production 
         to download information from the grid storage
         """
-        from src.header import lfn_output_dir
-        filenm   = self.output_name(self.rcard, self.rfolder, seed)
-        remotenm = filenm + ".tar.gz"
-        localfil = self.rfolder + "-" + str(seed) + ".tar.gz"
-        localnm  = self.rfolder + "/" + localfil
-        self.gridw.bring(filenm, lfn_output_dir, localnm)
-        return localfil
+        local_name = filename.replace("output", "")
+        local_file = self.rfolder + "/" + local_name
+        self.gridw.bring(filename, header.lfn_output_dir, local_file)
+        from os.path import isfile
+        if isfile(local_name):
+            return local_name
+        else:
+            return None
 
     def _do_extract_outputData(self, tarfile):
+        # TODO: separate warmup data from here so it doesn't get extracted every time
         """ Multithread wrapper used in get_data_production
             for untaring files
         """
