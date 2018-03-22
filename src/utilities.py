@@ -277,6 +277,10 @@ class GridWrap:
 
     def bring(self, tarfile, whereFrom, whereTo):
         args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
+        # WARNING: 
+        # This call doesn't seem to be affected by chdir coming from outside ????
+        # why?
+        # Investigate
         success = spCall(self.retriv + args)
         # lcg-cp returns always 0 even when it fails :___
         from os import path
