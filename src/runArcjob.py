@@ -97,7 +97,9 @@ class RunArc(Backend):
         for r in rncards:
             if n_sockets > 1:
                 # Automagically activates the socket and finds the best port for it!
-                port = sapi.fire_up_socket_server(header.server_host, port, n_sockets, header.wait_time, header.socket_exe, tag=r)
+                port = sapi.fire_up_socket_server(header.server_host, port, n_sockets, 
+                                                  header.wait_time, header.socket_exe,
+                                                  tag="{0}-{1}".format(r,dCards[r]))
                 job_type = "Socket={}".format(port)
 
             # Check whether this run has something on the gridStorage
