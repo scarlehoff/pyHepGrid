@@ -113,7 +113,7 @@ def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe
         port += 1
 
     # Once we have a free port, fire up the tmux session
-    tms = "socket-server-{0}-{1}".format(port,tag)
+    tms = "socket-server-{0}-{1}".format(port,tag.replace(".","-"))
     tmux = Tmux(tms, host)
 
     # Send the server activation command!
