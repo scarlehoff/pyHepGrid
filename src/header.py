@@ -65,6 +65,7 @@ sandbox_dir = "test_sandbox"
 arctable   = "arcjobs"
 diractable = "diracjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status']
+# DW This should be a hard link so socketed runs can be sent from other folders/locations
 socket_exe = "{0}/src/socket_server.py".format(os.getcwd()) # Eventually will need to point towards NNLOJET/bin
 
 #

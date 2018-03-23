@@ -99,7 +99,7 @@ def check_port_blocked(host, port):
 # 
 #     return blocked
   
-def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe = "/mt/home/jmartinez/Gangaless_new/src/socket_server.py"): 
+def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe = "/mt/home/jmartinez/Gangaless_new/src/socket_server.py",tag=""): 
     """ 
     Fires up the nnlojet socket server inside a tmux terminal
     in the given 'host' for 'n_sockets' and with a 'wait_time' (s)
@@ -113,7 +113,7 @@ def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe
         port += 1
 
     # Once we have a free port, fire up the tmux session
-    tms = "socket-server-{0}".format(port)
+    tms = "socket-server-{0}-{1}".format(port,tag)
     tmux = Tmux(tms, host)
 
     # Send the server activation command!
