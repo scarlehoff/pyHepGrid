@@ -169,51 +169,56 @@ def lhapdfIni():
 # Tar wrappers
 #
 
+import tarfile
+
 class TarWrap:
-    # Defaults
-    def init(self):
-        pass
-    
+
     def tarDir(self, inputDir, output_name):
-        import tarfile
         with tarfile.open(output_name, "w:gz") as output_tar:
             output_tar.add(inputDir)
             
     def tarFiles(self, inputList, output_name):
-        import tarfile
         with tarfile.open(output_name, "w:gz") as output_tar:
             for infile in inputList:
                 output_tar.add(infile)
 
     def listFilesTar(self, tarred_file):
-        import tarfile
         with tarfile.open(tarred_file, 'r|gz') as tfile:
             outp = tfile.getnames()
         return outp
 
     def extractThese(self, tarred_file, listFiles):
-        import tarfile
         with tarfile.open(tarred_file, 'r|gz') as tfile:
             for t in tfile:
                 if t.name in listFiles:
                     tfile.extract(t)
 
     def extractAll(self, tarred_file):
-        import tarfile
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            tfile.extractall()
+
+    def extract_extension_to(self, tarred_file, extension_dict):
+        """
+        extenson_dict is a dictionary {"ext" : "path"} so that
+        if the file has extension "ext" it will be extracted to "path"
+        """
+        # TODO: I don't like this, I'm sure there is a better way...
         with tarfile.open(tarred_file, 'r|gz') as tfile:
             for t in tfile:
-                tfile.extract(t)
+                for ext in extension_dict:
+                    if t.name.endswith(ext):
+                        tfile.extract(t, path = extension_dict[ext])
+                        break
+                
 
     def extract_extensions(self, tarred_file, extensions):
-        import tarfile
         matches = []
+        tuple_ext = tuple(extensions)
         with tarfile.open(tarred_file, 'r|gz') as tfile:
             for t in tfile:
-                for ext in extensions:
-                    if ext in t.name:
-                        tfile.extract(t)
-                        matches.append(t.name)
-                        break
+                if t.name.endswith(tuple_ext):
+                    tfile.extract(t)
+                    matches.append(t.name)
         return matches
 #
 # GridUtilities
