@@ -672,6 +672,11 @@ class Backend(object):
         tarfiles = list(filter(None, tarfiles))
         print("Downloaded {0} files, extracting...".format(len(tarfiles)))
 
+        # Extract some information from the first tarfile 
+        for tarfile in tarfiles:
+            if self._extract_output_warmup_data(tarfile):
+                break
+
         # Extract all
         dummy    =  self._multirun(self._do_extract_outputData, tarfiles, n_threads)
         os.chdir("..")
@@ -691,8 +696,14 @@ class Backend(object):
         else:
             return None
 
+    def _extract_output_warmup_data(self, tarfile):
+        """
+        Extracts runcard and warmup from a tarfile.
+        """
+        extensions = ["run", "vRa", "vRb", "vBa", "vBb", "RRa", "RRb", "log-warmup"]
+        return self.tarw.extract_extensions(tarfile, extensions)
+  
     def _do_extract_outputData(self, tarfile):
-        # TODO: separate warmup data from here so it doesn't get extracted every time
         """ Multithread wrapper used in get_data_production
             for untaring files
         """
@@ -700,45 +711,11 @@ class Backend(object):
         if not os.path.isfile(tarfile):
             print(tarfile + " not found")
             return -1
-        files =  self.tarw.listFilesTar(tarfile)
-        datf = []
-        logf = []
-        logw = None
-        runf = None
-        for fil in files:
-            if ".dat" in fil and "lhapdf/" not in fil:
-                datf.append(fil)
-            elif ".log" in fil:
-                if "warm" in fil:
-                    logw = fil
-                else:
-                    logf.append(fil)
-            elif ".run" in fil:
-                runf = fil
-        dtarfile = "../" + tarfile
 
-        try:
-            os.chdir("log")
-        except:
-            print("Somehow we could not enter 'log' folder")
-            print(os.getcwd())
-            print(os.system("ls"))
-        if runf:
-            if not os.path.isfile(runf):
-                self.tarw.extractThese(dtarfile, [runf])
-        if logw:
-            if not os.path.isfile(logw):
-                self.tarw.extractThese(dtarfile, [logw])
-        try:
-            self.tarw.extractThese(dtarfile, logf)
-            os.chdir("../dat")
-            self.tarw.extractThese(dtarfile, datf)
-            os.chdir("..")
-            util.spCall(["rm", tarfile])
-        except:
-            print("Once again, something went wrong with os and chdir")
-            print(os.getcwd())
-            print(os.system("ls"))
+        out_dict = {".log" : "log/", ".dat" : "dat/" }
+        self.tarw.extract_extension_to(tarfile, out_dict)
+
+        util.spCall(["rm", tarfile])
 
         return 0
 
