@@ -4,16 +4,20 @@ from types import ModuleType
 import getpass
 import importlib
 import get_site_info
- 
+import src.logger as logger
+
 header_mappings = {"jmartinez":"headers.juan_header",
                    "dwalker":"headers.duncan_header",
                    "jniehues":"headers.jan_header",
                    "jwhitehead":"headers.james_header"}
 
+
+logger  = logger.setup_logger()
+
 grid_username = getpass.getuser()
 head = importlib.import_module(header_mappings[grid_username])
 
-print("Using header file {0}.py".format(head.__name__))
+logger.info("Using header file {0}.py".format(head.__name__))
 
 ############ COPY NAMESPACE FROM MY_HEADER #############
 # Only slightly abusive...
@@ -36,8 +40,8 @@ for i in dir(head):
         # Give warnings if you've added any new attributes and not put them in the template.
         if i not in template_attributes and not isinstance(attr,ModuleType)\
                 and not callable(attr):
-            print("  \033[93m WARNING:\033[0m attribute {0} not present in {1}".format(i, template.__name__))
-            print("> Please add it in before committing so you don't break compatibility(!)")
+            logger.warning("attribute {0} not present in {1}".format(i, template.__name__))
+            logger.info("Please add it in before committing so you don't break compatibility(!)")
 
 
 # Raise errors if you try to run without parameters specified in the template
@@ -45,9 +49,9 @@ for i in template_attributes:
     try:
         assert(hasattr(this_file, i))
     except AssertionError as e:
-        print("  \033[91m ERROR:\033[0m Missing attribute {0} inside {1}.py that is present in {2}.py.".format(
+        logger.error("Missing attribute {0} inside {1}.py that is present in {2}.py.".format(
                 i, head.__name__, template.__name__))
-        print("> Check that {0}.py file is up to date as functionality may be broken otherwise.".format(head.__name__))
+        logger.info("Check that {0}.py file is up to date as functionality may be broken otherwise.".format(head.__name__))
         sys.exit(1)
 
 ############ General header #################
@@ -91,19 +95,19 @@ if runcard_file:
         if not attr_name.startswith("__") and not \
                 isinstance(getattr(runcard, attr_name), ModuleType):
             if not hasattr(this_file, attr_name) and attr_name != "dictCard" :
-                print(">\033[93m WARNING!\033[0m {0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
-                print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
-                print("> Or even if they do.")
+                logger.warning("{0} defined in {1}.py but not {2}.py.".format(attr_name, runcard.__name__, template.__name__))
+                logger.info("Be very careful if you're trying to override attributes that don't exist elsewhere.")
+                logger.info("Or even if they do.")
 
             attr_value = getattr(runcard, attr_name)
             if attr_name != "dictCard":
-                print("> Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
+                logger.info("Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
             setattr(this_file, attr_name, attr_value)
 try:
     from src.argument_parser import override_ce_base as use_best_ce
     if use_best_ce:
         setattr(this_file, "ce_base", get_site_info.get_most_free_cores())
-        print("> Setting value of {0} to {1} due to most_free_cores override".format("ce_base", ce_base))
+        logger.info("Setting value of {0} to {1} due to most_free_cores override".format("ce_base", ce_base))
 except ImportError as e:
     pass
 
@@ -114,9 +118,9 @@ try:
     from src.argument_parser import additional_arguments
     for attr_name in additional_arguments:
         if not hasattr(this_file, attr_name) and attr_name is not "dictCard":
-            print(">\033[93m WARNING!\033[0m {0} defined in command line args but not in {1}.py.".format(attr_name, template.__name__))
-            print("> Be very careful if you're trying to override attributes that don't exist elsewhere.")
-            print("> Or even if they do.")
+            logger.warning("{0} defined in command line args but not in {1}.py.".format(attr_name, template.__name__))
+            logger.info("Be very careful if you're trying to override attributes that don't exist elsewhere.")
+            logger.info("Or even if they do.")
 
         attr_value = additional_arguments[attr_name]
         try:
@@ -131,12 +135,12 @@ try:
                 elif attrtype is not type(None):
                     attr_value = attrtype(attr_value) # Casts the value to the type of the value found already in the header. If not found or the type is None, defaults to a string.
         except AttributeError as e:
-            print(">\033[93m WARNING!\033[0m {0} default type not found.".format(attr_name))
-            print("> Will be passed through as a string.")
+            logger.warning("{0} default type not found.".format(attr_name))
+            logger.info("Will be passed through as a string.")
         except ValueError as e:
-            print("  \033[91m ERROR:\033[0m Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
+            logger.error("Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
             sys.exit(-1)
-        print("> Overriding value of {0} to {1} from command line args".format(attr_name, attr_value))
+        logger.info("> Overriding value of {0} to {1} from command line args".format(attr_name, attr_value))
         setattr(this_file, attr_name, attr_value)
 except ImportError as e:
     pass
@@ -144,7 +148,7 @@ except ImportError as e:
 ### Moved to the bottom to allow runcard to override jobName/arcbase
 
 if arcbase is None and os.path.basename(os.path.realpath(sys.argv[0]))=="main.py":
-        print("  \033[91m ERROR:\033[0m arcbase (location of arc submission database) set to None. Please check your header/runcard.")
+        logger.error("arcbase (location of arc submission database) set to None. Please check your header/runcard.")
         sys.exit(-1)
 
 ARCSCRIPTDEFAULT = ["&",

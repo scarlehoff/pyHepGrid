@@ -8,7 +8,6 @@ def get_cmd_output(*args,**kwargs):
     outbyt = sp.Popen(args, stdout=sp.PIPE,**kwargs).communicate()[0]
     return outbyt.decode("utf-8")
 
-
 # Global Variables (default values)
 runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
