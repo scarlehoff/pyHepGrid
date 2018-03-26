@@ -305,14 +305,10 @@ def parse_all_arguments():
     return args
 
 
-if __name__ == "__main__":
-    from sys import exit
-    import signal
 
-    args = parse_all_arguments()
 
-    log = create_stdout_log(args.logfile)
-
+def do_server(args,log):
+    """ Main server running routine. Placed here so that we can catch exceptions with logger"""
     HOST = str(args.hostname)
     PORT = int(args.port)
     n_clients = int(args.N_clients)
@@ -394,3 +390,20 @@ if __name__ == "__main__":
             print("[WARNING] Something went wrong")
 
     server.close()
+
+
+
+
+if __name__ == "__main__":
+    from sys import exit
+    import signal
+
+    args = parse_all_arguments()
+
+    log = create_stdout_log(args.logfile)
+    
+    try:
+        do_server(args, log)
+    except (Exception,KeyboardInterrupt) as e:
+        log.exception("Encountered Exception") # Prints stack trace
+        exit(-1)
