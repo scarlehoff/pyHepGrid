@@ -22,8 +22,10 @@ class Generic_Socket:
 
         if logger:
             self._info_print = logger.info
+            self._debug_print = logger.debug
         else:
             self._info_print = print
+            self._debug_print = print
 
     def connect(self, host, port):
         """ Connects socket to given host-port
@@ -175,13 +177,13 @@ class Vegas_Socket(Generic_Socket):
                 exit(0)
             doubles = int(size / 8)
             if verbose:
-                print("Size of array: " + str(size))
-                print("Meaning we will get " + str(doubles) + " doubles")
+                self._info_print("Size of array: " + str(size))
+                self._info_print("Meaning we will get " + str(doubles) + " doubles")
 
             # Get the actual array of data
             partial_value = new_endpoint.read_partial_integral(size, verbose = verbose)
             if verbose:
-                print("Partial value obtained: " + str(partial_value))
+                self._info_print("Partial value obtained: " + str(partial_value))
 
 
             # Store the socket and the array we just received, we will use it in the future
@@ -195,7 +197,7 @@ class Vegas_Socket(Generic_Socket):
             integral_value = list(map(lambda x,y: x+y, integral_value, array_values))
 
         if verbose:
-            print("Total value of the integral received: " + str(integral_value))
+            self._info_print("Total value of the integral received: " + str(integral_value))
             self._info_print("Sending it back to all clients")
         while job_sockets:
             job_socket = job_sockets.pop()
@@ -239,9 +241,11 @@ ie, if for three sockets you need to have run
 def timeout_handler(signum, frame):
     raise Exception("The time has passed, it's time to run")
 
-def create_stdout_log():
+def create_stdout_log(logname):
     import logging
-    import sys
+    import sys, os
+    import getpass
+    import datetime
     # TODO: add more logging levels
 
     logger = logging.getLogger(__name__)
@@ -252,8 +256,19 @@ def create_stdout_log():
 
     formatter = logging.Formatter("%(asctime) 8s %(message)s", datefmt="[%H:%M:%S %d/%m]")
     h.setFormatter(formatter)
-
     logger.addHandler(h)
+    
+    username = getpass.getuser()
+    datestr = datetime.datetime.now().strftime("%d-%m-%Y")
+    logloc = "/tmp/{1}/{0}/{3}/{2}".format(os.path.splitext(os.path.basename(__file__))[0],
+                                       username,logname,datestr)
+    logger.info("Logfile: {0}".format(logloc))
+    os.makedirs(os.path.dirname(logloc),exist_ok=True)
+
+    logfile = logging.FileHandler(logloc)
+    logfile.setLevel(logging.DEBUG)
+    logfile.setFormatter(formatter)
+    logger.addHandler(logfile)
 
     return logger
 
@@ -267,6 +282,7 @@ def parse_all_arguments():
     parser.add_argument("-w", "--wait", help = "Wait for a given number of seconds. This options is only to be used on the gridui")
     parser.add_argument("-N", "--N_clients", help = "Number of clients to wait for, if used alongside wait, stop waiting after N clients", default = "2")
     parser.add_argument("-m", "--manual", help = "Print the manual and exit", action = "store_true")
+    parser.add_argument("-l", "--logfile", help = "Set the output logfile name (Stored in /tmp/<username>/socket_server/", default=None)
     args = parser.parse_args()
 
     if args.manual:
@@ -277,6 +293,11 @@ def parse_all_arguments():
         if "gridui" not in socket.gethostname():
             parser.error("Wait only to be used in gridui")
 
+    if args.logfile is None:
+        import datetime
+        timestr=datetime.datetime.now().strftime("%H-%M-%S")
+        args.logfile = "{2}_Port_{0}_No_clients_{1}.log".format(args.port,args.N_clients,timestr)
+
     return args
 
 
@@ -286,7 +307,7 @@ if __name__ == "__main__":
 
     args = parse_all_arguments()
 
-    log = create_stdout_log()
+    log = create_stdout_log(args.logfile)
 
     HOST = str(args.hostname)
     PORT = int(args.port)
@@ -342,7 +363,7 @@ if __name__ == "__main__":
         signal.alarm(0)
 
         if n_clients == 0:
-            print("[WARNING] Something went wrong, no clients registered")
+            log.critical("[WARNING] Something went wrong, no clients registered")
             exit(-1)
 
         for i in range(n_clients):

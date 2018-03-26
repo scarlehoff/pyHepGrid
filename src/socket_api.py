@@ -118,7 +118,8 @@ def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe
 
     # Send the server activation command!
     # TODO: put socket_exe in the general header since it should point to NNLOJET/bin
-    cmd_server = "{0} -N {1} -p {2} -w {3}".format(socket_exe, n_sockets, port, wait_time)
+    cmd_server = "{0} -N {1} -p {2} -w {3} -l {4}".format(socket_exe, n_sockets, port, 
+                                                          wait_time, tms)
     kill_session_cmd = tmux.get_kill_cmd()
     cmd = "{0} ; {1}".format(cmd_server, kill_session_cmd)
     tmux.run_cmd(cmd)
