@@ -23,9 +23,11 @@ class Generic_Socket:
         if logger:
             self._info_print = logger.info
             self._debug_print = logger.debug
+            self._critical_print = logger.critical
         else:
             self._info_print = print
             self._debug_print = print
+            self._critical_print = print
 
     def connect(self, host, port):
         """ Connects socket to given host-port
@@ -66,7 +68,9 @@ class Generic_Socket:
             if verbose:
                 self._info_print("Waiting for a connection")
             chunk = self.sock.recv(min(msg_len - bytes_received, 2048))
-            if chunk == b'': 
+            if chunk == b'':
+                self._critical_print("Data up to now:")
+                self._critical_print(chunks)
                 raise RuntimeError("socket connection broken")
             chunks.append(chunk)
             bytes_received = bytes_received + len(chunk)
