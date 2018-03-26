@@ -1,9 +1,9 @@
 import subprocess as sp
 import os
-##################################################
-#                Helper Functions                #
+######################################################
+#                Helper Functions                    #
 # Can't use src.utilities due to circular imports :( #
-##################################################
+######################################################
 def get_cmd_output(*args,**kwargs):
     outbyt = sp.Popen(args, stdout=sp.PIPE,**kwargs).communicate()[0]
     return outbyt.decode("utf-8")

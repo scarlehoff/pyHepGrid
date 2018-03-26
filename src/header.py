@@ -59,6 +59,7 @@ LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
 LFC_CATALOG_TYPE = "lfc"
 runfile = "nnlorun.py"
 sandbox_dir = "test_sandbox"
+arc_direct = True
 
 
 # Database config

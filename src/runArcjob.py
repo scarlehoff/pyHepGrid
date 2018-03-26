@@ -58,11 +58,16 @@ class RunArc(Backend):
         """ Sends XRSL to the queue defined in header
         If test = True, use test queue
         """
+        from src.header import arc_direct
         if test:
             from src.header import ce_test as ce
         else:
             from src.header import ce_base as ce
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
+        # Can only use direct in Durham. Otherwise fails! 
+        # Speeds up submission (according to Stephen)
+        if arc_direct and ".dur.scotgrid.ac.uk" in ce:
+            cmd += " --direct "
         output = util.getOutputCall(cmd.split())
         jobid = output.split("jobid:")[-1].rstrip().strip()
         return jobid
