@@ -1,5 +1,7 @@
 - Send production as subjobs for arc [if possible]
 
+- explore arcsub --direct argument for faster arc submission [to test, does it work outside of Durham, multithreading etc?] [Stephen is the goto about this]
+
 - Warmup and dat files in ARC/DIRAC sandbox - if job fails halfway through you can retrieve output... Alternatively, find whether there is a "backup" system so that we can copy the files somewhere else. It might also be a problem with lfc-ls?...
 
 - Make the script gfal ready...
