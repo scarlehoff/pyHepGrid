@@ -54,6 +54,7 @@ dirac_name = "jan.niehues"
 # NNLOJET Database Parameters
 #
 dbname     = "NNLOJET_november.dat"     
+provided_warmup_dir = None
 
 # Finalisation and storage options
 finalise_no_cores = 15

@@ -38,6 +38,7 @@ lhapdf             = get_cmd_output("lhapdf-config","--prefix")
  
 # NNLOJET Database Parameters
 dbname     = "NNLOJET_database.dat"     
+provided_warmup_dir = None
 
 # Finalisation and storage options
 finalise_no_cores = 15

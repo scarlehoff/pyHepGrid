@@ -20,9 +20,7 @@
   - proxy generation crontabs
   - LFC directories
   - additional necessary lines in .bashrc
-  - 
 
-- add a parameter to the runcard so the warmup folder directory (for initialisation) can also be given there instead of using -w warmup.warm.vRa
 
 ###### Done in the form of a bash script
 - Support for passing multiple runcards for initialisation/submission at once (requires modules reloading for runcard.py overrides)
