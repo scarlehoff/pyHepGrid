@@ -410,6 +410,9 @@ class Backend(object):
             if provided_warmup:
                 match, local = self.get_local_warmup_name(info,provided_warmup)
                 warmupFiles = [match]
+            elif header.provided_warmup_dir:
+                match, local = self.get_local_warmup_name(info,header.provided_warmup_dir)
+                warmupFiles = [match]
             else:
                 print("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname)
