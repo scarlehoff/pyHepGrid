@@ -5,7 +5,7 @@ from src.argument_parser import arguments as args
 rcard = args.runcard
 rmode = args.mode
 
-from src.header import arctable, diractable, dbname, dbfields
+from src.header import arctable, diractable, dbname, dbfields, logger
 from src.dbapi  import database
 
 ##### Checks go here
@@ -87,4 +87,4 @@ elif rmode[:3] == "tes":
 
     
 else:
-    print("Invalid mode {0} selected. Exiting".format(rmode))
+    logger.critical("Invalid mode {0} selected. Exiting".format(rmode))

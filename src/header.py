@@ -4,7 +4,7 @@ from types import ModuleType
 import getpass
 import importlib
 import get_site_info
-import src.logger as logger
+import src.logger as logmod
 
 header_mappings = {"jmartinez":"headers.juan_header",
                    "dwalker":"headers.duncan_header",
@@ -12,7 +12,7 @@ header_mappings = {"jmartinez":"headers.juan_header",
                    "jwhitehead":"headers.james_header"}
 
 
-logger  = logger.setup_logger()
+logger  = logmod.setup_logger()
 
 grid_username = getpass.getuser()
 head = importlib.import_module(header_mappings[grid_username])
@@ -140,7 +140,7 @@ try:
         except ValueError as e:
             logger.error("Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
             sys.exit(-1)
-        logger.info("> Overriding value of {0} to {1} from command line args".format(attr_name, attr_value))
+        logger.info("Overriding value of {0} to {1} from command line args".format(attr_name, attr_value))
         setattr(this_file, attr_name, attr_value)
 except ImportError as e:
     pass
