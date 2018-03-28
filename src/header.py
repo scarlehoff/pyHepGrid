@@ -12,7 +12,10 @@ header_mappings = {"jmartinez":"headers.juan_header",
                    "jwhitehead":"headers.james_header"}
 
 
-logger  = logmod.logger
+try:
+    logger  = logmod.logger
+except AttributeError as e:
+    logger = logmod.setup_logger("INFO")
 grid_username = getpass.getuser()
 head = importlib.import_module(header_mappings[grid_username])
 
