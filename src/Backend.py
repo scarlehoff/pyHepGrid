@@ -335,12 +335,20 @@ class Backend(object):
             2 - sent it to the grid storage
         """
         from shutil import copy
-        from src.header import NNLOJETdir, NNLOJETexe
+        import tempfile
+        from src.header import NNLOJETdir, NNLOJETexe, logger
         from src.header import runcardDir as runFol
+        
+        origdir = os.path.abspath(os.getcwd())
+        tmpdir = tempfile.mkdtemp()
+        os.chdir(tmpdir)
+        
+        logger.debug("Temporary directory: {0}".format(tmpdir))
+
         rncards, dCards = util.expandCard()
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
-            print("    \033[91mERROR:\033[0m Could not find NNLOJET executable at {0}".format(nnlojetfull))
+            logger.critical("Could not find NNLOJET executable at {0}".format(nnlojetfull))
             sys.exit(-1)
         copy(nnlojetfull, os.getcwd()) 
         files = [NNLOJETexe]
@@ -364,7 +372,7 @@ class Backend(object):
                     print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
                     warmup_files = self._bring_warmup_files(i, rname)
                     if not warmup_files:
-                        print("    \033[91mERROR:\033[0m No warmup grids found in warmup tar!")
+                        logger.error("No warmup grids found in warmup tar!")
                         sys.exit(-1)
                     files += warmup_files
                     print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
@@ -374,13 +382,14 @@ class Backend(object):
                 print("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
-            self.gridw.send(tarfile, "input")
+            self.gridw.send(tarfile, "input", shell=True)
             if not local:
                 for j in warmupFiles:
                     os.remove(j)
             os.remove(i)
             os.remove(tarfile)
         os.remove(NNLOJETexe)
+        os.chdir(origdir)
 
     def init_production(self, provided_warmup = None, continue_warmup=False):
         """ Initialises a production run. If a warmup file is provided
@@ -391,12 +400,20 @@ class Backend(object):
             2 - sent it to the grid storage
         """
         from shutil import copy
+        import tempfile
         from src.header import runcardDir as runFol
-        from src.header import NNLOJETexe, NNLOJETdir
+        from src.header import NNLOJETexe, NNLOJETdir, logger
         rncards, dCards = util.expandCard()
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
+        
+        origdir = os.path.abspath(os.getcwd())
+        tmpdir = tempfile.mkdtemp()
+        os.chdir(tmpdir)
+        logger.debug("Temporary directory: {0}".format(tmpdir))
+
+        
         if not os.path.isfile(nnlojetfull): 
-            print("    \033[91mERROR:\033[0m Could not find NNLOJET executable at {0}".format(nnlojetfull))
+            logger.critical("Could not find NNLOJET executable at {0}".format(nnlojetfull))
             sys.exit(-1)
         copy(nnlojetfull, os.getcwd())
         files = [NNLOJETexe]
@@ -424,6 +441,7 @@ class Backend(object):
             else:
                 util.spCall(["rm", i, tarfile] + warmupFiles)
         os.remove(NNLOJETexe)
+        os.chdir(origdir)
 
     def get_local_warmup_name(self,info,provided_warmup):
         from shutil import copy

@@ -12,8 +12,7 @@ header_mappings = {"jmartinez":"headers.juan_header",
                    "jwhitehead":"headers.james_header"}
 
 
-logger  = logmod.setup_logger()
-
+logger  = logmod.logger
 grid_username = getpass.getuser()
 head = importlib.import_module(header_mappings[grid_username])
 
@@ -31,6 +30,9 @@ template_attributes = [i for i in template_namespace if not
 # remove modules from template namespace
 template_attributes = [i for i in template_namespace if not 
                        isinstance(getattr(template, i),ModuleType)]
+
+for temp_attr in template_attributes:
+    logger.debug("{0:20}: {1}".format(temp_attr,getattr(head,temp_attr)))
 
 # Set attributes inside header
 for i in dir(head):
@@ -101,13 +103,13 @@ if runcard_file:
 
             attr_value = getattr(runcard, attr_name)
             if attr_name != "dictCard":
-                logger.info("Setting value of {0} to {1} in {2}.py".format(attr_name, attr_value, runcard.__name__))
+                logger.values("{2}: {0:15}: {1}".format(attr_name, attr_value, runcard.__name__))
             setattr(this_file, attr_name, attr_value)
 try:
     from src.argument_parser import override_ce_base as use_best_ce
     if use_best_ce:
         setattr(this_file, "ce_base", get_site_info.get_most_free_cores())
-        logger.info("Setting value of {0} to {1} due to most_free_cores override".format("ce_base", ce_base))
+        logger.values("most_free_cores: {0:15}: {1}".format("ce_base", ce_base))
 except ImportError as e:
     pass
 
@@ -117,30 +119,33 @@ except ImportError as e:
 try:
     from src.argument_parser import additional_arguments
     for attr_name in additional_arguments:
+        new = False
         if not hasattr(this_file, attr_name) and attr_name is not "dictCard":
             logger.warning("{0} defined in command line args but not in {1}.py.".format(attr_name, template.__name__))
             logger.info("Be very careful if you're trying to override attributes that don't exist elsewhere.")
             logger.info("Or even if they do.")
+            new = True
 
         attr_value = additional_arguments[attr_name]
-        try:
-            if attr_name == "dictCard":
-                import ast
-                attr_value = ast.literal_eval(attr_value)
-            else:
-                attrtype = type(getattr(this_file,attr_name))
-                if attrtype is type(dict()):
+        if not new: # Not a new argument only defined at cmd line args
+            try:
+                if attr_name == "dictCard":
                     import ast
                     attr_value = ast.literal_eval(attr_value)
-                elif attrtype is not type(None):
-                    attr_value = attrtype(attr_value) # Casts the value to the type of the value found already in the header. If not found or the type is None, defaults to a string.
-        except AttributeError as e:
-            logger.warning("{0} default type not found.".format(attr_name))
-            logger.info("Will be passed through as a string.")
-        except ValueError as e:
-            logger.error("Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
-            sys.exit(-1)
-        logger.info("Overriding value of {0} to {1} from command line args".format(attr_name, attr_value))
+                else:
+                    attrtype = type(getattr(this_file,attr_name))
+                    if attrtype is type(dict()):
+                        import ast
+                        attr_value = ast.literal_eval(attr_value)
+                    elif attrtype is not type(None):
+                        attr_value = attrtype(attr_value) # Casts the value to the type of the value found already in the header. If not found or the type is None, defaults to a string.
+            except AttributeError as e:
+                logger.warning("{0} default type not found.".format(attr_name))
+                logger.info("Will be passed through as a string.")
+            except ValueError as e:
+                logger.error("Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
+                sys.exit(-1)
+        logger.values("command line args: {0:15}: {1}".format(attr_name, attr_value))
         setattr(this_file, attr_name, attr_value)
 except ImportError as e:
     pass
