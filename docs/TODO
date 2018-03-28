@@ -1,12 +1,10 @@
-- Do tarring in tmp folder for submission so can do multiple inis at the same time
-
 - Warmup and dat files in ARC/DIRAC sandbox - if job fails halfway through you can retrieve output... Alternatively, find whether there is a "backup" system so that we can copy the files somewhere else. It might also be a problem with lfc-ls?...
 
 - Make the script gfal ready...
 
 - Option to do arcsync from main.py so that it queries the database and we only do arcsync for jobs and CEs that are actually being used.
 
-- Play around with priority systems for get_site_info.py hooks
+- Play around with priority systems for get_site_info.py 
 
 - Make main.py to run the socket server automagically
 
