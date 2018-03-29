@@ -12,12 +12,12 @@ def send_command(cmd, target_host):
 # Tmux Wrapper
 class Tmux:
 
-    def __init__(self, session_name, target_host):
+    def __init__(self, session_name, target_host, create_new = True):
         """ 
         Creates a tmux session 'session_name' in remote 'target_host'
         """
         self.target_computer = target_host
-        while self._check_session(session_name):
+        while self._check_session(session_name) and create_new:
             # Keep appending X to the session name until there is no other with the same name
             session_name += "X"
         self.tms = session_name
@@ -28,6 +28,9 @@ class Tmux:
         """ 
         Fires up tmux session
         """
+        if self._check_session(session_name):
+            # Session already exist
+            return 0
         cmd = "tmux new-session -d -s {0}".format(self.tms)
         return send_command(cmd, self.target_computer)
 
