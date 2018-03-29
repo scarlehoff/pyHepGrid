@@ -11,6 +11,7 @@ except:
 if caller_script == "main.py":
 
     import argparse
+    import src.logger
     parser = argparse.ArgumentParser()
 
     parser.add_argument("mode", help = "Mode [initialize/run/manage/test] ")
@@ -49,6 +50,7 @@ if caller_script == "main.py":
     parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
     parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
     parser.add_argument("-d", "--disableme", help = "disable database entry", action = "store_true")
+    parser.add_argument("-dbg", "--debuglevel", help = "set debug level", type=str, default="VALUES")
     parser.add_argument("--list_disabled", help = "List also disabled entries", action = "store_true")
 
     # Options that modify the jobs we can act onto
@@ -76,9 +78,13 @@ if caller_script == "main.py":
     override_ce_base = arguments.most_free_cores
     additional_arguments = {}
 
+    # Save to logger as header not loaded yet. 
+    # Reference copied to header.logger at the top of header when loaded
+    src.logger.logger = src.logger.setup_logger(arguments.debuglevel.upper()) 
+
     if arguments.args is not None:
         if len(arguments.args)%2!=0:
-            print("  \033[91m ERROR:\033[0m Not all additional arguments specified at prompt have values.")
+            src.logger.logger.error("Not all additional arguments specified at prompt have values.")
             import sys
             sys.exit(-1)
         else:

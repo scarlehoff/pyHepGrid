@@ -26,13 +26,17 @@ def expandCard(dummy=None):
 #
 # Subprocess Wrappers
 # 
-def spCall(cmd, suppress_errors = False):
+def spCall(cmd, suppress_errors = False, shell=False):
     from subprocess import call, DEVNULL
+    from src.header import logger
+    if shell:
+        cmd = [" ".join(cmd)]
     try:
+        logger.debug(cmd)
         if not suppress_errors:
-            call(cmd)
+            call(cmd, shell=shell)
         else:
-            call(cmd, stderr=DEVNULL, stdout=DEVNULL)
+            call(cmd, stderr=DEVNULL, stdout=DEVNULL, shell=shell)
         return 0
     except:
         raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
@@ -40,7 +44,9 @@ def spCall(cmd, suppress_errors = False):
 
 def getOutputCall(cmd, suppress_errors = False):
     from subprocess import Popen, PIPE, DEVNULL
+    from src.header import logger
     try:
+        logger.debug(cmd)
         if not suppress_errors:
             outbyt = Popen(cmd, stdout = PIPE).communicate()[0]
         else:
@@ -249,7 +255,8 @@ class GridWrap:
         if delete: self.delcmd = delete
         if lfn: self.lfn = lfn
     
-    def send(self, tarfile, whereTo):
+    def send(self, tarfile, whereTo, shell=False):
+        from src.header import logger
         wher = [self.lfn + whereTo + "/" + tarfile]
         what = ["file:" + tarfile]
         if self.gfal:
@@ -265,28 +272,29 @@ class GridWrap:
             cmd = self.sendto + wher + what
             count = 1
             while True:
-                success = spCall(cmd)
+                success = spCall(cmd, shell=shell)
                 # Check whether we actually sent what we wanted to send
                 if self.checkForThis(tarfile, whereTo):
                     break
                 elif count < 3: # 3 attempts before asking for input...
-                    print("  \033[93m ERROR:\033[0m {0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
-                    print("Automatically trying again...")
+                    logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                    logger.info("Automatically trying again...")
                 else:
-                    print("  \033[93m ERROR:\033[0m {0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                    logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
                     yn = input(" Try again? (y/n) ")
                     if not yn.startswith("y"):
+                        logger.error("{0} was not copied to the grid storage after {1} attempt(s)".format(tarfile,count))
                         break
                 count +=1
         return success
 
-    def bring(self, tarfile, whereFrom, whereTo):
+    def bring(self, tarfile, whereFrom, whereTo, shell=False):
         args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
         # WARNING: 
         # This call doesn't seem to be affected by chdir coming from outside ????
         # why?
         # Investigate
-        success = spCall(self.retriv + args)
+        success = spCall(self.retriv + args, shell=shell)
         # lcg-cp returns always 0 even when it fails :___
         from os import path
         return path.isfile(whereTo)
