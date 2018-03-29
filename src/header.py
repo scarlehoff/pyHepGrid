@@ -106,13 +106,13 @@ if runcard_file:
 
             attr_value = getattr(runcard, attr_name)
             if attr_name != "dictCard":
-                logger.values("{2}: {0:15}: {1}".format(attr_name, attr_value, runcard.__name__))
+                logger.value(attr_name, attr_value, runcard.__name__)
             setattr(this_file, attr_name, attr_value)
 try:
     from src.argument_parser import override_ce_base as use_best_ce
     if use_best_ce:
         setattr(this_file, "ce_base", get_site_info.get_most_free_cores())
-        logger.values("most_free_cores: {0:15}: {1}".format("ce_base", ce_base))
+        logger.value("ce_base", ce_base, most_free_cores)
 except ImportError as e:
     pass
 
@@ -148,7 +148,7 @@ try:
             except ValueError as e:
                 logger.error("Additional argument {0} with value {1} cannot be coerced into expected type {2}.".format(attr_name,attr_value,attrtype.__name__))
                 sys.exit(-1)
-        logger.values("command line args: {0:15}: {1}".format(attr_name, attr_value))
+        logger.value(attr_name, attr_value,"command line args")
         setattr(this_file, attr_name, attr_value)
 except ImportError as e:
     pass
