@@ -1,18 +1,10 @@
-- Send production as subjobs for arc [if possible]
-
-- explore arcsub --direct argument for faster arc submission [to test, does it work outside of Durham, multithreading etc?] [Stephen is the goto about this]
-
 - Warmup and dat files in ARC/DIRAC sandbox - if job fails halfway through you can retrieve output... Alternatively, find whether there is a "backup" system so that we can copy the files somewhere else. It might also be a problem with lfc-ls?...
 
 - Make the script gfal ready...
 
 - Option to do arcsync from main.py so that it queries the database and we only do arcsync for jobs and CEs that are actually being used.
 
-- Play around with priority systems for get_site_info.py hooks
-
-- Runcard test function which takes the setup to be initialised and check it runs ok
-
-- Make all print-with-color into functions "print_warning", "print_error", etc
+- Play around with priority systems for get_site_info.py 
 
 - Make main.py to run the socket server automagically
 
@@ -20,7 +12,15 @@
   - proxy generation crontabs
   - LFC directories
   - additional necessary lines in .bashrc
-
+  - 
 
 ###### Done in the form of a bash script
 - Support for passing multiple runcards for initialisation/submission at once (requires modules reloading for runcard.py overrides)
+
+# DONE #
+- Runcard test function which takes the setup to be initialised and check it runs ok
+- add a parameter to the runcard so the warmup folder directory (for initialisation) can also be given there instead of using -w warmup.warm.vRa
+- Make all print-with-color into functions "print_warning", "print_error", etc
+
+# IDEAS GRAVEYARD #
+- Send production as subjobs for arc [if possible - NOT POSSIBLE]
