@@ -23,12 +23,11 @@ class Tmux:
         self.tms = session_name
         self._new_session()
 
-
     def _new_session(self):
         """ 
         Fires up tmux session
         """
-        if self._check_session(session_name):
+        if self._check_session(self.tms):
             # Session already exist
             return 0
         cmd = "tmux new-session -d -s {0}".format(self.tms)
