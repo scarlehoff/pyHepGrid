@@ -242,7 +242,7 @@ class Backend(object):
                     self.gridw.delete(filename, lfn_output_dir)
             print("Output check complete")
 
-    def _bring_warmup_files(self, runcard, rname):
+    def _bring_warmup_files(self, runcard, rname, shell = False):
         """ Download the warmup file for a run to local directory
         extracts Vegas grid and log file and returns a list with their names
         TODO: use a unique /tmp directory instead of local dir
@@ -252,7 +252,7 @@ class Backend(object):
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
         tmpnm = "tmp.tar.gz"
-        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm)
+        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell)
         if not success:
             print("  \033[91m ERROR:\033[0m Grid files failed to copy from the LFN. Did the warmup complete successfully?")
             sys.exit(-1)
@@ -412,9 +412,16 @@ class Backend(object):
         from src.header import NNLOJETexe, NNLOJETdir, logger
         rncards, dCards = util.expandCard()
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
-        
+
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
+
+        # if provided warmup is a relative path, ensure we have the full path
+        # before we change to the tmp directory
+        if provided_warmup:
+            if provided_warmup[0] != "/":
+                provided_warmup = "{0}/{1}".format(origdir, provided_warmup)
+        
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
@@ -439,13 +446,13 @@ class Backend(object):
                 warmupFiles = [match]
             else:
                 print("Retrieving warmup file from grid")
-                warmupFiles = self._bring_warmup_files(i, rname)
+                warmupFiles = self._bring_warmup_files(i, rname,  shell = True)
             self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
                 print("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
-            self.gridw.send(tarfile, "input")
+            self.gridw.send(tarfile, "input", shell = True)
             if local:
                 util.spCall(["rm", i, tarfile])
             else:
