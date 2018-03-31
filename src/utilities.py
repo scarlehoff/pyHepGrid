@@ -294,9 +294,9 @@ class GridWrap:
         # This call doesn't seem to be affected by chdir coming from outside ????
         # why?
         # Investigate
+        from os import path
         success = spCall(self.retriv + args, shell=shell)
         # lcg-cp returns always 0 even when it fails :___
-        from os import path
         return path.isfile(whereTo)
 
     def delete(self, tarfile, whereFrom):
