@@ -9,13 +9,14 @@
 
 - Play around with priority systems for get_site_info.py 
 
-- Make main.py to run the socket server automagically
-
 - shell script that sets up:
   - proxy generation crontabs
   - LFC directories
   - additional necessary lines in .bashrc
-  - 
+
+- Investigate race condition between netcat and the server when the check for a server happens at the same time as it is retrieving data from NNLOJET.
+    - Option 1: Remove the ability to fire up remote sockets altogether
+    - Option 2 (preferred): Receive error codes through tmux through ssh 
 
 ###### Done in the form of a bash script
 - Support for passing multiple runcards for initialisation/submission at once (requires modules reloading for runcard.py overrides)
@@ -24,6 +25,7 @@
 - Runcard test function which takes the setup to be initialised and check it runs ok
 - add a parameter to the runcard so the warmup folder directory (for initialisation) can also be given there instead of using -w warmup.warm.vRa
 - Make all print-with-color into functions "print_warning", "print_error", etc
+- Make main.py to run the socket server automagically
 
 # IDEAS GRAVEYARD #
 - Send production as subjobs for arc [if possible - NOT POSSIBLE]
