@@ -341,6 +341,13 @@ class Backend(object):
         
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
+
+        # if provided warmup is a relative path, ensure we have the full path
+        # before we change to the tmp directory
+        if provided_warmup:
+            if provided_warmup[0] != "/":
+                provided_warmup = "{0}/{1}".format(origdir, provided_warmup)
+
         os.chdir(tmpdir)
         
         logger.debug("Temporary directory: {0}".format(tmpdir))
