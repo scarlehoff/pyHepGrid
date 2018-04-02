@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 
 logging.VALUES = 15
 logging.addLevelName(logging.VALUES, "VALUES")
@@ -51,8 +52,10 @@ class MyFormatter(logging.Formatter):
     def format(self, record):
         print_data = {}
         for attr in dir(record):
-            print_data[attr] = getattr(record,attr)
-
+            try:
+                print_data[attr] = os.path.relpath(getattr(record,attr))
+            except (AttributeError,ValueError) as e:
+                print_data[attr] = getattr(record,attr)
         try:
             return MyFormatter.format_strs[record.levelno].format(**print_data)
         except KeyError as e:
