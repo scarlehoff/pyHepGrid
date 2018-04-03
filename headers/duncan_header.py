@@ -40,6 +40,7 @@ arcbase    = None
 provided_warmup_dir = None
 
 # Finalisation and storage options
+timeout = 60
 finalise_no_cores = 25
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g

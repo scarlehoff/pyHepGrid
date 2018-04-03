@@ -37,6 +37,7 @@ provided_warmup_dir = None
 
 # Finalisation and storage options
 finalise_no_cores = 15
+timeout = 60
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_src.finalise()
