@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python3
 from __future__ import print_function
 import datetime
 import itertools
@@ -7,7 +7,7 @@ import multiprocessing as mp
 import os
 import string
 import subprocess as sp
-
+import uuid
 lfn = "lfn:"
 file_count_reprint_no = 15
 
@@ -35,7 +35,7 @@ class LFNFile():
     def __repr__(self):
         ln = self.__split
         return "{3:45} {4} {1} {0} {2:17} No. files: {5:7}  {6}".format(
-            ln[-4],ln[-3],ln[-2],ln[-1], self.time, ln[1], ln[0])
+            *ln[-4:], self.time, ln[1], ln[0])
 
 
 def bash_call(*args, **kwargs):
@@ -66,7 +66,10 @@ def delete_file_from_grid(xfile, lfndirectory, file_no, no_files):
     bash_call("lcg-del", lcgname, "-a")
     lfnname = "{0}/{1}".format(lfndirectory, xfile.fname)
     bash_call("lfc-rm", lfnname)
-
+    tmp = str(uuid.uuid4())
+    # If current attempts fail, rename to temporary name elsewhere!
+    bash_call("lfc-mkdir", "tmp")
+    bash_call("lfc-rename", lfnname, "tmp/{0}".format(tmp))
 
 def copy_lfn_file_to_local(lfnfile, localfile):
     bash_call("lcg-cp", lfnfile, localfile)
