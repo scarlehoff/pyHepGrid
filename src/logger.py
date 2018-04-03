@@ -2,8 +2,27 @@ import logging
 import sys
 import os
 
+################### README ###################
+# Use:
+# For all print/error/warning statements, import logger from src.header
+#
+#             LOG FUNCTION     PURPOSE                                         LEVEL
+# Then use -> logger.debug     debug statement                                   10
+#             logger.value     value setting in src.header                       15 
+#             logger.info      generic print                                     20
+#             logger.warning   warning message, continue with running            30
+#             logger.error     error message, continue with running              40
+#             logger.critical  error message, exit with non-zero error code      50
+#
+# Doing this allows consistent formatting and easy piping to log files in future :)
+# It also allows us to keep a lot of debug statements in the code that are ignored 
+# at runtime when by default we only print messages with levels of VALUES or higher. 
+# This can be changed with the command line argument debuglevel = [debug/value/...]
+# which will then print only statements of that debug level or higher
+
 logging.VALUES = 15
 logging.addLevelName(logging.VALUES, "VALUES")
+logging.Logger._critical = logging.Logger.critical
 
 def value(self, attrname, attrval, location_set, *args, **kws):
     # Args: attrname, attrval, location_set
@@ -21,7 +40,13 @@ def value(self, attrname, attrval, location_set, *args, **kws):
     if self.isEnabledFor(logging.VALUES):
         self._log(logging.VALUES, "", args, **kws) 
 
+
+def critical_with_exit(self, *args, **kwargs):
+    logging.Logger._critical(self, *args, **kwargs)
+    sys.exit(-1)
+
 logging.Logger.value = value
+logging.Logger.critical = critical_with_exit
 
 def setup_logger(debuglevel):
 

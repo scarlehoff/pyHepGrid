@@ -149,11 +149,12 @@ class Backend(object):
    
     # Checks for the runcard
     def _check_production_warmup(self, r, runcard_dir, warmup, production, continue_warmup=False):
+        from src.header import logger
         """ Check whether production/warmup are active in the runcard """
         warm_string = "warmup"
         prod_string = "production"
         info = {}
-        print("Checking warmup/production in runcard %s" % r)
+        logger.info("Checking warmup/production in runcard %s" % r)
         channels_flag = False
         channels_string = "channels"
         born = "vB"
@@ -165,8 +166,7 @@ class Backend(object):
                 line = line_raw.lower()
                 if warm_string in line:
                     if continue_warmup and not warmup:
-                        print("    \033[91m ERROR:\033[0m Continue warmup selected, but submission not in warmup mode. Exiting. ")
-                        sys.exit(-1)
+                        logger.critical("Continue warmup selected, but submission not in warmup mode. Exiting. ")
                     elif continue_warmup and warmup and (warmup and "2" not in line):
                         self._press_yes_to_continue("Continue warmup is not active in runcard")
                     elif (warmup and ".false." in line) or (warmup and "0" in line):
@@ -214,7 +214,8 @@ class Backend(object):
     # Checks for the grid storage system
     def _checkfor_existing_warmup(self, r, rname):
         """ Check whether given runcard already has a warmup output in the grid """
-        print("Checking whether this runcard is already at lfn:warmup")
+        from src.header import logger
+        logger.info("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
             self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(header.lfn_warmup_dir,checkname))
@@ -225,8 +226,8 @@ class Backend(object):
         needs testing as it needs to be able to remove (many) things for production run 
         It relies on the base seed from the src.header file to remove the output
         """
-        from src.header import lfn_output_dir
-        print("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
+        from src.header import lfn_output_dir, logger
+        logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         checkname = r + "-" + rname
         files = self.gridw.get_dir_contents(lfn_output_dir)
         first = True
@@ -237,25 +238,24 @@ class Backend(object):
                 if filename in files:
                     if first:
                         self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output with a seed you are trying to submit (looked for {}). Do you want to remove it/them?".format(checkname))
-                        print("Runcard " + r + " has at least one file at output")
+                        logger.warning("Runcard " + r + " has at least one file at output")
                         first = False
                     self.gridw.delete(filename, lfn_output_dir)
-            print("Output check complete")
+            logger.info("Output check complete")
 
     def _bring_warmup_files(self, runcard, rname, shell = False):
         """ Download the warmup file for a run to local directory
         extracts Vegas grid and log file and returns a list with their names
         TODO: use a unique /tmp directory instead of local dir
         """
-        from src.header import lfn_warmup_dir
+        from src.header import lfn_warmup_dir, logger
         gridFiles = []
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
         tmpnm = "tmp.tar.gz"
         success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell)
         if not success:
-            print("  \033[91m ERROR:\033[0m Grid files failed to copy from the LFN. Did the warmup complete successfully?")
-            sys.exit(-1)
+            logger.critical("Grid files failed to copy from the LFN. Did the warmup complete successfully?")
         ## Now extract only the Vegas grid files and log file
         gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
         extractFiles = self.tarw.extract_extensions(tmpnm, gridp+[".log"])
@@ -263,8 +263,7 @@ class Backend(object):
             gridFiles = [i for i in extractFiles if ".log" not in i]
             logfile = [i for i in extractFiles if ".log" in i][0]
         except IndexError as e:
-            print("  \033[91m ERROR:\033[0m Logfile not found. Did the warmup complete successfully?")
-            sys.exit(-1)
+            logger.critical("  \033[91m ERROR:\033[0m Logfile not found. Did the warmup complete successfully?")
 
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
@@ -282,6 +281,7 @@ class Backend(object):
         """ Returns a list of DIRAC/ARC jobids
         for a given database entry
         """
+        from src.header import logger
         jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
         try:
             idout = jobid[0]['jobid']
@@ -299,8 +299,7 @@ class Backend(object):
                         new_list.append(jobid)
                 return new_list
             else:
-                print("In order to act only on 'done' jobs you need to have that info in the db!")
-                sys.exit(-1)
+                logger.critical("In order to act only on 'done' jobs you need to have that info in the db!")
         else:
             return jobid_list
 
@@ -356,7 +355,6 @@ class Backend(object):
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         if not os.path.isfile(nnlojetfull): 
             logger.critical("Could not find NNLOJET executable at {0}".format(nnlojetfull))
-            sys.exit(-1)
         copy(nnlojetfull, os.getcwd()) 
         files = [NNLOJETexe]
         for i in rncards:
@@ -379,8 +377,7 @@ class Backend(object):
                     print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
                     warmup_files = self._bring_warmup_files(i, rname)
                     if not warmup_files:
-                        logger.error("No warmup grids found in warmup tar!")
-                        sys.exit(-1)
+                        logger.critical("No warmup grids found in warmup tar!")
                     files += warmup_files
                     print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
@@ -428,7 +425,6 @@ class Backend(object):
         
         if not os.path.isfile(nnlojetfull): 
             logger.critical("Could not find NNLOJET executable at {0}".format(nnlojetfull))
-            sys.exit(-1)
         copy(nnlojetfull, os.getcwd())
         files = [NNLOJETexe]
         for i in rncards:
@@ -462,6 +458,7 @@ class Backend(object):
 
     def get_local_warmup_name(self,info,provided_warmup):
         from shutil import copy
+        from src.header import logger
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
@@ -471,13 +468,9 @@ class Backend(object):
                         not potfile.endswith(".txt") and not potfile.endswith(".log"):
                     matches.append(potfile)
             if len(matches) > 1:
-                print("\033[93m Multiple warmup matches found in {1}: {0}\033[0m ".format(" ".join(i for i in matches), provided_warmup))
-                print("Exiting.")
-                sys.exit()
+                logger.critical("Multiple warmup matches found in {1}: {0}".format(" ".join(i for i in matches), provided_warmup))
             elif len(matches) ==0 :
-                print("\033[93m No warmup matches found in {0}.\033[0m ".format(provided_warmup))
-                print("Exiting.")
-                sys.exit()
+                logger.critical("No warmup matches found in {0}.".format(provided_warmup))
             else:
                 match = os.path.join(provided_warmup,matches[0])
         else:
@@ -854,16 +847,18 @@ class Backend(object):
         return base_string + warmup_str
 
     def stats_job_cheat(self, dbid):
+        from src.header import logger
         try:
             if self.__first_stats_job_cheat:
                 pass
         except AttributeError as e:
-             print("  \033[93m WARNING:\033[0m The selected backend does not override the cheat version of the status command. Falling back to the standard version.")
+             logger.warning("The selected backend does not override the cheat version of the status command. Falling back to the standard version.")
              self.__first_stats_job_cheat = False
         self.stats_job(dbid)
 
 def generic_initialise(runcard, warmup=False, production=False, grid=None, overwrite_grid=False):
-    print("Initialising runcard: {0}".format(runcard))
+    from src.header import logger
+    logger.info("Initialising runcard: {0}".format(runcard))
     back = Backend()
 
     if warmup:
@@ -873,7 +868,4 @@ def generic_initialise(runcard, warmup=False, production=False, grid=None, overw
     elif production:
         back.init_production(grid, continue_warmup=overwrite_grid)
     else:
-        print("What do you want me to initialise?")
-        sys.exit(-1)
-
-
+        logger.critical("Both warmup and production not selected. What do you want me to initialise?")
