@@ -288,13 +288,11 @@ class GridWrap:
                 count +=1
         return success
 
-    def bring(self, tarfile, whereFrom, whereTo, shell=False):
+    def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None):
         args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
-        # WARNING: 
-        # This call doesn't seem to be affected by chdir coming from outside ????
-        # why?
-        # Investigate
         from os import path
+        if timeout:
+            args += ["--sendreceive-timeout", str(timeout)]
         success = spCall(self.retriv + args, shell=shell)
         # lcg-cp returns always 0 even when it fails :___
         return path.isfile(whereTo)

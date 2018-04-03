@@ -41,6 +41,7 @@ dbname     = "NNLOJET_database.dat"
 provided_warmup_dir = None
 
 # Finalisation and storage options
+timeout = 60
 finalise_no_cores = 15
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g

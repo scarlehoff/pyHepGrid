@@ -109,8 +109,8 @@ class Backend(object):
         else:
             return ""
 
-    def _multirun(self, function, arguments, n_threads = 5, 
-                  arglen=None, use_counter = False):
+    def _multirun(self, function, arguments, n_threads = 15, 
+                  arglen=None, use_counter = False, timeout = False):
         """ Wrapper for multiprocessing
             For ARC only single thread is allow as the arc database needs
             to be locked 
@@ -126,7 +126,7 @@ class Backend(object):
             pool   = Pool(threads, initializer = init_counter, initargs = (counter,))
         else:
             pool   = Pool(threads)
-        result = pool.map(function, arguments)
+        result = pool.map(function, arguments, chunksize = 1)
         pool.close()
         pool.join()
         return result
@@ -728,7 +728,7 @@ class Backend(object):
         """
         local_name = filename.replace("output", "")
         local_file = self.rfolder + "/" + local_name
-        self.gridw.bring(filename, header.lfn_output_dir, local_file)
+        self.gridw.bring(filename, header.lfn_output_dir, local_file, timeout = header.timeout)
         from os.path import isfile
         if isfile(local_name):
             global counter
