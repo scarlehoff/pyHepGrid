@@ -21,7 +21,7 @@ if rmode[:3] == "run" or rmode[:3] == "man" and not "runcard" in rmode:
 ########################################
 
 #### Step1, invoke proxy
-if args.genProxy:
+if args.genProxy or rmode[:3] == "pro":
     import src.proxyUtil as proxyUtil
     if args.runArc or args.runArcProduction:   proxyUtil.arcProxyWiz()
     if args.runDirac: proxyUtil.diracProxy()
