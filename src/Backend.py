@@ -3,6 +3,11 @@ import sys
 import src.utilities as util
 import src.header as header
 
+counter = None
+def init_counter(args):
+    global counter
+    counter = args
+
 class Backend(object):
     """ Abstract class
     """
@@ -105,17 +110,22 @@ class Backend(object):
             return ""
 
     def _multirun(self, function, arguments, n_threads = 5, 
-                  arglen=None):
+                  arglen=None, use_counter = False):
         """ Wrapper for multiprocessing
             For ARC only single thread is allow as the arc database needs
             to be locked 
         """
-        from multiprocessing import Pool 
+        from multiprocessing import Pool, Value
         # If required # calls is lower than the # threads given, use the minimum
         if arglen is None:
             arglen = n_threads
         threads = max(min(n_threads, arglen),1)
-        pool   = Pool(threads)
+        
+        if use_counter:
+            counter = Value('i', 0)
+            pool   = Pool(threads, initializer = init_counter, initargs = (counter,))
+        else:
+            pool   = Pool(threads)
         result = pool.map(function, arguments)
         pool.close()
         pool.join()
@@ -703,8 +713,9 @@ class Backend(object):
         print("Found data for {0} of the {1} seeds.".format(len(remote_tarfiles), len(seeds)))
         
         # Download said data
-        tarfiles = self._multirun(self._do_get_data, remote_tarfiles, n_threads)
+        tarfiles = self._multirun(self._do_get_data, remote_tarfiles, n_threads, use_counter = True)
         tarfiles = list(filter(None, tarfiles))
+        print("Downloaded 0 files", end ='\r')
         print("Downloaded {0} files, extracting...".format(len(tarfiles)))
 
         # Extract some information from the first tarfile 
@@ -727,6 +738,10 @@ class Backend(object):
         self.gridw.bring(filename, header.lfn_output_dir, local_file)
         from os.path import isfile
         if isfile(local_name):
+            global counter
+            if counter:
+                counter.value += 1
+                print("Downloaded {0} files ".format(counter.value), end='\r')
             return local_name
         else:
             return None
