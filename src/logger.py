@@ -54,7 +54,7 @@ class MyFormatter(logging.Formatter):
         for attr in dir(record):
             try:
                 print_data[attr] = os.path.relpath(getattr(record,attr))
-            except (AttributeError,ValueError) as e:
+            except (AttributeError,ValueError,TypeError) as e:
                 print_data[attr] = getattr(record,attr)
         try:
             return MyFormatter.format_strs[record.levelno].format(**print_data)
