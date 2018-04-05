@@ -1,7 +1,10 @@
 import os
 import sys
+from src.header import logger
+
 import src.utilities as util
 import src.header as header
+from src.NNLOJETruncard import NNLOJETruncard
 
 counter = None
 def init_counter(args):
@@ -158,65 +161,21 @@ class Backend(object):
                 return warmup
    
     # Checks for the runcard
-    def _check_production_warmup(self, r, runcard_dir, warmup, production, continue_warmup=False):
-        from src.header import logger
-        """ Check whether production/warmup are active in the runcard """
-        warm_string = "warmup"
-        prod_string = "production"
-        info = {}
-        logger.info("Checking warmup/production in runcard %s" % r)
-        channels_flag = False
-        channels_string = "channels"
-        born = "vB"
-        real = "vR"
-        dreal = "RR"
-        sufix_dict = {'b' : born, 'lo' : born, 'v': born, 'vv': born, 'r' : real, 'rv' : real, 'rr': dreal}
-        with open(runcard_dir + "/" + r, 'r') as f:
-            for idx,line_raw in enumerate(f):
-                line = line_raw.lower()
-                if warm_string in line:
-                    if continue_warmup and not warmup:
-                        logger.critical("Continue warmup selected, but submission not in warmup mode. Exiting. ")
-                    elif continue_warmup and warmup and (warmup and "2" not in line):
-                        self._press_yes_to_continue("Continue warmup is not active in runcard")
-                    elif (warmup and ".false." in line) or (warmup and "0" in line):
-                        self._press_yes_to_continue("Warmup is not active in runcard")
-                    elif (not warmup and ".true." in line) or (not warmup and "1" in line):
-                        self._press_yes_to_continue("Warmup is active in runcard")
-                if prod_string in line:
-                    if (production and ".false." in line) or (production and "0" in line) \
-                            or (production and "2" in line):
-                        self._press_yes_to_continue("Production is not active in runcard")
-                    elif (not production and ".true." in line) or (not production and "1" in line):
-                        self._press_yes_to_continue("Production is active in runcard")
-                if idx == 1:
-                    info["id"] = line_raw.split()[0].strip()
-                if idx == 2:
-                    info["proc"] = line_raw.split()[0].strip()
-                if idx == 17:
-                    region = line_raw.split()[0].strip()
-                if idx == 14:
-                    info["tc"] = line_raw.split()[0].strip()
-                if channels_flag:
-                    # This will fail if you try to send a job with "all" in regions
-                    # It is not a bug, it's a feature
-                    if line.strip() in sufix_dict: # Only works for LO/R/V/RV/VV/RR
-                        info["channel_sufix"] = sufix_dict[line.strip()] + region
-                    else:
-                        info["channel_sufix"] = ""
-                    channels_flag = False
-                if channels_string == line.strip():
-                    channels_flag = True
+    def _check_production(self, runcard):
+        logger.info("Checking production in runcard {0}".format(runcard.name))
+        if runcard.is_warmup():
+            self._press_yes_to_continue("Warmup is active in runcard")
+        if not runcard.is_production():
+            self._press_yes_to_continue("Production is not active in runcard")
 
-        return info
-
-    def _check_production(self, r, runcard_dir, continue_warmup = False):
-        return self._check_production_warmup(r, runcard_dir, warmup = False, production = True, 
-                                      continue_warmup = continue_warmup)
-
-    def _check_warmup(self, r, runcard_dir, continue_warmup = False):
-        return self._check_production_warmup(r, runcard_dir, warmup = True, production = False, 
-                                      continue_warmup = continue_warmup)
+    def _check_warmup(self, runcard, continue_warmup = False):
+        logger.info("Checking warmup in runcard {0}".format(runcard.name))
+        if not runcard.is_warmup():
+            self._press_yes_to_continue("Warmup is not active in runcard")
+        if continue_warmup and not runcard.is_continuation():
+            self._press_yes_to_continue("Continue warmup is not active in runcard")
+        if runcard.is_production():
+            self._press_yes_to_continue("Production is active in runcard")
 
     def set_overwrite_warmup(self):
         self.overwrite_warmup = True
@@ -373,10 +332,12 @@ class Backend(object):
             # Check whether warmup/production is active in the runcard
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
-            info = self._check_warmup(i, runFol, continue_warmup=continue_warmup)
+            runcard_file = runFol + "/" + i
+            runcard_obj = NNLOJETruncard(runcard_file)
+            self._check_warmup(runcard_obj, continue_warmup)
             if provided_warmup: 
                 # Copy warmup to current dir if not already there
-                match, local = self.get_local_warmup_name(info,provided_warmup)
+                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
                 files += [match]
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -440,15 +401,17 @@ class Backend(object):
         for i in rncards:
             local = False
             # Check whether warmup/production is active in the runcard
-            info = self._check_production(i, runFol, continue_warmup = continue_warmup)
+            runcard_file = runFol + "/" + i
+            runcard_obj = NNLOJETruncard(runcard_file)
+            self._check_production(runcard_obj)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
-                match, local = self.get_local_warmup_name(info,provided_warmup)
+                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
                 warmupFiles = [match]
             elif header.provided_warmup_dir:
-                match, local = self.get_local_warmup_name(info,header.provided_warmup_dir)
+                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),header.provided_warmup_dir)
                 warmupFiles = [match]
             else:
                 print("Retrieving warmup file from grid")
@@ -466,15 +429,14 @@ class Backend(object):
         os.remove(NNLOJETexe)
         os.chdir(origdir)
 
-    def get_local_warmup_name(self,info,provided_warmup):
+    def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         from src.header import logger
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
-            matchname = "{0}.{1}.y{2}.{3}".format(info["proc"],info["id"],info["tc"],info["channel_sufix"])
             for potfile in potential_files:
-                if matchname in potfile and\
+                if matchname in potfile.lower() and\
                         not potfile.endswith(".txt") and not potfile.endswith(".log"):
                     matches.append(potfile)
             if len(matches) > 1:

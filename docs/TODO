@@ -14,6 +14,8 @@
   - LFC directories
   - additional necessary lines in .bashrc
 
+- Backend.py . _check_production_warmup should take as input the "info" dictionary with all the information from the NNLOJET runcard. The info dictionary should be parsed by a separate class.
+
 - Investigate race condition between netcat and the server when the check for a server happens at the same time as it is retrieving data from NNLOJET.
     - Option 1: Remove the ability to fire up remote sockets altogether
     - Option 2 (preferred): Receive error codes through tmux through ssh 
