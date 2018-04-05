@@ -2,7 +2,7 @@ import logging
 import sys
 import os
 
-################### README ###################
+###################################### README #########################################
 # Use:
 # For all print/error/warning statements, import logger from src.header
 #
@@ -68,7 +68,7 @@ class MyFormatter(logging.Formatter):
     format_strs  ={
             logging.WARNING:  "  \033[93m WARNING:\033[0m {msg}",
             logging.ERROR:  "  \033[91m ERROR:\033[0m {msg}",
-            logging.CRITICAL:  "  \033[91m CRITICAL ERROR:\033[0m {msg}",
+            logging.CRITICAL:  "  \033[91m CRITICAL:\033[0m {msg}",
             logging.INFO:  "> {msg}",
             logging.DEBUG:  "  \033[94m DEBUG:\033[0m {msg}",
             logging.VALUES:  "\033[92mValue set:\033[0m {location_set:20} {attrname:<15} : {attrval}",

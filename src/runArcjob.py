@@ -81,10 +81,18 @@ class RunArc(Backend):
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
         rncards, dCards = util.expandCard()
+        if test:
+            from src.header import ce_test as ce
+        else:
+            from src.header import ce_base as ce
         
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
+            if ".dur.scotgrid.ac.uk" not in ce:
+                #Can't submit sockets elsewhere than Durham!!!!!!!
+                header.logger.info("Current submission computing element: {0}".format(ce))
+                header.logger.critical("Can't submit socketed warmups to locations other than Durham")
         else:
             sockets = False
             n_sockets = 1
