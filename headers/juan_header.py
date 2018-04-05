@@ -32,7 +32,7 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
  
 # NNLOJET Database Parameters
-dbname     = "job_data/March/nnlojetdb.dat"     
+dbname     = "job_data/April/nnlojetdb.dat"     
 provided_warmup_dir = None
 
 # Finalisation and storage options
