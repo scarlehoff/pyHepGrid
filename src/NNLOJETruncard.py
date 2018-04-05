@@ -1,3 +1,4 @@
+import sys
 ############
 # NNLOJET runcard are partly line-fixed
 # In order to read new stuff from the fixed part just add here
@@ -9,6 +10,8 @@ nnlojet_linecode = {
         14 : "tc", # Technical cut
         17 : "region", # a, b, all
     }
+
+valid_channels = ["rr","rv","vv","r","v","lo"]
 
 class NNLOJETruncard:
     """
@@ -30,6 +33,26 @@ class NNLOJETruncard:
             self._parse_runcard_from_file(runcard_file)
 
             # Safety Checks
+            # Check channels
+            print("> Checking channel block in {0}".format(runcard_file))
+            for i in self.runcard_dict["channels"]:
+                self._check_channel(i)
+
+
+    # Safety check functions
+    def _check_channel(self, chan):
+        chan = chan.strip()
+        if " " in chan:
+            channels = chan.split() # Split line in case it's a list of channels e.g 1 2 3
+        else:
+            channels = [chan]
+        for element in channels:
+            try:
+                int(element) # numeric channel
+            except ValueError as e:
+                if not element in valid_channels:
+                    print("  \033[91m ERROR:\033[0m {0} is not a valid channel in your NNLOJET runcard.".format(element.upper()))
+                    sys.exit(-1)
 
     # Parsing routines
     def _parse_fixed(self):
@@ -77,7 +100,7 @@ class NNLOJETruncard:
         for block in self.blocks_to_read:
             self._parse_block(block)
 
-    # External API
+    # Internal functions for external API
     def _is_mode(self, mode, accepted = None):
         """
         Checks whether the mode is set to true from a set of 
@@ -96,6 +119,7 @@ class NNLOJETruncard:
         elif mode in [".true.", "2", "1"]:
             return True
 
+    # External API
     def is_continuation(self):
         return self._is_mode("warmup", accepted = ["2"])
 
