@@ -114,7 +114,6 @@ def print_final_stats(start_time, tot_no_new_files):
     print("New files found: {0}".format(tot_no_new_files)) 
 
 
-
 def do_finalise():
     start_time = datetime.datetime.now()
 
@@ -128,15 +127,24 @@ def do_finalise():
     output = set([x for x in str(output).split("\\n")])
 
     pool = mp.Pool(processes=no_processes)
-    tot_rc_no = len(rc.dictCard)
 
-    print("Finalisation setup complete. Preparing to pull data.")
     tot_no_new_files = 0
-    for rc_no, runcard in enumerate(rc.dictCard):
-        printstr = "> {0} [{1}/{2}]".format(runcard, rc_no+1, tot_rc_no)
-        print("{0:<60}".format(printstr), end="")
+    use_list = []
+    for runcard in rc.dictCard:
+        if type(rc.dictCard[runcard]) == str:
+            use_list.append((runcard,rc.dictCard[runcard]))
+        if type(rc.dictCard[runcard]) == list:
+            for entry in rc.dictCard[runcard]:
+                use_list.append((runcard,entry))
+    tot_rc_no = len(use_list)
+    print("Finalisation setup complete. Preparing to pull data.")
 
-        dirtag = runcard + "-" + rc.dictCard[runcard]
+    for rc_no, (runcard, tag) in enumerate(use_list):
+        printstr = "> {0}-{1} ".format(runcard, tag)
+        counter = "[{0}/{1}]".format(rc_no+1,tot_rc_no)
+        print("{0:<60}{1:<7}".format(printstr, counter), end="")
+
+        dirtag = runcard + "-" + tag
         runcard_name_no_seed = "output{0}-".format(dirtag)
         
         output_file_names,lfn_seeds = [],[]
