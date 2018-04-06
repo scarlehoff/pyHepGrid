@@ -53,6 +53,8 @@ def management_routine(backend, args):
         # Could we make this more generic? i.e pass function with opt args using a dictionary
         # rather than just making copies for every possibility
         # Options that keep the database entry after they are done
+        if args.simple_string:
+            backend.set_oneliner_output()
         if args.stats:
             backend.stats_job(db_id)
         elif args.statsCheat:
