@@ -198,6 +198,11 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
     stat += os.system("ls")
     return stat
 
+def print_node_info(ouputfile):
+    os.system("hostname >> {0}".format(outputfile))
+    os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
+    
+
 
 #################################################################################
 #################################################################################
@@ -213,6 +218,7 @@ if __name__ == "__main__":
     if debug_level > 1:
         from sys import version
         print("Running Python version {0}".format(version))
+        print_node_info("node_info.log")
 
     nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads, 
                                                                   args.executable, 
