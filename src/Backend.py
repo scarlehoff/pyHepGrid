@@ -33,6 +33,8 @@ class Backend(object):
         return [self.output_name(runcard, rname, seed) for seed in seeds]
     #########################################################################
 
+    def set_oneliner_output(self):
+        self.stats_one_line = True
 
     def stats_print_setup(self, runcard_info, dbid = ""):
         from src.header import short_stats
@@ -40,6 +42,9 @@ class Backend(object):
             string = ""
         else:
             string = "{0:5} ".format("["+dbid+"]")
+        if self.stats_one_line:
+            print("{0}-{1}: ".format(dbid, runcard_info["runcard"]), end="")
+            return
         if not short_stats:
             string += "=> {0}: {1}".format(runcard_info["runcard"], 
                                        runcard_info["runfolder"])
@@ -66,6 +71,7 @@ class Backend(object):
                 }
         self.assume_yes = False
         self.act_only_on_done = act_only_on_done
+        self.stats_one_line = False
 
     # Helper functions and wrappers
     def dont_ask_dont_tell(self):
@@ -516,6 +522,11 @@ class Backend(object):
         from src.header import short_stats
         total2 = done + wait + run + fail + unk 
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
+        
+        if self.stats_one_line:
+            string = "Done: [{0}/{1}];\n".format(done, total)
+            print(string)
+            return
 
         if short_stats:
             def addline(name, val, colour):

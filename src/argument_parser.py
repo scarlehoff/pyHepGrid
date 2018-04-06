@@ -48,6 +48,7 @@ if caller_script == "main.py":
     parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an production run (only with ini)")
     parser.add_argument("-f", "--find", help = "Only database entries in which a certain string is found are shown")
     parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
+    parser.add_argument("--simple_string", help = "To be used with -s/-S, prints one liners for done/total", action = "store_true")
     parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
     parser.add_argument("-d", "--disableme", help = "disable database entry", action = "store_true")
     parser.add_argument("-dbg", "--debuglevel", help = "set debug level", type=str, default="VALUES")
@@ -74,6 +75,7 @@ if caller_script == "main.py":
     parser.add_argument("-a", "--args", help = "Extra arguments that override those in BOTH the header and the runcard. Syntax:> var_name_1 val_1 var_name_2 val_2 var_name_3 val_3 ...",nargs="+")
 
     arguments = parser.parse_args()
+
     runcard = arguments.runcard
     override_ce_base = arguments.most_free_cores
     additional_arguments = {}
