@@ -198,7 +198,7 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
     stat += os.system("ls")
     return stat
 
-def print_node_info(ouputfile):
+def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
     os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
     
