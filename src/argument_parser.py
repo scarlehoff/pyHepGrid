@@ -18,15 +18,33 @@ if caller_script == "main.py":
     parser.add_argument("runcard", nargs = "?", help = "Runcard to act upon")
 
     # src.Backend selection
-    parser.add_argument("-A", "--runArc",   help = "Run/manage/test an Arc job (warmup)", action = "store_true")
-    parser.add_argument("-B", "--runArcProduction",   help = "Run/manage/test an Arc job (production)", action = "store_true")
-    parser.add_argument("-D", "--runDirac", help = "Run/manage/test a dirac job (production)", action = "store_true")
+    parser_back = parser.add_argument_group("backend selection")
+    parser_back.add_argument("-A", "--runArc",   help = "Run/manage/test an Arc job (warmup)", action = "store_true")
+    parser_back.add_argument("-B", "--runArcProduction",   help = "Run/manage/test an Arc job (production)", action = "store_true")
+    parser_back.add_argument("-D", "--runDirac", help = "Run/manage/test a dirac job (production)", action = "store_true")
+
+
 
     # Proxy initialisation
-    parser.add_argument("-gp", "--genProxy", help = "Generates proxy for the chosen backend", action = "store_true")
-    parser.add_argument("-n", "--noProxy", help = "[DEPRECATED] Bypasses proxy creation", action = "store_true")
+    parser_proxy = parser.add_argument_group("proxy initialisation options")
+    parser_proxy.add_argument("-gp", "--genProxy", help = "Generates proxy for the chosen backend", action = "store_true")
+    parser_proxy.add_argument("-n", "--noProxy", help = "[DEPRECATED] Bypasses proxy creation", action = "store_true")
 
-    # LHAPDF initialisation
+    # Global options
+    parser_global = parser.add_argument_group("global options", "Modify the runtime behaviour of main.py")
+    parser_global.add_argument("-a", "--args", help = "Extra arguments that override those in BOTH the header and the runcard. Syntax:> var_name_1 val_1 var_name_2 val_2 var_name_3 val_3 ...",nargs="+")
+    parser_global.add_argument("-dbg", "--debuglevel", help = "set logger debug level: [DEBUG/VALUES/INFO/WARNING/ERROR/CRITICAL] default=VALUES", type=str, default="VALUES")
+    # Option override
+    parser_global.add_argument("--yes", help = "Assume answer yes to all questions in management (use with care!)", action = "store_true")
+
+ 
+
+
+    ######## Initialisation options
+    parser_ini = parser.add_argument_group("initialisation options", "To be used with mode=initialisation")
+    parser_ini.add_argument("-w", "--provWarm", help = "Provide warmup files for an production run")
+    parser_ini.add_argument("-cw", "--continue_warmup", help = "Continue a previous warmup", action = "store_true")
+   # LHAPDF initialisation
     class LHAPDF_initAction(argparse.Action):
         def __init__(self, nargs=0, **kw):
             super().__init__(nargs=nargs, **kw)
@@ -34,56 +52,50 @@ if caller_script == "main.py":
             from src.utilities import lhapdfIni
             lhapdfIni()
             parser.exit(0)
-    parser.add_argument("-L", "--lhapdf", help = "Send LHAPDF to Grid", action = LHAPDF_initAction)
-
-    # Option override
-    parser.add_argument("--yes", help = "Assume answer yes to all questions in management (use with care!)", action = "store_true")
-
-    ######## Initialisation options
-    parser.add_argument("-w", "--provWarm", help = "Provide warmup files for an production run (only with ini)")
-    parser.add_argument("-cw", "--continue_warmup", help = "Continue a previous warmup", action = "store_true")
+    parser_ini.add_argument("-L", "--lhapdf", help = "Send LHAPDF to Grid", action = LHAPDF_initAction)
 
     ######## Run options
-    parser.add_argument("-mf","--most_free_cores",  help = "Override ce_base with ce with most free cores", action = "store_true")
-    parser.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes). NB this is different to the test mode, which runs nnlojob with the intended submission arguments locally for testing before submission. Also, the test queue was broken as of 22/2/18, so this option is a little bit broken.", action = "store_true")
+    parser_run = parser.add_argument_group("running options", "To be used with mode=run")
+    parser_run.add_argument("-mf","--most_free_cores",  help = "Override ce_base with ce with most free cores", action = "store_true")
+    parser_run.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes). NB this is different to the test mode, which runs nnlojob with the intended submission arguments locally for testing before submission. Also, the test queue was broken as of 22/2/18, so this option is a little bit broken.", action = "store_true")
 
 
     ######## Management options
-    parser.add_argument("-dbg", "--debuglevel", help = "set logger debug level: [accepted values]", type=str, default="VALUES")
     # Information about jobs
-    parser.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
-    parser.add_argument("-S", "--statsCheat", help = "Dirac only, use a modified version of dirac to speed up the information retrieval process", action = "store_true")
-    parser.add_argument("--simple_string", help = "To be used with -s/-S, prints one liners for done/total", action = "store_true")
+    parser_info = parser.add_argument_group("info options", "Display information about jobs, to be used with mode=man")
+    parser_info.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
+    parser_info.add_argument("-S", "--statsCheat", help = "Dirac only, use a modified version of dirac to speed up the information retrieval process", action = "store_true")
+    parser_info.add_argument("--simple_string", help = "To be used with -s/-S, prints one liners for done/total", action = "store_true")
 
-    parser.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
-    parser.add_argument("-I", "--infoVerbose", help = "retrieve arcstat/diracstat for a given job (more verbose, only ARC)", action = "store_true")
+    parser_info.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
+    parser_info.add_argument("-I", "--infoVerbose", help = "retrieve arcstat/diracstat for a given job (more verbose, only ARC)", action = "store_true")
 
-    parser.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
-    parser.add_argument("-P", "--printmelog", help = "do arccat to the *.log files of a given job (only ARC)", action = "store_true")
-    parser.add_argument("--error", help = "When doing arccat, print the standard error instead of std output", action = "store_true")
+    parser_info.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
+    parser_info.add_argument("-P", "--printmelog", help = "do arccat to the *.log files of a given job (only ARC)", action = "store_true")
+    parser_info.add_argument("--error", help = "When doing arccat, print the standard error instead of std output", action = "store_true")
 
     # Getting Data
-    parser.add_argument("-g", "--get_data", help = "Retrieve all data for a database entry", action = "store_true")
-    parser.add_argument("-G", "--getmewarmup", help = "Force the retrieval of the warmup file from an unfinished job", action = "store_true")
-
+    parser_fin = parser.add_argument_group("finalisation options", "Retrieve or kill jobs, to be used with mode=man")
+    parser_fin.add_argument("-g", "--get_data", help = "Retrieve all data for a database entry", action = "store_true")
+    parser_fin.add_argument("-G", "--getmewarmup", help = "Force the retrieval of the warmup file from an unfinished job", action = "store_true")
     # Killing jobs
-    parser.add_argument("-k", "--kill_job", help = "kill a given job", action = "store_true")
+    parser_fin.add_argument("-k", "--kill_job", help = "kill a given job", action = "store_true")
 
     # Options that act directly on the database
-    parser.add_argument("-j", "--idjob", help = "id of the job to act upon")
-    parser.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
-    parser.add_argument("-d", "--disableme", help = "disable database entry", action = "store_true")
-    parser.add_argument("-f", "--find", help = "Only database entries in which a certain string is found are shown")
-    parser.add_argument("--done", help = "For multiruns, only act on jobs which have the done status stored in the database", action = "store_true")
-    parser.add_argument("--list_disabled", help = "List also disabled entries", action = "store_true")
+    parser_db = parser.add_argument_group("database options", "These options act directly on the database selecting specific entries or subjobs within said entries")
+    parser_db.add_argument("-j", "--idjob", help = "id of the job to act upon")
+    parser_db.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
+    parser_db.add_argument("-d", "--disableme", help = "disable database entry", action = "store_true")
+    parser_db.add_argument("-f", "--find", help = "Only database entries in which a certain string is found are shown")
+    parser_db.add_argument("--done", help = "For multiruns, only act on jobs which have the done status stored in the database", action = "store_true")
+    parser_db.add_argument("--list_disabled", help = "List also disabled entries", action = "store_true")
 
     # Some Arc-only utilities
-    parser.add_argument("-u", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")
-    parser.add_argument("-r", "--renewArc", help = "renew the proxy of one given job", action = "store_true")
-    parser.add_argument("-c", "--clean", help = "clean given job from the remote cluster", action = "store_true")
+    parser_arc = parser.add_argument_group("arc-only options")
+    parser_arc.add_argument("-uArc", "--updateArc", help = "fetch and save all stdout of all ARC active runs", action = "store_true")
+    parser_arc.add_argument("-rArc", "--renewArc", help = "renew the proxy of one given job", action = "store_true")
+    parser_arc.add_argument("-cArc", "--clean", help = "clean given job from the remote cluster", action = "store_true")
 
-    # Abusive Override
-    parser.add_argument("-a", "--args", help = "Extra arguments that override those in BOTH the header and the runcard. Syntax:> var_name_1 val_1 var_name_2 val_2 var_name_3 val_3 ...",nargs="+")
 
     arguments = parser.parse_args()
 
