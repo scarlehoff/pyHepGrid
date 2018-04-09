@@ -1,4 +1,5 @@
 import sys
+import os
 ############
 # NNLOJET runcard are partly line-fixed
 # In order to read new stuff from the fixed part just add here
@@ -17,9 +18,17 @@ class NNLOJETruncard:
     """
     Reads a NNLOJET runcard into a class containing
     all the different parameters
+
+
+    NOTE: FOR LOGGING PURPOSES, USE self.print, self.info etc rather than just print
+    If logger is initialised, these will use the logger, otherwise they'll default to
+    the inbuilt print function [in _setup_logging()]
     """
 
-    def __init__(self, runcard_file = None, runcard_class = None, blocks = ["channels"]):
+    def __init__(self, runcard_file = None, runcard_class = None, blocks = ["channels"],
+                 logger=None):
+
+        self._setup_logging(logger)
         self.runcard_dict = {}
         if runcard_class and isinstance(runcard_class, type(self)):
             raise Exception("Not implemented yet")
@@ -34,7 +43,7 @@ class NNLOJETruncard:
 
             # Safety Checks
             # Check channels
-            print("> Checking channel block in {0}".format(runcard_file))
+            self.print("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i)
 
@@ -51,7 +60,7 @@ class NNLOJETruncard:
                 int(element) # numeric channel
             except ValueError as e:
                 if not element in valid_channels:
-                    print("  \033[91m ERROR:\033[0m {0} is not a valid channel in your NNLOJET runcard.".format(element.upper()))
+                    self.error("{0} is not a valid channel in your NNLOJET runcard.".format(element.upper()))
                     sys.exit(-1)
 
     # Parsing routines
@@ -62,6 +71,8 @@ class NNLOJETruncard:
         for line_key in nnlojet_linecode:
             line = self.runcard_list[line_key]
             self.runcard_dict[nnlojet_linecode[line_key]] = line
+            self.debug("{0:<15}: {1:<20} {2}".format(nnlojet_linecode[line_key],
+                                                      line, os.path.basename(self.runcard_file)))
 
     def _parse_block(self, block_name):
         """
@@ -80,6 +91,8 @@ class NNLOJETruncard:
             if line == block_start:
                 reading = True
         self.runcard_dict[block_name] = block_content
+        self.debug("{0:<15}: {1:<20} {2}".format(block_name, " ".join(block_content), 
+                                                 os.path.basename(self.runcard_file)))
 
     def _parse_runcard_from_file(self, filename):
         f = open(filename, 'r')
@@ -154,5 +167,18 @@ class NNLOJETruncard:
 
         return warmup_name
         
-        
+    def _setup_logging(self,logger):
+        if logger is not None:
+            self.print = logger.info
+            self.info = logger.info
+            self.critical = logger.critical
+            self.warning = logger.warning
+            self.debug = logger.debug
+        else:
+            self.print = print
+            self.info = print
+            self.critical = print
+            self.warning = print
+            self.debug = print
+
 
