@@ -22,7 +22,7 @@ class NNLOJETruncard:
 
     NOTE: FOR LOGGING PURPOSES, USE self.print, self.info etc rather than just print
     If logger is initialised, these will use the logger, otherwise they'll default to
-    the inbuilt print function [in _setup_logging()]
+    the inbuilt print function [set up controlled by _setup_logging()]
     """
 
     def __init__(self, runcard_file = None, runcard_class = None, blocks = ["channels"],
