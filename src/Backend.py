@@ -339,7 +339,7 @@ class Backend(object):
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
             runcard_file = runFol + "/" + i
-            runcard_obj = NNLOJETruncard(runcard_file)
+            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
             self._check_warmup(runcard_obj, continue_warmup)
             if provided_warmup: 
                 # Copy warmup to current dir if not already there
