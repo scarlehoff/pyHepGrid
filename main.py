@@ -18,7 +18,8 @@ if __name__ == "__main__":
     db = database(dbname, tables = [arctable, diractable], fields = dbfields)
 
     mode = rmode[:3]
-    try:
+
+    if mode in modes.keys():
         modes[mode](args,rcard)
-    except KeyError as e:
+    else:
         logger.critical("Invalid mode {0} selected. Exiting".format(rmode))
