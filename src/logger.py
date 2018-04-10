@@ -48,18 +48,37 @@ def critical_with_exit(self, *args, **kwargs):
 logging.Logger.value = value
 logging.Logger.critical = critical_with_exit
 
+class LevelFilter(logging.Filter):
+    """ Anything with level below level will go through """
+    def __init__(self, level):
+        self.level = level
+    def filter(self, record):
+        return record.levelno < self.level
+
 def setup_logger(debuglevel):
 
-    # Add custom level for value initialisation
-
     logger = logging.getLogger(__name__)
-    hdlr = logging.StreamHandler(sys.stdout)
-    formatter = MyFormatter()
-    hdlr.setFormatter(formatter)
-    logger.addHandler(hdlr)
     logger.setLevel(debuglevel)
 
+    # Set up formatter
+    formatter = MyFormatter()
 
+    # Decide what goes into stderr and what into stdout
+    # In principle from WARNING onwards goes to stderr
+    # atm regardless of debuglevel
+    partitioner = LevelFilter(logging.WARNING)
+
+    # Add custom level for value initialisation
+    out_handler = logging.StreamHandler(sys.stdout)
+    out_handler.setFormatter(formatter)
+    out_handler.addFilter( partitioner ) 
+
+    err_handler = logging.StreamHandler(sys.stderr)
+    err_handler.setFormatter( formatter )
+    err_handler.setLevel( logging.WARNING )
+
+    logger.addHandler(err_handler)
+    logger.addHandler(out_handler)
 
     return logger
 
