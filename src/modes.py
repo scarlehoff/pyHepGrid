@@ -1,5 +1,6 @@
 from src.header import logger
 
+
 def do_management(args,rcard):
 #### Management of running/finished jobs
     import src.main_routines as mr
@@ -19,10 +20,12 @@ def do_management(args,rcard):
     for backend in backends:
         mr.management_routine(backend, args)
 
+
 def do_test(args,rcard):
 #### Test an initialised runcard
     from src.test_nnlojob import run_test
     run_test(args, rcard)
+
 
 def do_initialise(args,rcard):
 #### Initialisation: send stuff to Grid Storage
@@ -48,6 +51,7 @@ def do_run(args,rcard):
     else:
         raise logger.critical("Choose what do you want to run -(A/B/D)")
     runWrapper(rcard, args.test)
+
 
 def do_proxy(args,rcard):
 #### Proxy management
