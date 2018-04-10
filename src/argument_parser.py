@@ -3,13 +3,23 @@ runcard = None
 import __main__
 import os
 
+def check_mode(rmode,args):       
+    if len(rmode) < 3:
+        logger.critical("Mode ", rmode, " not valid")
+
+    if (rmode[:3] == "run" and not "runcard" in rmode) or rmode[:3] == "man" :
+        if args.runDirac and args.runArc:
+            if not args.idjob == "all":
+                logger.critical("Please choose only Dirac (-D) or Arc (-A) or Arc Production Mode (-B) (unless using -j all)")
+        if not args.runDirac and not args.runArc and not args.runArcProduction:
+            logger.critical("Please choose either Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
+
 try:
     caller_script = os.path.basename(os.path.realpath(__main__.__file__)) 
 except:
     caller_script = "None"
 
 if caller_script == "main.py":
-
     import argparse
     import src.logger
     parser = argparse.ArgumentParser()
@@ -98,7 +108,7 @@ if caller_script == "main.py":
 
 
     arguments = parser.parse_args()
-
+    check_mode(arguments.mode, arguments)
     runcard = arguments.runcard
     override_ce_base = arguments.most_free_cores
     additional_arguments = {}
@@ -115,4 +125,6 @@ if caller_script == "main.py":
         else:
             for i in range(0,len(arguments.args),2):
                 additional_arguments[arguments.args[i]]=arguments.args[i+1]
-        
+
+
+
