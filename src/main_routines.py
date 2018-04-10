@@ -55,6 +55,7 @@ def management_routine(backend, args):
         # Options that keep the database entry after they are done
         if args.simple_string:
             backend.set_oneliner_output()
+
         if args.stats:
             backend.stats_job(db_id)
         elif args.statsCheat:

@@ -195,7 +195,8 @@ class Dirac(Backend):
         for jobid in done_jobs_set:
             status[jobids.index(jobid)] = self.cDONE
         self.stats_print_setup(runcard_info,dbid = dbid)
-        self.print_stats(done, wait, run, fail, unk, jobids)
+        total = len(jobids)
+        self.print_stats(done, wait, run, fail, unk, total)
         self._set_new_status(dbid, status)
 
 
