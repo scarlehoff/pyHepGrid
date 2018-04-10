@@ -108,14 +108,14 @@ if caller_script == "main.py":
 
 
     arguments = parser.parse_args()
-    check_mode(arguments.mode, arguments,logger)
     runcard = arguments.runcard
     override_ce_base = arguments.most_free_cores
     additional_arguments = {}
 
     # Save to logger as header not loaded yet. 
     # Reference copied to header.logger at the top of header when loaded
-    src.logger.logger = src.logger.setup_logger(arguments.debuglevel.upper()) 
+    src.logger.logger = src.logger.setup_logger(arguments.debuglevel.upper())
+    check_mode(arguments.mode, arguments,src.logger.logger)
 
     if arguments.args is not None:
         if len(arguments.args)%2!=0:
