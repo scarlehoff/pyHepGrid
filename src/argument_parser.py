@@ -3,7 +3,7 @@ runcard = None
 import __main__
 import os
 
-def check_mode(rmode,args):       
+def check_mode(rmode,args,logger):       
     if len(rmode) < 3:
         logger.critical("Mode ", rmode, " not valid")
 
@@ -108,7 +108,7 @@ if caller_script == "main.py":
 
 
     arguments = parser.parse_args()
-    check_mode(arguments.mode, arguments)
+    check_mode(arguments.mode, arguments,logger)
     runcard = arguments.runcard
     override_ce_base = arguments.most_free_cores
     additional_arguments = {}
