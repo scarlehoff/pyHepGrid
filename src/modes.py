@@ -50,7 +50,7 @@ def do_run(args,rcard):
         from src.runDiracjob import runWrapper
     else:
         raise logger.critical("Choose what do you want to run -(A/B/D)")
-    runWrapper(rcard, args.test)
+    runWrapper(rcard, test=args.test)
 
 
 def do_proxy(args,rcard):

@@ -288,12 +288,13 @@ class GridWrap:
                 count +=1
         return success
 
-    def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None):
+    def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False):
         args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
         from os import path
+        import os
         if timeout:
             args += ["--sendreceive-timeout", str(timeout)]
-        success = spCall(self.retriv + args, shell=shell)
+        success = spCall(self.retriv + args, shell=shell, suppress_errors=suppress_errors)
         # lcg-cp returns always 0 even when it fails :___
         return path.isfile(whereTo)
 
