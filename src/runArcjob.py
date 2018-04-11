@@ -73,14 +73,19 @@ class RunArc(Backend):
         return jobid
 
     # Runs for ARC
-    def run_wrap_warmup(self, test = None):
+    def run_wrap_warmup(self, test = None, expandedCard = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
             Writes XRSL file with the appropiate information and send one single job
             (or n_sockets jobs) to the queue
+
+            ExpandedCard is an override for util.expandCard for use in auto-resubmission
         """
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
-        rncards, dCards = util.expandCard()
+        if expandedCard is None:
+            rncards, dCards = util.expandCard()
+        else:
+            rncards, dCards = expandedCard
         if test:
             from src.header import ce_test as ce
         else:
@@ -193,10 +198,10 @@ class RunArc(Backend):
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
 
-def runWrapper(runcard, test = None):
+def runWrapper(runcard, test = None, expandedCard = None):
     print("Running arc job for {0}".format(runcard))
     arc = RunArc(header.ARCSCRIPTDEFAULT)
-    arc.run_wrap_warmup(test)
+    arc.run_wrap_warmup(test, expandedCard)
 
 def runWrapperProduction(runcard, test=None):
     print("Running arc job for {0}".format(runcard))

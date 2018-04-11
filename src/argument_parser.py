@@ -76,6 +76,8 @@ if caller_script == "main.py":
     parser_info.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
     parser_info.add_argument("-S", "--statsCheat", help = "Dirac only, use a modified version of dirac to speed up the information retrieval process", action = "store_true")
     parser_info.add_argument("--simple_string", help = "To be used with -s/-S, prints one liners for done/total", action = "store_true")
+    parser_info.add_argument("-C", "--checkwarmup", help = "Check completed warmup to see if a warmup file is present", action = "store_true")
+    parser_info.add_argument("--resubmit", help = "Resubmit if warmup not present. For use with --checkwarmup only", action = "store_true")
 
     parser_info.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
     parser_info.add_argument("-I", "--infoVerbose", help = "retrieve arcstat/diracstat for a given job (more verbose, only ARC)", action = "store_true")
@@ -88,6 +90,7 @@ if caller_script == "main.py":
     parser_fin = parser.add_argument_group("finalisation options", "Retrieve or kill jobs, to be used with mode=man")
     parser_fin.add_argument("-g", "--get_data", help = "Retrieve all data for a database entry", action = "store_true")
     parser_fin.add_argument("-G", "--getmewarmup", help = "Force the retrieval of the warmup file from an unfinished job", action = "store_true")
+
     # Killing jobs
     parser_fin.add_argument("-k", "--kill_job", help = "kill a given job", action = "store_true")
 

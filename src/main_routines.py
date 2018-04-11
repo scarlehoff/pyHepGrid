@@ -76,6 +76,9 @@ def management_routine(backend, args):
         elif args.getmewarmup:
             print(printstr.format("Retrieving warmup"))
             backend.bring_current_warmup(db_id)
+        elif args.checkwarmup:
+            backend.check_warmup_files(db_id, args.runcard, resubmit=args.resubmit)
+
 
         # Options that deactivate the database entry once they're done
         elif args.get_data:

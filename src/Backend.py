@@ -218,19 +218,33 @@ class Backend(object):
                     self.gridw.delete(filename, lfn_output_dir)
             logger.info("Output check complete")
 
-    def _bring_warmup_files(self, runcard, rname, shell = False):
+
+    def _bring_warmup_files(self, runcard, rname, shell = False, check_only = False):
         """ Download the warmup file for a run to local directory
         extracts Vegas grid and log file and returns a list with their names
-        TODO: use a unique /tmp directory instead of local dir
+
+        check_only flag doesn't error out if the warmup doesn't exist, instead just returns
+        and empty list for later use [intended for checkwarmup mode so multiple warmups can 
+        be checked consecutively.
         """
         from src.header import lfn_warmup_dir, logger
         gridFiles = []
+        suppress_errors = False
+        if check_only:
+            suppress_errors = True
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
+        logger.debug("Warmup LFN name: {0}".format(outnm))
         tmpnm = "tmp.tar.gz"
-        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell)
-        if not success:
+        logger.debug("local tmp tar name: {0}".format(tmpnm))
+        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell, 
+                                   suppress_errors=suppress_errors)
+
+        if not success and not check_only:
             logger.critical("Grid files failed to copy from the LFN. Did the warmup complete successfully?")
+        elif not success:
+            return []
+
         ## Now extract only the Vegas grid files and log file
         gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
         extractFiles = self.tarw.extract_extensions(tmpnm, gridp+[".log"])
@@ -238,8 +252,15 @@ class Backend(object):
             gridFiles = [i for i in extractFiles if ".log" not in i]
             logfile = [i for i in extractFiles if ".log" in i][0]
         except IndexError as e:
-            logger.critical("  \033[91m ERROR:\033[0m Logfile not found. Did the warmup complete successfully?")
-
+            if not check_only:
+                logger.critical("Logfile not found. Did the warmup complete successfully?")
+            else:
+                return []
+        if gridFiles == [] and not check_only: # No grid files found
+            logger.critical("Grid files not found in warmup tarfile. Did the warmup complete successfully?")
+        elif gridFiles == []:
+            return []
+        
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
         os.rename(logfile, newlog)
@@ -352,9 +373,9 @@ class Backend(object):
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
                     print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
-                    warmup_files = self._bring_warmup_files(i, rname)
-                    if not warmup_files:
-                        logger.critical("No warmup grids found in warmup tar!")
+                    warmup_files = self._bring_warmup_files(i, rname, shell=True)
+                    # if not warmup_files: # check now done in bring warmup files
+                    #     logger.critical("No warmup grids found in warmup tar!")
                     files += warmup_files
                     print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
@@ -463,10 +484,52 @@ class Backend(object):
         return match, local_match
 
 
+    def check_warmup_files(self, db_id, rcard, resubmit=False):
+        """ Provides stats on whether a warmup file exists for a given run and optionally 
+        resubmit if absent"""
+        from shutil import copy
+        import tempfile
+        import tarfile
+        from src.header import logger
+        
+        origdir = os.path.abspath(os.getcwd())
+        tmpdir = tempfile.mkdtemp()
+
+        os.chdir(tmpdir)
+        logger.debug("Temporary directory: {0}".format(tmpdir))
+        rncards, dCards = util.expandCard()
+        tags = ["runcard", "runfolder"]
+        runcard_info = self.dbase.list_data(self.table, tags, db_id)[0]
+        runcard = runcard_info["runcard"]
+        rname = runcard_info["runfolder"]
+        try:
+            warmup_files = self._bring_warmup_files(runcard, rname, check_only=True, shell=True)
+            if warmup_files == []:
+                status = "\033[93mMissing\033[0m"
+            else:
+                status = "\033[92mPresent\033[0m"
+        except tarfile.ReadError as e:
+            status = "\033[91mCorrupted\033[0m"
+        run_id = "{0}-{1}:".format(runcard, rname)
+        logger.info("[{0}] {2:55} {1:>20}".format(db_id, status, run_id))
+        os.chdir(origdir)
+
+        if resubmit and "Present" not in status:
+            done, wait, run, fail, unk = self.stats_job(db_id, do_print=False)
+            if run+wait>0: # Be more careful in case of unknown status
+                logger.warning("Job still running. Not resubmitting for now")
+            else:
+                # Need to override dictCard for single job submission
+                expandedCard = ([runcard], {runcard:rname}) 
+                logger.info("Warmup not found and job ended. Resubmitting to ARC")
+                from src.runArcjob import runWrapper
+                runWrapper(rcard, expandedCard = expandedCard)
+
+
     # src.Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
     # for both ARC and DIRAC)
-    def stats_job(self, dbid):
+    def stats_job(self, dbid, do_print=True):
         """ Given a list of jobs, returns the number of jobs which
         are in each possible state (done/waiting/running/etc)
         """
@@ -493,11 +556,13 @@ class Backend(object):
         run = status.count(self.cRUN)
         fail = status.count(self.cFAIL)
         unk = status.count(self.cUNK)
-
-        self.stats_print_setup(runcard_info, dbid=dbid)
-        total = len(jobids)
-        self.print_stats(done, wait, run, fail, unk, total)
+        if do_print:
+            self.stats_print_setup(runcard_info, dbid=dbid)
+            total = len(jobids)
+            self.print_stats(done, wait, run, fail, unk, total)
         self._set_new_status(dbid, status)
+        return done, wait, run, fail, unk
+
 
     def _get_old_status(self, db_id):
         field_name = "sub_status"
