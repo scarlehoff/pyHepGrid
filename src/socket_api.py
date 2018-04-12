@@ -78,28 +78,28 @@ class Tmux:
 
 ##########
 def check_port_blocked(host, port):
-    nc_cmd= 'echo -n "Are you alive?"| nc {0} {1}'.format(host, port)
-    return_code = sp.call(["bash", "-c", nc_cmd])
-    if return_code == 0:
-        blocked = True
-    else:
-        blocked = False
-    return blocked
+    # nc_cmd= 'echo -n "Are you alive?"| nc {0} {1}'.format(host, port)
+    # return_code = sp.call(["bash", "-c", nc_cmd])
+    # if return_code == 0:
+    #     blocked = True
+    # else:
+    #     blocked = False
+    # return blocked
     # Below, only works with host == localhost
-#     import socket
-#     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     try:
-#         s.bind((host, port))
-#         blocked = False
-#     except socket.error as e:
-#         if e.errno == 98: # Port already in use
-#             blocked = True
-#         else: # some other error
-#             raise(e)
-#     finally:
-#         s.close()
-# 
-#     return blocked
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind((host, port))
+        blocked = False
+    except socket.error as e:
+        if e.errno == 98: # Port already in use
+            blocked = True
+        else: # some other error
+            raise(e)
+    finally:
+        s.close()
+
+    return blocked
   
 def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe = "/mt/home/jmartinez/Gangaless_new/src/socket_server.py",tag=""): 
     """ 
