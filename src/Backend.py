@@ -435,10 +435,12 @@ class Backend(object):
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
+                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), 
+                                                          provided_warmup)
                 warmupFiles = [match]
             elif header.provided_warmup_dir:
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),header.provided_warmup_dir)
+                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),
+                                                          header.provided_warmup_dir)
                 warmupFiles = [match]
             else:
                 print("Retrieving warmup file from grid")

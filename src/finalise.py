@@ -24,7 +24,10 @@ os.environ["LFC_HOST"] = config.LFC_HOST
 os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
 os.environ["LFC_HOME"] = config.lfndir
 
-
+if config.timeout is not None:
+    timeoutstr = "--sendreceive-timeout {0}".format(config.timeout)
+else:
+    timeoutstr = ""
 
 def mkdir(directory):
     os.system('mkdir {0} > /dev/null 2>&1'.format(directory))
@@ -52,7 +55,7 @@ def pullrun(name, seed, run, tmpdir):
     status = 0
     if verbose:
         print("Pulling {0}, seed {1}".format(run, seed))
-    command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null'.format(name)
+    command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null {1}'.format(name, timeoutstr)
     os.system(command)
 
     corrupted = True
