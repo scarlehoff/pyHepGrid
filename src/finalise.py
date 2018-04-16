@@ -69,7 +69,7 @@ def pullrun(name, seed, run, tmpdir):
                     tfile.extract(t,"../log/")
                     corrupted = False
         os.remove(name)
-    except FileNotFoundError as e:
+    except (FileNotFoundError, tarfile.ReadError) as e:
         # pull error - corrupted stays True
         pass
 
