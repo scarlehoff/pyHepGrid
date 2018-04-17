@@ -2,6 +2,7 @@
 
 import socket
 import struct
+import datetime
 
 class Generic_Socket:
     """
@@ -377,6 +378,7 @@ def do_server(args,log):
 
     log.info("Waiting for " + str(n_clients) + " clients")
 
+    start_time = datetime.datetime.now()
     # set a number of iterations
     while True:
         counter += 1
@@ -385,8 +387,13 @@ def do_server(args,log):
         # Once every client has sent its share of the data, sum it 
         # together and send it back
         success = server.harmonize_integral(n_clients, verbose = False)
-        log.info("Iteration {} completed".format(counter))
-
+        end_time = datetime.datetime.now()
+        iteration_duration = end_time-start_time
+        start_time = end_time
+        hours, remainder = divmod(iteration_duration.total_seconds(), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        log.info("Iteration {0} completed in {1:02.0f}:{2:02.0f}:{3:02.0f}".format(counter, hours, 
+                                                                 minutes, seconds))
         if success < 0:
             print("[WARNING] Something went wrong")
 
