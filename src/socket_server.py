@@ -351,6 +351,7 @@ def do_server(args,log):
                 #print("ARC.py captured")
                 clients.append(new_client)
                 if not clients: # Start the timer
+                    log.info("Starting timer")
                     signal.alarm(int(args.wait))
             else:
                 log.info("Waiting for nnlorun.py instance, got nonsense instead.")
