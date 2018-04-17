@@ -12,7 +12,7 @@ def get_cmd_output(*args,**kwargs):
 runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/" # Directory for grid runcard storage
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"             # Directory for NNLOJET
 NNLOJETexe = "NNLOJET"                               # Exectuable name
-warmupthr  = 16
+warmupthr  = 8
 producRun  = 100
 baseSeed   = 100
 jobName    = "testjob"
