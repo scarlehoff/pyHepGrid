@@ -343,6 +343,9 @@ def do_server(args,log):
             try:
                 log.info("Waiting for {} more instances of nnlorun.py to salute".format(n_clients_max - n_clients))
                 new_client = server.wait_for_client()
+                if not clients: # Start the timer
+                    log.info("Starting timer")
+                    signal.alarm(int(args.wait))
             except:
                 break
             greetings = new_client.receive_str()
@@ -351,9 +354,6 @@ def do_server(args,log):
                 # nnlorun.py sends the word "greetins" at the start
                 #print("ARC.py captured")
                 clients.append(new_client)
-                if not clients: # Start the timer
-                    log.info("Starting timer")
-                    signal.alarm(int(args.wait))
             else:
                 log.info("Waiting for nnlorun.py instance, got nonsense instead.")
                 log.info("Received msg: {0}".format(greetings))
