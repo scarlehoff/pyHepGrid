@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+from __future__ import print_function #python 2.6+ compatible
+try:
+    import __builtin__
+except ImportError:
+    import builtins as __builtin__
 import os, sys, datetime
 
 # Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
@@ -24,7 +29,17 @@ def do_shell(*args):
         print("Error in {0}. Raising debug level to 9999".format(*args))
     return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok
 os.system = do_shell
+
+#### Override print with custom version that always flushes to stdout so we have up-to-date logs
+
+def print(*args,**kwargs):
+    retval = __builtin__.print(*args, **kwargs)
+    sys.stdout.flush()
+    return retval
 ####
+
+
+
 
 def parse_arguments():
     from optparse import OptionParser
@@ -208,6 +223,7 @@ def print_node_info(outputfile):
 #################################################################################
 
 if __name__ == "__main__":
+    print("Running with python version {0}".format(sys.version))
     start_time = datetime.datetime.now()
     print("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
