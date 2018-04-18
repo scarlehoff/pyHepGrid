@@ -217,9 +217,13 @@ def print_node_info(outputfile):
 #################################################################################
 
 if __name__ == "__main__":
-    print_flush("Running with python version {0}".format(sys.version))
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
+
+    # Architecture info
+    print_flush("Python version: {0}".format(sys.version))
+    syscall("lsb_release -a")
+ 
 
     args = parse_arguments()
 
