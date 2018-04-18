@@ -1,13 +1,14 @@
 #!/usr/bin/env python
-from __future__ import print_function #python 2.6+ compatible
-try:
-    import __builtin__
-except ImportError:
-    import builtins as __builtin__
 import os, sys, datetime
 
-# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
+#### Override print with custom version that always flushes to stdout so we have up-to-date logs
+def print_flush(string):
+    print string
+    sys.stdout.flush()
+    
+####
 
+# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-warm-" + rname + ".tar.gz"
@@ -26,17 +27,10 @@ def do_shell(*args):
     retval = syscall(*args)
     if retval != 0:
         debug_level = 9999
-        print("Error in {0}. Raising debug level to 9999".format(*args))
+        print_flush("Error in {0}. Raising debug level to 9999".format(*args))
     return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok
 os.system = do_shell
 
-#### Override print with custom version that always flushes to stdout so we have up-to-date logs
-
-def print(*args,**kwargs):
-    retval = __builtin__.print(*args, **kwargs)
-    sys.stdout.flush()
-    return retval
-####
 
 
 
@@ -96,7 +90,7 @@ def parse_arguments():
         if options.Sockets:
             parser.error("Probably a bad idea to run sockets in production")
     
-    print("Arguments: {0}".format(options))
+    print_flush("Arguments: {0}".format(options))
 
     return options
 
@@ -159,7 +153,7 @@ def tar_this(tarfile, sourcefiles):
     return stat
 
 def copy_to_grid(local_file, grid_file, maxrange = 10):
-    print("Copying " + local_file + " to " + grid_file)
+    print_flush("Copying " + local_file + " to " + grid_file)
     filein = "file:$PWD/" + local_file
     fileout = lfn + grid_file
     if gfal: # May need checking if we move to gfal
@@ -171,20 +165,20 @@ def copy_to_grid(local_file, grid_file, maxrange = 10):
         cmd = lcg_cr + " " + filein + " " + midfile + " " + fileout
     else:
         cmd = lcg_cr + " " + fileout + " " + filein
-    print("> Sandbox -> LFN copy command: {0}".format(cmd))
+    print_flush("> Sandbox -> LFN copy command: {0}".format(cmd))
     dirname = os.path.dirname(grid_file)
     for i in range(maxrange): # try max 10 times for now ;)
         exit_code=1
         output = os.popen(cmd).read().strip()
-        print(output)
+        print_flush(output)
         if "guid" in output: # Don't want to lfc-ls in case it's not present...
             exit_code = 0
             break
         elif i != maxrange-1:
-            print("Copy failure. Trying again. [Attempt "+str(i+1)+"]")
+            print_flush("Copy failure. Trying again. [Attempt "+str(i+1)+"]")
         else:
-            print("Copy failed after "+str(i+1)+" attempts.")
-            print("Giving up now.")
+            print_flush("Copy failed after "+str(i+1)+" attempts.")
+            print_flush("Giving up now.")
             exit_code=500
     return exit_code
 
@@ -223,9 +217,9 @@ def print_node_info(outputfile):
 #################################################################################
 
 if __name__ == "__main__":
-    print("Running with python version {0}".format(sys.version))
+    print_flush("Running with python version {0}".format(sys.version))
     start_time = datetime.datetime.now()
-    print("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
+    print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
     args = parse_arguments()
 
@@ -233,7 +227,7 @@ if __name__ == "__main__":
     
     if debug_level > 1:
         from sys import version
-        print("Running Python version {0}".format(version))
+        print_flush("Running Python version {0}".format(version))
         print_node_info("node_info.log")
 
     nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads, 
@@ -243,13 +237,13 @@ if __name__ == "__main__":
     if args.Sockets:
         host = args.Host
         port = args.port
-        print("Sockets are active, trying to connect to {0}:{1}".format(host,port))
+        print_flush("Sockets are active, trying to connect to {0}:{1}".format(host,port))
         socket_config = socket_sync_str(host, port)
         if "die" in socket_config:
-            print("Timeout'd by socket server")
+            print_flush("Timeout'd by socket server")
             sys.exit(0)
         socketed = True
-        print("Connected to socket server")
+        print_flush("Connected to socket server")
         nnlojet_command += " -port {0} -host {1} {2}".format(port, host,  socket_config)
 
     if args.Production:
@@ -268,14 +262,14 @@ if __name__ == "__main__":
         
     os.system("chmod +x {0}".format(args.executable))
     nnlojet_command +=" 2>&1 outfile.out"
-    print(" > Executed command: {0}".format(nnlojet_command))
+    print_flush(" > Executed command: {0}".format(nnlojet_command))
 
     # Run command
     status_nnlojet = os.system(nnlojet_command)
     if status_nnlojet == 0:
-        print("Command successfully executed")
+        print_flush("Command successfully executed")
     else:
-        print("Something went wrong")
+        print_flush("Something went wrong")
         os.system("cat outfile.out")
         debug_level = 9999
 
@@ -302,24 +296,24 @@ if __name__ == "__main__":
         status_copy = copy_to_grid(local_out, output_file)
 
     if status_copy == 0:
-        print("Copied over to grid storage!")
+        print_flush("Copied over to grid storage!")
     elif args.Sockets:
-        print("This was a socketed run so we are copying the grid to stderr just in case")
+        print_flush("This was a socketed run so we are copying the grid to stderr just in case")
         os.system("cat $(ls *.y* | grep -v .txt) 1>&2")
         status_copy = 0
     elif args.Warmup:
-        print("Failure! Outputing vegas warmup to stdout")
+        print_flush("Failure! Outputing vegas warmup to stdout")
         os.system("cat $(ls *.y* | grep -v .txt)")
 
     if args.Sockets:
         try: # only the first one arriving will go through!
-            print("Close Socket connection") 
+            print_flush("Close Socket connection") 
             _ = socket_sync_str(host, port, "bye!") # Be polite
         except:
             pass
     end_time = datetime.datetime.now()
-    print("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
+    print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
 
     final_state = sum(abs(i) for i in [status_nnlojet,status_copy,status_tar,bring_status])
-    print("Final Error Code: {0}".format(final_state))
+    print_flush("Final Error Code: {0}".format(final_state))
     sys.exit(final_state)
