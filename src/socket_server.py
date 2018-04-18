@@ -344,7 +344,7 @@ def do_server(args,log):
                 log.info("Waiting for {} more instances of nnlorun.py to salute".format(n_clients_max - n_clients))
                 new_client = server.wait_for_client()
                 if not clients: # Start the timer
-                    log.info("Starting timer")
+                    log.info("Starting timer for {0} secs".format(int(args.wait)))
                     signal.alarm(int(args.wait))
             except:
                 break
