@@ -322,7 +322,45 @@ class Backend(object):
         self.dbase.disable_entry(self.table, db_id, revert = True)
 
     ### Initialisation functions
-    def init_warmup(self, provided_warmup = None, continue_warmup=False):
+    def get_local_dir_name(self,runcard, tag):
+        from src.header import local_run_directory
+        runname = "{0}-{1}".format(runcard, tag)
+        dir_name = os.path.join(local_run_directory,runname)
+        logger.info("Run directory: {0}".format(dir_name))
+        return dir_name
+
+    def init_single_local_warmup(self, runcard, tag, continue_warmup = False, 
+                                 provided_warmup=False):
+        import shutil
+        from src.header import NNLOJETdir, NNLOJETexe, runcardDir
+        run_dir = self.get_local_dir_name(runcard, tag)
+        os.makedirs(run_dir,exist_ok=True)
+        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
+        shutil.copy(nnlojetfull, run_dir)
+        runcard_file = runcardDir + "/" + runcard
+        runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
+        self._check_warmup(runcard_obj, continue_warmup)
+        logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
+        shutil.copy(runcard_file, run_dir)
+        if provided_warmup: 
+            # Copy warmup to rundir
+            match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
+            shutil.copy(match, run_dir) 
+        if runcard_obj.is_continuation():
+            # Assert warmup is present in dir. Will error out if not
+            if continue_warmup:
+                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), run_dir)
+            else:
+                logger.critical("Continuation set in warmup but not requested at run time")
+
+    def init_local_warmups(self, provided_warmup = None, continue_warmup=False, local=False):
+        rncards, dCards = util.expandCard()
+        for runcard in rncards:
+            self.init_single_local_warmup(runcard, dCards[runcard], 
+                                          provided_warmup=provided_warmup,
+                                          continue_warmup=continue_warmup)
+        
+    def init_warmup(self, provided_warmup = None, continue_warmup=False, local=False):
         """ Initialises a warmup run. An warmup file can be provided and it will be 
         added to the .tar file sent to the grid storage. 
         Steps are:
@@ -333,7 +371,11 @@ class Backend(object):
         import tempfile
         from src.header import NNLOJETdir, NNLOJETexe, logger
         from src.header import runcardDir as runFol
-        
+
+        if local:
+            self.init_local_warmups(provided_warmup = provided_warmup, 
+                                    continue_warmup=continue_warmup)
+            return
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
 
@@ -854,7 +896,7 @@ class Backend(object):
             all_ids.append(str(i[field_name]))
         return all_ids
 
-    def _format_args(self):
+    def _format_args(self, *args, **kwargs):
         raise Exception("Any children classes of src.Backend.py should override this method")
 
     def _get_default_args(self):
@@ -911,7 +953,8 @@ class Backend(object):
              self.__first_stats_job_cheat = False
         self.stats_job(dbid)
 
-def generic_initialise(runcard, warmup=False, production=False, grid=None, overwrite_grid=False):
+def generic_initialise(runcard, warmup=False, production=False, grid=None, 
+                       overwrite_grid=False, local=False):
     from src.header import logger
     logger.info("Initialising runcard: {0}".format(runcard))
     back = Backend()
@@ -919,7 +962,7 @@ def generic_initialise(runcard, warmup=False, production=False, grid=None, overw
     if warmup:
         if overwrite_grid:
             back.set_overwrite_warmup()
-        back.init_warmup(grid, continue_warmup=overwrite_grid)
+        back.init_warmup(grid, continue_warmup=overwrite_grid, local=local)
     elif production:
         back.init_production(grid, continue_warmup=overwrite_grid)
     else:
