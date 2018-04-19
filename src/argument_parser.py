@@ -11,7 +11,7 @@ def check_mode(rmode,args,logger):
         if args.runDirac and args.runArc:
             if not args.idjob == "all":
                 logger.critical("Please choose only Dirac (-D) or Arc (-A) or Arc Production Mode (-B) (unless using -j all)")
-        if not args.runDirac and not args.runArc and not args.runArcProduction:
+        if not args.runDirac and not args.runArc and not args.runArcProduction and not args.runSlurm:
             logger.critical("Please choose either Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
 
 try:
@@ -32,6 +32,7 @@ if caller_script == "main.py":
     parser_back.add_argument("-A", "--runArc",   help = "Run/manage/test an Arc job (warmup)", action = "store_true")
     parser_back.add_argument("-B", "--runArcProduction",   help = "Run/manage/test an Arc job (production)", action = "store_true")
     parser_back.add_argument("-D", "--runDirac", help = "Run/manage/test a dirac job (production)", action = "store_true")
+    parser_back.add_argument("-E", "--runSlurm", help = "Run/manage/test a SLURM job (warmup)", action = "store_true")
 
 
 
