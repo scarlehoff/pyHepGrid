@@ -1,5 +1,6 @@
 import subprocess as sp
 import os
+import random
 ######################################################
 #                Helper Functions                    #
 # Can't use src.utilities due to circular imports :( #
@@ -12,7 +13,7 @@ def get_cmd_output(*args,**kwargs):
 runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
 NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
-warmupthr  = 16
+warmupthr  = 8
 producRun  = 1000
 baseSeed   = 1
 jobName    = "gridjob"
@@ -52,12 +53,12 @@ verbose_finalise = False
 default_runfolder = os.path.expanduser("~/warmups/")
 
 warmup_base_dir = None
-production_base_dir = os.path.expanduser("~/working/RESULTS/")
+production_base_dir = os.path.expanduser("/scratch/dwalker/RESULTS/")
 
 short_stats = True
 
 # ARC parameters
-ce_base = "ce1.dur.scotgrid.ac.uk"
+ce_base = random.choice(["ce1.dur.scotgrid.ac.uk","ce2.dur.scotgrid.ac.uk"])
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 ce_listfile = "computing_elements.txt"
 
