@@ -15,10 +15,14 @@ class RunSlurm(Backend):
         self.tarw      = util.TarWrap()
 
     def _get_warmup_args(self, runcard, tag, threads=1,
-                         sockets=None, port=header.port):
-        return {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
+                         sockets=None, port=header.port, array=False):
+        args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
                 "threads":threads, "sockets":sockets, "port":port}
-
+        if array:
+            args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
+        else:
+            args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
+        return args
 
     def _run_SLURM(self, filename, args, test=False):
         if test:
@@ -30,6 +34,7 @@ class RunSlurm(Backend):
         else:
             queuetag = ""
         cmd = "sbatch {1} {0} -N 1 -n {2}".format(filename, queuetag, args["threads"])
+        header.logger.debug(cmd)
         output = util.getOutputCall(cmd.split())
         jobid = output.strip().split()[-1]
         return jobid, queue
@@ -96,8 +101,12 @@ class RunSlurm(Backend):
             # TODO check if warmup exists?
 
             # Generate the SLURM file
+            if n_sockets >1:
+                array = True
+            else:
+                array=False
             arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr,
-                                              sockets=sockets, port=port)
+                                              sockets=sockets, port=port, array=array)
             slurmfile = self._write_SLURM(arguments)
             print(" > Path of slurm file: {0}".format(slurmfile))
             jobids = []

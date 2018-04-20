@@ -68,7 +68,7 @@ class Arc(Backend):
             cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
 
-    def cat_job(self, jobids, print_stderr = None):
+    def cat_job(self, jobids, jobinfo, print_stderr = None):
         """ print stdandard output of a given job"""
         for jobid in jobids:
             cmd = [self.cmd_print, "-j", header.arcbase, jobid.strip()]
@@ -135,7 +135,7 @@ class Dirac(Backend):
     def __str__(self):
         return "Dirac"
     
-    def cat_job(self, jobids, print_stderr = None):
+    def cat_job(self, jobids, jobinfo, print_stderr = None):
         print("Printing the last 20 lines of the last job")
         jobid = jobids[-1]
         cmd = [self.cmd_print, jobid.strip()]
@@ -223,7 +223,11 @@ class Slurm(Backend):
         return "Slurm"
 
     def get_data(*args, **kwargs):
-        header.logger.critical("Get_data not implemented for SLURM")
+        header.logger.critical("Get_data not (yet) implemented for SLURM")
+
+    def cat_log_job(*args, **kwargs):
+        header.logger.critical("logfile printing not (yet) implemented for SLURM")
+
 
     # def list_runs(*args, **kwargs):
     #     header.logger.critical("list_runs not implemented for SLURM")
@@ -250,6 +254,17 @@ class Slurm(Backend):
         self.stats_print_setup(runcard_info,dbid = dbid)
         total = len(jobids)
         self.print_stats(done, waiting, running, fail, 0, tot)
+
+
+    def cat_job(self, jobids, jobinfo, print_stderr = None):
+        """ print stdandard output of a given job"""
+        dir_name = self.get_stdout_dir_name(self.get_local_dir_name(jobinfo["runcard"],
+                                                                    jobinfo["runfolder"]))
+        for jobid in jobids:
+            # Currently only works for non-array jobs!
+            stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid)) 
+            cmd = ["cat", stdoutfile]
+            util.spCall(cmd)
 
 
     def kill_job(self,jobids):
