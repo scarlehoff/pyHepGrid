@@ -13,6 +13,8 @@ def do_management(args,rcard):
     else:
         if args.runArc or args.runArcProduction:
             from src.backendManagement import Arc as backend_class
+        if args.runSlurm:
+            from src.backendManagement import Slurm as backend_class
         if args.runDirac: 
             from src.backendManagement import Dirac as backend_class
         backends.append(backend_class(act_only_on_done = args.done))
@@ -29,15 +31,19 @@ def do_test(args,rcard):
 
 def do_initialise(args,rcard):
 #### Initialisation: send stuff to Grid Storage
-    mode_Warmup = args.runArc
+    mode_Warmup = (args.runArc or args.runSlurm)
     mode_Production = (args.runDirac or args.runArcProduction)
     from src.Backend import generic_initialise
+    local = False
+    if args.runSlurm:
+        local = True
     if mode_Warmup:
-        generic_initialise(rcard, warmup=True, grid=args.provWarm, overwrite_grid=args.continue_warmup)
+        generic_initialise(rcard, warmup=True, grid=args.provWarm, 
+                           overwrite_grid=args.continue_warmup, local=local)
     elif mode_Production:
         generic_initialise(rcard, production=True, grid=args.provWarm)
     else:
-        logger.critical("Choose what do you want to initialise -(A/B/D/L)")
+        logger.critical("Choose what do you want to initialise -(A/B/D/E/L)")
 
 
 def do_run(args,rcard):
@@ -48,8 +54,10 @@ def do_run(args,rcard):
         from src.runArcjob import runWrapperProduction as runWrapper
     elif args.runDirac:
         from src.runDiracjob import runWrapper
+    elif args.runSlurm:
+        from src.runSlurmjob import runWrapper
     else:
-        raise logger.critical("Choose what do you want to run -(A/B/D)")
+        raise logger.critical("Choose what do you want to run -(A/B/D/E)")
     runWrapper(rcard, test=args.test)
 
 

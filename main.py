@@ -3,7 +3,7 @@
 ##### Call argument parser
 from src.argument_parser import arguments as args
 
-from src.header import arctable, diractable, dbname, dbfields, logger
+from src.header import arctable, diractable, dbname, dbfields, logger, slurmtable
 from src.dbapi  import database
 from src.modes import do_proxy, do_run, do_initialise, do_test, do_management
 
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     rmode = args.mode
 
     # Checks on modes
-    db = database(dbname, tables = [arctable, diractable], fields = dbfields)
+    db = database(dbname, tables = [arctable, diractable, slurmtable], fields = dbfields)
 
     mode = rmode[:3]
 

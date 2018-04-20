@@ -52,9 +52,9 @@ class NNLOJETruncard:
     def _check_channel(self, chan):
         chan = chan.strip()
         if " " in chan:
-            channels = chan.split() # Split line in case it's a list of channels e.g 1 2 3
+            channels = [i for i in chan.split() if i != ""] # Split line in case it's a list of channels e.g 1 2 3
         else:
-            channels = [chan]
+            channels = [i for i in chan if i != ""]
         for element in channels:
             try:
                 int(element) # numeric channel
@@ -95,7 +95,7 @@ class NNLOJETruncard:
                                                  os.path.basename(self.runcard_file)))
 
     def _parse_runcard_from_file(self, filename):
-        f = open(filename, 'r')
+        f = open(filename, 'r', encoding="utf-8")
         self.name = filename.split("/")[-1]
         self.runcard_file = filename
         # Read entire runcard removing comments
@@ -174,11 +174,13 @@ class NNLOJETruncard:
             self.critical = logger.critical
             self.warning = logger.warning
             self.debug = logger.debug
+            self.error = logger.error
         else:
             self.print = print
             self.info = print
             self.critical = print
             self.warning = print
             self.debug = print
+            self.error = print
 
 

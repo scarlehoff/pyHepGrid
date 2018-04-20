@@ -10,10 +10,10 @@ def get_cmd_output(*args,**kwargs):
     return outbyt.decode("utf-8")
 
 # Global Variables (default values)
-runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
-NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
+runcardDir = os.path.expanduser("~/runcards/")
+NNLOJETdir ="/ddn/data/qpsv27/NNLOJET/"
 NNLOJETexe = "NNLOJET"
-warmupthr  = 8
+warmupthr  = 16
 producRun  = 1000
 baseSeed   = 1
 jobName    = "gridjob"
@@ -35,9 +35,9 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
-dbname     = "/mt/home/dwalker/jobscripts/databases/CCDIS.dat"     
+dbname     = "/ddn/home/qpsv27/grid/databases/batchdb.dat"     
 #dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
-arcbase    = None
+arcbase    = "/dev/null/"
 provided_warmup_dir = None
 
 # Finalisation and storage options
