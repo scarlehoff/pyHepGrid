@@ -34,6 +34,9 @@ YOU MUST INSTALL WITH LHAPDF-6.1.6. 6.2.1 IS BROKEN, and will not work on the gr
    directory will be tarred up when initialising the grid libraries for LHAPDF(!)
 -> For this you will also need to install and link against boost (painful I know...)
 
+-> As of 20/4/2018, the minimum known compatible version of gcc with NNLOJET is gcc 4.9.1. Versions 
+   above this are generally ok
+ 
 ###################################################################################################
 3) LFN SETUP
 
