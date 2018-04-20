@@ -329,12 +329,18 @@ class Backend(object):
         logger.info("Run directory: {0}".format(dir_name))
         return dir_name
 
+    def get_stdout_dir_name(self, run_dir):
+        return os.path.join(run_dir,"stdout/")
+        
+
     def init_single_local_warmup(self, runcard, tag, continue_warmup = False, 
                                  provided_warmup=False):
         import shutil
         from src.header import NNLOJETdir, NNLOJETexe, runcardDir
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
+        stdoutdir = self.get_stdout_dir_name(run_dir)
+        os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         shutil.copy(nnlojetfull, run_dir)
         runcard_file = runcardDir + "/" + runcard
