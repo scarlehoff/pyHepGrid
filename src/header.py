@@ -8,6 +8,7 @@ import src.logger as logmod
 
 header_mappings = {"jmartinez":"headers.juan_header",
                    "dwalker":"headers.duncan_header",
+                   "qpsv27":"headers.duncan_hamilton_header",
                    "jniehues":"headers.jan_header",
                    "jwhitehead":"headers.james_header"}
 
@@ -74,7 +75,8 @@ arc_direct = True
 # Database config
 arctable   = "arcjobs"
 diractable = "diracjobs"
-dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status']
+slurmtable = "slurmjobs"
+dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue"]
 # DW This should be a hard link so socketed runs can be sent from other folders/locations
 socket_exe = "{0}/src/socket_server.py".format(os.getcwd()) # Eventually will need to point towards NNLOJET/bin
 
@@ -184,3 +186,7 @@ DIRACSCRIPTDEFAULT = [
         "InputSandbox  = {{\"{0}\"}};".format(runfile),
         "OutputSandbox = {\"StdOut\",\"StdErr\"};",
         ]
+
+_slurmfilename = os.path.join(os.path.dirname(os.path.realpath(__file__)),"slurm_template.sh")
+with open(_slurmfilename) as template_file:
+    SLURMSCRIPTDEFAULT = template_file.read()

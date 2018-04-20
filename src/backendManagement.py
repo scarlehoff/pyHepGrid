@@ -68,7 +68,7 @@ class Arc(Backend):
             cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
 
-    def cat_job(self, jobids, print_stderr = None):
+    def cat_job(self, jobids, jobinfo, print_stderr = None):
         """ print stdandard output of a given job"""
         for jobid in jobids:
             cmd = [self.cmd_print, "-j", header.arcbase, jobid.strip()]
@@ -135,7 +135,7 @@ class Dirac(Backend):
     def __str__(self):
         return "Dirac"
     
-    def cat_job(self, jobids, print_stderr = None):
+    def cat_job(self, jobids, jobinfo, print_stderr = None):
         print("Printing the last 20 lines of the last job")
         jobid = jobids[-1]
         cmd = [self.cmd_print, jobid.strip()]
@@ -206,12 +206,78 @@ class Dirac(Backend):
         cmd = [self.cmd_kill] + jobids
         util.spCall(cmd)
 
+class Slurm(Backend):
+    # cmd_print = "arccat"
+    # cmd_get   = "arcget"
+    # cmd_kill  = "arckill"
+    # cmd_clean = "arcclean"
+    # cmd_stat  = "arcstat"
+    # cmd_renew = "arcrenew"
+
+    def __init__(self, **kwargs):
+        # Might not work on python2?
+        super(Slurm, self).__init__(**kwargs)
+        self.table = header.slurmtable
+
+    def __str__(self):
+        return "Slurm"
+
+    def get_data(*args, **kwargs):
+        header.logger.critical("Get_data not (yet) implemented for SLURM")
+
+    def cat_log_job(*args, **kwargs):
+        header.logger.critical("logfile printing not (yet) implemented for SLURM")
+
+
+    # def list_runs(*args, **kwargs):
+    #     header.logger.critical("list_runs not implemented for SLURM")
+
+    def get_status(self, jobid, status):
+        stat = len([i for i in util.getOutputCall(["squeue", "-j{0}".format(jobid),"-r","-t",status],
+                                                  suppress_errors=True).split("\n")[1:] 
+                    if "error" not in i]) #strip header from results
+        if stat >0:
+            stat = stat-1
+        return stat
+
+    def stats_job(self, dbid):
+        tags = ["runcard", "runfolder", "date"]
+        jobids = self.get_id(dbid) # only have one array id for SLURM
+        runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
+        running, waiting, fail, tot = 0,0,0,0
+        for jobid in jobids:
+            running += self.get_status(jobid,"R")
+            waiting += self.get_status(jobid,"PD")
+            fail += self.get_status(jobid,"F")+self.get_status(jobid,"CA")
+            tot += self.get_status(jobid,"all")
+        done = tot-fail-waiting-running
+        self.stats_print_setup(runcard_info,dbid = dbid)
+        total = len(jobids)
+        self.print_stats(done, waiting, running, fail, 0, tot)
+
+
+    def cat_job(self, jobids, jobinfo, print_stderr = None):
+        """ print stdandard output of a given job"""
+        dir_name = self.get_stdout_dir_name(self.get_local_dir_name(jobinfo["runcard"],
+                                                                    jobinfo["runfolder"]))
+        for jobid in jobids:
+            # Currently only works for non-array jobs!
+            stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid)) 
+            cmd = ["cat", stdoutfile]
+            util.spCall(cmd)
+
+
+    def kill_job(self,jobids):
+        for jobid in jobids:
+            util.spCall(["scancel",str(jobid)])
 
 if __name__ == '__main__':
     from sys import version_info
     print("Test for src.backendManagement.py")
     print("Running with: Python ", version_info.major)
     print("This test needs to be ran at gridui")
-    arc   = Arc() ; dirac = Dirac()
+    arc   = Arc()
+    dirac = Dirac()
+    slurm = Slurm()
     print("Instantiate classes")
 
