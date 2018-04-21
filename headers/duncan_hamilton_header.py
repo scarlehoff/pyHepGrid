@@ -36,7 +36,6 @@ lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
 dbname     = "/ddn/home/qpsv27/grid/databases/batchdb.dat"     
-#dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
 arcbase    = "/dev/null/"
 provided_warmup_dir = None
 
@@ -46,13 +45,14 @@ finalise_no_cores = 25
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_src.finalise()
-finalisation_script = "src/finalise"
+finalisation_script = None
 verbose_finalise = False
+
 # Default folder for use only if finalisation script != None
 # Gives a default destination for warmup files pulled whilst run is in progress
 default_runfolder = os.path.expanduser("~/warmups/")
 
-warmup_base_dir = None
+warmup_base_dir = os.path.expanduser("~/warmups")
 production_base_dir = os.path.expanduser("/scratch/dwalker/RESULTS/")
 
 short_stats = True
