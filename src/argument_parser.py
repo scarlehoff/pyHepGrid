@@ -10,9 +10,9 @@ def check_mode(rmode,args,logger):
     if (rmode[:3] == "run" and not "runcard" in rmode) or rmode[:3] == "man" :
         if args.runDirac and args.runArc:
             if not args.idjob == "all":
-                logger.critical("Please choose only Dirac (-D) or Arc (-A) or Arc Production Mode (-B) (unless using -j all)")
+                logger.critical("Please choose only Dirac (-D), Arc (-A), Arc Production Mode (-B), or Slurm Warmup mode (-E) (unless using -j all)")
         if not args.runDirac and not args.runArc and not args.runArcProduction and not args.runSlurm:
-            logger.critical("Please choose either Dirac (-D) or Arc (-A) or Arc Production Mode (-B)")
+            logger.critical("Please choose Dirac (-D), Arc (-A), Arc Production Mode (-B) or Slurm Warmup mode (-E)")
 
 try:
     caller_script = os.path.basename(os.path.realpath(__main__.__file__)) 

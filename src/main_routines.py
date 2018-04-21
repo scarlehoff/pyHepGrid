@@ -1,6 +1,7 @@
 """Routines to be used by main.py"""
 
 def management_routine(backend, args):
+
     if args.yes:
         backend.dont_ask_dont_tell()
     if args.list_disabled:

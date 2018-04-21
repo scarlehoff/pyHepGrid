@@ -86,7 +86,7 @@ class RunSlurm(Backend):
                 job_type = "Warmup"
 
         self.runfolder = header.runcardDir
-        from src.header import warmupthr, jobName, warmup_base_dir
+        from src.header import warmupthr, jobName
         # loop over al .run files defined in runcard.py
 
         print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
