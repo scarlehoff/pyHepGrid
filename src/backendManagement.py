@@ -6,7 +6,7 @@
 import src.utilities as util
 import src.header as header
 from src.Backend import Backend
-
+import shutil
 import os
 
 class Arc(Backend):
@@ -207,13 +207,6 @@ class Dirac(Backend):
         util.spCall(cmd)
 
 class Slurm(Backend):
-    # cmd_print = "arccat"
-    # cmd_get   = "arcget"
-    # cmd_kill  = "arckill"
-    # cmd_clean = "arcclean"
-    # cmd_stat  = "arcstat"
-    # cmd_renew = "arcrenew"
-
     def __init__(self, **kwargs):
         # Might not work on python2?
         super(Slurm, self).__init__(**kwargs)
@@ -222,15 +215,24 @@ class Slurm(Backend):
     def __str__(self):
         return "Slurm"
 
-    def get_data(*args, **kwargs):
-        header.logger.critical("Get_data not (yet) implemented for SLURM")
+    def _get_data_warmup(self, db_id):
+        fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
+        data      =  self.dbase.list_data(self.table, fields, db_id)[0]
+        warmup_output_dir = self.get_local_dir_name(data["runcard"],data["runfolder"])
+        warmup_extensions = (".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb",".log")
+        warmup_files = [i for i in os.listdir(warmup_output_dir) if i.endswith(warmup_extensions)]
+        print(warmup_files, data["pathfolder"])
+        warmup_dir = os.path.join(header.warmup_base_dir,data["runfolder"])
+        os.makedirs(warmup_dir,exist_ok=True)
+        for warmfile in warmup_files:
+            orig = os.path.join(warmup_output_dir, warmfile)
+            new = os.path.join(warmup_dir, warmfile)
+            shutil.copy(orig,new)
+        # header.logger.critical("Get_data not (yet) implemented for SLURM")
+
 
     def cat_log_job(*args, **kwargs):
         header.logger.critical("logfile printing not (yet) implemented for SLURM")
-
-
-    # def list_runs(*args, **kwargs):
-    #     header.logger.critical("list_runs not implemented for SLURM")
 
     def get_status(self, jobid, status):
         stat = len([i for i in util.getOutputCall(["squeue", "-j{0}".format(jobid),"-r","-t",status],
