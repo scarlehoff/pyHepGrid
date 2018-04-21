@@ -6,8 +6,17 @@ import os
 nnlojet_linecode = {
         1 : "id",
         2 : "proc",
+        3 : "events",
+        4 : "iterations",
+        5 : "seed",
         6 : "warmup",
         7 : "production",
+        8 : "pdf_name",
+        9 : "pdf_member",
+        10 : "jet_algorithm",
+        11 : "r_cut",
+        12 : "exclusive",
+        13 : "decay_type",
         14 : "tc", # Technical cut
         17 : "region", # a, b, all
     }
