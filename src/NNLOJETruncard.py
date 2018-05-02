@@ -63,7 +63,8 @@ class NNLOJETruncard:
         if " " in chan:
             channels = [i for i in chan.split() if i != ""] # Split line in case it's a list of channels e.g 1 2 3
         else:
-            channels = [i for i in chan if i != ""]
+#            channels = [i for i in chan if i != ""]
+            channels = [chan]
         for element in channels:
             try:
                 int(element) # numeric channel
