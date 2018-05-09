@@ -111,7 +111,7 @@ class NNLOJETruncard:
         # Read entire runcard removing comments
         self.runcard_list = []
         for line_raw in f:
-            line = line_raw.split("!")[0]
+            line = line_raw.strip().split("!")[0]
             if line:
                 self.runcard_list.append(line.strip().lower())
         f.close()
