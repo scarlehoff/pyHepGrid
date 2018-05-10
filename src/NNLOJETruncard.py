@@ -39,6 +39,7 @@ class NNLOJETruncard:
 
         self._setup_logging(logger)
         self.runcard_dict = {}
+        self.runcard_dict_case_preserving = {}
         if runcard_class and isinstance(runcard_class, type(self)):
             raise Exception("Not implemented yet")
         elif runcard_file:
@@ -81,6 +82,8 @@ class NNLOJETruncard:
         for line_key in nnlojet_linecode:
             line = self.runcard_list[line_key]
             self.runcard_dict[nnlojet_linecode[line_key]] = line
+            line = self.runcard_list_case_preserving[line_key]
+            self.runcard_dict_case_preserving[nnlojet_linecode[line_key]] = line
             self.debug("{0:<15}: {1:<20} {2}".format(nnlojet_linecode[line_key],
                                                       line, os.path.basename(self.runcard_file)))
 
@@ -110,10 +113,12 @@ class NNLOJETruncard:
         self.runcard_file = filename
         # Read entire runcard removing comments
         self.runcard_list = []
+        self.runcard_list_case_preserving = []
         for line_raw in f:
             line = line_raw.strip().split("!")[0]
             if line:
                 self.runcard_list.append(line.strip().lower())
+                self.runcard_list_case_preserving.append(line.strip())
         f.close()
 
         # Step 1, save everything from the fixed part of the runcard in the dictionary

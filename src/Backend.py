@@ -86,7 +86,8 @@ class Backend(object):
         """
         if self.assume_yes:
             return 0
-        print(msg)
+        if msg is not None:
+            print(msg)
         yn = input("Do you want to continue (y/n) ").lower()
         if yn.startswith("y"):
             return 0
@@ -217,6 +218,29 @@ class Backend(object):
                         first = False
                     self.gridw.delete(filename, lfn_output_dir)
             logger.info("Output check complete")
+
+
+    def _checkfor_existing_output_local(self, r, rname, baseSeed, producRun):
+        """ Check whether given runcard already has output in the local run dir (looks for log files)
+        """
+        from src.header import logger
+        import re
+        from src.NNLOJETruncard import NNLOJETruncard
+        logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
+        local_dir_name = self.get_local_dir_name(r,rname)
+        files = os.listdir(local_dir_name)
+        runcard = NNLOJETruncard(runcard_file=os.path.join(local_dir_name,r),logger=logger)
+        runcard_id = runcard.runcard_dict_case_preserving["id"]
+        logs = [f for f in files if f.endswith(".log") and runcard_id in f]
+        logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
+        existing_seeds = set([int(logseed_regex.search(i).group(1)) for i 
+                              in logs])
+        submission_seeds = set(range(baseSeed,baseSeed+producRun))
+        overlap = existing_seeds.intersection(submission_seeds)
+        if overlap:
+            logger.warning("Log files for seed(s) {0} already exist in run folders. Running will overwrite the logfiles already present.".format(" ".join(str(i) for i in overlap)))
+            self._press_yes_to_continue(None)
+        return
 
 
     def _bring_warmup_files(self, runcard, rname, shell = False, check_only = False):
@@ -441,11 +465,44 @@ class Backend(object):
         os.remove(NNLOJETexe)
         os.chdir(origdir)
 
-    def init_production(self, provided_warmup = None, continue_warmup=False):
+    def init_local_production(self, provided_warmup = None, local=False):
+        rncards, dCards = util.expandCard()
+        for runcard in rncards:
+            self.init_single_local_production(runcard, dCards[runcard], 
+                                              provided_warmup=provided_warmup)
+
+    def init_single_local_production(self, runcard, tag, provided_warmup=False):
+        """ Initialise single production run for the local environment. Can probably be
+        more tightly integrated with the warmup equivalent in future - lots of shared code 
+        that can be refactored."""
+        import shutil
+        from src.header import NNLOJETdir, NNLOJETexe, runcardDir
+        run_dir = self.get_local_dir_name(runcard, tag)
+        os.makedirs(run_dir,exist_ok=True)
+        stdoutdir = self.get_stdout_dir_name(run_dir)
+        os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
+        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
+        shutil.copy(nnlojetfull, run_dir)
+        runcard_file = runcardDir + "/" + runcard
+        runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
+        self._check_production(runcard_obj)
+        logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
+        shutil.copy(runcard_file, run_dir)
+        if provided_warmup: 
+            # Copy warmup to rundir
+            match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
+            shutil.copy(match, run_dir) 
+        else:
+            # check warmup is in dir - check is case insensitive - be careful!
+            rundirfiles = [i.lower() for i in os.listdir(run_dir)]
+            if runcard_obj.warmup_filename() not in rundirfiles:
+                logger.critical("No warmup found in run folder and no warmup provided manually")
+
+    def init_production(self, provided_warmup = None, continue_warmup=False, local=False):
         """ Initialises a production run. If a warmup file is provided
         retrieval step is skipped
         Steps are:
-            0 - Retrieve warmup from the grid
+            0 - Retrieve warmup from the grid/local
             1 - tar up NNLOJET, runcard and necessary files
             2 - sent it to the grid storage
         """
@@ -453,6 +510,11 @@ class Backend(object):
         import tempfile
         from src.header import runcardDir as runFol
         from src.header import NNLOJETexe, NNLOJETdir, logger
+
+        if local:
+            self.init_local_production(provided_warmup = provided_warmup)
+            return
+
         rncards, dCards = util.expandCard()
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
 
@@ -970,6 +1032,6 @@ def generic_initialise(runcard, warmup=False, production=False, grid=None,
             back.set_overwrite_warmup()
         back.init_warmup(grid, continue_warmup=overwrite_grid, local=local)
     elif production:
-        back.init_production(grid, continue_warmup=overwrite_grid)
+        back.init_production(grid, continue_warmup=overwrite_grid, local=local)
     else:
         logger.critical("Both warmup and production not selected. What do you want me to initialise?")

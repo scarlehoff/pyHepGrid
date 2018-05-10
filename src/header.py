@@ -190,3 +190,7 @@ DIRACSCRIPTDEFAULT = [
 _slurmfilename = os.path.join(os.path.dirname(os.path.realpath(__file__)),"slurm_template.sh")
 with open(_slurmfilename) as template_file:
     SLURMSCRIPTDEFAULT = template_file.read()
+
+_slurmfilename_production = os.path.join(os.path.dirname(os.path.realpath(__file__)),"slurm_template_production.sh")
+with open(_slurmfilename_production) as template_file:
+    SLURMSCRIPTDEFAULT_PRODUCTION = template_file.read()

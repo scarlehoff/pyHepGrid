@@ -74,3 +74,4 @@ wait_time = 3600 # default waiting time for the socket server (time between the 
 local_run_directory = "/ddn/data/qpsv27/run_directories/"
 warmup_queue = "openmp7.q"
 test_queue = "test.q"
+production_queue = "par7.q"

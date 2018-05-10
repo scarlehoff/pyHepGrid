@@ -32,18 +32,18 @@ def do_test(args,rcard):
 def do_initialise(args,rcard):
 #### Initialisation: send stuff to Grid Storage
     mode_Warmup = (args.runArc or args.runSlurm)
-    mode_Production = (args.runDirac or args.runArcProduction)
+    mode_Production = (args.runDirac or args.runArcProduction or args.runSlurmProduction)
     from src.Backend import generic_initialise
     local = False
-    if args.runSlurm:
+    if args.runSlurm or args.runSlurmProduction:
         local = True
     if mode_Warmup:
         generic_initialise(rcard, warmup=True, grid=args.provWarm, 
                            overwrite_grid=args.continue_warmup, local=local)
     elif mode_Production:
-        generic_initialise(rcard, production=True, grid=args.provWarm)
+        generic_initialise(rcard, production=True, grid=args.provWarm, local=local)
     else:
-        logger.critical("Choose what do you want to initialise -(A/B/D/E/L)")
+        logger.critical("Choose what do you want to initialise -(A/B/D/E/F/L)")
 
 
 def do_run(args,rcard):
@@ -56,8 +56,10 @@ def do_run(args,rcard):
         from src.runDiracjob import runWrapper
     elif args.runSlurm:
         from src.runSlurmjob import runWrapper
+    elif args.runSlurmProduction:
+        from src.runSlurmjob import runWrapperProduction as runWrapper
     else:
-        raise logger.critical("Choose what do you want to run -(A/B/D/E)")
+        raise logger.critical("Choose what do you want to run -(A/B/D/E/F)")
     runWrapper(rcard, test=args.test)
 
 

@@ -10,9 +10,10 @@ def check_mode(rmode,args,logger):
     if (rmode[:3] == "run" and not "runcard" in rmode) or rmode[:3] == "man" :
         if args.runDirac and args.runArc:
             if not args.idjob == "all":
-                logger.critical("Please choose only Dirac (-D), Arc (-A), Arc Production Mode (-B), or Slurm Warmup mode (-E) (unless using -j all)")
-        if not args.runDirac and not args.runArc and not args.runArcProduction and not args.runSlurm:
-            logger.critical("Please choose Dirac (-D), Arc (-A), Arc Production Mode (-B) or Slurm Warmup mode (-E)")
+                logger.critical("Please choose only Dirac (-D), Arc (-A), Arc Production Mode (-B), Slurm Warmup mode (-E) or Slurm production mode (-F) (unless using -j all)")
+        if not args.runDirac and not args.runArc and not args.runArcProduction and \
+           not args.runSlurm and not args.runSlurmProduction:
+            logger.critical("Please choose Dirac (-D), Arc (-A), Arc Production Mode (-B), Slurm Warmup mode (-E) or Slurm production mode (-F)")
 
 try:
     caller_script = os.path.basename(os.path.realpath(__main__.__file__)) 
@@ -33,7 +34,7 @@ if caller_script == "main.py":
     parser_back.add_argument("-B", "--runArcProduction",   help = "Run/manage/test an Arc job (production)", action = "store_true")
     parser_back.add_argument("-D", "--runDirac", help = "Run/manage/test a dirac job (production)", action = "store_true")
     parser_back.add_argument("-E", "--runSlurm", help = "Run/manage/test a SLURM job (warmup)", action = "store_true")
-
+    parser_back.add_argument("-F", "--runSlurmProduction", help = "Run/manage/test a SLURM job (production)", action = "store_true")
 
 
     # Proxy initialisation
