@@ -1,13 +1,38 @@
 #!/bin/bash
 
+
+# HELP TEXT function
+
+function display_help(){
+  echo -n "change_runcard.sh [OPTIONS] ... [FILE] ... [-o OUTFILE]
+
+  A simple script to automate the changing of NNLOJET runcards.
+  Without any of the below arguments, it will print the runcard's properties and exit.
+
+  Where both -w and -p are present, both warmup and production mode will be enabled in the runcard.
+
+
+  Options:
+    -E, --energy        Changes energy (in TeV)
+    -I, --Iterations    Changes number of integration iterations (e.g. 5 for warm-ups)
+    -N, --events        Changes number of events per iteration
+    -p, --prod          Switches production ON (and warmup off)
+    -w, --warm          Switches warmup ON (and production off)
+    -o, --output        Sets output file, to which to write changed runcard.
+
+    -h, --help          Display this help and exit.
+  "
+}
+
+
 getopt --test > /dev/null
 if [[ $? -ne 4 ]]; then
     echo "I’m sorry, `getopt --test` failed in this environment."
     exit 1
 fi
 
-OPTIONS=E:I:N:o:pw
-LONGOPTIONS=energy:,iterations:,events:,output:,prod,warmup
+OPTIONS=E:I:N:o:pwh
+LONGOPTIONS=energy:,iterations:,events:,output:,prod,warmup,help
 
 # -temporarily store output to be able to check for errors
 # -e.g. use “--options” parameter by name to activate quoting/enhanced mode
@@ -47,6 +72,10 @@ while true; do
         -w|--warm)
             warm=y
             shift
+            ;;
+        -h|--help)
+            display_help
+            exit 0
             ;;
         --)
             shift
@@ -160,6 +189,7 @@ else
     echo "Energy: $newenergy TeV"
 
 fi
+
 
 #
 # for file in $1*.run
