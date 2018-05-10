@@ -45,7 +45,7 @@ def management_routine(backend, args):
     for idx,db_id in enumerate(id_list):
         # Setup for printing/function args
         jdx= idx+1
-        jobinfo = backend.dbase.list_data(backend.table, ["runcard", "jobtype","runfolder"], db_id)[0]
+        jobinfo = backend.dbase.list_data(backend.table, ["runcard", "jobtype","runfolder","iseed","no_runs"], db_id)[0]
         jobname = "{0} ({1})".format(jobinfo["runcard"],jobinfo["jobtype"])
         jobid = backend.get_id(db_id) # a list
         printstr = "{0} for job"+" {0}: {3:20} [{1}/{2}]".format(db_id,jdx,no_ids,jobname)

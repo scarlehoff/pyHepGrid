@@ -76,7 +76,7 @@ arc_direct = True
 arctable   = "arcjobs"
 diractable = "diracjobs"
 slurmtable = "slurmjobs"
-dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue"]
+dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue", "no_runs"]
 # DW This should be a hard link so socketed runs can be sent from other folders/locations
 socket_exe = "{0}/src/socket_server.py".format(os.getcwd()) # Eventually will need to point towards NNLOJET/bin
 

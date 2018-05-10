@@ -262,12 +262,18 @@ class Slurm(Backend):
         """ print stdandard output of a given job"""
         dir_name = self.get_stdout_dir_name(self.get_local_dir_name(jobinfo["runcard"],
                                                                     jobinfo["runfolder"]))
-        for jobid in jobids:
-            # Currently only works for non-array jobs!
+        # jobids = length 1 for SLURM jobs - just take the only element here
+        jobid = jobids[0]
+        if jobinfo["jobtype"] == "Production":
+            for subjobno in range(1,int(jobinfo["no_runs"])+1):
+                stdoutfile=os.path.join(dir_name,"slurm-{0}_{1}.out".format(jobid,subjobno)) 
+                cmd = ["cat", stdoutfile]
+                util.spCall(cmd)
+            
+        else:
             stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid)) 
             cmd = ["cat", stdoutfile]
             util.spCall(cmd)
-
 
     def kill_job(self,jobids):
         for jobid in jobids:
