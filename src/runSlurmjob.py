@@ -11,6 +11,7 @@ class RunSlurm(Backend):
             self.templ = slurmscript
         else:
             self.templ = header.SLURMSCRIPTDEFAULT
+        self.prodtempl = header.SLURMSCRIPTDEFAULT_PRODUCTION
         self.runfolder = header.runcardDir
         self.tarw      = util.TarWrap()
 
@@ -18,6 +19,15 @@ class RunSlurm(Backend):
                          sockets=None, port=header.port, array=False):
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
                 "threads":threads, "sockets":sockets, "port":port}
+        if array:
+            args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
+        else:
+            args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
+        return args
+
+    def _get_production_args(self, runcard, tag, baseSeed, producRun, array=True):
+        args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
+                "baseSeed":baseSeed, "producRun":producRun,"threads":1}
         if array:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
@@ -51,6 +61,17 @@ class RunSlurm(Backend):
             f.write(slurmfile)
         return filename
 
+    def _write_SLURM_production(self, dictData, filename = None):
+        """ Writes a unique SLURM file 
+        which instructs the SLURM job to run with the appropriate args
+        """
+        if not filename:
+            filename = util.unique_filename()
+        with open(filename, 'w') as f:
+            slurmfile  =self.prodtempl.format(**dictData)
+            f.write(slurmfile)
+        return filename
+
 
     def run_wrap_warmup(self, test = None, expandedCard = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
@@ -75,7 +96,7 @@ class RunSlurm(Backend):
             sockets = True
             n_sockets = header.sockets_active
             if "openmp7.q" not in queue:
-                header.logger.info("Current submission computing queue: {0}".format(ce))
+                header.logger.info("Current submission computing queue: {0}".format(queue))
                 header.logger.critical("Can't submit socketed warmups to locations other than openmp7.q")
         else:
             sockets = False
@@ -126,12 +147,58 @@ class RunSlurm(Backend):
             self.dbase.insert_data(self.table, dataDict)
 
 
+    def run_wrap_production(self, test = None):
+        """ Wrapper function. It assumes the initialisation stage has already happend
+            Writes sbatch file with the appropiate information and sends producrun #
+            of jobs to the queue
+        """
+        # runcard names (of the form foo.run)
+        # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
+        rncards, dCards = util.expandCard()
+        if test:
+            from src.header import test_queue as queue
+        else:
+            from src.header import production_queue as queue
+        job_type="Production"
+        self.runfolder = header.runcardDir
+        from src.header import producRun, jobName, baseSeed
+        # loop over all .run files defined in runcard.py
+
+        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
+        for r in rncards:
+            self._checkfor_existing_output_local(r, dCards[r], baseSeed, producRun)
+
+            # Generate the SLURM file
+            arguments = self._get_production_args(r, dCards[r], baseSeed, producRun, array=True)
+            slurmfile = self._write_SLURM_production(arguments)
+            print(" > Path of slurm file: {0}".format(slurmfile))
+            jobids = []
+            jobid, queue = self._run_SLURM(slurmfile, arguments, test=test)
+            jobids.append(jobid)
+            # Create database entry
+            dataDict = {'jobid'     : ' '.join(jobids),
+                        'date'      : str(datetime.now()),
+                        'pathfolder': arguments["runcard_dir"],
+                        'runcard'   : r,
+                        'runfolder' : dCards[r],
+                        'jobtype'   : job_type,
+                        'queue'     : queue,
+                        'status'    : "active",}
+            self.dbase.insert_data(self.table, dataDict)
+
+
+
 def runWrapper(runcard, test = None, expandedCard = None):
-    print("Running SLURM job for {0}".format(runcard))
+    header.logger.info("Running SLURM job for {0}".format(runcard))
     slurm = RunSlurm()
     slurm.run_wrap_warmup(test,expandedCard)
 
+def runWrapperProduction(runcard, test = None, expandedCard = None):
+    header.logger.info("Running SLURM production job for {0}".format(runcard))
+    slurm = RunSlurm()
+    slurm.run_wrap_production(test)
+
 def iniWrapper(runcard, warmup=None):
-    print("Initialising SLURM for {0}".format(runcard))
+    header.logger.info("Initialising SLURM for {0}".format(runcard))
     slurm = RunSlurm()
     slurm.init_warmup(warmup)
