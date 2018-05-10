@@ -1,7 +1,7 @@
 import sys, os, importlib
 from collections import defaultdict
 
-#runcards = ["Z_TRIPLE_DIFF_79_939d0"]
+#runcards = ["CMS_8TeV_StandardCuts"]
 # Auto select all runcards
 runcard_files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 runcards = [rc.replace(".py","") for rc in runcard_files if rc.endswith(".py") 
