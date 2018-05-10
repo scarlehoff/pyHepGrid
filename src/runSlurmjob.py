@@ -25,20 +25,16 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
         return args
 
-    def _get_production_args(self, runcard, tag, baseSeed, producRun, array=True):
+    def _get_production_args(self, runcard, tag, baseSeed, producRun, threads, array=True):
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
-                "baseSeed":baseSeed, "producRun":producRun-1,"threads":1}
+                "baseSeed":baseSeed, "producRun":producRun-1,"threads":threads}
         if array:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
         return args
 
-    def _run_SLURM(self, filename, args, test=False):
-        if test:
-            from src.header import test_queue as queue
-        else:
-            from src.header import warmup_queue as queue
+    def _run_SLURM(self, filename, args, queue, test=False):
         if queue is not None:
             queuetag = "-p {0}".format(queue)
         else:
@@ -133,7 +129,7 @@ class RunSlurm(Backend):
             jobids = []
             for i_socket in range(n_sockets):
                 # Run the file
-                jobid, queue = self._run_SLURM(slurmfile, arguments, test=test)
+                jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test)
                 jobids.append(jobid)
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
@@ -161,19 +157,20 @@ class RunSlurm(Backend):
             from src.header import production_queue as queue
         job_type="Production"
         self.runfolder = header.runcardDir
-        from src.header import producRun, jobName, baseSeed
+        from src.header import producRun, jobName, baseSeed, production_threads
         # loop over all .run files defined in runcard.py
 
         print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:
             self._checkfor_existing_output_local(r, dCards[r], baseSeed, producRun)
-
+            
             # Generate the SLURM file
-            arguments = self._get_production_args(r, dCards[r], baseSeed, producRun, array=True)
+            arguments = self._get_production_args(r, dCards[r], baseSeed, producRun,
+                                                  production_threads, array=True)
             slurmfile = self._write_SLURM_production(arguments)
             print(" > Path of slurm file: {0}".format(slurmfile))
             jobids = []
-            jobid, queue = self._run_SLURM(slurmfile, arguments, test=test)
+            jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test)
             jobids.append(jobid)
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
