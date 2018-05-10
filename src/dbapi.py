@@ -179,18 +179,25 @@ class database(object):
         self._execute_and_commit(total_query, verbose = True)
 
 def get_next_seed(dbname=None):
-    from src.header import arctable, diractable, dbfields
+    from src.header import arctable, diractable, slurmtable, dbfields
     if dbname is None:
         from src.header import dbname
-    db = database(dbname, tables = [arctable, diractable], 
+    db = database(dbname, tables = [arctable, diractable, slurmtable], 
                   fields=dbfields)
     db.list_disabled = True
     alldata = db.list_data(arctable,["iseed","jobid"])
     alldata += db.list_data(diractable,["iseed","jobid"])
+    slurmdata = db.list_data(slurmtable,["iseed","no_runs"])
     ret_seed = 1
     for run in alldata:
         try:
             max_seed = int(run["iseed"])+len(run["jobid"].split())
+        except TypeError as e:
+            max_seed = ret_seed
+        ret_seed = max(max_seed,ret_seed)
+    for run in slurmdata:
+        try:
+            max_seed = int(run["iseed"])+int(run["no_runs"])
         except TypeError as e:
             max_seed = ret_seed
         ret_seed = max(max_seed,ret_seed)

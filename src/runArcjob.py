@@ -195,6 +195,7 @@ class RunArc(Backend):
                         'jobtype'   : job_type,
                         'runfolder' : dCards[r],
                         'iseed'     : str(baseSeed),
+                        'no_runs'   : str(producRun),
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
 

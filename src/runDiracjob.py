@@ -97,6 +97,7 @@ class RunDirac(Backend):
                         'runcard'   : r,
                         'runfolder' : dCards[r],
                         'iseed'     : str(baseSeed),
+                        'no_runs'   : str(producRun),
                         'jobtype'   : "Production",
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)

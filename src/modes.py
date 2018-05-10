@@ -15,6 +15,8 @@ def do_management(args,rcard):
             from src.backendManagement import Arc as backend_class
         if args.runSlurm:
             from src.backendManagement import Slurm as backend_class
+        if args.runSlurmProduction:
+            from src.backendManagement import Slurm as backend_class
         if args.runDirac: 
             from src.backendManagement import Dirac as backend_class
         backends.append(backend_class(act_only_on_done = args.done))

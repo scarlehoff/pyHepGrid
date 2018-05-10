@@ -27,7 +27,7 @@ class RunSlurm(Backend):
 
     def _get_production_args(self, runcard, tag, baseSeed, producRun, array=True):
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
-                "baseSeed":baseSeed, "producRun":producRun,"threads":1}
+                "baseSeed":baseSeed, "producRun":producRun-1,"threads":1}
         if array:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
@@ -183,6 +183,8 @@ class RunSlurm(Backend):
                         'runfolder' : dCards[r],
                         'jobtype'   : job_type,
                         'queue'     : queue,
+                        'iseed'     : str(baseSeed),
+                        'no_runs'   : str(producRun),
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
 
