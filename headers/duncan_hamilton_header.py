@@ -53,7 +53,7 @@ verbose_finalise = False
 default_runfolder = os.path.expanduser("~/warmups/")
 
 warmup_base_dir = os.path.expanduser("~/warmups")
-production_base_dir = os.path.expanduser("/scratch/dwalker/RESULTS/")
+production_base_dir = os.path.expanduser("/ddn/data/qpsv27/results/")
 
 short_stats = True
 

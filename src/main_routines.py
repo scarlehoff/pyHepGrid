@@ -83,9 +83,10 @@ def management_routine(backend, args):
 
         # Options that deactivate the database entry once they're done
         elif args.get_data:
+            print("hi")
             print(printstr.format("Retrieving data"))
             backend.get_data(db_id)
-            if not args.done: # if --done is used we assume there are jobs which are _not_ done
+            if not args.done and not args.runSlurmProduction: # if --done is used we assume there are jobs which are _not_ done
                 backend.disable_db_entry(db_id)
         elif args.kill_job:
             print(printstr.format("Killing"))

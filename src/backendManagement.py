@@ -230,6 +230,32 @@ class Slurm(Backend):
             shutil.copy(orig,new)
         # header.logger.critical("Get_data not (yet) implemented for SLURM")
 
+    def _get_data_production(self, db_id):
+        fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
+        data      =  self.dbase.list_data(self.table, fields, db_id)[0]
+        production_output_dir = self.get_local_dir_name(data["runcard"],data["runfolder"])
+        dat_files = [i for i in os.listdir(production_output_dir) 
+                        if i.endswith(".dat")]
+        log_files = [i for i in os.listdir(production_output_dir) 
+                        if i.endswith(".log")]
+        print(dat_files, data["pathfolder"])
+        production_dir = os.path.join(header.production_base_dir,data["runfolder"])
+        os.makedirs(production_dir,exist_ok=True)
+        results_folder = production_dir
+        os.makedirs(results_folder, exist_ok=True)
+        for prodfile in dat_files:
+            orig = os.path.join(production_output_dir, prodfile)
+            new = os.path.join(results_folder, prodfile)
+            shutil.copy(orig,new)
+        log_folder = os.path.join(results_folder,"log")
+        os.makedirs(log_folder, exist_ok=True)
+        for logfile in log_files:
+            orig = os.path.join(production_output_dir, logfile)
+            new = os.path.join(log_folder, logfile)
+            shutil.copy(orig,new)
+
+        # header.logger.critical("Get_data not (yet) implemented for SLURM")
+
 
     def cat_log_job(*args, **kwargs):
         header.logger.critical("logfile printing not (yet) implemented for SLURM")
