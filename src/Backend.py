@@ -425,7 +425,8 @@ class Backend(object):
             logger.critical("Could not find NNLOJET executable at {0}".format(nnlojetfull))
         copy(nnlojetfull, os.getcwd()) 
         files = [NNLOJETexe]
-        for i in rncards:
+        for idx,i in enumerate(rncards):
+            logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
             warmupFiles = []
             # Check whether warmup/production is active in the runcard
@@ -535,7 +536,8 @@ class Backend(object):
             logger.critical("Could not find NNLOJET executable at {0}".format(nnlojetfull))
         copy(nnlojetfull, os.getcwd())
         files = [NNLOJETexe]
-        for i in rncards:
+        for idx,i in enumerate(rncards):
+            logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
             # Check whether warmup/production is active in the runcard
             runcard_file = runFol + "/" + i
