@@ -82,6 +82,7 @@ def pullrun(name, seed, run, tmpdir):
         return 1
     return 0
 
+
 def pull_seed_data(seed, runcard, targetdir, runcardname):
     tarname = "{0}{1}.tar.gz".format(runcard,seed)
     tmpdir = os.path.join(targetdir, "log")
@@ -149,7 +150,7 @@ def do_finalise():
 
         dirtag = runcard + "-" + tag
         runcard_name_no_seed = "output{0}-".format(dirtag)
-        
+
         output_file_names,lfn_seeds = [],[]
         for i in output: 
             if runcard_name_no_seed in i:
@@ -165,7 +166,7 @@ def do_finalise():
 
         logseeds, targetdir = createdirs(currentdir, dirtag)
         pull_seeds = set(lfn_seeds).difference(logseeds)
-        
+
         no_files_found = len(pull_seeds)
         print_no_files_found(no_files_found)
 

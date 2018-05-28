@@ -5,7 +5,7 @@ from collections import defaultdict
 # Auto select all runcards
 runcard_files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 runcards = [rc.replace(".py","") for rc in runcard_files if rc.endswith(".py") 
-            and "template" not in rc and "finalise" not in rc]
+            and "template" not in rc and "finalise" not in rc and "#" not in rc]
 # Disable
 def blockPrint():
     sys.stdout = open(os.devnull, 'w')
