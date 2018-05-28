@@ -13,7 +13,7 @@ def get_cmd_output(*args,**kwargs):
 runcardDir = os.path.expanduser("~/runcards/")
 NNLOJETdir ="/ddn/data/qpsv27/NNLOJET/"
 NNLOJETexe = "NNLOJET"
-warmupthr  = 16
+warmupthr  = 24
 producRun  = 1000
 baseSeed   = 1
 jobName    = "gridjob"
