@@ -25,6 +25,9 @@ lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
+# TMUX config
+tmux_location= "/ddn/home/qpsv27/local/bin/tmux"
+
 #Lhapdf config
 lhapdf_grid_loc = "input/lhapdf.tar.gz" 
 lhapdf_loc = "lhapdf"
@@ -71,7 +74,7 @@ finalise_runcards = "runcards/finalise_runcards"
 finalise_prefix = "results_"
 
 # socket parameters
-server_host = "gridui2.dur.scotgrid.ac.uk"
+server_host = "hamilton2.hpc.dur.ac.uk"
 port = 9000
 wait_time = 3600 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)
 

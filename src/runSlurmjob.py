@@ -1,5 +1,6 @@
 from src.Backend import Backend
 import src.header as header
+import src.socket_api as sapi
 import src.utilities as util
 from datetime import datetime
 
@@ -15,11 +16,15 @@ class RunSlurm(Backend):
         self.runfolder = header.runcardDir
         self.tarw      = util.TarWrap()
 
-    def _get_warmup_args(self, runcard, tag, threads=1,
+    def _get_warmup_args(self, runcard, tag, threads=1, n_sockets=1,
                          sockets=None, port=header.port, array=False):
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
-                "threads":threads, "sockets":sockets, "port":port}
-        if array:
+                "threads":threads, "sockets":sockets, "port":port, "host":header.server_host,
+                "socketstr":"", "array":""}
+        if sockets:
+            args["socketstr"] = " -port {0} -sockets {1} -host {2} -ns $((${{SLURM_ARRAY_TASK_ID}}))".format(port, n_sockets, header.server_host)
+            args["array"] = "#SBATCH --array=1-{0}".format(n_sockets)
+        if array or sockets:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
@@ -34,7 +39,7 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
         return args
 
-    def _run_SLURM(self, filename, args, queue, test=False):
+    def _run_SLURM(self, filename, args, queue, test=False, socket=None):
         if queue is not None:
             queuetag = "-p {0}".format(queue)
         else:
@@ -112,27 +117,30 @@ class RunSlurm(Backend):
             if n_sockets > 1:
                 # Automagically activates the socket and finds the best port for it!
                 port = sapi.fire_up_socket_server(header.server_host, port, n_sockets, 
-                                                  header.wait_time, header.socket_exe,
-                                                  tag="{0}-{1}".format(r,dCards[r]))
+                                                  None, header.socket_exe,
+                                                  tag="{0}-{1}".format(r,dCards[r]),
+                                                  tmuxloc=header.tmux_location)
                 job_type = "Socket={}".format(port)
-            # TODO check if warmup exists?
+            # TODO check if warmup exists? nah
 
             # Generate the SLURM file
             if n_sockets >1:
                 array = True
             else:
                 array=False
-            arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr,
+            arguments = self._get_warmup_args(r, dCards[r], n_sockets = n_sockets,
+                                              threads=warmupthr,
                                               sockets=sockets, port=port, array=array)
             slurmfile = self._write_SLURM(arguments)
             print(" > Path of slurm file: {0}".format(slurmfile))
             jobids = []
-            for i_socket in range(n_sockets):
-                # Run the file
-                jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test)
-                jobids.append(jobid)
+            # for i_socket in range(n_sockets):
+            #     # Run the file
+            jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test)
+            jobids.append(jobid)
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
+                        'no_runs'   : str(n_sockets),
                         'date'      : str(datetime.now()),
                         'pathfolder': arguments["runcard_dir"],
                         'runcard'   : r,

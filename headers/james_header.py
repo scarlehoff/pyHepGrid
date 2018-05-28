@@ -29,6 +29,9 @@ lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
+# TMUX config
+tmux_location= "tmux"
+
 # Lhapdf config
 lhapdf_grid_loc    = "util/lhapdf.tar.gz"
 lhapdf_loc         = "lhapdf"

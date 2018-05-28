@@ -290,12 +290,11 @@ class Slurm(Backend):
                                                                     jobinfo["runfolder"]))
         # jobids = length 1 for SLURM jobs - just take the only element here
         jobid = jobids[0]
-        if jobinfo["jobtype"] == "Production":
+        if jobinfo["jobtype"] == "Production" or "Socket" in jobinfo["jobtype"]:
             for subjobno in range(1,int(jobinfo["no_runs"])+1):
                 stdoutfile=os.path.join(dir_name,"slurm-{0}_{1}.out".format(jobid,subjobno)) 
                 cmd = ["cat", stdoutfile]
                 util.spCall(cmd)
-            
         else:
             stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid)) 
             cmd = ["cat", stdoutfile]
