@@ -1,4 +1,3 @@
-
 from src.Backend import Backend
 from datetime import datetime
 import src.utilities as util
@@ -39,7 +38,7 @@ class RunDirac(Backend):
         """ Writes a unique JDL file 
         which instructs the dirac job to run
         """
-        import src.header.jobName as jobName
+        from src.header import jobName
         if not filename:
             filename = util.unique_filename()
         with open(filename, 'w') as f:
