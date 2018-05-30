@@ -179,7 +179,7 @@ ARCSCRIPTDEFAULTPRODUCTION = ["&",
         ]
 
 DIRACSCRIPTDEFAULT = [
-        "JobName    = \"{0}\";".format(jobName),
+#        "JobName    = \"{0}\";".format(jobName),
         "Executable = \"{0}\";".format(runfile),
         "StdOutput  = \"StdOut\";",
         "StdError   = \"StdErr\";",
