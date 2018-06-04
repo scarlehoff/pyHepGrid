@@ -116,7 +116,6 @@ def print_final_stats(start_time, tot_no_new_files):
     print("\033[92m{0:^80}\033[0m".format("Finalisation finished!"))
     print("Total time: {0} ".format(total_time))
     print("New files found: {0}".format(tot_no_new_files)) 
-    print("Finish time: {0}".format(end_time.strftime('%H:%M:%S')))
 
 
 def do_finalise():

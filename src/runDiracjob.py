@@ -1,3 +1,4 @@
+
 from src.Backend import Backend
 from datetime import datetime
 import src.utilities as util
@@ -34,21 +35,16 @@ class RunDirac(Backend):
             raise Exception("Type of input arguments: {} not regocnised in DIRAC ._format_args".format(type(input_args)))
 
 
-    def _write_JDL(self, argument_string, start_seed, no_runs, filename = None, jobtag="gridjob"):
+    def _write_JDL(self, argument_string, start_seed, no_runs, filename = None):
         """ Writes a unique JDL file 
         which instructs the dirac job to run
         """
-        from src.header import jobName
         if not filename:
             filename = util.unique_filename()
         with open(filename, 'w') as f:
             for i in self.templ:
                 f.write(i)
                 f.write("\n")
-            if jobName is not None:
-                f.write("JobName    = \"{0}\";".format(jobName))
-            else:
-                f.write("JobName    = \"{0}\";".format(jobtag))
             f.write("Arguments = \"{}\";\n".format(argument_string))
             f.write("Parameters = {0};\n".format(no_runs))
             f.write("ParameterStart = {0};\n".format(start_seed))
@@ -85,7 +81,7 @@ class RunDirac(Backend):
             joblist, remaining_seeds, seed_start = [], producRun, baseSeed
             while remaining_seeds > 0:
                 no_seeds = min(1000,remaining_seeds)
-                jdlfile = self._write_JDL(args, seed_start, no_seeds, jobtag=dCards[r])
+                jdlfile = self._write_JDL(args, seed_start, no_seeds)
                 max_seed =  seed_start+no_seeds-1
                 print(" > jdl file path for seeds {0}-{1}: {2}".format(seed_start,max_seed,jdlfile))
                 joblist += self._run_JDL(jdlfile)

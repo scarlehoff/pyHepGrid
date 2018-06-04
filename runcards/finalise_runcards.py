@@ -16,7 +16,6 @@ def enablePrint():
 
 # RUNCARDS USED ONLY FOR PULLING DATA WITH FINALISE.PY 
 print("Pulling data for runcard(s): \n{0}.py".format(".py ".join(i for i in runcards)))
-
 blockPrint()
 modules = [importlib.import_module("runcards.{0}".format(rc)) for rc in runcards]
 enablePrint()
