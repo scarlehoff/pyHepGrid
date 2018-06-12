@@ -10,13 +10,13 @@ ce1.dur.scotgrid.ac.uk
 ce2.dur.scotgrid.ac.uk
 ce3.dur.scotgrid.ac.uk
 ce4.dur.scotgrid.ac.uk
+ce02.tier2.hep.manchester.ac.uk  [07-Dec-2017, cream]
 
 
 Known NOT to work [28/11/17]:
 hepgrid5.ph.liv.ac.uk            UKI-NORTHGRID-LIV-HEP  [Works well 09-Dec-2017]
 t2arc00.physics.ox.ac.uk         UKI-SOUTHGRID-OX-HEP
 ce0[4-7].esc.qmul.ac.uk              
-ce01.tier2.hep.manchester.ac.uk  [07-Dec-2017, cream]
 lcgce2.shef.ac.uk                [07-Dec-2017, cream]
 
 Work but can't be used with the current form of nnlojet.py [05-Dec-2017]:

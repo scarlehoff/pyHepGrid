@@ -541,7 +541,7 @@ class Backend(object):
             local = False
             # Check whether warmup/production is active in the runcard
             runcard_file = runFol + "/" + i
-            runcard_obj = NNLOJETruncard(runcard_file)
+            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
             self._check_production(runcard_obj)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"

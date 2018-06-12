@@ -23,6 +23,8 @@ nnlojet_linecode = {
 
 valid_channels = ["rr","rv","vv","r","v","lo"]
 
+numeric_ids = [3,4,5,9,13]
+
 class NNLOJETruncard:
     """
     Reads a NNLOJET runcard into a class containing
@@ -56,7 +58,18 @@ class NNLOJETruncard:
             self.print("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i)
+        self._check_numeric()
 
+
+
+    def _check_numeric(self):
+        """ Asserts that runcard elements that need to be numeric indeed are """
+        for i in numeric_ids:
+            try:
+                float(self.runcard_dict[nnlojet_linecode[i]])
+            except:
+                self.critical("Line {0} [{1}] should be numeric type. Value is instead {2}.".format(i,nnlojet_linecode[i], self.runcard_dict[nnlojet_linecode[i]])) 
+                print(self.logger)
 
     # Safety check functions
     def _check_channel(self, chan):
