@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+from __future__ import division, print_function
+import os
+import sys
+import argparse as ap
+import importlib
+import numpy as np
+np.warnings.filterwarnings('ignore')
+# Janky af, but allows script to be called from other directories
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from src.header import production_base_dir as rootdir
+
+# def tail(f, lines=1):
+#     """Returns the last n lines (default=1) of file f"""
+#     total_lines_wanted = lines
+#     BLOCK_SIZE = 1024
+#     f.seek(0, 2)
+#     block_end_byte = f.tell()
+#     lines_to_go = total_lines_wanted
+#     block_number = -1
+#     blocks = []  # blocks of size BLOCK_SIZE, in reverse order starting
+#     # from the end of the file
+#     while lines_to_go > 0 and block_end_byte > 0:
+#         if (block_end_byte - BLOCK_SIZE > 0):
+#             # read the last block we haven't yet read
+#             f.seek(block_number * BLOCK_SIZE, 2)
+#             blocks.append(f.read(BLOCK_SIZE))
+#         else:
+#             # file too small, start from begining
+#             f.seek(0, 0)
+#     # only read what was not read
+#             blocks.append(f.read(block_end_byte))
+#         lines_found = str(blocks[-1]).count('\n')
+#         lines_to_go -= lines_found
+#         block_end_byte -= BLOCK_SIZE
+#         block_number -= 1
+#     blocks = [str(block) for block in blocks]
+#     all_read_text = ''.join(reversed(blocks))
+#     return '\n'.join(all_read_text.splitlines()[-total_lines_wanted:])
+
+
+def get_time_hrs(f):
+    for line in f.readlines():
+        if "Elapsed" in str(line):
+            val, unit = line.split()[-2:]
+            val = float(val)
+            unit = str(unit)
+            if "minutes" in unit:
+                val = val/60
+            elif "second" in unit:
+                val = val/3600
+            # print(val, unit)
+    return val
+
+def add_runcard_directories(args):
+    runcard_loc = os.path.join(os.getcwd(), args.runcard)
+    runcard_dir, runcard_name = os.path.split(runcard_loc)
+    sys.path =  [runcard_dir]+sys.path
+    import_name = runcard_name.replace(".py","")
+    runcard_import = importlib.import_module(import_name)
+    finalise = importlib.import_module("finalise")
+    for runcard in runcard_import.dictCard:
+        direc = finalise.get_output_dir_name(runcard)+"-{0}/log".format(runcard_import.dictCard[runcard])
+        args.directories.append(direc)
+    return args
+
+
+def compile_time_info(directory):
+    times = []
+    skip_count = 0
+    total_runs = 0
+    for infile in os.listdir(directory):
+        if infile.endswith(".log"):
+            total_runs +=1
+            full_infile = os.path.join(directory, infile)
+            with open(full_infile, 'rb') as f:
+                time_data = get_time_hrs(f)
+            try:
+                if time_data>=0:
+                    times.append(float(time_data))
+                else:
+                    skip_count += 1
+            except ValueError as e:
+                skip_count +=1
+    times = np.array(times)
+    return times, skip_count, total_runs
+
+
+def print_full_output(directory, times, skip_count, total_runs, histogram):
+    times = np.array(times)
+    mean = np.mean(times)
+    stdev = np.std(times)
+    tot = np.sum(times)
+    try:
+        long_run = np.max(times)
+        short_run = np.min(times)
+    except ValueError:
+        long_run = 0
+        short_run = 0
+
+    hr = " hrs"
+    print("Input directory:    {0}".format(directory))
+
+    print("=================================")
+    print("Total time:         {0:<8.1f} {1}".format(tot, hr))
+    print("Total no. runs:     {0:<8}".format(total_runs))
+    print("No. +ve time runs:  {0:<8}".format(len(times)))
+#    print("No. -ve time runs:  {0:<8}".format(skip_count))
+    print("---------------------------------")
+    print("Longest Run:        {0:<8.4f} {1}".format(long_run, hr))
+    print("Shortest run:       {0:<8.4f} {1}".format(short_run, hr))
+    print("Mean time:          {0:<8.4f} {1}".format(mean,hr))
+    print("Standard Deviation: {0:<8.4f} {1}".format(stdev, hr))
+    print("=================================")
+    if histogram:
+        print(np.histogram(times, bins = range(0,72)))
+
+def print_short_header():
+    header ="{1:60} {0:17} ".format("Average time","Runcard")
+    print(header)
+    print("="*len(header))
+
+def print_short_output(directory, times, skip_count, total_runs):
+    times = np.array(times)
+    mean = np.mean(times)
+    stdev = np.std(times)
+    directory = directory.split("/")[-2].replace("results_","").split(".run-")[0]
+    hr = " hrs"
+    print("{4:60} {0:<5.2f} +/- {1:<5.2f} {2} [{3} runs]".format(
+            mean,stdev,hr, len(times),directory))
+        
+def do_search(args, path):
+    if args.search is not None:
+        for searchstr in args.search:
+            if args.case_insensitive:
+                if searchstr.lower() not in path.lower():
+                    return False
+            else:
+                if searchstr not in path:
+                    return False
+    return True
+
+def do_reject(args, path):
+    if args.reject is not None:
+        for rejectstr in args.reject:
+            if args.case_insensitive:
+                if rejectstr.lower() in path.lower():
+                    return False
+            else:
+                if rejectstr in path:
+                    return False
+    return True
+
+def search_matches_path(args, path):
+    if any(not i(args, path) for i in [do_search, do_reject]):
+        return False
+    return True
+
+def get_dirs():
+    dirs = []
+    for thing in os.listdir(rootdir):
+        fullpath = os.path.join(rootdir,thing)
+        if os.path.isdir(fullpath):
+            if search_matches_path(args, fullpath):
+                dirs.append(fullpath+"/log")
+    return dirs
+
+if __name__ == "__main__":
+    parser = ap.ArgumentParser(
+        description="Generate timing information from a directory of log files.")
+    parser.add_argument('directories', metavar='dir',
+                        help='Directories to search.',
+                        nargs = "*")
+    parser.add_argument('--runcard', '-rc',
+                        help='runcard.py file to use.')
+    parser.add_argument('--verbose', '-v',
+                        help='Outputs a much longer summary.', action="store_true")
+    parser.add_argument('--search','-f','-s',
+                        help='search for specific string(s) in runcard dir.', nargs = '+')
+    parser.add_argument('--reject','-r',
+                        help='reject specific string(s) in runcard dir.', nargs = '+')
+    parser.add_argument('--case_insensitive','-i', help='case insensitive search/reject.',action='store_true')
+    parser.add_argument('--histogram','-hs', help='histogram output for verbose mode',action='store_true')
+
+    args = parser.parse_args()
+    #args.directories = [os.path.join(rootdir, i, "log") for i in args.directories]
+    args.directories = get_dirs()
+
+    if args.runcard is not None:
+        args = add_runcard_directories(args)
+
+    if not args.verbose:
+        print_short_header()
+
+    for directory in args.directories:
+        times, skip_count, total_runs = compile_time_info(directory)
+        if not args.verbose:
+            print_short_output(directory, times, skip_count, total_runs)
+        else:
+            print_full_output(directory, times, skip_count, total_runs, args.histogram)
