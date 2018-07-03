@@ -117,18 +117,19 @@ def print_full_output(directory, times, skip_count, total_runs, histogram):
         print(np.histogram(times, bins = range(0,72)))
 
 def print_short_header():
-    header ="{1:60} {0:17} ".format("Average time","Runcard")
+    header ="{1:55} {0:17}      {2:17}".format("Average time","Runcard", "Total time")
     print(header)
     print("="*len(header))
 
 def print_short_output(directory, times, skip_count, total_runs):
     times = np.array(times)
+    tot = np.sum(times)
     mean = np.mean(times)
     stdev = np.std(times)
     directory = directory.split("/")[-2].replace("results_","").split(".run-")[0]
     hr = " hrs"
-    print("{4:60} {0:<5.2f} +/- {1:<5.2f} {2} [{3} runs]".format(
-            mean,stdev,hr, len(times),directory))
+    print("{4:55} {0:<5.2f} +/- {1:<5.2f} {2}   {5:<5.2f} {2} [{3} runs]".format(
+            mean,stdev,hr, len(times),directory, tot))
         
 def do_search(args, path):
     if args.search is not None:
