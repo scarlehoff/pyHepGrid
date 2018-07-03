@@ -50,7 +50,8 @@ def get_time_hrs(f):
             elif "second" in unit:
                 val = val/3600
             # print(val, unit)
-    return val
+    	    return val
+    return None
 
 def add_runcard_directories(args):
     runcard_loc = os.path.join(os.getcwd(), args.runcard)
