@@ -81,7 +81,7 @@ def compile_time_info(directory):
                     times.append(float(time_data))
                 else:
                     skip_count += 1
-            except ValueError as e:
+            except (TypeError, ValueError) as e:
                 skip_count +=1
     times = np.array(times)
     return times, skip_count, total_runs
