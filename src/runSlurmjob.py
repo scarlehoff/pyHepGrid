@@ -101,9 +101,9 @@ class RunSlurm(Backend):
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
-            if "par7.q" not in queue:
-                header.logger.info("Current submission computing queue: {0}".format(queue))
-                header.logger.critical("Can't submit socketed warmups to locations other than par7.q")
+            # if "par7.q" not in queue:
+            #     header.logger.info("Current submission computing queue: {0}".format(queue))
+            #     header.logger.critical("Can't submit socketed warmups to locations other than par7.q")
         else:
             sockets = False
             n_sockets = 1
@@ -144,6 +144,9 @@ class RunSlurm(Backend):
             jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test,
                                            n_sockets=n_sockets)
             jobids.append(jobid)
+            if queue is None:
+                queue = "None"
+
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
                         'no_runs'   : str(n_sockets),
