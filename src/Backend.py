@@ -298,6 +298,7 @@ class Backend(object):
 
     def get_completion_stats(self, jobid, jobinfo, args):
         from collections import Counter
+        from src.gnuplot import do_plot
         job_outputs = self.cat_job(jobid, jobinfo, store = True)
         vals = []
         for idx,job_stdout in enumerate(job_outputs):
@@ -340,18 +341,8 @@ class Backend(object):
                 newvals.append(i)
                 newcounts.append(0)
 
-        import subprocess
-        gnuplot = subprocess.Popen(["/usr/bin/gnuplot"], 
-                                   stdin=subprocess.PIPE)
-        gnuplot.stdin.write("set term dumb 79 35\n".encode("utf-8"))
-        gnuplot.stdin.write("set xlabel '% Completion' \n;".encode("utf-8"))
-        gnuplot.stdin.write("set key horizontal left \n;".encode("utf-8"))
-        gnuplot.stdin.write("set ylabel 'No. of jobs' \n;".encode("utf-8"))
-        gnuplot.stdin.write("plot '-' using 1:2 title 'Number of jobs' with histep \n".encode("utf-8"))
-        for i,j in zip(newvals,newcounts):
-            gnuplot.stdin.write(("%f %f\n" % (i,j)).encode("utf-8"))
-        gnuplot.stdin.write("e\n".encode("utf-8"))
-        gnuplot.stdin.flush()
+        do_plot(newvals, newcounts, title="Completion % Histogram (Unnormalised)", 
+                xlabel="% Completion", ylabel = "No. of jobs")
 
     def get_grid_from_stdout(self,jobid, jobinfo):
         from src.header import logger, warmup_base_dir, default_runfolder
