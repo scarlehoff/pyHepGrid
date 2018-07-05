@@ -10,10 +10,10 @@ def get_cmd_output(*args,**kwargs):
     return outbyt.decode("utf-8")
 
 # Global Variables (default values)
-runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
-NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
+runcardDir = os.path.expanduser("/mt/home/dwalker/pyhepgrid/runcards/")
+NNLOJETdir ="/mt/home/dwalker/nnlojet/"
 NNLOJETexe = "NNLOJET"
-warmupthr  = 8
+warmupthr  = 1
 producRun  = 1000
 baseSeed   = 1
 jobName    = "gridjob"
@@ -38,9 +38,8 @@ lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
-dbname     = "/mt/home/dwalker/jobscripts/databases/CCDIS.dat"     
-#dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
-arcbase    = "/mt/home/dwalker/jobscripts/.arc/default.dat"
+dbname     = "/mt/home/dwalker/pyhepgrid/grid/databases/batchdb.dat"     
+arcbase    = "/dev/null/"
 provided_warmup_dir = None
 
 # Finalisation and storage options
@@ -49,14 +48,15 @@ finalise_no_cores = 25
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_src.finalise()
-finalisation_script = "src/finalise"
+finalisation_script = None
 verbose_finalise = False
+
 # Default folder for use only if finalisation script != None
 # Gives a default destination for warmup files pulled whilst run is in progress
 default_runfolder = os.path.expanduser("~/warmups/")
 
-warmup_base_dir = None
-production_base_dir = os.path.expanduser("/scratch/dwalker/RESULTS/")
+warmup_base_dir = os.path.expanduser("~/warmups")
+production_base_dir = os.path.expanduser("/mt/home/dwalker/pyhepgrid/results/")
 
 short_stats = True
 
@@ -74,13 +74,13 @@ finalise_runcards = "runcards/finalise_runcards"
 finalise_prefix = "results_"
 
 # socket parameters
-server_host = "gridui2.dur.scotgrid.ac.uk"
-port = 9000
+server_host = "d76.phyip3.dur.ac.uk"
+port = 9050
 wait_time = 3600 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)
 
 #SLURM parameters
-local_run_directory = "/ddn/data/qpsv27/run_directories/"
-warmup_queue = "openmp7.q"
-production_queue = "par7.q"
-test_queue = "test.q"
-production_threads = 24
+local_run_directory = "/mt/home/dwalker/pyhepgrid/run_directories/"
+warmup_queue = None
+production_queue = None
+test_queue = None
+production_threads = 1
