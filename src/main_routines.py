@@ -42,6 +42,15 @@ def management_routine(backend, args):
 
     no_ids = len(id_list)
 
+    if args.get_grid_stdout:
+        # if no_ids > 1:
+        #     import src.header as header
+        #     header.logger.critical("Only one job at a time can be used when getting grid output from stdout in case to prevent overwriting")
+        if not args.runArc:
+            import src.header as header
+            header.logger.critical("Getting grid output from stdout only a valid mode for Arc warmups")
+#        elif 
+
     for idx,db_id in enumerate(id_list):
         # Setup for printing/function args
         jdx= idx+1
@@ -79,11 +88,11 @@ def management_routine(backend, args):
             backend.bring_current_warmup(db_id)
         elif args.checkwarmup:
             backend.check_warmup_files(db_id, args.runcard, resubmit=args.resubmit)
-
+        elif args.get_grid_stdout:
+            backend.get_grid_from_stdout(jobid, jobinfo)
 
         # Options that deactivate the database entry once they're done
         elif args.get_data:
-            print("hi")
             print(printstr.format("Retrieving data"))
             backend.get_data(db_id)
             if not args.done and not args.runSlurmProduction: # if --done is used we assume there are jobs which are _not_ done
