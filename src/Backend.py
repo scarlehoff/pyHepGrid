@@ -329,7 +329,7 @@ class Backend(object):
             self._press_yes_to_continue("  \033[93m WARNING:\033[0m Grid file already exists at {0}. do you want to overwrite it?".format(grid_fname))
         with open(grid_fname,"w") as gridfile:
             gridfile.write(grid)
-        logger.info("Grid written locally")
+        logger.info("Grid written locally to {0}".format(os.path.relpath(grid_fname)))
 
 
     # External functions for database management
