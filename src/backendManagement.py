@@ -291,21 +291,30 @@ class Slurm(Backend):
         self.print_stats(done, waiting, running, fail, 0, tot)
 
 
-    def cat_job(self, jobids, jobinfo, print_stderr = None):
+    def cat_job(self, jobids, jobinfo, print_stderr = None, store = False):
         """ print stdandard output of a given job"""
         dir_name = self.get_stdout_dir_name(self.get_local_dir_name(jobinfo["runcard"],
                                                                     jobinfo["runfolder"]))
         # jobids = length 1 for SLURM jobs - just take the only element here
         jobid = jobids[0]
+        output = []
         if jobinfo["jobtype"] == "Production" or "Socket" in jobinfo["jobtype"]:
             for subjobno in range(1,int(jobinfo["no_runs"])+1):
                 stdoutfile=os.path.join(dir_name,"slurm-{0}_{1}.out".format(jobid,subjobno)) 
                 cmd = ["cat", stdoutfile]
-                util.spCall(cmd)
+                if not store:
+                    util.spCall(cmd)
+                else:
+                    output.append(util.getOutputCall(cmd))
         else:
             stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid)) 
             cmd = ["cat", stdoutfile]
-            util.spCall(cmd)
+            if not store:
+                util.spCall(cmd)
+            else:
+                output.append(util.getOutputCall(cmd))
+        if store:
+            return output
 
     def kill_job(self,jobids):
         for jobid in jobids:
