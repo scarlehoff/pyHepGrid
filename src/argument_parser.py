@@ -81,6 +81,7 @@ if caller_script == "main.py":
     parser_info.add_argument("-C", "--checkwarmup", help = "Check completed warmup to see if a warmup file is present", action = "store_true")
     parser_info.add_argument("--resubmit", help = "Resubmit if warmup not present. For use with --checkwarmup only", action = "store_true")
     parser_info.add_argument("-c","--completion", help = "Show current iteration completion of running jobs", action = "store_true")
+    parser_info.add_argument("--gnuplot", help = "Add gnuplot output where possible", action = "store_true")
 
     parser_info.add_argument("-i", "--info", help = "retrieve arcstat/diracstat for a given job", action = "store_true")
     parser_info.add_argument("-I", "--infoVerbose", help = "retrieve arcstat/diracstat for a given job (more verbose, only ARC)", action = "store_true")
