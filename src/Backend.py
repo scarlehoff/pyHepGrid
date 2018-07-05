@@ -296,6 +296,30 @@ class Backend(object):
             util.spCall(["chmod", "a+wrx", i])
         return gridFiles
 
+    def get_completion_stats(self, jobid, jobinfo):
+        from collections import Counter
+        job_outputs = self.cat_job(jobid, jobinfo, store = True)
+        vals = []
+        for idx,job_stdout in enumerate(job_outputs):
+            for line in reversed(job_stdout.split("\n")):
+                if "Current progress" in line and ".uk" not in line:
+                    vals.append(int(line.split("\r")[-1].split()[-1].strip()[:-1]))
+                    break
+                elif "Commencing" in line:
+                    vals.append(0)
+                    break
+        histogram = sorted(list(zip(Counter(vals).keys(),Counter(vals).values())), key = lambda x: x[0])
+        format_string = "| {0:<4}"
+        val_line = "{0:<13}".format("% Completion")
+        count_line =  "{0:<13}".format("# Jobs")
+        for element in histogram:
+            val_line += format_string.format(str(element[0])+"%")
+            count_line += format_string.format(element[1])
+        divider = "-"*len(val_line)
+        print(val_line)
+        print(divider)
+        print(count_line)
+
 
     def get_grid_from_stdout(self,jobid, jobinfo):
         from src.header import logger, warmup_base_dir, default_runfolder

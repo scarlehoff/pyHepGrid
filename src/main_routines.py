@@ -90,6 +90,8 @@ def management_routine(backend, args):
             backend.check_warmup_files(db_id, args.runcard, resubmit=args.resubmit)
         elif args.get_grid_stdout:
             backend.get_grid_from_stdout(jobid, jobinfo)
+        elif args.completion:
+            backend.get_completion_stats(jobid, jobinfo)
 
         # Options that deactivate the database entry once they're done
         elif args.get_data:
