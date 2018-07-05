@@ -296,6 +296,42 @@ class Backend(object):
             util.spCall(["chmod", "a+wrx", i])
         return gridFiles
 
+
+    def get_grid_from_stdout(self,jobid, jobinfo):
+        from src.header import logger, warmup_base_dir, default_runfolder
+        import re, os
+
+        stdout = "\n".join(self.cat_job(jobid, jobinfo, store = True))
+
+        try:
+            gridname = [i for i in stdout.split("\n") if "Writing grid" in i][0].split()[-1].strip()
+            logger.info("Grid name from stdout: {0}".format(gridname))
+        except IndexError as e:
+            logger.critical("No grid filename found in stdout logs. Did the warmup write a grid?")
+
+        result = re.search('vegas warmup to stdout(.*)End', stdout,flags=re.S) # Thanks StackOverflow
+
+        try:
+            grid = result.group(1)
+        except IndexError as e:
+            logger.critical("No grid found in stdout logs. Did the warmup write a grid?")
+
+        logger.info("Grid extracted successfully")
+        if default_runfolder is None:
+            base = header.warmup_base_dir
+        else:
+            base = header.default_runfolder
+        
+        outloc = os.path.join(base,jobinfo["runfolder"],jobinfo["runcard"])
+        grid_fname = os.path.join(outloc,gridname)
+        os.makedirs(outloc,exist_ok=True)
+        if os.path.exists(grid_fname): 
+            self._press_yes_to_continue("  \033[93m WARNING:\033[0m Grid file already exists at {0}. do you want to overwrite it?".format(grid_fname))
+        with open(grid_fname,"w") as gridfile:
+            gridfile.write(grid)
+        logger.info("Grid written locally to {0}".format(os.path.relpath(grid_fname)))
+
+
     # External functions for database management
     def get_id(self, db_id):
         """ Returns a list of DIRAC/ARC jobids
@@ -541,7 +577,7 @@ class Backend(object):
             local = False
             # Check whether warmup/production is active in the runcard
             runcard_file = runFol + "/" + i
-            runcard_obj = NNLOJETruncard(runcard_file)
+            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
             self._check_production(runcard_obj)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
