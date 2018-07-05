@@ -296,7 +296,7 @@ class Backend(object):
             util.spCall(["chmod", "a+wrx", i])
         return gridFiles
 
-    def get_completion_stats(self, jobid, jobinfo):
+    def get_completion_stats(self, jobid, jobinfo, args):
         from collections import Counter
         job_outputs = self.cat_job(jobid, jobinfo, store = True)
         vals = []
@@ -320,6 +320,38 @@ class Backend(object):
         print(divider)
         print(count_line)
 
+        if not args.gnuplot:
+            return
+
+        rawvals = [i[0] for i in histogram]
+        rawcounts = [i[1] for i in histogram]
+        
+        newvals = []
+        newcounts = []
+        for i in range(0, 105, 5):
+            match = False
+            for j in histogram:
+                if i == j[0]:
+                    newvals.append(j[0])
+                    newcounts.append(j[1])
+                    match = True
+                    break
+            if not match:
+                newvals.append(i)
+                newcounts.append(0)
+
+        import subprocess
+        gnuplot = subprocess.Popen(["/usr/bin/gnuplot"], 
+                                   stdin=subprocess.PIPE)
+        gnuplot.stdin.write("set term dumb 79 35\n".encode("utf-8"))
+        gnuplot.stdin.write("set xlabel '% Completion' \n;".encode("utf-8"))
+        gnuplot.stdin.write("set key horizontal left \n;".encode("utf-8"))
+        gnuplot.stdin.write("set ylabel 'No. of jobs' \n;".encode("utf-8"))
+        gnuplot.stdin.write("plot '-' using 1:2 title 'Number of jobs' with histep \n".encode("utf-8"))
+        for i,j in zip(newvals,newcounts):
+            gnuplot.stdin.write(("%f %f\n" % (i,j)).encode("utf-8"))
+        gnuplot.stdin.write("e\n".encode("utf-8"))
+        gnuplot.stdin.flush()
 
     def get_grid_from_stdout(self,jobid, jobinfo):
         from src.header import logger, warmup_base_dir, default_runfolder

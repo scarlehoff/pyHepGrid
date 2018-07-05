@@ -91,7 +91,7 @@ def management_routine(backend, args):
         elif args.get_grid_stdout:
             backend.get_grid_from_stdout(jobid, jobinfo)
         elif args.completion:
-            backend.get_completion_stats(jobid, jobinfo)
+            backend.get_completion_stats(jobid, jobinfo, args)
 
         # Options that deactivate the database entry once they're done
         elif args.get_data:
