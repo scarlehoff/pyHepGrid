@@ -92,6 +92,7 @@ if caller_script == "main.py":
     parser_fin = parser.add_argument_group("finalisation options", "Retrieve or kill jobs, to be used with mode=man")
     parser_fin.add_argument("-g", "--get_data", help = "Retrieve all data for a database entry", action = "store_true")
     parser_fin.add_argument("-G", "--getmewarmup", help = "Force the retrieval of the warmup file from an unfinished job", action = "store_true")
+    parser_fin.add_argument("-gg", "--get_grid_stdout", help = "Retrieve the warmup grid from stdout for a given job. Can only run for one job at a time in case two warmups have the same name!", action = "store_true")
 
     # Killing jobs
     parser_fin.add_argument("-k", "--kill_job", help = "kill a given job", action = "store_true")

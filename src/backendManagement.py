@@ -68,13 +68,20 @@ class Arc(Backend):
             cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
 
-    def cat_job(self, jobids, jobinfo, print_stderr = None):
+    def cat_job(self, jobids, jobinfo, print_stderr = None, store = False):
         """ print stdandard output of a given job"""
+        out = []
         for jobid in jobids:
             cmd = [self.cmd_print, "-j", header.arcbase, jobid.strip()]
             if print_stderr:
                 cmd += ["-e"]
-            util.spCall(cmd)
+            if not store:
+                util.spCall(cmd)
+            else:
+                out.append(util.getOutputCall(cmd))
+        if store:
+            return out
+
 
     def cat_log_job(self, jobids):
         """Sometimes the std output doesn't get updated
@@ -313,4 +320,3 @@ if __name__ == '__main__':
     dirac = Dirac()
     slurm = Slurm()
     print("Instantiate classes")
-
