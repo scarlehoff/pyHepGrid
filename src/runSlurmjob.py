@@ -39,12 +39,17 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
         return args
 
-    def _run_SLURM(self, filename, args, queue, test=False, socket=None):
+    def _run_SLURM(self, filename, args, queue, test=False, socket=None, n_sockets=1):
         if queue is not None:
             queuetag = "-p {0}".format(queue)
         else:
             queuetag = ""
-        cmd = "sbatch {1} {0} -N 1 -n {2}".format(filename, queuetag, args["threads"])
+        if n_sockets>1:
+            exclusive = "--exclusive"
+        else:
+            exclusive = ""
+        cmd = "sbatch {1} {0} -N {0} -n {2} {3} -c 24".format(filename, queuetag,
+                                                        args["threads"], n_sockets, exclusive)
         header.logger.debug(cmd)
         output = util.getOutputCall(cmd.split())
         jobid = output.strip().split()[-1]
@@ -96,9 +101,9 @@ class RunSlurm(Backend):
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
-            if "openmp7.q" not in queue:
+            if "par7.q" not in queue:
                 header.logger.info("Current submission computing queue: {0}".format(queue))
-                header.logger.critical("Can't submit socketed warmups to locations other than openmp7.q")
+                header.logger.critical("Can't submit socketed warmups to locations other than par7.q")
         else:
             sockets = False
             n_sockets = 1
@@ -111,7 +116,7 @@ class RunSlurm(Backend):
         from src.header import warmupthr, jobName
         # loop over al .run files defined in runcard.py
 
-        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
+        header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         port = header.port
         for r in rncards:
             if n_sockets > 1:
@@ -132,11 +137,12 @@ class RunSlurm(Backend):
                                               threads=warmupthr,
                                               sockets=sockets, port=port, array=array)
             slurmfile = self._write_SLURM(arguments)
-            print(" > Path of slurm file: {0}".format(slurmfile))
+            header.logger.info(" > Path of slurm file: {0}".format(slurmfile))
             jobids = []
             # for i_socket in range(n_sockets):
             #     # Run the file
-            jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test)
+            jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test,
+                                           n_sockets=n_sockets)
             jobids.append(jobid)
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
@@ -168,7 +174,7 @@ class RunSlurm(Backend):
         from src.header import producRun, jobName, baseSeed, production_threads
         # loop over all .run files defined in runcard.py
 
-        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
+        header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:
             self._checkfor_existing_output_local(r, dCards[r], baseSeed, producRun)
             
@@ -176,7 +182,7 @@ class RunSlurm(Backend):
             arguments = self._get_production_args(r, dCards[r], baseSeed, producRun,
                                                   production_threads, array=True)
             slurmfile = self._write_SLURM_production(arguments)
-            print(" > Path of slurm file: {0}".format(slurmfile))
+            header.logger.info("Path of slurm file: {0}".format(slurmfile))
             jobids = []
             jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test)
             jobids.append(jobid)
