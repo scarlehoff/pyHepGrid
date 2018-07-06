@@ -189,6 +189,10 @@ DIRACSCRIPTDEFAULT = [
         "OutputSandbox = {\"StdOut\",\"StdErr\"};",
         ]
 
+# If Dirac banned sites are specified, include them in JDL
+if DIRAC_BANNED_SITES is not None:
+    DIRACSCRIPTDEFAULT.append("BannedSites = {{\"{0}\"}}".format("\",\"".join(DIRAC_BANNED_SITES)))
+
 _slurmfilename = os.path.join(os.path.dirname(os.path.realpath(__file__)),"slurm_template.sh")
 with open(_slurmfilename) as template_file:
     SLURMSCRIPTDEFAULT = template_file.read()
