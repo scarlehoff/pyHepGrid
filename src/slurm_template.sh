@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH -o {stdoutfile}
+#SBATCH --error {stderrfile}
 {array}
 
 cd {runcard_dir}

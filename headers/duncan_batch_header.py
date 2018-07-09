@@ -1,3 +1,5 @@
+
+
 import subprocess as sp
 import os
 import random
@@ -13,7 +15,7 @@ def get_cmd_output(*args,**kwargs):
 runcardDir = os.path.expanduser("/mt/home/dwalker/pyhepgrid/runcards/")
 NNLOJETdir ="/mt/home/dwalker/nnlojet/"
 NNLOJETexe = "NNLOJET"
-warmupthr  = 1
+warmupthr  = 128
 producRun  = 1000
 baseSeed   = 1
 jobName    = "gridjob"
@@ -84,3 +86,4 @@ warmup_queue = None
 production_queue = None
 test_queue = None
 production_threads = 1
+slurm_exclusive = True
