@@ -65,6 +65,7 @@ arcbase  = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
 
 # DIRAC parameters
 dirac_name = "juan.m.cruzmartinez"
+DIRAC_BANNED_SITES = ["VAC.UKI-SCOTGRID-GLASGOW.uk"]
 
 # src.finalise.py-only parameters
 finalise_runcards = None
