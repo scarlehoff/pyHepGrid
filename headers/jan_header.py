@@ -52,6 +52,7 @@ arcbase  = "/mt/home/jniehues/.arc/jobs.dat" # arc database
 
 # DIRAC parameters
 dirac_name = "jan.niehues"
+DIRAC_BANNED_SITES = ["VAC.UKI-SCOTGRID-GLASGOW.uk"]
 
 #
 # NNLOJET Database Parameters

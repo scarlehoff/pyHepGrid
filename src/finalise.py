@@ -145,7 +145,8 @@ def do_finalise():
     print("Finalisation setup complete. Preparing to pull data.")
 
     for rc_no, (runcard, tag) in enumerate(use_list):
-        printstr = "> {0}-{1} ".format(runcard, tag)
+        #printstr = "> {0}-{1} ".format(runcard, tag)
+        printstr = "> {0} ".format(runcard, tag)
         counter = "[{0}/{1}]".format(rc_no+1,tot_rc_no)
         print("{0:<60}{1:<7}".format(printstr, counter), end="")
 
@@ -162,7 +163,7 @@ def do_finalise():
             print_no_files_found(0)
             continue
 
-        # Makes the second runcard slightly quicker by removing matched files:)
+        # Makes the second runcard slightly quicker by removing matched files :)
         output = output.difference(set(output_file_names)) 
 
         logseeds, targetdir = createdirs(currentdir, dirtag)

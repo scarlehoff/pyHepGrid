@@ -63,6 +63,7 @@ arcbase  = "/mt/home/dwalker/.arc/jobs.dat" # arc database
 
 # DIRAC parameters
 dirac_name = "duncan.walker"
+DIRAC_BANNED_SITES = ["VAC.UKI-SCOTGRID-GLASGOW.uk"]
 
 # finalise.py-only parameters
 finalise_runcards = None
