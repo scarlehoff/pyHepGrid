@@ -28,6 +28,7 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
+        args["stderrfile"]=args["stdoutfile"].replace(".out",".err")
         return args
 
     def _get_production_args(self, runcard, tag, baseSeed, producRun, threads, array=True):
@@ -37,18 +38,20 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
+        args["stderrfile"]=args["stdoutfile"].replace(".out",".err")
         return args
 
     def _run_SLURM(self, filename, args, queue, test=False, socket=None, n_sockets=1):
+        from src.header import slurm_exclusive
         if queue is not None:
             queuetag = "-p {0}".format(queue)
         else:
             queuetag = ""
-        if n_sockets>1:
+        if n_sockets>1 or slurm_exclusive:
             exclusive = "--exclusive"
         else:
             exclusive = ""
-        cmd = "sbatch {1} {0} -N {0} -n {2} {3} -c 24".format(filename, queuetag,
+        cmd = "sbatch {0} {1} -N 1 -n {2} {3} -c 24".format(filename, queuetag,
                                                         args["threads"], n_sockets, exclusive)
         header.logger.debug(cmd)
         output = util.getOutputCall(cmd.split())
