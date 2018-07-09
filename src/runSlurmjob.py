@@ -29,6 +29,8 @@ class RunSlurm(Backend):
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
         args["stderrfile"]=args["stdoutfile"].replace(".out",".err")
+        args["stacksize"]=header.stacksize
+        args["memsize"]=int(threads*stacksize*1.2)
         return args
 
     def _get_production_args(self, runcard, tag, baseSeed, producRun, threads, array=True):
@@ -51,8 +53,10 @@ class RunSlurm(Backend):
             exclusive = "--exclusive"
         else:
             exclusive = ""
+        # cmd = "sbatch {0} {1} -n {2} {3} -c 24".format(filename, queuetag,
+        #                                                 args["threads"], n_sockets, exclusive)
         cmd = "sbatch {0} {1} -N 1 -n {2} {3} -c 24".format(filename, queuetag,
-                                                        args["threads"], n_sockets, exclusive)
+                                                            args["threads"], n_sockets, exclusive)
         header.logger.debug(cmd)
         output = util.getOutputCall(cmd.split())
         jobid = output.strip().split()[-1]
