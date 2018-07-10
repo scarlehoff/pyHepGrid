@@ -35,7 +35,7 @@ lhapdf_ignore_dirs = ["doc", "examples", "config", "LHAPDF-6.2.1/share",
                       "tests", "python2.6", "wrappers", "bin", "include", 
                       "src"]
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
-lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
+lhapdf_central_scale_only = True #True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
 dbname     = "/mt/home/dwalker/jobscripts/databases/CCDIS.dat"     

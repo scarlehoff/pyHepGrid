@@ -451,7 +451,7 @@ class Backend(object):
         nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
         shutil.copy(nnlojetfull, run_dir)
         runcard_file = runcardDir + "/" + runcard
-        runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
+        runcard_obj = NNLOJETruncard(runcard_file, logger=logger, grid_run=False)
         self._check_warmup(runcard_obj, continue_warmup)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
