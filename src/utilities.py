@@ -122,18 +122,21 @@ def sanitiseGeneratedPath(dailyPath, rname):
 def lhapdfIni():
     import shutil, os 
     import src.header as header
+    import collections, re
+    import json
+    from src.header import logger
     lha_conf = "lhapdf-config"
     if getOutputCall(["which", lha_conf]) != "":
-        print("Using lhapdf-config to get lhapdf directory")
+        logger.info("Using lhapdf-config to get lhapdf directory")
         lha_raw = getOutputCall([lha_conf, "--prefix"])
         lha_dir = lha_raw.rstrip()
     else:
         from src.header import lhapdf as lha_dir
     lhapdf = header.lhapdf_loc
-    print("> Copying lhapdf from {0} to {1}".format(lha_dir, lhapdf))
+    logger.info("Copying lhapdf from {0} to {1}".format(lha_dir, lhapdf))
     bring_lhapdf_pwd = ["cp", "-LR", lha_dir, lhapdf]
     spCall(bring_lhapdf_pwd)
-    # Remove any unwatend directory from lhapdf
+    # Remove any unwanted directory from lhapdf
     rmdirs = header.lhapdf_ignore_dirs
     if header.lhapdf_ignore_dirs is not None:
         for root, dirs, files in os.walk(lhapdf):
@@ -143,17 +146,38 @@ def lhapdfIni():
                     if rname in directory_path:
                         shutil.rmtree(directory_path)
                         break
+    pdfs = collections.defaultdict(set)
     if header.lhapdf_central_scale_only:
-        print("> Removing non-central scales from lhapdf")
-        for root, dirs, files in os.walk(lhapdf):
-            for xfile in files:
-                fullpath = os.path.join(root,xfile)
-                if "share" and ".dat" in fullpath and "._" not in fullpath:
-                    if "_0000.dat" not in fullpath:
-                        os.remove(fullpath)
-                    else:
-                        prettyname = fullpath.split("/")[-1].replace("_0000.dat","")
-                        print("Including central PDF for {0} from {1}".format(prettyname,root))
+        logger.info("Removing non-central scales from lhapdf")
+
+    for root, dirs, files in os.walk(lhapdf):
+        for xfile in files:
+            fullpath = os.path.join(root,xfile)
+            if "share" and ".dat" in fullpath and "._" not in fullpath:
+                if "_0000.dat" not in fullpath and header.lhapdf_central_scale_only:
+                    os.remove(fullpath)
+                    continue
+                elif header.lhapdf_central_scale_only:
+                    prettyname = fullpath.split("/")[-1].replace("_0000.dat","")
+                    logger.info("Including central PDF for {0} from {1}".format(prettyname,root))
+                setname = re.sub(r"_([0-9]*).dat","",fullpath.split("/")[-1])
+                member = int(re.search(r"_([0-9]*).dat",fullpath.split("/")[-1]
+                                       ).group(0).replace("_","").replace(".dat",""))
+                pdfs[setname].update(set([member]))
+
+    
+    pdf_file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo") 
+    for key,val in pdfs.items():
+        pdfs[key]=list(val)
+
+    pdfs = dict(pdfs)
+    logger.info("Writing pdf contents to .pdfinfo file")
+
+    with open(pdf_file_name,"w") as pdf_file_obj:
+        pdf_file_obj.write(json.dumps(pdfs))
+
+    import sys
+    sys.exit()
     # Tar lhapdf and prepare it to be sent
     lhapdf_remote = header.lhapdf_grid_loc
     lhapdf_griddir = lhapdf_remote.rsplit("/",1)[0]
@@ -162,11 +186,11 @@ def lhapdfIni():
     grid_w = GridWrap()
     tar_w.tarDir(lhapdf, lhapdf_gridname)
     size = os.path.getsize(lhapdf_gridname)/float(1<<20)
-    print("> LHAPDF tar size: {0:>6.3f} MB".format(size))
+    logger.info("> LHAPDF tar size: {0:>6.3f} MB".format(size))
     if grid_w.checkForThis(lhapdf_gridname, lhapdf_griddir):
-        print("> Removing previous version of lhapdf in the grid")
+        logger.info("> Removing previous version of lhapdf in the grid")
         grid_w.delete(lhapdf_gridname, lhapdf_griddir)
-    print("> Sending new lhapdf to grid as {0}".format(lhapdf_gridname))
+    logger.info("> Sending new lhapdf to grid as {0}".format(lhapdf_gridname))
     grid_w.send(lhapdf_gridname, lhapdf_griddir)
     shutil.rmtree(lhapdf)
     os.remove(lhapdf_gridname)

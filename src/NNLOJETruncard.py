@@ -37,7 +37,7 @@ class NNLOJETruncard:
     """
 
     def __init__(self, runcard_file = None, runcard_class = None, blocks = ["channels"],
-                 logger=None):
+                 logger=None, grid_run = True):
 
         self._setup_logging(logger)
         self.runcard_dict = {}
@@ -59,8 +59,46 @@ class NNLOJETruncard:
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i)
         self._check_numeric()
+        self._check_pdf(grid_run)
 
 
+    def __check_local_pdf(self):
+        from subprocess import Popen, PIPE
+        pdf = self.runcard_dict_case_preserving["pdf_name"]
+        cmd = ["lhapdf","ls","--installed"]
+        outbyt = Popen(cmd, stdout = PIPE).communicate()[0]
+        pdfs = [i for i in outbyt.decode("utf-8").split("\n") if i != ""]
+        try:
+            assert pdf in pdfs
+        except AssertionError as e:
+            self.critical("PDF set {0} is not installed in local version of LHAPDF".format(pdf))
+
+
+    def __check_grid_pdf(self):
+        import json
+        infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo") 
+        try:
+            with open(infofile,"r") as f:
+                data = json.load(f)
+                pdf = self.runcard_dict_case_preserving["pdf_name"]
+                member = self.runcard_dict_case_preserving["pdf_member"]
+                try:
+                    members = data[pdf]
+                except KeyError as e:
+                    self.critical("PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf))
+                try:
+                    assert int(member) in members
+                except AssertionError as e:
+                    self.critical("PDF member {1} for PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf, member))
+        except FileNotFoundError as e:
+            self.warning("No PDF info file found. Skipping check.")
+
+    def _check_pdf(self, grid_run):
+        self.print("Checking PDF set validity")
+        if grid_run:
+            self.__check_grid_pdf()
+        else:
+            self.__check_local_pdf()
 
     def _check_numeric(self):
         """ Asserts that runcard elements that need to be numeric indeed are """
