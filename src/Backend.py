@@ -1022,13 +1022,22 @@ class Backend(object):
         fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype", "iseed"]
         dictC  = self._db_list(fields, search_string)
         print("Active runs: " + str(len(dictC)))
-        print("id".center(5) + " | " + "runcard".center(22) + " | " + "runname".center(25) + " | " +  "date".center(22) + " | " + "misc".center(20))
+
+        # Could easily be optimised
+        offset = 2
+        id_width = max(len(str(i["rowid"])) for i in dictC)+offset
+        runcard_width = max(len(i["runcard"].strip()) for i in dictC)+offset
+        runname_width = max(len(i["runfolder"].strip()) for i in dictC)+offset
+        date_width = max(len(str(i['date']).split('.')[0].strip()) for i in dictC)+offset
+        misc_width = 7
+
+        print("|".join(["id".center(id_width),"runcard".center(runcard_width),"runname".center(runname_width),"date".center(date_width),"misc".center(misc_width)]))
         for i in dictC:
-            rid = str(i['rowid']).center(5)
-            ruc = str(i['runcard']).center(22)
-            run = str(i['runfolder']).center(25)
-            dat = str(i['date']).split('.')[0].center(22)
-            misc = str(i['jobtype'])
+            rid = str(i['rowid']).center(id_width)
+            ruc = str(i['runcard']).center(runcard_width)
+            run = str(i['runfolder']).center(runname_width)
+            dat = str(i['date']).split('.')[0].center(date_width)
+            misc = str(" "+i['jobtype'])
             jobids = str(i['jobid'])
             initial_seed = str(i['iseed'])
             no_jobs = len(jobids.split(" "))
@@ -1038,8 +1047,8 @@ class Backend(object):
                 else:
                     misc += " ({0})".format(no_jobs)
             misc += self._get_computing_element(jobids)
-            misc_text = misc.center(20)
-            print(rid + " | " + ruc + " | " + run + " | " + dat + " | " + misc_text)
+            misc_text = misc.center(misc_width)
+            print("|".join([rid,ruc,run,dat,misc_text]))
 
     def get_active_dbids(self):
         field_name = "rowid"

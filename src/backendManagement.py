@@ -301,6 +301,8 @@ class Slurm(Backend):
         if jobinfo["jobtype"] == "Production" or "Socket" in jobinfo["jobtype"]:
             for subjobno in range(1,int(jobinfo["no_runs"])+1):
                 stdoutfile=os.path.join(dir_name,"slurm-{0}_{1}.out".format(jobid,subjobno)) 
+                if print_stderr:
+                    stdoutfile = stdoutfile.replace(".out",".err")
                 cmd = ["cat", stdoutfile]
                 if not store:
                     util.spCall(cmd)
@@ -308,6 +310,8 @@ class Slurm(Backend):
                     output.append(util.getOutputCall(cmd))
         else:
             stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid)) 
+            if print_stderr:
+                stdoutfile = stdoutfile.replace(".out",".err")
             cmd = ["cat", stdoutfile]
             if not store:
                 util.spCall(cmd)
