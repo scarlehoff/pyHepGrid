@@ -22,6 +22,7 @@ baseSeed   = 100
 #how arc/dirac identifies the job
 jobName    = "testjob"
 debug_level = 0
+stacksize = 50 #MB
 
 # Grid config 
 lfndir         = "/grid/pheno/jwhitehead"
@@ -83,3 +84,4 @@ warmup_queue = "openmp7.q"
 production_queue = "par7.q"
 test_queue = "test.q"
 production_threads = 24
+slurm_exclusive = True
