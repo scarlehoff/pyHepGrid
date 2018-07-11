@@ -18,6 +18,7 @@ producRun  = 1000
 baseSeed   = 1
 jobName    = "gridjob"
 debug_level = 0
+stacksize = 50 #MB
 
 # Grid config 
 lfndir   = "/grid/pheno/dwalker"
@@ -86,3 +87,4 @@ warmup_queue = "par7.q"
 production_queue = "par7.q"
 test_queue = "test.q"
 production_threads = 24
+slurm_exclusive = True
