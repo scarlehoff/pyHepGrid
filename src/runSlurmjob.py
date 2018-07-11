@@ -30,7 +30,7 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
         args["stderrfile"]=args["stdoutfile"].replace(".out",".err")
         args["stacksize"]=header.stacksize
-        args["memsize"]=int(threads*stacksize*1.2)
+        args["memsize"]=int(threads*header.stacksize*1.2)
         return args
 
     def _get_production_args(self, runcard, tag, baseSeed, producRun, threads, array=True):
