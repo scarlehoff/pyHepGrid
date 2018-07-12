@@ -110,12 +110,13 @@ def print_run_stats(no_files_found, corrupt_no):
     print("    {2}Successful: {0:<5}\033[0m  {3}Corrupted: {1:<5}\033[0m".format(success_no,corrupt_no,suc_col,cor_col))
 
 
-def print_final_stats(start_time, tot_no_new_files):
+def print_final_stats(start_time, tot_no_new_files, corrupt_no):
     end_time = datetime.datetime.now()
     total_time = (end_time-start_time).__str__().split(".")[0]
     print("\033[92m{0:^80}\033[0m".format("Finalisation finished!"))
     print("Total time: {0} ".format(total_time))
     print("New files found: {0}".format(tot_no_new_files)) 
+    print("Corrupted files: {0}".format(corrupt_no)) 
     print("Finish time: {0}".format(end_time.strftime('%H:%M:%S')))
 
 
@@ -134,6 +135,7 @@ def do_finalise():
     pool = mp.Pool(processes=no_processes)
 
     tot_no_new_files = 0
+    tot_no_corrupted_files = 0
     use_list = []
     for runcard in rc.dictCard:
         if type(rc.dictCard[runcard]) == str:
@@ -180,9 +182,10 @@ def do_finalise():
                                              it.repeat(runcard)),
                                    chunksize=1)
             corrupt_no = sum(results)
+            tot_no_corrupted_files += corrupt_no
             print_run_stats(no_files_found, corrupt_no)
 
-    print_final_stats(start_time,tot_no_new_files)
+    print_final_stats(start_time,tot_no_new_files,tot_no_corrupted_files)
 
 if __name__ == "__main__":
     do_finalise()
