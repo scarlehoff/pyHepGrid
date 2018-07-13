@@ -83,7 +83,7 @@ class Arc(Backend):
             return out
 
 
-    def cat_log_job(self, jobids):
+    def cat_log_job(self, jobids, jobinfo):
         """Sometimes the std output doesn't get updated
         but we can choose to access the logs themselves"""
         output_folder = ["file:///tmp/"]
@@ -228,14 +228,15 @@ class Slurm(Backend):
         warmup_output_dir = self.get_local_dir_name(data["runcard"],data["runfolder"])
         warmup_extensions = (".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb",".log")
         warmup_files = [i for i in os.listdir(warmup_output_dir) if i.endswith(warmup_extensions)]
-        print(warmup_files, data["pathfolder"])
+        header.logger.info("Found files: {0}".format(", ".join(warmup_files)))
         warmup_dir = os.path.join(header.warmup_base_dir,data["runfolder"])
         os.makedirs(warmup_dir,exist_ok=True)
         for warmfile in warmup_files:
             orig = os.path.join(warmup_output_dir, warmfile)
             new = os.path.join(warmup_dir, warmfile)
             shutil.copy(orig,new)
-        # header.logger.critical("Get_data not (yet) implemented for SLURM")
+        header.logger.info("Warmup stored in {0}".format(warmup_dir))
+
 
     def _get_data_production(self, db_id):
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
@@ -245,7 +246,7 @@ class Slurm(Backend):
                         if i.endswith(".dat")]
         log_files = [i for i in os.listdir(production_output_dir) 
                         if i.endswith(".log")]
-        print(dat_files, data["pathfolder"])
+        header.logger.info(dat_files, data["pathfolder"])
         production_dir = os.path.join(header.production_base_dir,data["runfolder"])
         os.makedirs(production_dir,exist_ok=True)
         results_folder = production_dir
@@ -261,11 +262,35 @@ class Slurm(Backend):
             new = os.path.join(log_folder, logfile)
             shutil.copy(orig,new)
 
-        # header.logger.critical("Get_data not (yet) implemented for SLURM")
+
+    def cat_log_job(self, jobids, jobinfo, *args, **kwargs):
+        import re
+        import glob
+        run_dir = self.get_local_dir_name(jobinfo["runcard"],jobinfo["runfolder"])
+        log_files = [i for i in os.listdir(run_dir) if i.endswith(".log")]
+
+        if jobinfo["iseed"] is None:
+            jobinfo["iseed"] = 1
+        expected_seeds = set(range(int(jobinfo["iseed"]),int(jobinfo["iseed"])+int(jobinfo["no_runs"])))
+
+        logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
+        logseeds_in_dir = set([int(logseed_regex.search(i).group(1)) for i 
+                               in glob.glob('{0}/*.log'.format(run_dir))])
+        seeds_to_print = (logseeds_in_dir.union(expected_seeds))
+
+        cat_logs = []
+        for log_file in log_files:
+            for seed in seeds_to_print:
+                if ".s{0}.".format(seed) in log_file:
+                    cat_logs.append(log_file)
+                    seeds_to_print.remove(seed)
+                    break
+        
+        for log in cat_logs:
+            cmd = ["cat", os.path.join(run_dir,log)]
+            util.spCall(cmd)
 
 
-    def cat_log_job(*args, **kwargs):
-        header.logger.critical("logfile printing not (yet) implemented for SLURM")
 
     def get_status(self, jobid, status):
         stat = len([i for i in util.getOutputCall(["squeue", "-j{0}".format(jobid),"-r","-t",status],
@@ -274,6 +299,7 @@ class Slurm(Backend):
         if stat >0:
             stat = stat-1
         return stat
+
 
     def stats_job(self, dbid):
         tags = ["runcard", "runfolder", "date"]
