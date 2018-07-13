@@ -1025,10 +1025,10 @@ class Backend(object):
 
         # Could easily be optimised
         offset = 2
-        id_width = max(len(str(i["rowid"])) for i in dictC)+offset
-        runcard_width = max(len(i["runcard"].strip()) for i in dictC)+offset
-        runname_width = max(len(i["runfolder"].strip()) for i in dictC)+offset
-        date_width = max(len(str(i['date']).split('.')[0].strip()) for i in dictC)+offset
+        id_width = max(list(len(str(i["rowid"])) for i in dictC)+[2])+offset
+        runcard_width = max(list(len(i["runcard"].strip()) for i in dictC)+[7])+offset
+        runname_width = max(list(len(i["runfolder"].strip()) for i in dictC)+[7])+offset
+        date_width = max(list(len(str(i['date']).split('.')[0].strip()) for i in dictC)+[10])+offset
         misc_width = 7
 
         print("|".join(["id".center(id_width),"runcard".center(runcard_width),"runname".center(runname_width),"date".center(date_width),"misc".center(misc_width)]))

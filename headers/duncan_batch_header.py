@@ -54,9 +54,9 @@ verbose_finalise = False
 
 # Default folder for use only if finalisation script != None
 # Gives a default destination for warmup files pulled whilst run is in progress
-default_runfolder = os.path.expanduser("~/warmups/")
+default_runfolder = os.path.expanduser("~/pyhepgrid/warmups/")
 
-warmup_base_dir = os.path.expanduser("~/warmups")
+warmup_base_dir = os.path.expanduser("~/pyhepgrid/warmups")
 production_base_dir = os.path.expanduser("/mt/home/dwalker/pyhepgrid/results/")
 
 short_stats = True
