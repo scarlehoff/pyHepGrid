@@ -238,9 +238,18 @@ if __name__ == "__main__":
                                                                   args.executable, 
                                                                   args.runcard)
 
+    bring_status = bring_lhapdf(args.lhapdf_grid, debug_level)
+    bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
+    if debug_level > 2:
+        os.system("env")
+
     if args.Sockets:
         host = args.Host
         port = args.port
+        if bring_status != 0:
+            print_flush("Not able to bring data from LFN, removing myself from the pool")
+            socket_sync_str(host, port, handshake = "oupsities")
+            sys.exit(-95)
         print_flush("Sockets are active, trying to connect to {0}:{1}".format(host,port))
         socket_config = socket_sync_str(host, port)
         if "die" in socket_config:
@@ -254,11 +263,6 @@ if __name__ == "__main__":
         nnlojet_command += " -iseed {0}".format(args.seed)
 
     set_environment(args.lfndir, args.lhapdf_local)
-
-    bring_status = bring_lhapdf(args.lhapdf_grid, debug_level)
-    bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
-    if debug_level > 2:
-        os.system("env")
 
     if debug_level > 1:
         os.system("ls")

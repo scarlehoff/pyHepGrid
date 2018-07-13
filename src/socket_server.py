@@ -354,6 +354,10 @@ def do_server(args,log):
                 # nnlorun.py sends the word "greetins" at the start
                 #print("ARC.py captured")
                 clients.append(new_client)
+            elif greetings == "oupsities":
+                n_clients_max -= 1
+                new_client.close()
+                continue
             else:
                 log.info("Waiting for nnlorun.py instance, got nonsense instead.")
                 log.info("Received msg: {0}".format(greetings))
