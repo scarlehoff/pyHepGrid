@@ -35,11 +35,17 @@ def search_matches_path(args, path):
         return False
     return True
 
-def print_output(stats):
+def print_output(stats, do_total):
     print(RuncardStats.output_header())
     print(RuncardStats.divider_string())
+    no_files = 0
     for i in stats:
+        no_files += i.no_files
         print(i)
+    if do_total:
+        print(RuncardStats.divider_string())
+        print(RuncardStats.print_format("Total Files",no_files,""))
+        
 
 def get_stats(args):
     stats = []
@@ -123,6 +129,8 @@ def parser_setup():
                         help='search for specific string(s) in runcard dir.', nargs = '+')
     parser.add_argument('--reject','-r',
                         help='reject specific string(s) in runcard dir.', nargs = '+')
+    parser.add_argument('--total','-tot',
+                        help='include total # of results', action="store_true")
     args = parser.parse_args()
     return args
 
@@ -137,6 +145,6 @@ if __name__ == "__main__":
     if args.nofiles:
         stats.sort(reverse=args.rev,key=lambda x: x.nofiles)
     if len(stats)>0:
-        print_output(stats)
+        print_output(stats,args.total)
     else:
         print("No results found.")
