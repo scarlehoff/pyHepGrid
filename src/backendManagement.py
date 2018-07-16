@@ -53,7 +53,7 @@ class Arc(Backend):
             cmd = [self.cmd_renew, jobid.strip()]
             util.spCall(cmd)
 
-    def kill_job(self, jobids):
+    def kill_job(self, jobids, jobinfo):
         """ kills given job """
         self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill the job!")
         for jobid in jobids:
@@ -207,7 +207,7 @@ class Dirac(Backend):
         self._set_new_status(dbid, status)
 
 
-    def kill_job(self, jobids):
+    def kill_job(self, jobids, jobinfo):
         """ kill all jobs associated with this run """
         self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill all jobs for this run!")
         cmd = [self.cmd_kill] + jobids
@@ -346,9 +346,19 @@ class Slurm(Backend):
         if store:
             return output
 
-    def kill_job(self,jobids):
+    def kill_job(self,jobids, jobinfo):
+        header.logger.debug(jobids, jobinfo)
         for jobid in jobids:
             util.spCall(["scancel",str(jobid)])
+        # Kill the socket server if needed
+        # if "Socket" in jobinfo["jobtype"]:
+        #     hostname = header.server_host
+        #     port  = jobinfo["jobtype"].split("=")[-1]
+        #     self._press_yes_to_continue("  \033[93m WARNING:\033[0m Killing TMUX server for job at {0}:{1}".format(hostname,port))
+        #     import src.socket_api as sapi
+        #     sapi.socket_sync_str(hostname,port,b"bye!")
+
+
 
 if __name__ == '__main__':
     from sys import version_info

@@ -101,7 +101,7 @@ def management_routine(backend, args):
                 backend.disable_db_entry(db_id)
         elif args.kill_job:
             print(printstr.format("Killing"))
-            backend.kill_job(jobid)
+            backend.kill_job(jobid, jobinfo)
             backend.disable_db_entry(db_id)
         elif args.clean:
             print(printstr.format("Cleaning"))
