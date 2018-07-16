@@ -88,3 +88,4 @@ production_queue = "par7.q"
 test_queue = "test.q"
 production_threads = 24
 slurm_exclusive = True
+slurm_exclude = []

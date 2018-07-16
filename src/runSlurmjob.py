@@ -16,6 +16,22 @@ class RunSlurm(Backend):
         self.runfolder = header.runcardDir
         self.tarw      = util.TarWrap()
 
+    def __do_common_args(self,args,threads):
+        """ Setup for all arguments common to production and warmup"""
+        from src.header import slurm_exclusive, slurm_exclude
+        if slurm_exclusive:
+            args["exclusive"] = "#SBATCH --exclusive"
+        else:
+            args["exclusive"] = ""
+        if len(slurm_exclude)>0:
+            args["exclude_list"] = "#SBATCH --exclude={0}".format(",".join(slurm_exclude))
+        else:
+            args["exclude_list"] = ""
+        args["stderrfile"]=args["stdoutfile"].replace(".out",".err")
+        args["stacksize"]=header.stacksize
+        args["memsize"]=int(threads*header.stacksize*1.2)
+        return args
+
     def _get_warmup_args(self, runcard, tag, threads=1, n_sockets=1,
                          sockets=None, port=header.port, array=False):
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
@@ -28,9 +44,7 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
-        args["stderrfile"]=args["stdoutfile"].replace(".out",".err")
-        args["stacksize"]=header.stacksize
-        args["memsize"]=int(threads*header.stacksize*1.2)
+        args = self.__do_common_args(args, threads)
         return args
 
     def _get_production_args(self, runcard, tag, baseSeed, producRun, threads, array=True):
@@ -40,7 +54,7 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
-        args["stderrfile"]=args["stdoutfile"].replace(".out",".err")
+        args = self.__do_common_args(args, threads)
         return args
 
     def _run_SLURM(self, filename, args, queue, test=False, socket=None, n_sockets=1):
@@ -49,14 +63,11 @@ class RunSlurm(Backend):
             queuetag = "-p {0}".format(queue)
         else:
             queuetag = ""
-        if n_sockets>1 or slurm_exclusive:
-            exclusive = "--exclusive"
-        else:
-            exclusive = ""
-        # cmd = "sbatch {0} {1} -n {2} {3} -c 24".format(filename, queuetag,
-        #                                                 args["threads"], n_sockets, exclusive)
-        cmd = "sbatch {0} {1} -N 1 -n {2} {3} -c 24".format(filename, queuetag,
-                                                            args["threads"], n_sockets, exclusive)
+        # if n_sockets>1 or slurm_exclusive:
+        #     exclusive = "--exclusive"
+        # else:
+        #     exclusive = ""
+        cmd = "sbatch {0} {1}".format(filename, queuetag)
         header.logger.debug(cmd)
         output = util.getOutputCall(cmd.split())
         jobid = output.strip().split()[-1]
@@ -72,6 +83,7 @@ class RunSlurm(Backend):
         with open(filename, 'w') as f:
             slurmfile  =self.templ.format(**dictData)
             f.write(slurmfile)
+        header.logger.debug(slurmfile)
         return filename
 
     def _write_SLURM_production(self, dictData, filename = None):
