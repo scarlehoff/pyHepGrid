@@ -3,6 +3,7 @@
 #SBATCH --error {stderrfile}
 #SBATCH --mem {memsize}M         
 #SBATCH --cpus-per-task={threads}
+#SBATCH --job-name={jobName}
 {array}
 {exclusive}
 {exclude_list}

@@ -18,7 +18,8 @@ class RunSlurm(Backend):
 
     def __do_common_args(self,args,threads):
         """ Setup for all arguments common to production and warmup"""
-        from src.header import slurm_exclusive, slurm_exclude
+        from src.header import slurm_exclusive, slurm_exclude, jobName
+
         if slurm_exclusive:
             args["exclusive"] = "#SBATCH --exclusive"
         else:
@@ -30,6 +31,7 @@ class RunSlurm(Backend):
         args["stderrfile"]=args["stdoutfile"].replace(".out",".err")
         args["stacksize"]=header.stacksize
         args["memsize"]=int(threads*header.stacksize*1.2)
+        args["jobName"]=jobName
         return args
 
     def _get_warmup_args(self, runcard, tag, threads=1, n_sockets=1,
