@@ -132,6 +132,16 @@ def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe
 
     return port
 
+
+def socket_sync_str(host, port, handshake):
+    # Blocking call, it will receive a str of the form
+    # -sockets {0} -ns {1}
+    import socket
+    sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sid.connect((host, int(port)))
+    sid.send(handshake)
+    return sid.recv(32)
+
     
 if __name__ == "__main__":
     test_host = "gridui1"
