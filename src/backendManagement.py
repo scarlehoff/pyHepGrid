@@ -56,8 +56,10 @@ class Arc(Backend):
     def kill_job(self, jobids):
         """ kills given job """
         self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill the job!")
-        for jobid in jobids:
-            cmd = [self.cmd_kill, "-j", header.arcbase, jobid.strip()]
+        for jobid_set in util.batch_gen(jobids, 150): # Kill in groups of 150 for speeeed
+            stripped_set = [i.strip() for i in jobid_set]
+            cmd = [self.cmd_kill, "-j", header.arcbase] + stripped_set
+            header.logger.debug("job_kill batch length:{0}".format(len(stripped_set)))
             util.spCall(cmd)
 
     def clean_job(self, jobids):

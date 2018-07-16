@@ -117,6 +117,14 @@ def sanitiseGeneratedPath(dailyPath, rname):
     return finalPlacement
 
 #
+# Miscellaneous helpers
+#
+def batch_gen(data, batch_size):
+    for i in range(0, len(data), batch_size):
+            yield data[i:i+batch_size]
+
+
+#
 # Library initialisation
 #
 def lhapdfIni():

@@ -69,7 +69,7 @@ ce_listfile = "computing_elements.txt"
 
 # DIRAC parameters
 dirac_name = "duncan.walker"
-DIRAC_BANNED_SITES = ["VAC.UKI-SCOTGRID-GLASGOW.uk"]
+DIRAC_BANNED_SITES = None # ["VAC.UKI-SCOTGRID-GLASGOW.uk"]
 
 
 # finalise.py-only parameters
