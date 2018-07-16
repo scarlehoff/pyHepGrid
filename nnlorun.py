@@ -226,8 +226,9 @@ if __name__ == "__main__":
  
 
     args = parse_arguments()
-
     debug_level = int(args.debug)
+
+    set_environment(args.lfndir, args.lhapdf_local)
     
     if debug_level > 1:
         from sys import version
@@ -261,8 +262,6 @@ if __name__ == "__main__":
 
     if args.Production:
         nnlojet_command += " -iseed {0}".format(args.seed)
-
-    set_environment(args.lfndir, args.lhapdf_local)
 
     if debug_level > 1:
         os.system("ls")

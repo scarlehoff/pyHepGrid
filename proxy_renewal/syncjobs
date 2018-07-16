@@ -1,2 +1,3 @@
 arcsync -c ce1.dur.scotgrid.ac.uk
+arcsync -c ce2.dur.scotgrid.ac.uk
 arcrenew -a &>/dev/null
