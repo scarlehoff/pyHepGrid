@@ -16,7 +16,7 @@ class RunSlurm(Backend):
         self.runfolder = header.runcardDir
         self.tarw      = util.TarWrap()
 
-    def __do_common_args(self,args,threads):
+    def __do_common_args(self,args,threads, queue):
         """ Setup for all arguments common to production and warmup"""
         from src.header import slurm_exclusive, slurm_exclude, jobName
 
@@ -32,10 +32,14 @@ class RunSlurm(Backend):
         args["stacksize"]=header.stacksize
         args["memsize"]=int(threads*header.stacksize*1.2)
         args["jobName"]=jobName
+        if queue is not None:
+            args["partition"] = "#SBATCH --partition {0}".format(queue)
+        else:
+            args["partition"] = ""
         return args
 
     def _get_warmup_args(self, runcard, tag, threads=1, n_sockets=1,
-                         sockets=None, port=header.port, array=False):
+                         sockets=None, port=header.port, array=False, queue=None):
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
                 "threads":threads, "sockets":sockets, "port":port, "host":header.server_host,
                 "socketstr":"", "array":""}
@@ -46,17 +50,17 @@ class RunSlurm(Backend):
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
-        args = self.__do_common_args(args, threads)
+        args = self.__do_common_args(args, threads, queue)
         return args
 
-    def _get_production_args(self, runcard, tag, baseSeed, producRun, threads, array=True):
+    def _get_production_args(self, runcard, tag, baseSeed, producRun, threads, array=True, queue=None):
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
                 "baseSeed":baseSeed, "producRun":producRun-1,"threads":threads}
         if array:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
-        args = self.__do_common_args(args, threads)
+        args = self.__do_common_args(args, threads, queue)
         return args
 
     def _run_SLURM(self, filename, args, queue, test=False, socket=None, n_sockets=1):
@@ -70,6 +74,7 @@ class RunSlurm(Backend):
         # else:
         #     exclusive = ""
         cmd = "sbatch {0} {1}".format(filename, queuetag)
+        # cmd = "sbatch {0} {1} -N 1 -c 24".format(filename, queuetag)
         header.logger.debug(cmd)
         output = util.getOutputCall(cmd.split())
         jobid = output.strip().split()[-1]
@@ -156,7 +161,8 @@ class RunSlurm(Backend):
                 array=False
             arguments = self._get_warmup_args(r, dCards[r], n_sockets = n_sockets,
                                               threads=warmupthr,
-                                              sockets=sockets, port=port, array=array)
+                                              sockets=sockets, port=port, array=array,
+                                              queue=queue)
             slurmfile = self._write_SLURM(arguments)
             header.logger.info(" > Path of slurm file: {0}".format(slurmfile))
             jobids = []
@@ -204,7 +210,7 @@ class RunSlurm(Backend):
             
             # Generate the SLURM file
             arguments = self._get_production_args(r, dCards[r], baseSeed, producRun,
-                                                  production_threads, array=True)
+                                                  production_threads, array=True, queue=queue)
             slurmfile = self._write_SLURM_production(arguments)
             header.logger.info("Path of slurm file: {0}".format(slurmfile))
             jobids = []

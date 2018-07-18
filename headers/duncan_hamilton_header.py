@@ -83,7 +83,7 @@ wait_time = 3600 # default waiting time for the socket server (time between the 
 #SLURM parameters
 local_run_directory = "/ddn/data/qpsv27/run_directories/"
 #warmup_queue = "openmp7.q"
-warmup_queue = "par7.q"
+warmup_queue = "par7.q" # 3 DAY LIMIT
 production_queue = "par7.q"
 test_queue = "test.q"
 production_threads = 24
