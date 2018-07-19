@@ -32,6 +32,7 @@ class RunSlurm(Backend):
         args["stacksize"]=header.stacksize
         args["memsize"]=int(threads*header.stacksize*1.2)
         args["jobName"]=jobName
+        args["exe"]=header.NNLOJETexe
         return args
 
     def _get_warmup_args(self, runcard, tag, threads=1, n_sockets=1,
@@ -239,3 +240,15 @@ def iniWrapper(runcard, warmup=None):
     header.logger.info("Initialising SLURM for {0}".format(runcard))
     slurm = RunSlurm()
     slurm.init_warmup(warmup)
+
+def testWrapper(r, dCards):
+    print("Testing SLURM job for {0}".format(r))
+    slurm = RunSlurm()
+    header.runfile = slurm.templ
+    return ""
+
+def testWrapperProduction(r, dCards):
+    print("Testing SLURM job for {0}".format(r))
+    slurm = RunSlurm()
+    header.runfile = slurm.prodtempl
+    return ""
