@@ -8,6 +8,6 @@
 
 
 cd {runcard_dir}
-OMP_NUM_THREADS={threads} ./NNLOJET -run {runcard} -iseed $((${{SLURM_ARRAY_TASK_ID}} + {baseSeed}))
+OMP_NUM_THREADS={threads} ./{exe} -run {runcard} -iseed $((${{SLURM_ARRAY_TASK_ID}} + {baseSeed}))
 
 exit 0
