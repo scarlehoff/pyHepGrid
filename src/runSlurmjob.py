@@ -102,6 +102,7 @@ class RunSlurm(Backend):
         with open(filename, 'w') as f:
             slurmfile  =self.prodtempl.format(**dictData)
             f.write(slurmfile)
+        header.logger.debug(slurmfile)
         return filename
 
 
@@ -214,6 +215,8 @@ class RunSlurm(Backend):
             header.logger.info("Path of slurm file: {0}".format(slurmfile))
             jobids = []
             jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test)
+            if queue is None:
+                queue = "None"
             jobids.append(jobid)
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
