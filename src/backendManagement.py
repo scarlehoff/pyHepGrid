@@ -361,6 +361,19 @@ class Slurm(Backend):
         #     sapi.socket_sync_str(hostname,port,b"bye!")
 
 
+    def status_job(self, jobids, verbose = False):
+        """ print the current status of a given job """
+        running,waiting,fail,tot = 0,0,0,0
+        for jobid in jobids:
+            running += self.get_status(jobid,"R")
+            waiting += self.get_status(jobid,"PD")
+            fail += self.get_status(jobid,"F")+self.get_status(jobid,"CA")
+            tot += self.get_status(jobid,"all")
+        done = tot-fail-waiting-running
+        total = len(jobids)
+        self.print_stats(done, waiting, running, fail, 0, tot)
+
+
 
 if __name__ == '__main__':
     from sys import version_info
