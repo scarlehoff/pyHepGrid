@@ -31,8 +31,8 @@ class RunDirac(Backend):
         elif isinstance(input_args, list):
             return " {}".format(" ".join(input_args))
         else:
-            print("Arguments: {}".format(input_args))
-            raise Exception("Type of input arguments: {} not regocnised in DIRAC ._format_args".format(type(input_args)))
+            header.logger.warning("Arguments: {}".format(input_args))
+            raise Exception("Type of input arguments: {} not recognised in DIRAC ._format_args".format(type(input_args)))
 
 
     def _write_JDL(self, argument_string, start_seed, no_runs, filename = None):
@@ -69,12 +69,12 @@ class RunDirac(Backend):
         to the diract management system
         """
         rncards, dCards = util.expandCard()
-        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
+        header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         self.runfolder  = header.runcardDir
         from src.header    import baseSeed, producRun
         for r in rncards:
-            print("> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
-            print("> Beginning at seed {0} in increments of 1000.".format(baseSeed))
+            header.logger.info("> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
+            header.logger.info("> Beginning at seed {0} in increments of 1000.".format(baseSeed))
             self._checkfor_existing_output(r, dCards[r])
             jdlfile = None
             args = self._get_prod_args(r, dCards[r], "%s")
@@ -83,7 +83,8 @@ class RunDirac(Backend):
                 no_seeds = min(1000,remaining_seeds)
                 jdlfile = self._write_JDL(args, seed_start, no_seeds)
                 max_seed =  seed_start+no_seeds-1
-                print(" > jdl file path for seeds {0}-{1}: {2}".format(seed_start,max_seed,jdlfile))
+                header.logger.info(" > jdl file path for seeds {0}-{1}: {2}".format(
+                    seed_start,max_seed,jdlfile))
                 joblist += self._run_JDL(jdlfile)
                 remaining_seeds = remaining_seeds - no_seeds
                 seed_start = seed_start + no_seeds
@@ -104,17 +105,17 @@ class RunDirac(Backend):
 
 
 def runWrapper(runcard, test = None):
-    print("Running dirac job for {0}".format(runcard))
+    header.logger.info("Running dirac job for {0}".format(runcard))
     dirac = RunDirac()
     dirac.run_wrap_production()
 
 def testWrapper(r, dCards):
-    print("Running dirac job for {0}".format(r))
+    header.logger.info("Running dirac job for {0}".format(r))
     dirac = RunDirac()
     return dirac._get_prod_args(r, dCards[r], 1)
 
 # code graveyard
 def iniWrapper(runcard, warmupProvided = None):
-    print("Initialising dirac for {0}".format(runcard))
+    header.logger.info("Initialising dirac for {0}".format(runcard))
     dirac = RunDirac()
     dirac.init_production(warmupProvided)

@@ -32,7 +32,7 @@ class RunArc(Backend):
         elif isinstance(input_args, list):
             return "\"{}\"".format("\" \"".join(input_args))
         else:
-            print("Arguments: {}".format(input_args))
+            header.logger.warning("Arguments: {}".format(input_args))
             raise Exception("Type of input arguments: {} not regocnised in ARC ._format_args".format(type(input_args)))
 
     def _write_XRSL(self, dictData, filename = None):
@@ -113,7 +113,7 @@ class RunArc(Backend):
         from src.header import warmupthr, jobName, warmup_base_dir
         # loop over al .run files defined in runcard.py
 
-        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
+        header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         port = header.port
         for r in rncards:
             if n_sockets > 1:
@@ -133,7 +133,7 @@ class RunArc(Backend):
                         'count'       : str(warmupthr),
                         'countpernode': str(warmupthr),}
             xrslfile = self._write_XRSL(dictData)
-            print(" > Path of xrsl file: {0}".format(xrslfile))
+            header.logger.info(" > Path of xrsl file: {0}".format(xrslfile))
 
             jobids = []
             for i_socket in range(n_sockets):
@@ -167,7 +167,7 @@ class RunArc(Backend):
         job_type = "Production"
         from src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
 
-        print("Runcards selected: {0}".format(" ".join(r for r in rncards)))
+        header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
@@ -183,7 +183,7 @@ class RunArc(Backend):
                             'countpernode': str(1),}
                 xrslfile = self._write_XRSL(dictData, filename = xrslfile)
                 if(seed == baseSeed):
-                    print(" > Path of xrsl file: {0}".format(xrslfile))
+                    header.logger.info(" > Path of xrsl file: {0}".format(xrslfile))
                 # Run the file
                 jobid = self._run_XRSL(xrslfile, test=test)
                 joblist.append(jobid)
@@ -203,12 +203,12 @@ class RunArc(Backend):
             self.dbase.insert_data(self.table, dataDict)
 
 def runWrapper(runcard, test = None, expandedCard = None):
-    print("Running arc job for {0}".format(runcard))
+    header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(header.ARCSCRIPTDEFAULT)
     arc.run_wrap_warmup(test, expandedCard)
 
 def runWrapperProduction(runcard, test=None):
-    print("Running arc job for {0}".format(runcard))
+    header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
     arc.run_wrap_production(test)
 
@@ -216,24 +216,24 @@ def runWrapperProduction(runcard, test=None):
 ####### Testing routines - just a wrapper to get the args for nnlojob
 
 def testWrapper(r, dCards):
-    print("Running arc job for {0}".format(r))
+    header.logger.info("Running arc job for {0}".format(r))
     arc = RunArc(header.ARCSCRIPTDEFAULT)
     return arc._get_warmup_args(r, dCards[r], threads=header.warmupthr,
                                                         sockets=False)
 
 def testWrapperProduction(r, dCards):
-    print("Running arc job for {0}".format(r))
+    header.logger.info("Running arc job for {0}".format(r))
     arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
     return arc._get_prod_args(r, dCards[r], 1)
 
 # Code graveyard
 def iniWrapper(runcard, warmup=None):
-    print("Initialising Arc for {0}".format(runcard))
+    header.logger.info("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
     arc.init_warmup(warmup)
 
 def iniWrapperProduction(runcard, warmup=None):
-    print("Initialising Arc for {0}".format(runcard))
+    header.logger.info("Initialising Arc for {0}".format(runcard))
     arc = RunArc()
     if warmup:
         arc.init_warmup(warmup)

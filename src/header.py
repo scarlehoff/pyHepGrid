@@ -80,19 +80,10 @@ diractable = "diracjobs"
 slurmtable = "slurmjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue", "no_runs"]
 # DW This should be a hard link so socketed runs can be sent from other folders/locations
-socket_exe = "{0}/src/socket_server.py".format(os.getcwd()) # Eventually will need to point towards NNLOJET/bin
+socket_exe = "{0}/socket_server.py".format(os.path.dirname(os.path.realpath(__file__))) # Eventually will need to point towards NNLOJET/bin
 
-#
-# Templates
-# 
 sockets_active = 1 # 1 socket == no sockets
 
-# # If a job is expected to run for long, use the following property (in minutes)
-# "(wallTime  =    \"3 days\")" 
-# it is also possible to specifiy the maximum cpu time instead (or 'as well')
-# "(cpuTime = \"3 days\")"
-# if nothing is used, the end system will decide what the maximum is
-#
 
 
 #### RUNCARD OVERRIDES ####
@@ -161,6 +152,17 @@ except ImportError as e:
 
 if arcbase is None and os.path.basename(os.path.realpath(sys.argv[0]))=="main.py":
         logger.critical("arcbase (location of arc submission database) set to None. Please check your header/runcard.")
+
+#
+# Templates
+# 
+
+# # If a job is expected to run for long, use the following property (in minutes)
+# "(wallTime  =    \"3 days\")" 
+# it is also possible to specifiy the maximum cpu time instead (or 'as well')
+# "(cpuTime = \"3 days\")"
+# if nothing is used, the end system will decide what the maximum is
+#
 
 ARCSCRIPTDEFAULT = ["&",
         "(executable   = \"{0}\")".format(runfile),
