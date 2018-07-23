@@ -10,14 +10,14 @@ def get_cmd_output(*args,**kwargs):
 
 # Global Variables (default values)
 runcardDir = "/mt/home/jmartinez/Runcards"
-NNLOJETdir = "/mt/home/jmartinez/NNLOJET/"
+NNLOJETdir = "/mt/home/jmartinez/not_nnlojet_at_all/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
 producRun  = 500
 baseSeed   = 100
 jobName    = "testjob"
 debug_level = 0
-stacksize = 50 #MB
+stacksize = 100 #MB
 
 # Grid config 
 lfndir   = "/grid/pheno/jmartinez"
@@ -30,13 +30,13 @@ tmux_location= "tmux"
 
 # Lhapdf config
 lhapdf_grid_loc = "util/lhapdf.tar.gz"  
-lhapdf_loc = "lhapdf" 
+lhapdf_loc = "lhapdf"
 lhapdf_ignore_dirs = []# ["doc", "examples", "config"]
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
  
 # NNLOJET Database Parameters
-dbname     = "job_data/April/nnlojetdb.dat"     
+dbname     = "job_data/July/nnlojetdb.dat"     
 provided_warmup_dir = None
 
 # Finalisation and storage options

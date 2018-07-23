@@ -220,20 +220,16 @@ if __name__ == "__main__":
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
-    # Architecture info
-    print_flush("Python version: {0}".format(sys.version))
-    syscall("lsb_release -a")
- 
-
     args = parse_arguments()
     debug_level = int(args.debug)
 
     set_environment(args.lfndir, args.lhapdf_local)
-    
-    if debug_level > 1:
-        from sys import version
-        print_flush("Running Python version {0}".format(version))
+
+    if debug_level > -1:
+        # Architecture info
+        print_flush("Python version: {0}".format(sys.version))
         print_node_info("node_info.log")
+        syscall("lsb_release -a")
 
     nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads, 
                                                                   args.executable, 
