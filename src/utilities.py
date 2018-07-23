@@ -184,8 +184,6 @@ def lhapdfIni():
     with open(pdf_file_name,"w") as pdf_file_obj:
         pdf_file_obj.write(json.dumps(pdfs))
 
-    import sys
-    sys.exit()
     # Tar lhapdf and prepare it to be sent
     lhapdf_remote = header.lhapdf_grid_loc
     lhapdf_griddir = lhapdf_remote.rsplit("/",1)[0]
