@@ -75,8 +75,7 @@ if caller_script == "main.py":
     ######## Management options
     # Information about jobs
     parser_info = parser.add_argument_group("info options", "Display information about jobs, to be used with mode=man")
-    parser_info.add_argument("-s", "--stats", help = "output statistics for all subjobs in a dirac job", action = "store_true")
-    parser_info.add_argument("-S", "--statsCheat", help = "Dirac only, use a modified version of dirac to speed up the information retrieval process", action = "store_true")
+    parser_info.add_argument("-s","-S", "--stats", help = "output status statistics for all subjobs in a job", action = "store_true")
     parser_info.add_argument("--simple_string", help = "To be used with -s/-S, prints one liners for done/total", action = "store_true")
     parser_info.add_argument("-C", "--checkwarmup", help = "Check completed warmup to see if a warmup file is present", action = "store_true")
     parser_info.add_argument("--resubmit", help = "Resubmit if warmup not present. For use with --checkwarmup only", action = "store_true")
