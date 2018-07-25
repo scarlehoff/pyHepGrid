@@ -229,7 +229,8 @@ class Backend(object):
         logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         local_dir_name = self.get_local_dir_name(r,rname)
         files = os.listdir(local_dir_name)
-        runcard = NNLOJETruncard(runcard_file=os.path.join(local_dir_name,r),logger=logger)
+        runcard = NNLOJETruncard(runcard_file=os.path.join(local_dir_name,r),logger=logger, 
+                                 grid=False)
         runcard_id = runcard.runcard_dict_case_preserving["id"]
         logs = [f for f in files if f.endswith(".log") and runcard_id in f]
         logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")

@@ -216,7 +216,7 @@ Running all commands will install dirac version $DIRAC_VERSION to $HOME/dirac_ui
 You can change this by modifying the variable DIRAC_FOLDER
 
 DIRAC_FOLDER="~/dirac_ui"
-DIRAC_VERSION="-r v6r19p10 -i 27 -g v13r0"
+DIRAC_VERSION="-r v6r20p5 -i 27 -g v14r1"
 
 mkdir $DIRAC_FOLDER
 cd $DIRAC_FOLDER
@@ -234,6 +234,11 @@ You need to source $DIRAC_FOLDER/bashrc every time you want to use dirac.
 Running the following command will put the "source" in your own .bashrc
 
 echo "source $DIRAC_FOLDER/bashrc" >> $HOME/.bashrc
+
+# ALTERNATIVE
+
+Instead of sourcing the dirach bashrc as above, you can alternatively add $DIRAC_FOLDER/scripts/ 
+to your PATH variable directly in your bashrc. It all seems to work ok with python 2.6.6
 
 ### Note: 
 To enable fast dirac statistics (using -DS rather than -Ds), you will need to alter your dirac src 
