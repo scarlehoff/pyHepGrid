@@ -68,8 +68,8 @@ def management_routine(backend, args):
 
         if args.stats:
             backend.stats_job(db_id)
-        elif args.statsCheat:
-            backend.stats_job_cheat(db_id)
+        # elif args.statsCheat:
+        #     backend.stats_job_cheat(db_id)
         elif args.info or args.infoVerbose:
             print(printstr.format("Retrieving information"))
             backend.status_job(jobid, args.infoVerbose)

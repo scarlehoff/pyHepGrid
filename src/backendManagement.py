@@ -168,7 +168,7 @@ class Dirac(Backend):
         header.logger.debug(output)
         return output
 
-    def stats_job_cheat(self, dbid):
+    def stats_job(self, dbid):
         """ When using Dirac, instead of asking for each job individually
         we can ask for batchs of jobs in a given state and compare.
         """
@@ -196,7 +196,6 @@ class Dirac(Backend):
         wait = len(jobids_set & waiting_jobs)
         run = len(jobids_set & running_jobs)
         unk = len(jobids_set & unk_jobs)
-        print(run)
         # Save done and failed jobs to the database
         status = len(jobids)*[0]
         for jobid in failed_jobs_set:
