@@ -161,16 +161,16 @@ class Dirac(Backend):
         return 0
 
     def get_status(self, status, date):
-        return set(util.getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
-                                  '--Owner={0}'.format(header.dirac_name),
-                                  '--Date={0}'.format(date)]).split("\n")[-2].split(", "))
+        output = set(util.getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
+                                       '--Owner={0}'.format(header.dirac_name),
+                                       '--Maximum=0', # 0 lists ALL jobs, which is nice :)
+                                       '--Date={0}'.format(date)]).split("\n")[-2].split(","))
+        header.logger.debug(output)
+        return output
 
     def stats_job_cheat(self, dbid):
         """ When using Dirac, instead of asking for each job individually
         we can ask for batchs of jobs in a given state and compare.
-        In order to use this function you need to modify 
-        "DIRAC/Interfaces/scripts/dirac-wms-select-jobs.py" to comment out 
-        lines 87-89.
         """
         jobids = self.get_id(dbid)
         tags = ["runcard", "runfolder", "date"]
@@ -179,7 +179,6 @@ class Dirac(Backend):
         try:
             self.__first_call_stats
         except AttributeError as e:
-            print("Stats function under testing/debugging. Use with care...")
             self.__first_call_stats = False
         date = runcard_info["date"].split()[0]
         jobids_set = set(jobids)
@@ -197,6 +196,7 @@ class Dirac(Backend):
         wait = len(jobids_set & waiting_jobs)
         run = len(jobids_set & running_jobs)
         unk = len(jobids_set & unk_jobs)
+        print(run)
         # Save done and failed jobs to the database
         status = len(jobids)*[0]
         for jobid in failed_jobs_set:
