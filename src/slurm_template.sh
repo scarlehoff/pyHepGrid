@@ -4,6 +4,7 @@
 #SBATCH --mem {memsize}M         
 #SBATCH --cpus-per-task={threads}
 #SBATCH --job-name={jobName}
+{partition}         
 {array}
 {exclusive}
 {exclude_list}
@@ -12,6 +13,7 @@ cd {runcard_dir}
 export OMP_STACKSIZE={stacksize}M
 
 export OMP_NUM_THREADS={threads}
-./NNLOJET -run {runcard} {socketstr}
+hostname
+./{exe} -run {runcard} {socketstr}
 
 exit 0

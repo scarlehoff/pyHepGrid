@@ -26,10 +26,19 @@ def run_test(args, runcard):
         from src.runArcjob import testWrapperProduction as testWrapper
     elif args.runDirac:
         from src.runDiracjob import testWrapper
+    elif args.runSlurm:
+        from src.runSlurmjob import testWrapper
+    elif args.runSlurmProduction:
+        from src.runSlurmjob import testWrapperProduction as testWrapper
     else:
-        raise Exception("Choose what you want to test -(A/B/D)")
+        raise Exception("Choose what you want to test -(A/B/D/E/F)")
 
     rncards, dCards = util.expandCard(runcard)
+
+    # if args.runSlurm:
+    #     header.runfile = header.SLURMSCRIPTDEFAULT
+    # if args.runSlurmProduction:
+    #     header.runfile = header.SLURMSCRIPTDEFAULT_PRODUCTION
 
     setup()
 
