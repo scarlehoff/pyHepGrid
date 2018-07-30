@@ -44,8 +44,7 @@ def createdirs(currentdir, runcard):
     mkdir(targetdir)
     logdir = os.path.join(targetdir, 'log')
     mkdir(logdir)
-    logcheck = set([logseed_regex.search(i).group(1) for i 
-                    in glob.glob('{0}/*.log'.format(logdir))])
+    logcheck = set([logseed_regex.search(i).group(1) for i in glob.glob('{0}/*.log'.format(logdir)) if logseed_regex.search(i) is not None])
     return logcheck, targetdir
 
 

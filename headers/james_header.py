@@ -42,6 +42,7 @@ lhapdf             = get_cmd_output("lhapdf-config","--prefix")
  
 # NNLOJET Database Parameters
 dbname     = "NNLOJET_database.dat"     
+arcbase    = os.path.expanduser("~/.arc/jobs.dat")
 provided_warmup_dir = None
 
 # Finalisation and storage options
@@ -50,13 +51,17 @@ finalise_no_cores = 15
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
 # if using a script, ./main.py will call script.do_finalise()
-finalisation_script = "src/finalise_james"
+finalisation_script = "src/finalise"
+#finalisation_script = None
+verbose_finalise = True
 # Default folder for use only if finalisation script != None
 # Gives a default destination for warmup files pulled whilst run is in progress
 default_runfolder = None
 
 warmup_base_dir = os.path.expanduser("~/warmups")
-production_base_dir = os.path.expanduser("~/results")
+#warmup_base_dir = "warmups"
+#production_base_dir = os.path.expanduser("~/results")
+production_base_dir = "/scratch/jwhitehead/results"
 
 short_stats = True
 
@@ -76,7 +81,9 @@ finalise_prefix = ""
 # socket default parameters
 server_host = "gridui1.dur.scotgrid.ac.uk"
 port = 8080
-wait_time = 3600 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)
+wait_time = 14400 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)
+#sockets_active = 10
+#warmupthr = 8
 
 #SLURM parameters
 local_run_directory = "/ddn/data/qpsv27/run_directories/"
