@@ -12,8 +12,9 @@ import subprocess
 import tarfile
 
 rc = importlib.import_module(config.finalise_runcards.replace("/","."))
-logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
-tarfile_regex = re.compile(r"-([0-9]+)\.tar.gz+$")
+logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$") # Matches seeds in logfiles
+tarfile_regex = re.compile(r"-([0-9]+)\.tar.gz+$") # Matches tarfiles
+logfile_regex = re.compile(r"\w+\.\w+\.s([0-9]+)\.log") # Matches NNLOJET log files
 
 # CONFIG
 no_processes = config.finalise_no_cores
@@ -39,12 +40,19 @@ def get_output_dir_name(runcard):
     return os.path.join(basedir, subdir)
 
 
+def get_NNLOJET_logfiles(logdir):
+    for i in os.listdir(logdir):
+        if logfile_regex.match(i) is not None:
+            yield i
+
+
 def createdirs(currentdir, runcard):
     targetdir = os.path.join(currentdir, get_output_dir_name(runcard))
     mkdir(targetdir)
     logdir = os.path.join(targetdir, 'log')
     mkdir(logdir)
-    logcheck = set([logseed_regex.search(i).group(1) for i in glob.glob('{0}/*.log'.format(logdir)) if logseed_regex.search(i) is not None])
+    logcheck = set([logseed_regex.search(i).group(1) for i 
+                    in get_NNLOJET_logfiles(logdir)])
     return logcheck, targetdir
 
 
@@ -78,6 +86,7 @@ def pullrun(name, seed, run, tmpdir):
             print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
         os.system('lcg-del -a lfn:output/{0} 2>/dev/null'.format(name))
         os.system('lfc-rm output/{0} -f 2>/dev/null'.format(name))
+        os.system('lfc-rm output/{0} -a -f 2>/dev/null'.format(name))
         return 1
     return 0
 
