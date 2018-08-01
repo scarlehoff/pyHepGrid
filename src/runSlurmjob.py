@@ -165,11 +165,9 @@ class RunSlurm(Backend):
             header.logger.info(" > Path of slurm file: {0}".format(slurmfile))
             jobids = []
 
-            jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test,
+            jobid, runqueue = self._run_SLURM(slurmfile, arguments, queue, test=test,
                                            n_sockets=n_sockets)
             jobids.append(jobid)
-            if queue is None:
-                queue = "None"
 
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
@@ -179,7 +177,7 @@ class RunSlurm(Backend):
                         'runcard'   : r,
                         'runfolder' : dCards[r],
                         'jobtype'   : job_type,
-                        'queue'     : queue,
+                        'queue'     : str(runqueue),
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
 
@@ -212,9 +210,7 @@ class RunSlurm(Backend):
             slurmfile = self._write_SLURM(arguments, self.prodtempl)
             header.logger.info("Path of slurm file: {0}".format(slurmfile))
             jobids = []
-            jobid, queue = self._run_SLURM(slurmfile, arguments, queue, test=test)
-            if queue is None:
-                queue = "None"
+            jobid, runqueue = self._run_SLURM(slurmfile, arguments, queue, test=test)
             jobids.append(jobid)
             # Create database entry
             dataDict = {'jobid'     : ' '.join(jobids),
@@ -223,7 +219,7 @@ class RunSlurm(Backend):
                         'runcard'   : r,
                         'runfolder' : dCards[r],
                         'jobtype'   : job_type,
-                        'queue'     : queue,
+                        'queue'     : str(runqueue),
                         'iseed'     : str(baseSeed),
                         'no_runs'   : str(producRun),
                         'status'    : "active",}
