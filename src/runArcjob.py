@@ -154,6 +154,7 @@ class RunArc(Backend):
                         'jobtype'   : job_type,
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
+            port += 1
 
     def run_wrap_production(self, test = None):
         """ Wrapper function. It assumes the initialisation stage has already happend

@@ -87,8 +87,6 @@ def check_port_blocked(host, port):
     # return blocked
     # Below, only works with host == localhost
     import socket
-    import time
-    time.sleep(10)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.bind((host, port))

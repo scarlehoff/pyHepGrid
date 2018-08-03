@@ -180,6 +180,7 @@ class RunSlurm(Backend):
                         'queue'     : str(runqueue),
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
+            port += 1
 
 
     def run_wrap_production(self, test = None):
