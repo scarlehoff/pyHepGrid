@@ -96,6 +96,9 @@ def check_port_blocked(host, port):
     except socket.error as e:
         if e.errno == 98: # Port already in use
             blocked = True
+        elif e.errno == 99:
+            print("\033[91m WARNING:\033[0m Can't assign address for socket server. Check that the server host is your current machine. ")
+            raise(e)
         else: # some other error
             raise(e)
     finally:
