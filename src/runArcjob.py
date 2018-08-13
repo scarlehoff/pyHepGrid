@@ -136,10 +136,15 @@ class RunArc(Backend):
             header.logger.info(" > Path of xrsl file: {0}".format(xrslfile))
 
             jobids = []
-            for i_socket in range(n_sockets):
-                # Run the file
-                jobids.append(self._run_XRSL(xrslfile, test=test))
-
+            keyquit = None
+            try:
+                for i_socket in range(n_sockets):
+                    # Run the file
+                    jobids.append(self._run_XRSL(xrslfile, test=test))
+            except Exception as interrupt:
+                print("\n")
+                header.logger.error("Submission error encountered. Inserting all successful submissions to database")
+                keyquit = interrupt
             # Create daily path
             if warmup_base_dir is not None:
                 pathfolder = util.generatePath(warmup=True)
@@ -155,6 +160,8 @@ class RunArc(Backend):
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
             port += 1
+            if keyquit is not None:
+                raise keyquit
 
     def run_wrap_production(self, test = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
@@ -176,18 +183,24 @@ class RunArc(Backend):
             # use the same unique name for all seeds since 
             # we cannot multiprocess the arc submission
             xrslfile = None 
-            for seed in range(baseSeed, baseSeed + producRun):
-                arguments = self._get_prod_args(r, dCards[r], seed)
-                dictData = {'arguments'   : arguments,
-                            'jobName'     : jobName,
-                            'count'       : str(1),
-                            'countpernode': str(1),}
-                xrslfile = self._write_XRSL(dictData, filename = xrslfile)
-                if(seed == baseSeed):
-                    header.logger.info(" > Path of xrsl file: {0}".format(xrslfile))
+            keyquit = None
+            try:
+                for seed in range(baseSeed, baseSeed + producRun):
+                    arguments = self._get_prod_args(r, dCards[r], seed)
+                    dictData = {'arguments'   : arguments,
+                                'jobName'     : jobName,
+                                'count'       : str(1),
+                                'countpernode': str(1),}
+                    xrslfile = self._write_XRSL(dictData, filename = xrslfile)
+                    if(seed == baseSeed):
+                        header.logger.info(" > Path of xrsl file: {0}".format(xrslfile))
                 # Run the file
-                jobid = self._run_XRSL(xrslfile, test=test)
-                joblist.append(jobid)
+                    jobid = self._run_XRSL(xrslfile, test=test)
+                    joblist.append(jobid)
+            except Exception as e:
+                print("\n")
+                header.logger.error("Submission error encountered. Inserting all successful submissions to database")
+                keyquit = interrupt
             # Create daily path
             pathfolder = util.generatePath(warmup=False)
             # Create database entry
@@ -202,6 +215,8 @@ class RunArc(Backend):
                         'no_runs'   : str(producRun),
                         'status'    : "active",}
             self.dbase.insert_data(self.table, dataDict)
+            if keyquit is not None:
+                raise keyquit
 
 def runWrapper(runcard, test = None, expandedCard = None):
     header.logger.info("Running arc job for {0}".format(runcard))
