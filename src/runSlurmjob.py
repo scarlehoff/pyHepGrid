@@ -6,9 +6,12 @@ import src.utilities as util
 
 class RunSlurm(Backend):
     """ Generic class for running Slurm scripts, both production and warmup"""
-    def __init__(self, slurmscript = None, **kwargs): 
+    def __init__(self, prod=False,slurmscript = None, **kwargs): 
         super(RunSlurm, self).__init__(**kwargs)
-        self.table     = header.slurmtable
+        if prod:
+            self.table = header.slurmprodtable
+        else:
+            self.table = header.slurmtable
         if slurmscript:
             self.templ = slurmscript
         else:
@@ -234,7 +237,7 @@ def runWrapper(runcard, test = None, expandedCard = None):
 
 def runWrapperProduction(runcard, test = None, expandedCard = None):
     header.logger.info("Running SLURM production job for {0}".format(runcard))
-    slurm = RunSlurm()
+    slurm = RunSlurm(prod=True)
     slurm.run_wrap_production(test)
 
 def iniWrapper(runcard, warmup=None):

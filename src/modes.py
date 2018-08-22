@@ -20,7 +20,8 @@ def do_management(args,rcard):
         backends.append(backend_Slurm(act_only_on_done = args.done))
     if args.runSlurmProduction:
         from src.backendManagement import Slurm as backend_SlurmProd
-        backends.append(backend_SlurmProd(act_only_on_done = args.done))
+        backends.append(backend_SlurmProd(act_only_on_done = args.done,
+                                          production=True))
 
     for backend in backends:
         mr.management_routine(backend, args)

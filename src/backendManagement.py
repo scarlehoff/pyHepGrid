@@ -218,10 +218,13 @@ class Dirac(Backend):
         util.spCall(cmd)
 
 class Slurm(Backend):
-    def __init__(self, **kwargs):
+    def __init__(self, production=False, **kwargs):
         # Might not work on python2?
         super(Slurm, self).__init__(**kwargs)
-        self.table = header.slurmtable
+        if production:
+            self.table = header.slurmprodtable
+        else:
+            self.table = header.slurmtable
 
     def __str__(self):
         return "Slurm"
