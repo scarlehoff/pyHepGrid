@@ -179,10 +179,10 @@ class database(object):
         self._execute_and_commit(total_query, verbose = True)
 
 def get_next_seed(dbname=None):
-    from src.header import arctable, diractable, slurmtable, dbfields
+    from src.header import arctable, arcprodtable, diractable, slurmtable, dbfields
     if dbname is None:
         from src.header import dbname
-    db = database(dbname, tables = [arctable, diractable, slurmtable], 
+    db = database(dbname, tables = [arctable, arcprodtable, diractable, slurmtable], 
                   fields=dbfields)
     db.list_disabled = True
     alldata = db.list_data(arctable,["iseed","jobid"])

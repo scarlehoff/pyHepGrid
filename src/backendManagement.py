@@ -17,10 +17,13 @@ class Arc(Backend):
     cmd_stat  = "arcstat"
     cmd_renew = "arcrenew"
 
-    def __init__(self, **kwargs):
+    def __init__(self,production=False, **kwargs):
         # Might not work on python2?
         super(Arc, self).__init__(**kwargs)
-        self.table = header.arctable
+        if production:
+            self.table = header.arcprodtable
+        else:
+            self.table = header.arctable
 
     def __str__(self):
         return "Arc"
