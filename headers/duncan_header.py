@@ -41,6 +41,7 @@ lhapdf_central_scale_only = True #True # Only tar up central [0000.dat] PDF sets
 
 # NNLOJET Database Parameters
 dbname     = "/mt/home/dwalker/jobscripts/databases/CCDIS.dat"     
+arcprodtable  = "arcjobs_prod"
 #dbname     = "/mt/home/dwalker/submit/gangaless_resources/test.dat"     
 arcbase    = "/mt/home/dwalker/jobscripts/.arc/default.dat"
 provided_warmup_dir = None

@@ -5,21 +5,22 @@ def do_management(args,rcard):
 #### Management of running/finished jobs
     import src.main_routines as mr
     backends = []
-    if (args.runArc or args.runArcProduction) and args.runDirac:
+    if args.runArc:
         from src.backendManagement import Arc as backend_Arc
         backends.append(backend_Arc(act_only_on_done = args.done))
+    if args.runArcProduction:
+        from src.backendManagement import Arc as backend_ArcProd
+        backends.append(backend_ArcProd(act_only_on_done = args.done, 
+                                        production=True))
+    if args.runDirac:
         from src.backendManagement import Dirac as backend_Dirac
         backends.append(backend_Dirac(act_only_on_done = args.done))
-    else:
-        if args.runArc or args.runArcProduction:
-            from src.backendManagement import Arc as backend_class
-        if args.runSlurm:
-            from src.backendManagement import Slurm as backend_class
-        if args.runSlurmProduction:
-            from src.backendManagement import Slurm as backend_class
-        if args.runDirac: 
-            from src.backendManagement import Dirac as backend_class
-        backends.append(backend_class(act_only_on_done = args.done))
+    if args.runSlurm:
+        from src.backendManagement import Slurm as backend_Slurm
+        backends.append(backend_Slurm(act_only_on_done = args.done))
+    if args.runSlurmProduction:
+        from src.backendManagement import Slurm as backend_SlurmProd
+        backends.append(backend_SlurmProd(act_only_on_done = args.done))
 
     for backend in backends:
         mr.management_routine(backend, args)

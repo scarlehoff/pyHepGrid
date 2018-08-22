@@ -5,9 +5,12 @@ import src.header as header
 import src.socket_api as sapi
 
 class RunArc(Backend):
-    def __init__(self, arcscript = None, **kwargs): 
+    def __init__(self, prod=False, arcscript = None, **kwargs): 
         super(RunArc, self).__init__(**kwargs)
-        self.table     = header.arctable
+        if not prod:
+            self.table     = header.arctable
+        else:
+            self.table     = header.arcprodtable
         self.arcbd     = header.arcbase
         if arcscript:
             self.templ = arcscript
@@ -220,12 +223,12 @@ class RunArc(Backend):
 
 def runWrapper(runcard, test = None, expandedCard = None):
     header.logger.info("Running arc job for {0}".format(runcard))
-    arc = RunArc(header.ARCSCRIPTDEFAULT)
+    arc = RunArc(arcscript=header.ARCSCRIPTDEFAULT)
     arc.run_wrap_warmup(test, expandedCard)
 
 def runWrapperProduction(runcard, test=None):
     header.logger.info("Running arc job for {0}".format(runcard))
-    arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
+    arc = RunArc(prod=True,arcscript=header.ARCSCRIPTDEFAULTPRODUCTION)
     arc.run_wrap_production(test)
 
 
@@ -233,13 +236,13 @@ def runWrapperProduction(runcard, test=None):
 
 def testWrapper(r, dCards):
     header.logger.info("Running arc job for {0}".format(r))
-    arc = RunArc(header.ARCSCRIPTDEFAULT)
+    arc = RunArc(arcscript=header.ARCSCRIPTDEFAULT)
     return arc._get_warmup_args(r, dCards[r], threads=header.warmupthr,
                                                         sockets=False)
 
 def testWrapperProduction(r, dCards):
     header.logger.info("Running arc job for {0}".format(r))
-    arc = RunArc(header.ARCSCRIPTDEFAULTPRODUCTION)
+    arc = RunArc(prod=True,arcscript=header.ARCSCRIPTDEFAULTPRODUCTION)
     return arc._get_prod_args(r, dCards[r], 1)
 
 # Code graveyard

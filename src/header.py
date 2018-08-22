@@ -47,7 +47,7 @@ for i in dir(head):
         setattr(this_file,i,attr)
         # Give warnings if you've added any new attributes and not put them in the template.
         if i not in template_attributes and not isinstance(attr,ModuleType)\
-                and not callable(attr):
+                and not callable(attr) and i not in ["arcprodtable","slurmprodtable"]:
             logger.warning("attribute {0} not present in {1}".format(i, template.__name__))
             logger.info("Please add it in before committing so you don't break compatibility(!)")
 
@@ -76,12 +76,14 @@ arc_direct = True
 
 # Database config
 arctable   = "arcjobs"
+arcprodtable   = "arcjobs"
 diractable = "diracjobs"
 slurmtable = "slurmjobs"
+slurmprodtable = "slurmjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue", "no_runs"]
+
 # DW This should be a hard link so socketed runs can be sent from other folders/locations
 socket_exe = "{0}/socket_server.py".format(os.path.dirname(os.path.realpath(__file__))) # Eventually will need to point towards NNLOJET/bin
-
 sockets_active = 1 # 1 socket == no sockets
 
 

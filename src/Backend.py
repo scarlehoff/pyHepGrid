@@ -537,7 +537,7 @@ class Backend(object):
                     print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
-            if self.gridw.checkForThis(tarfile, "input"):
+            if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
                 print("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
