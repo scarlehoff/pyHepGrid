@@ -325,7 +325,7 @@ class Slurm(Backend):
 
 
     def cat_job(self, jobids, jobinfo, print_stderr = None, store = False):
-        """ print stdandard output of a given job"""
+        """ print standard output of a given job"""
         dir_name = self.get_stdout_dir_name(self.get_local_dir_name(jobinfo["runcard"],
                                                                     jobinfo["runfolder"]))
         # jobids = length 1 for SLURM jobs - just take the only element here
@@ -340,7 +340,7 @@ class Slurm(Backend):
                 if not store:
                     util.spCall(cmd)
                 else:
-                    output.append(util.getOutputCall(cmd))
+                    output.append(util.getOutputCall(cmd,suppress_errors=True))
         else:
             stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid)) 
             if print_stderr:
@@ -349,7 +349,7 @@ class Slurm(Backend):
             if not store:
                 util.spCall(cmd)
             else:
-                output.append(util.getOutputCall(cmd))
+                output.append(util.getOutputCall(cmd,suppress_errors=True))
         if store:
             return output
 
