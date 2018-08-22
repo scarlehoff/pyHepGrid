@@ -73,7 +73,7 @@ class RunSlurm(Backend):
         corresponding value. Then in the template file, {<option_name>} will be replaced 
         by the corresponding value."""
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
-                "baseSeed":baseSeed, "producRun":producRun-1,"threads":threads}
+                "baseSeed":baseSeed, "producRun":producRun,"threads":threads}
         if array:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%A_%a.out"
         else:

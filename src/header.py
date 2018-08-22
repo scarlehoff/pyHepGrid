@@ -35,7 +35,7 @@ LFC_CATALOG_TYPE = "lfc"
 runfile = "nnlorun.py"
 sandbox_dir = "test_sandbox"
 arc_direct = True
-
+slurm_kill_exe = "{0}/kill_server.py".format(os.path.dirname(os.path.realpath(__file__)))
 
 # Database config
 arctable   = "arcjobs"

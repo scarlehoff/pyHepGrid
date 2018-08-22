@@ -15,5 +15,6 @@ export OMP_STACKSIZE={stacksize}M
 export OMP_NUM_THREADS={threads}
 hostname
 ./{exe} -run {runcard} {socketstr}
+python kill_server.py {socketstr}
 
 exit 0
