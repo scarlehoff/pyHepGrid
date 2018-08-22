@@ -87,4 +87,5 @@ production_queue = None
 test_queue = None
 production_threads = 1
 slurm_exclusive = True
-slurm_exclude = []
+slurm_exclude = ["d76"]
+slurmprodtable = "slurmjobs_prod"

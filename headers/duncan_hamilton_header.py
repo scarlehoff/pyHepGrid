@@ -89,3 +89,4 @@ test_queue = "test.q"
 production_threads = 24
 slurm_exclusive = True
 slurm_exclude = []
+slurmprodtable = "slurmjobs_prod"
