@@ -24,6 +24,32 @@ head = importlib.import_module(header_mappings[grid_username])
 
 logger.info("Using header file {0}.py".format(head.__name__))
 
+
+############ General header #################
+# This should not be changed unless you really know what you are doing!
+# Grid config
+
+gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
+LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
+LFC_CATALOG_TYPE = "lfc"
+runfile = "nnlorun.py"
+sandbox_dir = "test_sandbox"
+arc_direct = True
+
+
+# Database config
+arctable   = "arcjobs"
+arcprodtable   = "arcjobs"
+diractable = "diracjobs"
+slurmtable = "slurmjobs"
+slurmprodtable = "slurmjobs"
+dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue", "no_runs"]
+
+# DW This should be a hard link so socketed runs can be sent from other folders/locations
+socket_exe = "{0}/socket_server.py".format(os.path.dirname(os.path.realpath(__file__))) # Eventually will need to point towards NNLOJET/bin
+sockets_active = 1 # 1 socket == no sockets
+
+
 ############ COPY NAMESPACE FROM MY_HEADER #############
 # Only slightly abusive...
 this_file = sys.modules[__name__]
@@ -62,29 +88,6 @@ for i in template_attributes:
         logger.info("Check that {0}.py file is up to date as functionality may be broken otherwise.".format(head.__name__))
         sys.exit(1)
 
-############ General header #################
-# This should not be changed unless you really know what you are doing!
-# Grid config
-
-gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
-LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
-LFC_CATALOG_TYPE = "lfc"
-runfile = "nnlorun.py"
-sandbox_dir = "test_sandbox"
-arc_direct = True
-
-
-# Database config
-arctable   = "arcjobs"
-arcprodtable   = "arcjobs"
-diractable = "diracjobs"
-slurmtable = "slurmjobs"
-slurmprodtable = "slurmjobs"
-dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue", "no_runs"]
-
-# DW This should be a hard link so socketed runs can be sent from other folders/locations
-socket_exe = "{0}/socket_server.py".format(os.path.dirname(os.path.realpath(__file__))) # Eventually will need to point towards NNLOJET/bin
-sockets_active = 1 # 1 socket == no sockets
 
 
 
