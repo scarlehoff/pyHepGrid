@@ -444,7 +444,7 @@ class Backend(object):
     def init_single_local_warmup(self, runcard, tag, continue_warmup = False, 
                                  provided_warmup=False):
         import shutil
-        from src.header import NNLOJETdir, NNLOJETexe, runcardDir
+        from src.header import NNLOJETdir, NNLOJETexe, runcardDir, slurm_kill_exe
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
@@ -456,6 +456,7 @@ class Backend(object):
         self._check_warmup(runcard_obj, continue_warmup)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
+        shutil.copy(slurm_kill_exe, run_dir)
         if provided_warmup: 
             # Copy warmup to rundir
             match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
