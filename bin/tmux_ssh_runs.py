@@ -34,8 +34,8 @@ def create_new_session_with_server(name, serverloc,tot,host,port):
 
 def create_NNLOJET_instance(port, host, no, tot, window_name, runcard, desktop, runloc):
     socket_info = "-port {0} -sockets {3} -host {1} -ns {2}".format(port, host, no+1, tot)
-    runcmd = "'ssh {0} cd {1} && nice -n {5} ./NNLOJET -run {2} {3} && {4} {3}'".format(desktop,runloc, runcard, 
-                                                                                        socket_info, killserverloc, nice_priority)
+    runcmd = "'ssh {0} cd {1} && nice -n {5} ./NNLOJET -run {2} {3} && tmux kill-session -t {4}'"
+    runcmd = runcmd.format(desktop,runloc, runcard, socket_info, window_name, nice_priority)
     os.system("tmux split-window -c {0} -t {2}: {1}".format(runloc, runcmd, window_name))
     arrange_tmux_window(window_name)
 
