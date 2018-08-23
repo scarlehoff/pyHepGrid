@@ -90,3 +90,6 @@ production_threads = 24
 slurm_exclusive = True
 slurm_exclude = []
 slurmprodtable = "slurmjobs_prod"
+
+# LOCAL
+desktop_list = ["ws1"]
