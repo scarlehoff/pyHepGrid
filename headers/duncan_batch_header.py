@@ -89,3 +89,6 @@ production_threads = 1
 slurm_exclusive = True
 slurm_exclude = ["d76"]
 slurmprodtable = "slurmjobs_prod"
+
+#LOCAL runs
+desktop_list = ["d76", "d77", "d78", "d79", "d75", "d74"]

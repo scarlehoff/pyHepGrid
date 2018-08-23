@@ -93,3 +93,6 @@ test_queue = "test.q"
 production_threads = 24
 slurm_exclusive = True
 slurm_exclude = []
+
+# LOCAL
+desktop_list = ["ws1"]
