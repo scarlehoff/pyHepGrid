@@ -2,7 +2,6 @@
 #SBATCH -o {stdoutfile}
 #SBATCH --error {stderrfile}
 #SBATCH --array=1-{producRun}
-#SBATCH --error {stderrfile}
 #SBATCH --job-name={jobName}
 {exclude_list}
 {exclusive}
