@@ -91,7 +91,7 @@ production_queue = "par7.q"
 test_queue = "test.q"
 production_threads = 24
 slurm_exclusive = True
-slurm_exclude = ["ip3-ws6"]
+slurm_exclude = ["ip3-ws6","ip3-ws3"]
 
 # LOCAL
 desktop_list = ["ws1"]
