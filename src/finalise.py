@@ -80,7 +80,7 @@ def pullrun(name, seed, run, tmpdir):
                 elif t.name.endswith(".log") and "node_info"in t.name:
                     tfile.extract(t,"../log/node_info/")
                     os.rename("../log/node_info/"+t.name, 
-                              "../log/node_info/node_info_{0}.log".format(seed)
+                              "../log/node_info/node_info_{0}.log".format(seed))
         os.remove(name)
     except (FileNotFoundError, tarfile.ReadError) as e:
         # pull error - corrupted stays True
