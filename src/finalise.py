@@ -51,6 +51,8 @@ def createdirs(currentdir, runcard):
     mkdir(targetdir)
     logdir = os.path.join(targetdir, 'log')
     mkdir(logdir)
+    nodedir = os.path.join(logdir, 'node_info')
+    mkdir(nodedir)
     logcheck = set([logseed_regex.search(i).group(1) for i 
                     in get_NNLOJET_logfiles(logdir)])
     return logcheck, targetdir
@@ -76,7 +78,9 @@ def pullrun(name, seed, run, tmpdir):
                     tfile.extract(t,"../log/")
                     corrupted = False
                 elif t.name.endswith(".log") and "node_info"in t.name:
-                    tfile.extract(t,"../log/node_info_{0}.log".format(seed))
+                    tfile.extract(t,"../log/node_info/")
+                    os.rename("../log/node_info/"+t.name, 
+                              "../log/node_info/node_info_{0}.log".format(seed)
         os.remove(name)
     except (FileNotFoundError, tarfile.ReadError) as e:
         # pull error - corrupted stays True
