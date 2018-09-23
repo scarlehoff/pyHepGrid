@@ -72,9 +72,11 @@ def pullrun(name, seed, run, tmpdir):
                 if t.name.endswith(".dat"):
                     tfile.extract(t,path="../")
                     corrupted = False
-                elif t.name.endswith(".log"):
+                elif t.name.endswith(".log") and "node_info" not in t.name:
                     tfile.extract(t,"../log/")
                     corrupted = False
+                elif t.name.endswith(".log") and "node_info"in t.name:
+                    tfile.extract(t,"../log/node_info_{0}.log".format(seed))
         os.remove(name)
     except (FileNotFoundError, tarfile.ReadError) as e:
         # pull error - corrupted stays True
