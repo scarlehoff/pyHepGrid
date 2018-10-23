@@ -4,7 +4,7 @@ README
 CONTENTS
 1)  INITIAL SETUP
 2)  NNLOJET SETUP
-3)  LFN SETUP
+3)  LFN/GFAL SETUP
 4)  GRID SCRIPTS SETUP [GANGALESS]
 5)  PROXY SETUP
 6)  GRID SCRIPTS USAGE
@@ -66,6 +66,21 @@ warmup
 
 generate more directories in analogy. A nice wrapper is included as described in the GRID 
 	 STORAGE MANAGEMENT section later on.
+
+To use GFAL instead, one needs to perform the above setup, except using 
+gfal-mkdir gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/<directoryname>
+
+The folder setup that the GFAL setup uses should be the same as for LFN, so you will need an input, output and warmup folder as normal
+
+GFAL should be much more stable and quick than the LFN, though I've not tested it through DIRAC yet. It has been tested for both production and warmup (plus ini) with Durham and Glasgow, so it just depends on whether Gfal is set up on Dirac systems
+
+It works for ARC, and you can view the files in a web browser at
+
+se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/
+
+To enable, toggle use_gfal to True in your header file. This will also change over the finalise.py to use the gfal system where LFN files cannot be seen.
+
+# Todo update this section to include more on GFAL storage management
 
 ###################################################################################################
 4) GRID SCRIPTS SETUP [GANGALESS]
