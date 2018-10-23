@@ -26,7 +26,10 @@ os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
 os.environ["LFC_HOME"] = config.lfndir
 
 if config.timeout is not None:
-    timeoutstr = "--sendreceive-timeout {0}".format(config.timeout)
+    if config.use_gfal:
+        timeoutstr = "-t {0}".format(config.timeout)
+    else:
+        timeoutstr = "--sendreceive-timeout {0}".format(config.timeout)
 else:
     timeoutstr = ""
 
@@ -64,7 +67,13 @@ def pullrun(name, seed, run, tmpdir):
     status = 0
     if verbose:
         print("Pulling {0}, seed {1}".format(run, seed))
-    command = 'lcg-cp lfn:output/{0} {0} 2>/dev/null {1}'.format(name, timeoutstr)
+
+    if config.use_gfal:
+        gridname = os.path.join(config.gfaldir, config.lfn_output_dir, name)
+        command = 'gfal-copy {0} {1} {2} > /dev/null 2>&1'.format(gridname, name, timeoutstr)
+    else:
+        command = 'lcg-cp lfn:{2}/{0} {0} 2>/dev/null {1}'.format(name,
+                                                                  timeoutstr, config.lfn_output_dir)
     os.system(command)
 
     corrupted = True
@@ -90,10 +99,14 @@ def pullrun(name, seed, run, tmpdir):
         # Hits if seed not found in any of the output files
         if verbose:
             print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
-        os.system('lcg-del -a lfn:output/{0} >/dev/null 2>&1'.format(name))
-        os.system('lfc-rm output/{0} -f 2>/dev/null 2>&1'.format(name))
-        os.system('lfc-rm output/{0} -a -f >/dev/null 2>&1'.format(name))
-        return 1
+        if config.use_gfal:
+            os.system("gfal-rm {0}".format(gridname))
+            return 1
+        else:
+            os.system('lcg-del -a lfn:{1}/{0} >/dev/null 2>&1'.format(name, config.lfn_output_dir))
+            os.system('lfc-rm {1}/{0} -f 2>/dev/null 2>&1'.format(name, config.lfn_output_dir))
+            os.system('lfc-rm {1}/{0} -a -f >/dev/null 2>&1'.format(name, config.lfn_output_dir))
+            return 1
     return 0
 
 
@@ -140,10 +153,14 @@ def do_finalise():
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     os.chdir(dname)
-    cmd = ['lfc-ls', config.lfn_output_dir]
+
+    if config.use_gfal:
+        cmd = ['gfal-ls', os.path.join(config.gfaldir, config.lfn_output_dir)]
+    else:
+        cmd = ['lfc-ls', config.lfn_output_dir]
     output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
-    currentdir = os.getcwd()
-    
+    currentdir = os.getcwd()    
+
     output = set([x for x in str(output).split("\\n")])
 
     pool = mp.Pool(processes=no_processes)

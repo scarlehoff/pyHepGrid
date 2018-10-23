@@ -541,7 +541,10 @@ class Backend(object):
             if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
                 print("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
-            print("Sending " + tarfile + " to lfn:input/")
+            if self.gridw.gfal:
+                print("Sending " + tarfile + " to gfal input/")
+            else:
+                print("Sending " + tarfile + " to lfn input/")
             self.gridw.send(tarfile, "input", shell=True)
             if not local:
                 for j in warmupFiles:
@@ -642,7 +645,7 @@ class Backend(object):
             else:
                 print("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname,  shell = True)
-            self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
+            self.tarw.tarFiles(files + [i] +  warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
                 print("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
@@ -1075,6 +1078,8 @@ class Backend(object):
                 'lhapdf_grid' : header.lhapdf_grid_loc,
                 'lhapdf_local' : header.lhapdf_loc,
                 'debug' : str(header.debug_level),
+                'gfaldir': header.gfaldir,
+                'use_gfal' : str(header.use_gfal)
                 }
         return dictionary
 

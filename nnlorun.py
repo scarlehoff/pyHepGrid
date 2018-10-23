@@ -40,6 +40,7 @@ def parse_arguments():
     from getpass import getuser
 
     default_user_lfn = "/grid/pheno/{0}".format(getuser())  
+    default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
     parser = OptionParser(usage = "usage: %prog [options]")
 
     parser.add_option("-r","--runcard", help = "Runcard to be run")
@@ -53,9 +54,18 @@ def parse_arguments():
 
     # Grid configuration options
     parser.add_option("-l", "--lfndir", help = "LFNDIR", default = default_user_lfn)
-    parser.add_option("-i", "--input_folder", help = "lfn input folder, relative to --lfndir", default = "input")
-    parser.add_option("-w", "--warmup_folder", help = "lfn warmup folder, relative to --lfndir", default = "warmup")
-    parser.add_option("-o", "--output_folder", help = "lfn output folder, relative to --lfndir", default = "output")
+    parser.add_option("-i", "--input_folder",
+                      help = "lfn input folder, relative to --lfndir or gfaldir depending on which mode is used",
+                      default = "input")
+    parser.add_option("-w", "--warmup_folder",
+                      help = "lfn warmup folder, relative to --lfndir or gfaldir depending on which mode is used",
+                      default = "warmup")
+    parser.add_option("-o", "--output_folder", 
+                      help = "lfn output folder, relative to --lfndir or gfaldir depending on which mode is used", 
+                      default = "output")
+    parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
+    parser.add_option("--use_gfal", default="False", 
+                      help = "Use gfal for file transfer and storage rather than the LFN")
 
     # LHAPDF options
     parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir", default = "util/lhapdf.tar.gz")
@@ -73,6 +83,13 @@ def parse_arguments():
     parser.add_option("--pedantic", help = "Enable various checks", action = "store_true", default = False)
 
     (options, positional) = parser.parse_args()
+
+
+    if options.use_gfal.lower() == "true":
+        options.use_gfal = True
+        print("Using GFAL for storage")
+    else:
+        options.use_gfal = False
 
     if not options.runcard or not options.runname:
         parser.error("Runcard and runname must be provided")
@@ -121,23 +138,21 @@ def set_environment(lfndir, lhapdf_dir):
 
     
 
-gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/generated/"
-
+gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
 lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
 lfn    = "lfn:"
-gfal   = False
-
-#lcg_cp = "gfal-copy"
-#lcg_cr = "gfal-copy"
-#lfn = "lfn://grid/pheno/jmartinez/"
-#gfal = True
 
 # Define some utilites
-def copy_from_grid(grid_file, local_file):
-    cmd = lcg_cp + " " + lfn
-    cmd += grid_file + " " + local_file
-    return os.system(cmd)
+def copy_from_grid(grid_file, local_file, args):
+    if args.use_gfal:
+        filein = "file://$PWD/" + local_file
+        cmd = "gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir)
+        return os.system(cmd)
+    else:
+        cmd = lcg_cp + " " + lfn
+        cmd += grid_file + " " + local_file
+        return os.system(cmd)
 
 def untar_file(local_file, debug):
     if debug_level > 2:
@@ -152,18 +167,16 @@ def tar_this(tarfile, sourcefiles):
     os.system("ls")
     return stat
 
-def copy_to_grid(local_file, grid_file, maxrange = 10):
+def copy_to_grid(local_file, grid_file, args, maxrange = 10):
     print_flush("Copying " + local_file + " to " + grid_file)
-    filein = "file:$PWD/" + local_file
     fileout = lfn + grid_file
-    if gfal: # May need checking if we move to gfal
-        from uuid import uuid1 as generateRandom
-        today_str = datetime.today().strftime('%Y-%m-%d')
-        unique_str = "ffilef" + str(generateRandom())
-        file_str = today_str + "/" + unique_str
-        midfile = gsiftp + file_str
-        cmd = lcg_cr + " " + filein + " " + midfile + " " + fileout
+    if args.use_gfal:
+        filein = "file://$PWD/" + local_file
+        cmd = "gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir)
+        os.system(cmd)
+        return 0
     else:
+        filein = "file:$PWD/" + local_file
         cmd = lcg_cr + " " + fileout + " " + filein
     print_flush("> Sandbox -> LFN copy command: {0}".format(cmd))
     dirname = os.path.dirname(grid_file)
@@ -193,7 +206,7 @@ def socket_sync_str(host, port, handshake = "greetings"):
 
 def bring_lhapdf(lhapdf_grid, debug):
     tmp_tar = "lhapdf.tar.gz"
-    stat = copy_from_grid(lhapdf_grid, tmp_tar)
+    stat = copy_from_grid(lhapdf_grid, tmp_tar, args)
     stat += untar_file(tmp_tar, debug)
     return os.system("rm {0}".format(tmp_tar))+stat
 
@@ -201,7 +214,7 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
     # Todo: this is not very general, is it?
     tmp_tar = "nnlojet.tar.gz"
     input_name = "{0}/{1}{2}.tar.gz".format(input_grid, runcard, runname)
-    stat = copy_from_grid(input_name, tmp_tar)
+    stat = copy_from_grid(input_name, tmp_tar, args)
     stat += untar_file(tmp_tar, debug)
     stat += os.system("rm {0}".format(tmp_tar))
     stat += os.system("ls")
@@ -295,9 +308,9 @@ if __name__ == "__main__":
     status_tar = tar_this(local_out, "*")
 
     if args.Sockets:
-        status_copy = copy_to_grid(local_out, output_file, maxrange = 1)
+        status_copy = copy_to_grid(local_out, output_file, args, maxrange = 1)
     else:
-        status_copy = copy_to_grid(local_out, output_file)
+        status_copy = copy_to_grid(local_out, output_file, args)
 
     if status_copy == 0:
         print_flush("Copied over to grid storage!")
