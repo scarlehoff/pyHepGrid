@@ -658,11 +658,12 @@ class Backend(object):
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         from src.header import logger
+        print(matchname, provided_warmup)
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
             for potfile in potential_files:
-                if matchname in potfile.lower() and\
+                if potfile.lower().startswith(matchname) and\
                         not potfile.endswith(".txt") and not potfile.endswith(".log"):
                     matches.append(potfile)
             if len(matches) > 1:

@@ -116,12 +116,12 @@ python3 main ini runcard.py -Bn -w warmup.file
  -A is warmup in arc 
 
 send the jobs to run with one of:
-python3 main.py run <runcard.py> -An # ARC WARMUP
-python3 main.py run <runcard.py> -Bn # ARC PRODUCTION
-python3 main.py run <runcard.py> -Dn # DIRAC PRODUCTION
+python3 main.py run <runcard.py> -A # ARC WARMUP
+python3 main.py run <runcard.py> -B # ARC PRODUCTION
+python3 main.py run <runcard.py> -D # DIRAC PRODUCTION
 
 manage the jobs/view the database of runs with:
-python3 main.py man <runcard.py> -(A/B/D)n
+python3 main.py man <runcard.py> -(A/B/D)
 	include the flags:
 		 -S/-s for job stats
 		 -p to print the stdout of the job (selects last job of set if production) 
@@ -238,7 +238,7 @@ echo "source $DIRAC_FOLDER/bashrc" >> $HOME/.bashrc
 
 # ALTERNATIVE
 
-Instead of sourcing the dirach bashrc as above, you can alternatively add $DIRAC_FOLDER/scripts/ 
+Instead of sourcing the dirac bashrc as above, you can alternatively add $DIRAC_FOLDER/scripts/ 
 to your PATH variable directly in your bashrc. It all seems to work ok with python 2.6.6
 
 ###################################################################################################
