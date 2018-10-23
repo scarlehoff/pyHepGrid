@@ -209,8 +209,9 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
 
 def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
-    os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
-    
+    # os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
+    os.system("gcc --version >> {0}".format(outputfile))
+    os.system("python --version >> {0}".format(outputfile))    
 
 
 #################################################################################

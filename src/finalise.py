@@ -90,9 +90,9 @@ def pullrun(name, seed, run, tmpdir):
         # Hits if seed not found in any of the output files
         if verbose:
             print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
-        os.system('lcg-del -a lfn:output/{0} 2>/dev/null'.format(name))
-        os.system('lfc-rm output/{0} -f 2>/dev/null'.format(name))
-        os.system('lfc-rm output/{0} -a -f 2>/dev/null'.format(name))
+        os.system('lcg-del -a lfn:output/{0} >/dev/null 2>&1'.format(name))
+        os.system('lfc-rm output/{0} -f 2>/dev/null 2>&1'.format(name))
+        os.system('lfc-rm output/{0} -a -f >/dev/null 2>&1'.format(name))
         return 1
     return 0
 
