@@ -25,6 +25,9 @@ lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
+use_gfal = False
+gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
+
 # TMUX config
 tmux_location= "tmux"
 
