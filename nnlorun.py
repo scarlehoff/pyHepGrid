@@ -68,13 +68,15 @@ def parse_arguments():
                       help = "Use gfal for file transfer and storage rather than the LFN")
 
     # LHAPDF options
-    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir", default = "util/lhapdf.tar.gz")
+    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir", 
+                      default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
 
     # Socket options
     parser.add_option("-S", "--Sockets", help = "Activate socketed run", action = "store_true", default = False)
     parser.add_option("-p", "--port", help = "Port to connect the sockets to", default = "8888")
-    parser.add_option("-H", "--Host", help = "Host to connect the sockets to", default = "gridui1.dur.scotgrid.ac.uk")
+    parser.add_option("-H", "--Host", help = "Host to connect the sockets to",
+                      default = "gridui1.dur.scotgrid.ac.uk")
 
     # Mark the run as production or warmup
     parser.add_option("-P", "--Production", help = "Production run", action = "store_true", default = False)
@@ -126,7 +128,6 @@ def set_environment(lfndir, lhapdf_dir):
     os.environ["PATH"] = "%s:%s:%s" % (gcc_PATH,lha_PATH,old_PATH)
     old_ldpath                    = os.environ["LD_LIBRARY_PATH"]
     os.environ["LD_LIBRARY_PATH"] = "%s:%s:%s:%s" % (gcc_libpath, gcc_lib64path, lhapdf_lib, old_ldpath)
-
     os.environ["LFC_HOST"]         = "lfc01.dur.scotgrid.ac.uk"
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
     os.environ["LFC_HOME"]         = lfndir
@@ -134,8 +135,10 @@ def set_environment(lfndir, lhapdf_dir):
     os.environ['OMP_STACKSIZE']    = "999999"
     os.environ['LHAPATH']          = lhapdf_share
     os.environ['LHA_DATA_PATH']    = lhapdf_share
+    # os.environ['PYTHONPATH']       = os.environ["PYTHONPATH"]+":"+os.environ["DIRAC"]+ \
+    #     "/linux_x86_64_glibc-2.12/lib/python2.6/site-packages/"
     return 0
-
+# export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
     
 
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"

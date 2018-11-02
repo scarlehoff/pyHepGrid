@@ -19,6 +19,8 @@ logfile_regex = re.compile(r"\w+\.\w+\.s([0-9]+)\.log") # Matches NNLOJET log fi
 # CONFIG
 no_processes = config.finalise_no_cores
 verbose = config.verbose_finalise
+DELETE_CORRUPTED = True
+MAX_ATTEMPTS = 5
 
 # Set up environment
 os.environ["LFC_HOST"] = config.LFC_HOST
@@ -61,12 +63,17 @@ def createdirs(currentdir, runcard):
     return logcheck, targetdir
 
 
-def pullrun(name, seed, run, tmpdir):
+def pullrun(name, seed, run, tmpdir, attempts=0):
     seedstr = ".s{0}.log".format(seed)
-    os.chdir(tmpdir)
+
+    if attempts == 0: # Otherwise already in the tmp dir
+        os.chdir(tmpdir)
+
     status = 0
-    if verbose:
+    if verbose and attempts==0:
         print("Pulling {0}, seed {1}".format(run, seed))
+    elif verbose:
+        print("Retrying {0}, seed {1}. Attempt {2}".format(run, seed, attempts+1))
 
     if config.use_gfal:
         gridname = os.path.join(config.gfaldir, config.lfn_output_dir, name)
@@ -96,17 +103,20 @@ def pullrun(name, seed, run, tmpdir):
         pass
 
     if corrupted:
+        if attempts<MAX_ATTEMPTS-1:
+            return pullrun(name, seed, run, tmpdir, attempts=attempts+1)
+        if DELETE_CORRUPTED:
         # Hits if seed not found in any of the output files
-        if verbose:
-            print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
-        if config.use_gfal:
-            os.system("gfal-rm {0}".format(gridname))
-            return 1
-        else:
-            os.system('lcg-del -a lfn:{1}/{0} >/dev/null 2>&1'.format(name, config.lfn_output_dir))
-            os.system('lfc-rm {1}/{0} -f 2>/dev/null 2>&1'.format(name, config.lfn_output_dir))
-            os.system('lfc-rm {1}/{0} -a -f >/dev/null 2>&1'.format(name, config.lfn_output_dir))
-            return 1
+            if verbose:
+                print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
+            if config.use_gfal:
+                os.system("gfal-rm {0}".format(gridname))
+                return 1
+            else:
+                os.system('lcg-del -a lfn:{1}/{0} >/dev/null 2>&1'.format(name, config.lfn_output_dir))
+                os.system('lfc-rm {1}/{0} -f 2>/dev/null 2>&1'.format(name, config.lfn_output_dir))
+                os.system('lfc-rm {1}/{0} -a -f >/dev/null 2>&1'.format(name, config.lfn_output_dir))
+        return 1
     return 0
 
 
