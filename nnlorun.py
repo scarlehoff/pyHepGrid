@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 import os, sys, datetime
+try:
+    dirac = os.environ["DIRAC"]
+    sys.path.append("{0}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages".format(dirac))
+except KeyError as e:
+    pass
 
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
 def print_flush(string):
@@ -114,6 +119,7 @@ def parse_arguments():
     return options
 
 def set_environment(lfndir, lhapdf_dir):
+    os.system("export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages")
     # GCC 
     cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
     gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
@@ -135,10 +141,13 @@ def set_environment(lfndir, lhapdf_dir):
     os.environ['OMP_STACKSIZE']    = "999999"
     os.environ['LHAPATH']          = lhapdf_share
     os.environ['LHA_DATA_PATH']    = lhapdf_share
-    # os.environ['PYTHONPATH']       = os.environ["PYTHONPATH"]+":"+os.environ["DIRAC"]+ \
-    #     "/linux_x86_64_glibc-2.12/lib/python2.6/site-packages/"
+    try:
+        os.environ['PYTHONPATH']       = os.environ["PYTHONPATH"]+":"+os.environ["DIRAC"]+ \
+            "/linux_x86_64_glibc-2.12/lib/python2.6/site-packages/"
+    except KeyError as e:
+        pass
     return 0
-# export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
+
     
 
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
@@ -234,6 +243,7 @@ def print_node_info(outputfile):
 #################################################################################
 
 if __name__ == "__main__":
+
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
