@@ -27,8 +27,9 @@ lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
-use_gfal = False
-gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
+use_gfal = True
+protocol = "srm" # "dav" "gsiftp"
+gfaldir = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/".format(protocol)
 
 # TMUX config
 tmux_location= "tmux"
@@ -62,7 +63,7 @@ verbose_finalise = False
 default_runfolder = os.path.expanduser("~/warmups/")
 
 warmup_base_dir = None
-production_base_dir = os.path.expanduser("/scratch/dwalker/RESULTS/")
+production_base_dir = os.path.expanduser("/scratch/dwalker/RESULTS/RADISH/VJ_RADISH/")
 
 short_stats = True
 

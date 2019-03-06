@@ -45,7 +45,7 @@ def parse_arguments():
     from getpass import getuser
 
     default_user_lfn = "/grid/pheno/{0}".format(getuser())  
-    default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
+    default_user_gfal = "srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
     parser = OptionParser(usage = "usage: %prog [options]")
 
     parser.add_option("-r","--runcard", help = "Runcard to be run")
@@ -149,8 +149,8 @@ def set_environment(lfndir, lhapdf_dir):
     return 0
 
     
-
-gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
+protocol = "srm"
+gsiftp = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/".format(protocol)
 lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
 lfn    = "lfn:"
@@ -196,7 +196,10 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
         exit_code=1
         output = os.popen(cmd).read().strip()
         print_flush(output)
-        if "guid" in output: # Don't want to lfc-ls in case it's not present...
+        if "guid" in output and not args.use_gfal: 
+            exit_code = 0
+            break
+        elif "[DONE]" in output and args.use_gfal: 
             exit_code = 0
             break
         elif i != maxrange-1:
