@@ -170,19 +170,22 @@ class Backend(object):
     # Checks for the runcard
     def _check_production(self, runcard):
         logger.info("Checking production in runcard {0}".format(runcard.name))
-        # if runcard.is_warmup():
-        #     self._press_yes_to_continue("Warmup is active in runcard")
-        # if not runcard.is_production():
-        #     self._press_yes_to_continue("Production is not active in runcard")
+        if runcard.is_warmup():
+            self._press_yes_to_continue("Warmup is active in runcard")
+        if not runcard.is_production():
+            self._press_yes_to_continue("Production is not active in runcard")
+        logger.info("Production ok")
+
 
     def _check_warmup(self, runcard, continue_warmup = False):
         logger.info("Checking warmup in runcard {0}".format(runcard.name))
-        # if not runcard.is_warmup():
-        #     self._press_yes_to_continue("Warmup is not active in runcard")
-        # if continue_warmup and not runcard.is_continuation():
-        #     self._press_yes_to_continue("Continue warmup is not active in runcard")
-        # if runcard.is_production():
-        #     self._press_yes_to_continue("Production is active in runcard")
+        if not runcard.is_warmup():
+            self._press_yes_to_continue("Warmup is not active in runcard")
+        if continue_warmup and not runcard.is_continuation():
+            self._press_yes_to_continue("Continue warmup is not active in runcard")
+        if runcard.is_production():
+            self._press_yes_to_continue("Production is active in runcard")
+        logger.info("Warmup ok")
 
     def set_overwrite_warmup(self):
         self.overwrite_warmup = True
@@ -392,7 +395,7 @@ class Backend(object):
         try:
             idout = jobid[0]['jobid']
         except IndexError:
-            print("Selected job is %s out of bounds" % jobid)
+            logger.info("Selected job is %s out of bounds" % jobid)
             idt   = input("> Select id to act upon: ")
             idout = self.get_id(idt)
         jobid_list = idout.split(" ")
@@ -416,7 +419,7 @@ class Backend(object):
         try:
             idout = jobid[0]['date']
         except IndexError:
-            print("Selected job is %s out of bounds" % jobid)
+            logger.info("Selected job is %s out of bounds" % jobid)
             idt   = input("> Select id to act upon: ")
             idout = self.get_date(idt)
         return idout
@@ -532,21 +535,21 @@ class Backend(object):
             if self.overwrite_warmup:
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
-                    print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
+                    logger.info("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
                     warmup_files = self._bring_warmup_files(i, rname, shell=True)
                     # if not warmup_files: # check now done in bring warmup files
                     #     logger.critical("No warmup grids found in warmup tar!")
                     files += warmup_files
-                    print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
+                    logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
             if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
-                print("Removing old version of " + tarfile + " from Grid Storage")
+                logger.info("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
             if self.gridw.gfal:
-                print("Sending " + tarfile + " to gfal input/")
+                logger.info("Sending " + tarfile + " to gfal input/")
             else:
-                print("Sending " + tarfile + " to lfn input/")
+                logger.info("Sending " + tarfile + " to lfn input/")
             self.gridw.send(tarfile, "input", shell=True)
             if not local:
                 for j in warmupFiles:
@@ -645,13 +648,13 @@ class Backend(object):
                                                           header.provided_warmup_dir)
                 warmupFiles = [match]
             else:
-                print("Retrieving warmup file from grid")
+                logger.info("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname,  shell = True)
             self.tarw.tarFiles(files + [i] +  warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
-                print("Removing old version of " + tarfile + " from Grid Storage")
+                logger.info("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, "input")
-            print("Sending " + tarfile + " to lfn:input/")
+            logger.info("Sending " + tarfile + " to Grid Storage")
             self.gridw.send(tarfile, "input", shell = True)
             if local:
                 util.spCall(["rm", i, tarfile])
@@ -663,7 +666,7 @@ class Backend(object):
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         from src.header import logger
-        print(matchname, provided_warmup)
+        logger.info(matchname, provided_warmup)
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
@@ -679,7 +682,7 @@ class Backend(object):
                 match = os.path.join(provided_warmup,matches[0])
         else:
             match = provided_warmup
-        print("Using warmup {0}".format(match))
+        logger.info("Using warmup {0}".format(match))
         if not match in os.listdir(sys.path[0]):
             local_match  =False
             copy(match,os.path.basename(match))
@@ -1068,7 +1071,7 @@ class Backend(object):
 
     def _format_args(self, *args, **kwargs):
         raise Exception("Any children classes of src.Backend.py should override this method")
-
+  
     def _get_default_args(self):
         # Defaults arguments that can always go in
         dictionary = {

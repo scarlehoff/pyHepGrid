@@ -130,6 +130,7 @@ def get_most_free_cores():
 if __name__ == "__main__":
     args = get_args()
     site_info = get_ces(args.all)
+
     sortval = "Free"
 
     if args.aliases:
