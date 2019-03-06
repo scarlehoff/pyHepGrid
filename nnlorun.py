@@ -38,8 +38,6 @@ os.system = do_shell
 
 
 
-
-
 def parse_arguments():
     from optparse import OptionParser
     from getpass import getuser
@@ -150,6 +148,7 @@ def set_environment(lfndir, lhapdf_dir):
 
     
 protocol = "srm"
+protocols = ["srm", "xroot", "gsiftp", "root"]
 gsiftp = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/".format(protocol)
 lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
@@ -159,8 +158,14 @@ lfn    = "lfn:"
 def copy_from_grid(grid_file, local_file, args):
     if args.use_gfal:
         filein = "file://$PWD/" + local_file
-        cmd = "gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir)
-        return os.system(cmd)
+        protoc = args.gfaldir.split(":")[0]
+        for protocol in protocols: # cycle through available protocols until one works.
+            print("Attempting copy with {0} protocol".format(protocol))
+            cmd = "gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir.replace(protoc, protocol))
+            retval = syscall(cmd)
+            if retval == 0:
+                return retval
+        return retval
     else:
         cmd = lcg_cp + " " + lfn
         cmd += grid_file + " " + local_file
@@ -184,9 +189,12 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
     fileout = lfn + grid_file
     if args.use_gfal:
         filein = "file://$PWD/" + local_file
-        cmd = "gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir)
-        os.system(cmd)
-        return 0
+        protoc = args.gfaldir.split(":")[0]
+        for protocol in protocols: # cycle through available protocols until one works.
+            cmd = "gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir.replace(protoc, protocol))
+            retval = syscall(cmd)
+            if retval == 0:
+                return retval
     else:
         filein = "file:$PWD/" + local_file
         cmd = lcg_cr + " " + fileout + " " + filein
