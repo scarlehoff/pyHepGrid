@@ -1075,6 +1075,7 @@ class Backend(object):
     def _get_default_args(self):
         # Defaults arguments that can always go in
         dictionary = {
+                'gfal_location':header.cvmfs_gfal_location,
                 'executable' : header.NNLOJETexe,
                 'lfndir' : header.lfndir,
                 'input_folder' : header.lfn_input_dir,

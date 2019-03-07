@@ -26,7 +26,9 @@ lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
 use_gfal = False
+protocol = "srm" # "dav" "gsiftp"
 gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/jmartinez/"
+cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.17/bin/" # set to None for environmentt gfal
 
 # TMUX config
 tmux_location= "tmux"

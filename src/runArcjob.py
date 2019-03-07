@@ -200,7 +200,7 @@ class RunArc(Backend):
                 # Run the file
                     jobid = self._run_XRSL(xrslfile, test=test)
                     joblist.append(jobid)
-            except Exception as e:
+            except Exception as interrupt:
                 print("\n")
                 header.logger.error("Submission error encountered. Inserting all successful submissions to database")
                 keyquit = interrupt
