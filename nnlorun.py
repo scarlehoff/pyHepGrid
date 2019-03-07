@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 import os, sys, datetime
-# try:
-#     dirac = os.environ["DIRAC"]
-#     sys.path.append("{0}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages".format(dirac))
-# except KeyError as e:
-#     pass
 
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
 def print_flush(string):
@@ -159,14 +154,12 @@ def set_environment(lfndir, lhapdf_dir, options):
     os.environ['LHA_DATA_PATH']    = lhapdf_share
     try:
         import gfal2_util.shell
-        # os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"]+":"+options.gfal_location.replace("/bin/","/lib/python2.7/site-packages/")
-        # os.environ["LD_LIBRARY_PATH"] = options.gfal_location.replace("/bin/","/lib/")+":"+os.environ["LD_LIBRARY_PATH"]
     except KeyError as e:
         pass
     except ImportError as e:
-        # If gfal can't be imported then the site packages need to be added to the python path
-        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.7/site-packages/")
-
+        # If gfal can't be imported then the site packages need to be added to the python path because ? :(
+        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
+        os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
     return 0
 
     
