@@ -44,6 +44,7 @@ def parse_arguments():
 
     default_user_lfn = "/grid/pheno/{0}".format(getuser())  
     default_user_gfal = "srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
+
     parser = OptionParser(usage = "usage: %prog [options]")
 
     parser.add_option("-r","--runcard", help = "Runcard to be run")
@@ -69,6 +70,8 @@ def parse_arguments():
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
     parser.add_option("--use_gfal", default="False", 
                       help = "Use gfal for file transfer and storage rather than the LFN")
+    parser.add_option("--gfal_location", default="", 
+                      help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
     # LHAPDF options
     parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir", 
@@ -93,6 +96,14 @@ def parse_arguments():
     if options.use_gfal.lower() == "true":
         options.use_gfal = True
         print("Using GFAL for storage")
+        if os.path.exists(options.gfal_location) and options.gfal_location != "":
+            print("GFAL location found: {0}".format(options.gfal_location))
+        elif options.gfal_location == "":
+            print("Using environment gfal. Good luck!")
+        else:
+            print("GFAL location not found!")
+            print("Reverting to environment gfal commands")
+            options.gfal_location = ""
     else:
         options.use_gfal = False
 
@@ -161,7 +172,9 @@ def copy_from_grid(grid_file, local_file, args):
         protoc = args.gfaldir.split(":")[0]
         for protocol in protocols: # cycle through available protocols until one works.
             print("Attempting copy with {0} protocol".format(protocol))
-            cmd = "gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir.replace(protoc, protocol))
+            cmd = "{3}gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir.replace(protoc, protocol), args.gfal_location)
+            if debug_level > 0:
+                print(cmd)
             retval = syscall(cmd)
             if retval == 0:
                 return retval
@@ -191,10 +204,11 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
         filein = "file://$PWD/" + local_file
         protoc = args.gfaldir.split(":")[0]
         for protocol in protocols: # cycle through available protocols until one works.
-            cmd = "gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir.replace(protoc, protocol))
+            cmd = "{3}gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir.replace(protoc, protocol), args.gfal_location)
             retval = syscall(cmd)
             if retval == 0:
                 return retval
+        return retval
     else:
         filein = "file:$PWD/" + local_file
         cmd = lcg_cr + " " + fileout + " " + filein

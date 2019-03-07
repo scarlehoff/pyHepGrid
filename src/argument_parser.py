@@ -69,7 +69,7 @@ if caller_script == "main.py":
     ######## Run options
     parser_run = parser.add_argument_group("running options", "To be used with mode=run")
     parser_run.add_argument("-mf","--most_free_cores",  help = "Override ce_base with ce with most free cores", action = "store_true")
-    parser_run.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes). NB this is different to the test mode, which runs nnlojob with the intended submission arguments locally for testing before submission. Also, the test queue was broken as of 22/2/18, so this option is a little bit broken.", action = "store_true")
+    parser_run.add_argument("-test", "--test", help = "Use test queue (only runs for 20 minutes). NB this is different to the test mode, which runs nnlojob with the intended submission arguments locally for testing before submission.", action = "store_true")
 
 
     ######## Management options
