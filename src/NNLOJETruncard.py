@@ -1,5 +1,6 @@
 import sys
 import os
+import src.utilities as util
 ############
 # NNLOJET runcard are partly line-fixed
 # In order to read new stuff from the fixed part just add here
@@ -18,7 +19,7 @@ class NNLOJETruncard:
 
     def __init__(self, runcard_file = None, runcard_class = None, 
                  blocks = {"channels":[], "process":{}, "run":{}, "misc":{}},
-                 logger=None, grid_run = True):
+                 logger=None, grid_run = True, use_cvmfs=False, cvmfs_loc = ""):
 
         self._setup_logging(logger)
         self.runcard_dict = {}
@@ -38,7 +39,7 @@ class NNLOJETruncard:
             self.print("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i.lower())
-        self._check_pdf(grid_run)
+        self._check_pdf(grid_run, use_cvmfs=use_cvmfs, cvmfs_loc = cvmfs_loc)
 
 
     def __repr__(self):
@@ -66,30 +67,42 @@ class NNLOJETruncard:
             self.critical("PDF set {0} is not installed in local version of LHAPDF".format(pdf))
 
 
-    def __check_grid_pdf(self):
+    def __check_grid_pdf(self, use_cvmfs=False, cvmfs_loc=""):
         import json
         infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo") 
-        try:
-            with open(infofile,"r") as f:
-                data = json.load(f)
-                pdf, member = self.parse_pdf_entry()
-                try:
-                    members = data[pdf]
-                    self.print("PDF set found")
-                except KeyError as e:
-                    self.critical("PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf))
-                try:
-                    assert int(member) in members
-                    self.print("PDF member found")
-                except AssertionError as e:
-                    self.critical("PDF member {1} for PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf, member))
-        except FileNotFoundError as e:
-            self.warning("No PDF info file found. Skipping check.")
+        pdf, member = self.parse_pdf_entry()
+        if not use_cvmfs:
+            try:
+                with open(infofile,"r") as f:
+                    data = json.load(f)
+                    try:
+                        members = data[pdf]
+                        self.print("PDF set found")
+                    except KeyError as e:
+                        self.critical("PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf))
+                    try:
+                        assert int(member) in members
+                        self.print("PDF member found")
+                    except AssertionError as e:
+                        self.critical("PDF member {1} for PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf, member))
+            except FileNotFoundError as e:
+                self.warning("No PDF info file found. Skipping check.")
+        else:
+            sharedir = "{0}/share/LHAPDF/".format(cvmfs_loc)
+            os.environ["LHA_DATA_PATH"] = sharedir
+            os.environ["LHAPATH"] = sharedir
+            cvmfs_pdfs = util.getOutputCall(["lhapdf", "ls", "--installed"])
+            cvmfs_pdfs = [i.strip() for i in cvmfs_pdfs.split()]
+            if pdf not in cvmfs_pdfs:
+                self.critical("PDF set {0} is not included in cvmfs LHAPDF. Turn cvmfs PDF off and use your own one (or ask the admins nicely...".format(pdf))
+            else:
+                self.print("PDF set found in cvmfs LHAPDF setup")
 
-    def _check_pdf(self, grid_run):
+
+    def _check_pdf(self, grid_run, use_cvmfs=False, cvmfs_loc=""):
         self.print("Checking PDF set validity...")
         if grid_run:
-            self.__check_grid_pdf()
+            self.__check_grid_pdf(use_cvmfs=use_cvmfs, cvmfs_loc = cvmfs_loc)
         else:
             self.__check_local_pdf()
 
