@@ -294,7 +294,7 @@ class GridWrap:
             file_str = today_str + "/" + unique_str
             gsiftp_wher = [gsiftp + file_str]
             gridname = os.path.join(gfaldir, whereTo, tarfile)
-            cmd = ["gfal-copy", what[0], gridname]
+            cmd = ["/usr/bin/gfal-copy", what[0], gridname]
             success = spCall(cmd, shell=shell)
             return success
         else:
@@ -323,7 +323,7 @@ class GridWrap:
         if self.gfal:
             #"gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/{0}/{1}".format(whereFrom, tarfile)
             gridname = path.join(gfaldir, whereFrom, tarfile)
-            cmd = ["gfal-copy", gridname, whereTo]   
+            cmd = ["/usr/bin/gfal-copy", gridname, whereTo]   
             if timeout:
                 cmd += ["-t", str(timeout)]
             success = spCall(cmd, shell=shell, suppress_errors=suppress_errors)
@@ -340,7 +340,7 @@ class GridWrap:
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, whereFrom, tarfile)
-            cmd = ["gfal-rm", gridname]
+            cmd = ["/usr/bin/gfal-rm", gridname]
         else:
             args = [self.lfn + whereFrom + "/" + tarfile]
             cmd = self.delcmd + args
@@ -351,7 +351,7 @@ class GridWrap:
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, where)
-            cmd = ["gfal-ls", gridname]
+            cmd = ["/usr/bin/gfal-ls", gridname]
         else:
             args = [where]
             cmd = self.listfi + args
@@ -366,7 +366,7 @@ class GridWrap:
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, directory)
-            cmd = ["gfal-ls", gridname]
+            cmd = ["/usr/bin/gfal-ls", gridname]
         else:
             args = [directory]
             cmd = self.listfi + args

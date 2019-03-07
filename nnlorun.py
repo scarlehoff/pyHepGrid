@@ -134,8 +134,8 @@ def parse_arguments():
 
     return options
 
-def set_environment(lfndir, lhapdf_dir):
-    os.system("export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages")
+def set_environment(lfndir, lhapdf_dir, options):
+
     # GCC 
     cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
     gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
@@ -158,8 +158,7 @@ def set_environment(lfndir, lhapdf_dir):
     os.environ['LHAPATH']          = lhapdf_share
     os.environ['LHA_DATA_PATH']    = lhapdf_share
     try:
-        os.environ['PYTHONPATH']       = os.environ["PYTHONPATH"]+":"+os.environ["DIRAC"]+ \
-            "/linux_x86_64_glibc-2.12/lib/python2.6/site-packages/"
+        os.environ["PYTHONPATH"] = options.gfal_location.replace("/bin/","/lib/python2.7/site-packages/")+":"+os.environ["PYTHONPATH"]
     except KeyError as e:
         pass
     return 0
@@ -282,7 +281,7 @@ if __name__ == "__main__":
     args = parse_arguments()
     debug_level = int(args.debug)
 
-    set_environment(args.lfndir, args.lhapdf_local)
+    set_environment(args.lfndir, args.lhapdf_local, args)
 
     if debug_level > -1:
         # Architecture info
