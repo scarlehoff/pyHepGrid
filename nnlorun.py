@@ -77,6 +77,9 @@ def parse_arguments():
     parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir", 
                       default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
+    parser.add_option("--use_cvmfs_lhapdf", action = "store_true", default = False)
+    parser.add_option("--cvmfs_lhapdf_location", default="", 
+                      help = "Provide a cvmfs location for LHAPDF.")
 
     # Socket options
     parser.add_option("-S", "--Sockets", help = "Activate socketed run", action = "store_true", default = False)
@@ -106,6 +109,10 @@ def parse_arguments():
             options.gfal_location = ""
     else:
         options.use_gfal = False
+
+    if options.use_cvmfs_lhapdf:
+        print("Using cvmfs LHAPDF at {0}".format(options.cvmfs_lhapdf_location))
+        options.lhapdf_local = options.cvmfs_lhapdf_location
 
     if not options.runcard or not options.runname:
         parser.error("Runcard and runname must be provided")
@@ -287,7 +294,9 @@ if __name__ == "__main__":
                                                                   args.executable, 
                                                                   args.runcard)
 
-    bring_status = bring_lhapdf(args.lhapdf_grid, debug_level)
+    bring_status = 0
+    if not args.use_cvmfs_lhapdf:
+        bring_status += bring_lhapdf(args.lhapdf_grid, debug_level)
     bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
     if debug_level > 2:
         os.system("env")
@@ -332,7 +341,8 @@ if __name__ == "__main__":
     os.system("voms-proxy-info --all")
 
     # Copy stuff to grid storage, remove executable and lhapdf folder
-    os.system("rm -rf {0} {1}".format(args.executable, args.lhapdf_local))
+    if not args.use_cvmfs_lhapdf:
+        os.system("rm -rf {0} {1}".format(args.executable, args.lhapdf_local))
     if args.Production:
         local_out = output_name(args.runcard, args.runname, args.seed)
         output_file = args.output_folder + "/" + local_out

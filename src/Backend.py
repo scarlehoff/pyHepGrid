@@ -233,7 +233,8 @@ class Backend(object):
         local_dir_name = self.get_local_dir_name(r,rname)
         files = os.listdir(local_dir_name)
         runcard = NNLOJETruncard(runcard_file=os.path.join(local_dir_name,r),logger=logger, 
-                                 grid_run=False)
+                                 grid_run=False, use_cvmfs=header.use_cvmfs_location,
+                                 cvmfs_loc=header.cvmfs_lhapdf_location)
         runcard_id = runcard.runcard_dict_case_preserving["id"]
         logs = [f for f in files if f.endswith(".log") and runcard_id in f]
         logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
@@ -523,7 +524,8 @@ class Backend(object):
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
             runcard_file = runFol + "/" + i
-            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
+            runcard_obj = NNLOJETruncard(runcard_file, logger=logger, use_cvmfs=header.use_cvmfs_lhapdf, 
+                                         cvmfs_loc=header.cvmfs_lhapdf_location)
             self._check_warmup(runcard_obj, continue_warmup)
             if provided_warmup: 
                 # Copy warmup to current dir if not already there
@@ -634,7 +636,8 @@ class Backend(object):
             local = False
             # Check whether warmup/production is active in the runcard
             runcard_file = runFol + "/" + i
-            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
+            runcard_obj = NNLOJETruncard(runcard_file, logger=logger, use_cvmfs=header.use_cvmfs_lhapdf, 
+                                         cvmfs_loc=header.cvmfs_lhapdf_location)
             self._check_production(runcard_obj)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -1075,18 +1078,22 @@ class Backend(object):
     def _get_default_args(self):
         # Defaults arguments that can always go in
         dictionary = {
-                'gfal_location':header.cvmfs_gfal_location,
-                'executable' : header.NNLOJETexe,
-                'lfndir' : header.lfndir,
-                'input_folder' : header.lfn_input_dir,
-                'output_folder' : header.lfn_output_dir,
-                'warmup_folder' : header.lfn_warmup_dir,
-                'lhapdf_grid' : header.lhapdf_grid_loc,
-                'lhapdf_local' : header.lhapdf_loc,
-                'debug' : str(header.debug_level),
-                'gfaldir': header.gfaldir,
-                'use_gfal' : str(header.use_gfal)
-                }
+            'gfal_location':header.cvmfs_gfal_location,
+            'executable' : header.NNLOJETexe,
+            'lfndir' : header.lfndir,
+            'input_folder' : header.lfn_input_dir,
+            'output_folder' : header.lfn_output_dir,
+            'warmup_folder' : header.lfn_warmup_dir,
+            'lhapdf_grid' : header.lhapdf_grid_loc,
+            'lhapdf_local' : header.lhapdf_loc,
+            'debug' : str(header.debug_level),
+            'gfaldir': header.gfaldir,
+            'use_gfal' : str(header.use_gfal)
+            }
+        if header.use_cvmfs_lhapdf:
+            dictionary.update({
+            "use_cvmfs_lhapdf":header.use_cvmfs_lhapdf,
+            "cvmfs_lhapdf_location":header.cvmfs_lhapdf_location})
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):

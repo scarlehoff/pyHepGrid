@@ -44,7 +44,9 @@ lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = get_cmd_output("lhapdf-config","--prefix")
- 
+use_cvmfs_lhapdf = False
+cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/lhapdf/6.1.6"
+
 # NNLOJET Database Parameters
 dbname     = "NNLOJET_database.dat"     
 arcbase    = os.path.expanduser("~/.arc/jobs.dat")

@@ -39,7 +39,9 @@ lhapdf_loc = "lhapdf"
 lhapdf_ignore_dirs = []# ["doc", "examples", "config"]
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
- 
+use_cvmfs_lhapdf = False
+cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/lhapdf/6.1.6"
+
 # NNLOJET Database Parameters
 dbname     = "job_data/July/nnlojetdb.dat"     
 provided_warmup_dir = None
