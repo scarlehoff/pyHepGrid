@@ -89,9 +89,10 @@ class NNLOJETruncard:
                 self.warning("No PDF info file found. Skipping check.")
         else:
             sharedir = "{0}/share/LHAPDF/".format(cvmfs_loc)
+            bindir = "{0}/bin/".format(cvmfs_loc)
             os.environ["LHA_DATA_PATH"] = sharedir
             os.environ["LHAPATH"] = sharedir
-            cvmfs_pdfs = util.getOutputCall(["lhapdf", "ls", "--installed"])
+            cvmfs_pdfs = util.getOutputCall(bindir+"lhapdf", "ls", "--installed"])
             cvmfs_pdfs = [i.strip() for i in cvmfs_pdfs.split()]
             if pdf not in cvmfs_pdfs:
                 self.critical("PDF set {0} is not included in cvmfs LHAPDF. Turn cvmfs PDF off and use your own one (or ask the admins nicely...".format(pdf))
