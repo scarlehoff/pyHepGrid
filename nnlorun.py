@@ -164,26 +164,27 @@ def set_environment(lfndir, lhapdf_dir, options):
 
     
 protocol = "srm"
-protocols = ["srm", "xroot", "gsiftp", "root"]
+protocols = ["srm", "xroot", "gsiftp", "root", "xrootd"]
 gsiftp = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/".format(protocol)
 lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
 lfn    = "lfn:"
 
 # Define some utilites
-def copy_from_grid(grid_file, local_file, args):
+def copy_from_grid(grid_file, local_file, args, maxrange=10):
     if args.use_gfal:
         filein = "file://$PWD/" + local_file
         protoc = args.gfaldir.split(":")[0]
         for protocol in protocols: # cycle through available protocols until one works.
             print("Attempting copy with {0} protocol".format(protocol))
-            cmd = "{3}gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir.replace(protoc, protocol), args.gfal_location)
-            if debug_level > 0:
-                print(cmd)
-            retval = syscall(cmd)
-            if retval == 0:
-                return retval
-        return 99999
+            for i in range(maxrange):
+                cmd = "{3}gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir.replace(protoc, protocol), args.gfal_location)
+                if debug_level > 0:
+                    print(cmd)
+                    retval = syscall(cmd)
+                    if retval == 0:
+                        return retval
+            return 99999
     else:
         cmd = lcg_cp + " " + lfn
         cmd += grid_file + " " + local_file
@@ -209,10 +210,12 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
         filein = "file://$PWD/" + local_file
         protoc = args.gfaldir.split(":")[0]
         for protocol in protocols: # cycle through available protocols until one works.
-            cmd = "{3}gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir.replace(protoc, protocol), args.gfal_location)
-            retval = syscall(cmd)
-            if retval == 0:
-                return retval
+            print("Attempting Protocol {0}".format(protocol))
+            for i in range(maxrange): # try max 10 times for now ;)
+                cmd = "{3}gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir.replace(protoc, protocol), args.gfal_location)
+                retval = syscall(cmd)
+                if retval == 0:
+                    return retval
         return retval
     else:
         filein = "file:$PWD/" + local_file
