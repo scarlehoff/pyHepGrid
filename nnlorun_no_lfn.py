@@ -6,21 +6,21 @@ import socket
 from optparse import OptionParser
 from getpass import getuser
 
+# NOTE: Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
+
 RUN_CMD = "OMP_NUM_THREADS={0} ./{1} -run {2}"
 protocols = ["xroot", "srm", "gsiftp", "root", "xrootd"]
 gsiftp = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/".format(protocols[0])
 lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
 
-
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
 def print_flush(string):
     print string
     sys.stdout.flush()
-    
-####
 
-# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
+
+#### Output file name functions    
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
@@ -28,9 +28,8 @@ def warmup_name(runcard, rname):
 
 def warmup_name_ns(runcard, rname, socket_no):
     # Save socketed run output with as well just in case one fails
-    out = "output{0}-warm-{1}-socket_{2}.tar.gz".format(runcard, rname, socket_no)
+    out = "output{0}-warm-socket_{2}-{1}".format(runcard, rname, socket_no)
     return out
-
 
 def output_name(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py
@@ -199,6 +198,10 @@ def grid_copy(infile, outfile, args, maxrange=10):
             retval = syscall(cmd)
             if retval == 0:
                 return retval
+            # if copying to the grid and it has failed, remove before trying again
+            if retval != 0 and "file" not in outfile and not args.Sockets:
+                os.system("gfal-rm {0}".format(outfile_tmp))
+                
     return 9999999
 
 def untar_file(local_file, debug_level):
@@ -277,7 +280,7 @@ def teardown(*statuses):
     print_flush("Final Error Code: {0}".format(final_state))
     sys.exit(final_state)
 
-def store_output(args, socketed=False):
+def store_output(args, socketed=False, socket_config=""):
     # Copy stuff to grid storage, remove executable and lhapdf folder
     if not args.use_cvmfs_lhapdf:
         os.system("rm -rf {0} {1}".format(args.executable, args.lhapdf_local))
@@ -295,11 +298,15 @@ def store_output(args, socketed=False):
     if socketed:
         status_copy = copy_to_grid(local_out, output_file, args, maxrange = 1)
         # copy a second time with socket # as a backup in case of main failure
-        backup_name = warmup_name_ns(runcard, rname, socket_config.split()[-1].strip())
-        status_copy += copy_to_grid(local_out, backup_name, args)
+        socket_no = socket_config.split()[-1].strip()
+        subfolder = os.path.splitext(os.path.basename(output_file))[0].replace(".tar", "")
+        backup_name = warmup_name_ns(args.runcard, args.runname, socket_no)
+        backup_fullpath = os.path.join(args.warmup_folder, subfolder, backup_name)
+        status_copy += copy_to_grid(local_out, backup_fullpath, args)
     else:
         status_copy = copy_to_grid(local_out, output_file, args)
     return status_copy, tar_status
+
 
 def bring_files(args):
     bring_status = 0
@@ -353,6 +360,7 @@ if __name__ == "__main__":
 
     nnlojet_command = RUN_CMD.format(args.threads, args.executable, args.runcard)
 
+    socket_config = None
     if args.Sockets:
         nnlojet_command, socket_config = setup_sockets(args, nnlojet_command, bring_status)
     elif args.Production: # Assume sockets does not work with production
@@ -369,14 +377,15 @@ if __name__ == "__main__":
     # Run executable
     status_nnlojet = run_executable(nnlojet_command)
     # Store output
-    status_copy, status_tar = store_output(args, socketed=args.Sockets)
+    status_copy, status_tar = store_output(args, socketed=args.Sockets, socket_config=socket_config)
     print_copy_status(args, status_copy)
 
     if args.Sockets:
         try: # only the first one arriving will go through!
             print_flush("Close Socket connection") 
-            _ = socket_sync_str(host, port, "bye!") # Be polite
-        except:
+            _ = socket_sync_str(args.Host, args.port, "bye!") # Be polite
+        except Exception as e:
+            raise e
             pass
 
     teardown(status_nnlojet,status_copy,status_tar,bring_status)
