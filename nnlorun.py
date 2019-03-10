@@ -38,7 +38,7 @@ def parse_arguments():
     from getpass import getuser
 
     default_user_lfn = "/grid/pheno/{0}".format(getuser())  
-    default_user_gfal = "srm://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
+    default_user_gfal = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
 
     parser = OptionParser(usage = "usage: %prog [options]")
 
@@ -163,8 +163,7 @@ def set_environment(lfndir, lhapdf_dir, options):
     return 0
 
     
-protocol = "srm"
-protocols = ["srm", "xroot", "gsiftp", "root", "xrootd"]
+protocols = ["xroot", "srm", "gsiftp", "root", "xrootd"]
 gsiftp = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/".format(protocol)
 lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
@@ -181,16 +180,16 @@ def copy_from_grid(grid_file, local_file, args, maxrange=10):
                 cmd = "{3}gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir.replace(protoc, protocol), args.gfal_location)
                 if debug_level > 0:
                     print(cmd)
-                    retval = syscall(cmd)
-                    if retval == 0:
-                        return retval
+                retval = syscall(cmd)
+                if retval == 0:
+                    return retval
             return 99999
     else:
         cmd = lcg_cp + " " + lfn
         cmd += grid_file + " " + local_file
         return os.system(cmd)
 
-def untar_file(local_file, debug):
+def untar_file(local_file, debug_level):
     if debug_level > 2:
         cmd = "tar zxfv {0}".format(local_file)
     else:
@@ -229,9 +228,6 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
         if "guid" in output and not args.use_gfal: 
             exit_code = 0
             break
-        elif "[DONE]" in output and args.use_gfal: 
-            exit_code = 0
-            break
         elif i != maxrange-1:
             print_flush("Copy failure. Trying again. [Attempt "+str(i+1)+"]")
         else:
@@ -252,6 +248,7 @@ def socket_sync_str(host, port, handshake = "greetings"):
 def bring_lhapdf(lhapdf_grid, debug):
     tmp_tar = "lhapdf.tar.gz"
     stat = copy_from_grid(lhapdf_grid, tmp_tar, args)
+    print_flush("LHAPDF copy from GRID status: {0}".format(stat))
     stat += untar_file(tmp_tar, debug)
     return os.system("rm {0}".format(tmp_tar))+stat
 
@@ -297,8 +294,13 @@ if __name__ == "__main__":
 
     bring_status = 0
     if not args.use_cvmfs_lhapdf:
+        print_flush("Using own version of LHAPDF")
         bring_status += bring_lhapdf(args.lhapdf_grid, debug_level)
     bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
+    if bring_status != 0:
+        print_flush("Not able to bring data from storage. Exiting now.")
+        sys.exit(-95)
+
     if debug_level > 2:
         os.system("env")
 
