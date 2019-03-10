@@ -248,7 +248,7 @@ class Backend(object):
         return
 
 
-    def _bring_warmup_files(self, runcard, rname, shell = False, check_only = False):
+    def _bring_warmup_files(self, runcard, rname, shell = False, check_only = False, multichannel=False):
         """ Download the warmup file for a run to local directory
         extracts Vegas grid and log file and returns a list with their names
 
@@ -287,6 +287,11 @@ class Backend(object):
                 logger.critical("Logfile not found. Did the warmup complete successfully?")
             else:
                 return []
+
+        if multichannel and len([i for i in gridFiles if "channels" in i]) ==0:
+            logger.critical("No multichannel warmup found, but multichannel is set in the runcard.")
+        elif multichannel:
+            logger.info("Multichannel warmup files found.")
         if gridFiles == [] and not check_only: # No grid files found
             logger.critical("Grid files not found in warmup tarfile. Did the warmup complete successfully?")
         elif gridFiles == []:
@@ -474,6 +479,21 @@ class Backend(object):
             else:
                 logger.critical("Continuation set in warmup but not requested at run time")
 
+    def check_runcard_multichannel(self, runcard_obj):
+        try:
+            multichannel_val = runcard_obj.runcard_dict["run"]["multi_channel"]
+            if multichannel_val.lower() == ".true.":
+                logger.info("Multichannel switched ON in runcard")
+                multichannel=True
+            else:
+                multichannel=False
+                logger.info("Multichannel switched OFF in runcard")
+        except KeyError as e:
+            multichannel = False
+            logger.info("Multichannel not enabled in runcard")
+        return multichannel
+
+
     def init_local_warmups(self, provided_warmup = None, continue_warmup=False, local=False):
         rncards, dCards = util.expandCard()
         for runcard in rncards:
@@ -527,6 +547,7 @@ class Backend(object):
             runcard_obj = NNLOJETruncard(runcard_file, logger=logger, use_cvmfs=header.use_cvmfs_lhapdf, 
                                          cvmfs_loc=header.cvmfs_lhapdf_location)
             self._check_warmup(runcard_obj, continue_warmup)
+            multichannel = self.check_runcard_multichannel(runcard_obj)
             if provided_warmup: 
                 # Copy warmup to current dir if not already there
                 match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
@@ -538,7 +559,7 @@ class Backend(object):
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
                     logger.info("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
-                    warmup_files = self._bring_warmup_files(i, rname, shell=True)
+                    warmup_files = self._bring_warmup_files(i, rname, shell=True, multichannel=multichannel)
                     # if not warmup_files: # check now done in bring warmup files
                     #     logger.critical("No warmup grids found in warmup tar!")
                     files += warmup_files
@@ -638,6 +659,7 @@ class Backend(object):
             runcard_file = runFol + "/" + i
             runcard_obj = NNLOJETruncard(runcard_file, logger=logger, use_cvmfs=header.use_cvmfs_lhapdf, 
                                          cvmfs_loc=header.cvmfs_lhapdf_location)
+            multichannel = self.check_runcard_multichannel(runcard_obj)
             self._check_production(runcard_obj)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -652,7 +674,7 @@ class Backend(object):
                 warmupFiles = [match]
             else:
                 logger.info("Retrieving warmup file from grid")
-                warmupFiles = self._bring_warmup_files(i, rname,  shell = True)
+                warmupFiles = self._bring_warmup_files(i, rname,  shell = True, multichannel=multichannel)
             self.tarw.tarFiles(files + [i] +  warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
                 logger.info("Removing old version of " + tarfile + " from Grid Storage")
