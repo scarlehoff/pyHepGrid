@@ -5,36 +5,17 @@ import datetime
 import socket
 from optparse import OptionParser
 from getpass import getuser
-
 # NOTE: Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
 
 RUN_CMD = "OMP_NUM_THREADS={0} ./{1} -run {2}"
-protocols = ["xroot", "srm", "gsiftp", "root", "xrootd"]
-gsiftp = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/".format(protocols[0])
-lcg_cp = "lcg-cp"
-lcg_cr = "lcg-cr --vo pheno -l"
+MAX_COPY = 15
+PROTOCOLS = ["xroot", "srm", "gsiftp", "root", "xrootd"]
 
+####### MISC ABUSIVE SETUP #######
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
 def print_flush(string):
     print string
     sys.stdout.flush()
-
-
-#### Output file name functions    
-def warmup_name(runcard, rname):
-    # This function must always be the same as the one in Backend.py
-    out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
-    return out
-
-def warmup_name_ns(runcard, rname, socket_no):
-    # Save socketed run output with as well just in case one fails
-    out = "output{0}-warm-socket_{2}-{1}".format(runcard, rname, socket_no)
-    return out
-
-def output_name(runcard, rname, seed):
-    # This function must always be the same as the one in Backend.py
-    out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
-    return out
 
 #### Override os.system with custom version that auto sets debug level on failure
 # Abusive...
@@ -47,8 +28,90 @@ def do_shell(*args):
         print_flush("Error in {0}. Raising debug level to 9999".format(*args))
     return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok
 os.system = do_shell
+####### END MISC ABUSIVE SETUP #######
 
 
+####### SETUP/TEARDOWN FUNCTIONS #######
+def setup():
+    start_time = datetime.datetime.now()
+    print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
+    args = parse_arguments()
+    debug_level = int(args.debug)
+    setup_environment(args.lfndir, args.lhapdf_local, args)
+    socket_config = None
+
+    if debug_level > 1:
+        # Architecture info
+        print_flush("Python version: {0}".format(sys.version))
+        print_node_info("node_info.log")
+        syscall("lsb_release -a")
+        os.system("env")
+        os.system("voms-proxy-info --all")
+
+    return args, debug_level, socket_config
+
+
+def setup_sockets(args, nnlojet_command, bring_status):
+    host = args.Host
+    port = args.port
+    if bring_status != 0:
+        print_flush("Not able to bring data from LFN, removing myself from the pool")
+        socket_sync_str(host, port, handshake = "oupsities")
+        sys.exit(-95)
+    print_flush("Sockets are active, trying to connect to {0}:{1}".format(host,port))
+    socket_config = socket_sync_str(host, port)
+    if "die" in socket_config:
+        print_flush("Timeout'd by socket server")
+        sys.exit(0)
+    print_flush("Connected to socket server")
+    nnlojet_command += " -port {0} -host {1} {2}".format(port, host,  socket_config)
+    return nnlojet_command, socket_config
+
+
+def setup_environment(lfndir, lhapdf_dir, options):
+    # GCC 
+    cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
+    gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
+    gcc_lib64path = os.path.join(cvmfs_gcc_dir, "lib64")
+    gcc_PATH = os.path.join(cvmfs_gcc_dir, "bin")
+    # LHAPDF
+    lha_PATH = lhapdf_dir + "/bin"
+    lhapdf_lib = lhapdf_dir + "/lib"
+    lhapdf_share = lhapdf_dir + "/share/LHAPDF"
+    
+    old_PATH = os.environ["PATH"]
+    os.environ["PATH"] = "%s:%s:%s" % (gcc_PATH,lha_PATH,old_PATH)
+    old_ldpath                    = os.environ["LD_LIBRARY_PATH"]
+    os.environ["LD_LIBRARY_PATH"] = "%s:%s:%s:%s" % (gcc_libpath, gcc_lib64path, lhapdf_lib, old_ldpath)
+    os.environ["LFC_HOST"]         = "lfc01.dur.scotgrid.ac.uk"
+    os.environ["LCG_CATALOG_TYPE"] = "lfc"
+    os.environ["LFC_HOME"]         = lfndir
+    os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
+    os.environ['OMP_STACKSIZE']    = "999999"
+    os.environ['LHAPATH']          = lhapdf_share
+    os.environ['LHA_DATA_PATH']    = lhapdf_share
+    try:
+        import gfal2_util.shell
+    except KeyError as e:
+        pass
+    except ImportError as e:
+        # If gfal can't be imported then the site packages need to be added to the python path because ? :(
+        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
+        os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
+    return 0
+
+
+def teardown(*statuses):
+    end_time = datetime.datetime.now()
+    print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
+
+    final_state = sum(abs(i) for i in statuses)
+    print_flush("Final Error Code: {0}".format(final_state))
+    sys.exit(final_state)
+####### END SETUP/TEARDOWN FUNCTIONS #######
+
+
+####### ARGUMENT PARSING #######
 def parse_arguments():
     default_user_gfal = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
     default_user_lfn = ""
@@ -139,71 +202,10 @@ def parse_arguments():
     
     print_flush("Arguments: {0}".format(options))
     return options
+####### END ARGUMENT PARSING #######
 
-def set_environment(lfndir, lhapdf_dir, options):
-    # GCC 
-    cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
-    gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
-    gcc_lib64path = os.path.join(cvmfs_gcc_dir, "lib64")
-    gcc_PATH = os.path.join(cvmfs_gcc_dir, "bin")
-    # LHAPDF
-    lha_PATH = lhapdf_dir + "/bin"
-    lhapdf_lib = lhapdf_dir + "/lib"
-    lhapdf_share = lhapdf_dir + "/share/LHAPDF"
-    
-    old_PATH = os.environ["PATH"]
-    os.environ["PATH"] = "%s:%s:%s" % (gcc_PATH,lha_PATH,old_PATH)
-    old_ldpath                    = os.environ["LD_LIBRARY_PATH"]
-    os.environ["LD_LIBRARY_PATH"] = "%s:%s:%s:%s" % (gcc_libpath, gcc_lib64path, lhapdf_lib, old_ldpath)
-    os.environ["LFC_HOST"]         = "lfc01.dur.scotgrid.ac.uk"
-    os.environ["LCG_CATALOG_TYPE"] = "lfc"
-    os.environ["LFC_HOME"]         = lfndir
-    os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
-    os.environ['OMP_STACKSIZE']    = "999999"
-    os.environ['LHAPATH']          = lhapdf_share
-    os.environ['LHA_DATA_PATH']    = lhapdf_share
-    try:
-        import gfal2_util.shell
-    except KeyError as e:
-        pass
-    except ImportError as e:
-        # If gfal can't be imported then the site packages need to be added to the python path because ? :(
-        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
-        os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
-    return 0
 
-# Define some utilites
-def copy_from_grid(grid_file, local_file, args, maxrange=10):
-    filein = os.path.join(args.gfaldir, grid_file)
-    fileout = "file://$PWD/{0}".format(local_file)
-    return grid_copy(filein, fileout, args, maxrange=maxrange)
-
-def copy_to_grid(local_file, grid_file, args, maxrange = 10):
-    filein = "file://$PWD/{0}".format(local_file)
-    fileout = os.path.join(args.gfaldir, grid_file)
-    return grid_copy(filein, fileout, args, maxrange=maxrange)
-
-def grid_copy(infile, outfile, args, maxrange=10):
-    print_flush("Copying {0} to {1}".format(infile, outfile))
-    protoc = args.gfaldir.split(":")[0]
-    for protocol in protocols: # cycle through available protocols until one works.
-        infile_tmp = infile.replace(protoc, protocol)
-        outfile_tmp = outfile.replace(protoc, protocol)
-        print("Attempting Protocol {0}".format(protocol))
-        for i in range(maxrange): # try max 10 times for now ;)
-            cmd = "{2}gfal-copy {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
-            if args.debug > 1:
-                print(cmd)
-                os.system("ls")
-            retval = syscall(cmd)
-            if retval == 0:
-                return retval
-            # if copying to the grid and it has failed, remove before trying again
-            if retval != 0 and "file" not in outfile and not args.Sockets:
-                os.system("gfal-rm {0}".format(outfile_tmp))
-                
-    return 9999999
-
+####### TAR UTILITIES #######
 def untar_file(local_file, debug_level):
     if debug_level > 2:
         cmd = "tar zxfv {0}".format(local_file)
@@ -211,12 +213,33 @@ def untar_file(local_file, debug_level):
         cmd = "tar zxf {0}".format(local_file)
     return os.system(cmd)
 
+
 def tar_this(tarfile, sourcefiles):
     cmd = "tar -czf {0} {1}".format(tarfile, sourcefiles)
     stat = os.system(cmd)
-    os.system("ls")
     return stat
+####### END TAR UTILITIES #######
 
+
+####### FILE NAME HELPERS #######     
+def warmup_name(runcard, rname):
+    # This function must always be the same as the one in Backend.py
+    out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
+    return out
+
+def warmup_name_ns(runcard, rname, socket_no):
+    # Save socketed run output with as well just in case one fails
+    out = "output{0}-warm-socket_{2}-{1}".format(runcard, rname, socket_no)
+    return out
+
+def output_name(runcard, rname, seed):
+    # This function must always be the same as the one in Backend.py
+    out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
+    return out
+####### END FILE NAME HELPERS #######     
+
+
+####### SOCKET HELPERS #######
 def socket_sync_str(host, port, handshake = "greetings"):
     # Blocking call, it will receive a str of the form
     # -sockets {0} -ns {1}
@@ -224,6 +247,22 @@ def socket_sync_str(host, port, handshake = "greetings"):
     sid.connect((host, int(port)))
     sid.send(handshake)
     return sid.recv(32)
+####### END SOCKET HELPERS #######
+
+
+####### COPY WRAPPER FUNCTIONS #######
+def bring_files(args):
+    bring_status = 0
+    if not args.use_cvmfs_lhapdf:
+        print_flush("Using own version of LHAPDF")
+        bring_status += bring_lhapdf(args.lhapdf_grid, debug_level)
+    bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
+    os.system("chmod +x {0}".format(args.executable))
+    if bring_status != 0:
+        print_flush("Not able to bring data from storage. Exiting now.")
+        sys.exit(-95)
+    return bring_status
+
 
 def bring_lhapdf(lhapdf_grid, debug):
     tmp_tar = "lhapdf.tar.gz"
@@ -231,6 +270,7 @@ def bring_lhapdf(lhapdf_grid, debug):
     print_flush("LHAPDF copy from GRID status: {0}".format(stat))
     stat += untar_file(tmp_tar, debug)
     return os.system("rm {0}".format(tmp_tar))+stat
+
 
 def bring_nnlojet(input_grid, runcard, runname, debug):
     # Todo: this is not very general, is it?
@@ -242,43 +282,6 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
     stat += os.system("ls")
     return stat
 
-def print_node_info(outputfile):
-    os.system("hostname >> {0}".format(outputfile))
-    os.system("gcc --version >> {0}".format(outputfile))
-    os.system("python --version >> {0}".format(outputfile))    
-
-
-def setup_sockets(args, nnlojet_command, bring_status):
-    host = args.Host
-    port = args.port
-    if bring_status != 0:
-        print_flush("Not able to bring data from LFN, removing myself from the pool")
-        socket_sync_str(host, port, handshake = "oupsities")
-        sys.exit(-95)
-    print_flush("Sockets are active, trying to connect to {0}:{1}".format(host,port))
-    socket_config = socket_sync_str(host, port)
-    if "die" in socket_config:
-        print_flush("Timeout'd by socket server")
-        sys.exit(0)
-    print_flush("Connected to socket server")
-    nnlojet_command += " -port {0} -host {1} {2}".format(port, host,  socket_config)
-    return nnlojet_command, socket_config
-
-def setup():
-    start_time = datetime.datetime.now()
-    print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
-    args = parse_arguments()
-    debug_level = int(args.debug)
-    set_environment(args.lfndir, args.lhapdf_local, args)
-    return args, debug_level
-
-def teardown(*statuses):
-    end_time = datetime.datetime.now()
-    print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
-
-    final_state = sum(abs(i) for i in statuses)
-    print_flush("Final Error Code: {0}".format(final_state))
-    sys.exit(final_state)
 
 def store_output(args, socketed=False, socket_config=""):
     # Copy stuff to grid storage, remove executable and lhapdf folder
@@ -296,8 +299,9 @@ def store_output(args, socketed=False, socket_config=""):
         os.system("ls")
 
     if socketed:
-        status_copy = copy_to_grid(local_out, output_file, args, maxrange = 1)
-        # copy a second time with socket # as a backup in case of main failure
+        status_copy = copy_to_grid(local_out, output_file, args, maxrange=1)
+        # copy a second time with socket # as a backup to a subfolder in case of main failure
+        # Don't want to retry main copy as multiple instances will be trying to copy there at the same time
         socket_no = socket_config.split()[-1].strip()
         subfolder = os.path.splitext(os.path.basename(output_file))[0].replace(".tar", "")
         backup_name = warmup_name_ns(args.runcard, args.runname, socket_no)
@@ -306,21 +310,46 @@ def store_output(args, socketed=False, socket_config=""):
     else:
         status_copy = copy_to_grid(local_out, output_file, args)
     return status_copy, tar_status
+####### END COPY WRAPPER FUNCTIONS #######
 
 
-def bring_files(args):
-    bring_status = 0
-    if not args.use_cvmfs_lhapdf:
-        print_flush("Using own version of LHAPDF")
-        bring_status += bring_lhapdf(args.lhapdf_grid, debug_level)
-    bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
-    if bring_status != 0:
-        print_flush("Not able to bring data from storage. Exiting now.")
-        sys.exit(-95)
-    return bring_status
+####### COPY UTILITIES #######
+def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY):
+    filein = os.path.join(args.gfaldir, grid_file)
+    fileout = "file://$PWD/{0}".format(local_file)
+    return grid_copy(filein, fileout, args, maxrange=maxrange)
 
 
+def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY):
+    filein = "file://$PWD/{0}".format(local_file)
+    fileout = os.path.join(args.gfaldir, grid_file)
+    return grid_copy(filein, fileout, args, maxrange=maxrange)
+
+
+def grid_copy(infile, outfile, args, maxrange=MAX_COPY):
+    print_flush("Copying {0} to {1}".format(infile, outfile))
+    protoc = args.gfaldir.split(":")[0]
+    for protocol in PROTOCOLS: # cycle through available protocols until one works.
+        infile_tmp = infile.replace(protoc, protocol)
+        outfile_tmp = outfile.replace(protoc, protocol)
+        print("Attempting Protocol {0}".format(protocol))
+        for i in range(maxrange): # try max 10 times for now ;)
+            cmd = "{2}gfal-copy {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
+            if args.debug > 1:
+                print(cmd)
+            retval = syscall(cmd)
+            if retval == 0:
+                return retval
+            # if copying to the grid and it has failed, remove before trying again
+            if retval != 0 and "file" not in outfile and not args.Sockets:
+                os.system("gfal-rm {0}".format(outfile_tmp))
+    return 9999999
+####### END COPY UTILITIES #######
+
+
+####### RUN FUNCTIONS #######
 def run_executable(nnlojet_command):
+    print_flush(" > Executing command: {0}".format(nnlojet_command))
     # Run command
     status_nnlojet = os.system(nnlojet_command)
     if status_nnlojet == 0:
@@ -330,7 +359,10 @@ def run_executable(nnlojet_command):
         os.system("cat outfile.out")
         debug_level = 9999
     return status_nnlojet
+####### END RUN FUNCTIONS #######
 
+
+####### PRINT FUNCTIONS #######
 def print_copy_status(args, status_copy):
     if status_copy == 0:
         print_flush("Copied over to grid storage!")
@@ -342,40 +374,36 @@ def print_copy_status(args, status_copy):
         print_flush("Failure! Outputing vegas warmup to stdout")
         os.system("cat $(ls *.y* | grep -v .txt)")
 
-#################################################################################
-#################################################################################
 
+def print_node_info(outputfile):
+    os.system("hostname >> {0}".format(outputfile))
+    os.system("gcc --version >> {0}".format(outputfile))
+    os.system("python --version >> {0}".format(outputfile))    
+####### END PRINT FUNCTIONS #######
+
+
+####################
+###     MAIN     ###
+####################
 if __name__ == "__main__":
-    args, debug_level = setup()
-
-    if debug_level > 1:
-        # Architecture info
-        print_flush("Python version: {0}".format(sys.version))
-        print_node_info("node_info.log")
-        syscall("lsb_release -a")
-        os.system("env")
-        os.system("voms-proxy-info --all")
-
+    args, debug_level, socket_config = setup()
     bring_status = bring_files(args)
 
     nnlojet_command = RUN_CMD.format(args.threads, args.executable, args.runcard)
 
-    socket_config = None
     if args.Sockets:
         nnlojet_command, socket_config = setup_sockets(args, nnlojet_command, bring_status)
-    elif args.Production: # Assume sockets does not work with production
+    if args.Production: # Assume sockets does not work with production
         nnlojet_command += " -iseed {0}".format(args.seed)
+    nnlojet_command +=" 2>&1 outfile.out"
 
     if debug_level > 1:
         os.system("ls")
         os.system("ldd -v {0}".format(args.executable))
-        
-    os.system("chmod +x {0}".format(args.executable))
-    nnlojet_command +=" 2>&1 outfile.out"
-    print_flush(" > Executed command: {0}".format(nnlojet_command))
 
     # Run executable
     status_nnlojet = run_executable(nnlojet_command)
+
     # Store output
     status_copy, status_tar = store_output(args, socketed=args.Sockets, socket_config=socket_config)
     print_copy_status(args, status_copy)
@@ -384,8 +412,7 @@ if __name__ == "__main__":
         try: # only the first one arriving will go through!
             print_flush("Close Socket connection") 
             _ = socket_sync_str(args.Host, args.port, "bye!") # Be polite
-        except Exception as e:
-            raise e
+        except socket.error as e:
             pass
 
     teardown(status_nnlojet,status_copy,status_tar,bring_status)
