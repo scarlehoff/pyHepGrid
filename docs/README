@@ -126,7 +126,7 @@ initialise libraries [LHAPDF,(OPENLOOPS?)]
 python3 main.py ini -L 
 
 initialise runcard
-python3 main ini runcard.py -Bn -w warmup.file
+python3 main ini runcard.py -B -w warmup.file
  -B is production in arc -D in dirac
  -A is warmup in arc 
 

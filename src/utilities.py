@@ -34,9 +34,9 @@ def spCall(cmd, suppress_errors = False, shell=False):
     try:
         logger.debug(cmd)
         if not suppress_errors:
-            call(cmd, shell=shell)
+            return call(cmd, shell=shell)
         else:
-            call(cmd, stderr=DEVNULL, stdout=DEVNULL, shell=shell)
+            return call(cmd, stderr=DEVNULL, stdout=DEVNULL, shell=shell)
         return 0
     except:
         raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
@@ -295,7 +295,12 @@ class GridWrap:
             gsiftp_wher = [gsiftp + file_str]
             gridname = os.path.join(gfaldir, whereTo, tarfile)
             cmd = ["/usr/bin/gfal-copy", what[0], gridname]
-            success = spCall(cmd, shell=shell)
+            max_repeats = 25
+            for i in range(max_repeats):
+                print("\033[1;35;47m[COPY Attempt {0}/{1}]\033[0m".format(i+1, max_repeats))
+                success = spCall(cmd, shell=shell)
+                if success ==0:
+                    return success
             return success
         else:
             cmd = self.sendto + wher + what

@@ -5,16 +5,18 @@ import datetime
 import socket
 from optparse import OptionParser
 from getpass import getuser
+
 # NOTE: Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
+# Hopefully after the shutdown we can rely on python 2.6/7 but that is TBC
 
 RUN_CMD = "OMP_NUM_THREADS={0} ./{1} -run {2}"
-MAX_COPY = 15
+MAX_COPY_TRIES = 15
 PROTOCOLS = ["xroot", "srm", "gsiftp", "root", "xrootd"]
 
 ####### MISC ABUSIVE SETUP #######
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
 def print_flush(string):
-    print string
+    print(string)
     sys.stdout.flush()
 
 #### Override os.system with custom version that auto sets debug level on failure
@@ -168,20 +170,20 @@ def parse_arguments():
     # Post-parsing setup/checks
     if options.use_gfal.lower() == "true":
         options.use_gfal = True
-        print("Using GFAL for storage")
+        print_flush("Using GFAL for storage")
         if os.path.exists(options.gfal_location) and options.gfal_location != "":
-            print("GFAL location found: {0}".format(options.gfal_location))
+            print_flush("GFAL location found: {0}".format(options.gfal_location))
         elif options.gfal_location == "":
-            print("Using environment gfal. Good luck!")
+            print_flush("Using environment gfal. Good luck!")
         else:
-            print("GFAL location not found!")
-            print("Reverting to environment gfal commands")
+            print_flush("GFAL location not found!")
+            print_flush("Reverting to environment gfal commands")
             options.gfal_location = ""
     else:
         options.use_gfal = False
 
     if options.use_cvmfs_lhapdf:
-        print("Using cvmfs LHAPDF at {0}".format(options.cvmfs_lhapdf_location))
+        print_flush("Using cvmfs LHAPDF at {0}".format(options.cvmfs_lhapdf_location))
         options.lhapdf_local = options.cvmfs_lhapdf_location
 
     if not options.runcard or not options.runname:
@@ -314,29 +316,29 @@ def store_output(args, socketed=False, socket_config=""):
 
 
 ####### COPY UTILITIES #######
-def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY):
+def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
     filein = os.path.join(args.gfaldir, grid_file)
     fileout = "file://$PWD/{0}".format(local_file)
     return grid_copy(filein, fileout, args, maxrange=maxrange)
 
 
-def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY):
+def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY_TRIES):
     filein = "file://$PWD/{0}".format(local_file)
     fileout = os.path.join(args.gfaldir, grid_file)
     return grid_copy(filein, fileout, args, maxrange=maxrange)
 
 
-def grid_copy(infile, outfile, args, maxrange=MAX_COPY):
+def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     print_flush("Copying {0} to {1}".format(infile, outfile))
     protoc = args.gfaldir.split(":")[0]
     for protocol in PROTOCOLS: # cycle through available protocols until one works.
         infile_tmp = infile.replace(protoc, protocol)
         outfile_tmp = outfile.replace(protoc, protocol)
-        print("Attempting Protocol {0}".format(protocol))
+        print_flush("Attempting Protocol {0}".format(protocol))
         for i in range(maxrange): # try max 10 times for now ;)
             cmd = "{2}gfal-copy {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
             if args.debug > 1:
-                print(cmd)
+                print_flush(cmd)
             retval = syscall(cmd)
             if retval == 0:
                 return retval
@@ -415,4 +417,4 @@ if __name__ == "__main__":
         except socket.error as e:
             pass
 
-    teardown(status_nnlojet,status_copy,status_tar,bring_status)
+    teardown(status_nnlojet, status_copy, status_tar, bring_status)
