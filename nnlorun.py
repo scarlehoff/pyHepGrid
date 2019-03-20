@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import os, sys, datetime
 
+MAX_COPY_TRIES = 15
+PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
+
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
 def print_flush(string):
     print string
@@ -66,6 +69,8 @@ def parse_arguments():
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
     parser.add_option("--use_gfal", default="False", 
                       help = "Use gfal for file transfer and storage rather than the LFN")
+    parser.add_option("--gfal_location", default="", 
+                      help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
     # LHAPDF options
     parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir", 
@@ -137,6 +142,14 @@ def set_environment(lfndir, lhapdf_dir):
     os.environ['LHA_DATA_PATH']    = lhapdf_share
     # os.environ['PYTHONPATH']       = os.environ["PYTHONPATH"]+":"+os.environ["DIRAC"]+ \
     #     "/linux_x86_64_glibc-2.12/lib/python2.6/site-packages/"
+    try:
+        import gfal2_util.shell
+    except KeyError as e:
+        pass
+    except ImportError as e:
+        # If gfal can't be imported then the site packages need to be added to the python path because ? :(
+        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
+        os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
     return 0
 # export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
     
@@ -147,37 +160,35 @@ lcg_cr = "lcg-cr --vo pheno -l"
 lfn    = "lfn:"
 
 # Define some utilites
-def copy_from_grid(grid_file, local_file, args):
+
+#### COPYING ####
+
+def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
     if args.use_gfal:
-        filein = "file://$PWD/" + local_file
-        cmd = "gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir)
-        return os.system(cmd)
+        # filein = "file://$PWD/" + local_file
+        # cmd = "gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir)
+        # return os.system(cmd)
+        filein = os.path.join(args.gfaldir, grid_file)
+        fileout = "file://$PWD/{0}".format(local_file)
+        return gfal_copy(filein, fileout, args, maxrange=maxrange)
+
     else:
         cmd = lcg_cp + " " + lfn
         cmd += grid_file + " " + local_file
         return os.system(cmd)
 
-def untar_file(local_file, debug):
-    if debug_level > 2:
-        cmd = "tar zxfv {0}".format(local_file)
-    else:
-        cmd = "tar zxf " + local_file
-    return os.system(cmd)
-
-def tar_this(tarfile, sourcefiles):
-    cmd = "tar -czf " + tarfile + " " + sourcefiles
-    stat = os.system(cmd)
-    os.system("ls")
-    return stat
-
 def copy_to_grid(local_file, grid_file, args, maxrange = 10):
     print_flush("Copying " + local_file + " to " + grid_file)
     fileout = lfn + grid_file
     if args.use_gfal:
-        filein = "file://$PWD/" + local_file
-        cmd = "gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir)
-        os.system(cmd)
-        return 0
+        filein = "file://$PWD/{0}".format(local_file)
+        fileout = os.path.join(args.gfaldir, grid_file)
+        return gfal_copy(filein, fileout, args, maxrange=maxrange)
+
+        # filein = "f# ile://$PWD/" + local_file
+        # cmd = "gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir)
+        # os.system(cmd)
+        # return 0
     else:
         filein = "file:$PWD/" + local_file
         cmd = lcg_cr + " " + fileout + " " + filein
@@ -197,6 +208,44 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
             print_flush("Giving up now.")
             exit_code=500
     return exit_code
+
+
+def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
+    print_flush("Copying {0} to {1}".format(infile, outfile))
+    protoc = args.gfaldir.split(":")[0]
+    for protocol in PROTOCOLS: # cycle through available protocols until one works.
+        infile_tmp = infile.replace(protoc, protocol)
+        outfile_tmp = outfile.replace(protoc, protocol)
+        print_flush("Attempting Protocol {0}".format(protocol))
+        for i in range(maxrange): # try max 10 times for now ;)
+            cmd = "{2}gfal-copy {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
+            if args.debug > 1:
+                print_flush(cmd)
+            retval = syscall(cmd)
+            if retval == 0:
+                return retval
+            # if copying to the grid and it has failed, remove before trying again
+            if retval != 0 and "file" not in outfile and not args.Sockets:
+                os.system("gfal-rm {0}".format(outfile_tmp))
+    return 9999999
+
+
+#### TAR ####
+
+def untar_file(local_file, debug):
+    if debug_level > 2:
+        cmd = "tar zxfv {0}".format(local_file)
+    else:
+        cmd = "tar zxf " + local_file
+    return os.system(cmd)
+
+def tar_this(tarfile, sourcefiles):
+    cmd = "tar -czf " + tarfile + " " + sourcefiles
+    stat = os.system(cmd)
+    os.system("ls")
+    return stat
+
+
 
 def socket_sync_str(host, port, handshake = "greetings"):
     # Blocking call, it will receive a str of the form

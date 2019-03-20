@@ -1,3 +1,4 @@
+
 import subprocess as sp
 import os
 
@@ -30,14 +31,16 @@ lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
-use_gfal = False
+use_gfal = True
 gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/jwhitehead/"
+cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.17/bin/" # set to None for environmentt gfal
 
 # TMUX config
 tmux_location= "tmux"
 
 # Lhapdf config
-lhapdf_grid_loc    = "util/lhapdf.tar.gz"
+# lhapdf_grid_loc    = "util/lhapdf.tar.gz" # for LFN
+lhapdf_grid_loc = "input/lhapdf.tar.gz"
 lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
@@ -64,7 +67,7 @@ default_runfolder = None
 warmup_base_dir = os.path.expanduser("~/warmups")
 #warmup_base_dir = "warmups"
 #production_base_dir = os.path.expanduser("~/results")
-production_base_dir = "/scratch/jwhitehead/results"
+production_base_dir = "/scratch/jwhitehead/results/isolation_tests/"
 
 short_stats = True
 
