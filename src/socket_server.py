@@ -100,7 +100,7 @@ class Generic_Socket:
 
 class Vegas_Socket(Generic_Socket):
     """ Extends Generic_Socket for its
-    use with Vegas within NNLOJET
+    use with Vegas with sockets support
     """
 
     def double_to_bytes(self, double):
@@ -210,39 +210,6 @@ class Vegas_Socket(Generic_Socket):
 
         return 0
         
-def NNLOJET_tuto():
-    str_pr = """
-     >>>>> MANUAL <<<<
-Server side:
-To start the server, give the number of instances of NNLOJET to be sent (ex: 3)
-the port the server will be waiting for (1234) and the hostname of the computer 
-where the server is active. hostname:port needs to be accessible by all NNLOJET instances
-If host is not provided, the socket will try to listen to all available network interfaces.
-    ~$ ./vegas_socket.py -n 3 -p 1234 -H gridui1
-
-NNLOJET side:
-First of all, the NNLOJET code needs to be compiled with the option "sockets=true"
-    ~$ make sockets=true
-(tip: with ~$ touch core/Vegas.f90 && make sockets=true, makedepend will force the compilation of all relevant files)
-After that, run every NNLOJET instance with the following commandline options:
-    ~$ ./NNLOJET -run runcard.run -sockets 3 -ns 1 -port 1234 -hostname gridui1
- -sockets: number of instance (each with its own socket) of NNLOJET that will be run, need to match the server -n option
- -ns: position of this instance, ie, which share of the total number of events will this instance receive. Each instance will run the events from (events)*((ns-1)/sockets) to (events)*(ns/sockets)
- -port: port to connect to the socket (needs to match server port)
- -hostname: hostname to connect (needs to match server host, by default: gridui1)
-ie, if for three sockets you need to have run
-    ~$ ./NNLOJET -run runcard.run -sockets 3 -ns 1 -port 1234 -hostname gridui1
-    ~$ ./NNLOJET -run runcard.run -sockets 3 -ns 2 -port 1234 -hostname gridui1
-    ~$ ./NNLOJET -run runcard.run -sockets 3 -ns 3 -port 1234 -hostname gridui1
-
-(
-    important: this example server should only be used for one run at a time
-    If you want to different runs at the same time, start up two instances of the 
-    server listening to two different ports
-)
-"""
-    print(str_pr)
-
 def timeout_handler(signum, frame):
     raise Exception("The time has passed, it's time to run")
 
@@ -290,10 +257,6 @@ def parse_all_arguments():
     parser.add_argument("-l", "--logfile", help = "Set the output logfile name (Stored in /tmp/<username>/socket_server/", default=None)
     args = parser.parse_args()
 
-    if args.manual:
-        NNLOJET_tuto()
-        exit(0)
-
     if args.wait:
         if "gridui" not in socket.gethostname():
             parser.error("Wait only to be used in gridui")
@@ -327,9 +290,9 @@ def do_server(args,log):
 
     #### If wait (this whole block is for its use with the grid scripts)
     if args.wait:
-        # Wait for a number of ARC jobs to start before allowing NNLOJET to run
+        # Wait for a number of ARC jobs to start before allowing the program to run
         # it will "capture" the different instances of nnlorun.py until it gets all of them
-        # TODO: If we capture a rogue instance of NNLOJET instead, skip to the while loop or make it fail? What should I do?
+        # TODO: If we capture a rogue instance instead, skip to the while loop or make it fail? What should I do?
 
         clients = []
 

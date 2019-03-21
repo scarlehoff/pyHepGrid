@@ -14,7 +14,7 @@ import tarfile
 rc = importlib.import_module(config.finalise_runcards.replace("/","."))
 logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$") # Matches seeds in logfiles
 tarfile_regex = re.compile(r"-([0-9]+)\.tar.gz+$") # Matches tarfiles
-logfile_regex = re.compile(r"\w+\.\w+\.s([0-9]+)\.log") # Matches NNLOJET log files
+logfile_regex = re.compile(r"\w+\.\w+\.s([0-9]+)\.log") # Matches PROGRAM log files
 
 # CONFIG
 no_processes = config.finalise_no_cores
@@ -45,7 +45,7 @@ def get_output_dir_name(runcard):
     return os.path.join(basedir, subdir)
 
 
-def get_NNLOJET_logfiles(logdir):
+def get_PROGRAM_logfiles(logdir):
     for i in os.listdir(logdir):
         if logfile_regex.match(i) is not None:
             yield i
@@ -59,7 +59,7 @@ def createdirs(currentdir, runcard):
     nodedir = os.path.join(logdir, 'node_info')
     mkdir(nodedir)
     logcheck = set([logseed_regex.search(i).group(1) for i 
-                    in get_NNLOJET_logfiles(logdir)])
+                    in get_PROGRAM_logfiles(logdir)])
     return logcheck, targetdir
 
 

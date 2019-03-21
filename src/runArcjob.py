@@ -176,7 +176,7 @@ class RunArc(Backend):
         rncards, dCards = util.expandCard()
         self.runfolder = header.runcardDir
         job_type = "Production"
-        from src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, NNLOJETexe, lfn_output_dir
+        from src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, executable_exe, lfn_output_dir
 
         header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:

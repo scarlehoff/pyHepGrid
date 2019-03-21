@@ -11,8 +11,8 @@ def get_cmd_output(*args,**kwargs):
 # Global Variables
 # Global Variables (default values, can be changed by runcard.py)
 runcardDir = "/path/to/runcard/directory/" # Directory for grid runcard storage
-NNLOJETdir = "/path/to/nnlojet/directory"             # Directory for NNLOJET
-NNLOJETexe = "NNLOJET"                               # Exectuable name
+executable_src_dir = "/path/to/nnlojet/directory"             # Directory for NNLOJET
+executable_exe = "NNLOJET"                               # Exectuable name
 warmupthr  = 8
 producRun  = 100
 baseSeed   = 100

@@ -106,7 +106,7 @@ def check_port_blocked(host, port):
   
 def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe = "/mt/home/jmartinez/Gangaless_new/src/socket_server.py",tag="", tmuxloc = "tmux"): 
     """ 
-    Fires up the nnlojet socket server inside a tmux terminal
+    Fires up the vegas socket server inside a tmux terminal
     in the given 'host' for 'n_sockets' and with a 'wait_time' (s)
     'port' is the starting point, it won't fire up the server until
     finding one free
@@ -122,7 +122,6 @@ def fire_up_socket_server(host, port, n_sockets, wait_time = "18000", socket_exe
     tmux = Tmux(tms, host, tmuxloc = tmuxloc)
 
     # Send the server activation command!
-    # TODO: put socket_exe in the general header since it should point to NNLOJET/bin
     if wait_time is None:
         waitstr = ""
     else:

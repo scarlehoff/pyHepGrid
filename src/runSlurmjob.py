@@ -40,7 +40,7 @@ class RunSlurm(Backend):
             args["partition"] = "#SBATCH --partition {0}".format(queue)
         else:
             args["partition"] = ""
-        args["exe"]=header.NNLOJETexe
+        args["exe"]=header.executable_exe
         return args
 
     def _get_warmup_args(self, runcard, tag, threads=1, n_sockets=1,
