@@ -32,7 +32,8 @@ lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
 use_gfal = True
-gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/jwhitehead/"
+protocol = "srm" # "dav" "gsiftp" "xroot"
+gfaldir = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/jwhitehead/".format(protocol)
 cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.17/bin/" # set to None for environmentt gfal
 
 # TMUX config

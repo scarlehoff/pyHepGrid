@@ -19,7 +19,7 @@ logfile_regex = re.compile(r"\w+\.\w+\.s([0-9]+)\.log") # Matches NNLOJET log fi
 # CONFIG
 no_processes = config.finalise_no_cores
 verbose = config.verbose_finalise
-DELETE_CORRUPTED = True
+DELETE_CORRUPTED = False
 MAX_ATTEMPTS = 5
 
 # Set up environment

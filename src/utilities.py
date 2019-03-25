@@ -5,6 +5,10 @@
 #
 #
 
+
+MAX_COPY_TRIES = 10
+PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
+
 ###################################
 def pythonVersion():
     from sys import version_info
@@ -34,9 +38,9 @@ def spCall(cmd, suppress_errors = False, shell=False):
     try:
         logger.debug(cmd)
         if not suppress_errors:
-            call(cmd, shell=shell)
+            return call(cmd, shell=shell)
         else:
-            call(cmd, stderr=DEVNULL, stdout=DEVNULL, shell=shell)
+            return call(cmd, stderr=DEVNULL, stdout=DEVNULL, shell=shell)
         return 0
     except:
         raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
@@ -282,51 +286,44 @@ class GridWrap:
     def send(self, tarfile, whereTo, shell=False):
         import os
         from src.header import logger, gfaldir
-        wher = [self.lfn + whereTo + "/" + tarfile]
-        what = ["file:" + tarfile]
         if self.gfal:
             what = ["file:///{0}/".format(os.getcwd()) + tarfile]
-            from datetime import datetime
-            from uuid import uuid1 as generateRandom
             from src.header import gsiftp
-            today_str = datetime.today().strftime('%Y-%m-%d')
-            unique_str = "ffilef" + str(generateRandom())
-            file_str = today_str + "/" + unique_str
-            gsiftp_wher = [gsiftp + file_str]
             gridname = os.path.join(gfaldir, whereTo, tarfile)
             cmd = ["gfal-copy", what[0], gridname]
-            success = spCall(cmd, shell=shell)
-            return success
         else:
+            wher = [self.lfn + whereTo + "/" + tarfile]
+            what = ["file:" + tarfile]
             cmd = self.sendto + wher + what
-            count = 1
-            while True:
-                success = spCall(cmd, shell=shell)
-                # Check whether we actually sent what we wanted to send
-                if self.checkForThis(tarfile, whereTo):
+        count = 1
+        while True:
+            success = spCall(cmd, shell=shell)
+            # Check whether we actually sent what we wanted to send
+            if self.checkForThis(tarfile, whereTo):
+                break
+            elif count < 3: # 3 attempts before asking for input...
+                logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                logger.info("Automatically trying again...")
+            else:
+                logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                yn = input(" Try again? (y/n) ")
+                if not yn.startswith("y"):
+                    logger.error("{0} was not copied to the grid storage after {1} attempt(s)".format(tarfile,count))
                     break
-                elif count < 3: # 3 attempts before asking for input...
-                    logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
-                    logger.info("Automatically trying again...")
-                else:
-                    logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
-                    yn = input(" Try again? (y/n) ")
-                    if not yn.startswith("y"):
-                        logger.error("{0} was not copied to the grid storage after {1} attempt(s)".format(tarfile,count))
-                        break
-                count +=1
+            count +=1
         return success
 
     def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False):
         from os import path
         from src.header import gfaldir
         if self.gfal:
-            #"gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/{0}/{1}".format(whereFrom, tarfile)
             gridname = path.join(gfaldir, whereFrom, tarfile)
-            cmd = ["gfal-copy", gridname, whereTo]   
-            if timeout:
-                cmd += ["-t", str(timeout)]
-            success = spCall(cmd, shell=shell, suppress_errors=suppress_errors)
+            destpath = "file://$PWD/{0}".format(whereTo)
+            success = gfal_copy(gridname, destpath)
+            # cmd = ["gfal-copy", gridname, whereTo]   
+            # if timeout:
+            #     cmd += ["-t", str(timeout)]
+            # success = spCall(cmd, shell=shell, suppress_errors=suppress_errors)
         else:
             args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
             if timeout:
@@ -379,6 +376,30 @@ class GridWrap:
         for filename in files:
             self.delete(filename, directory)
         return spCall(self.delete_dir + [directory])
+
+
+
+def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES):
+    print("Copying {0} to {1}".format(infile, outfile))
+    from src.header import gfaldir
+    import os
+    protoc = gfaldir.split(":")[0]
+    for protocol in PROTOCOLS: # cycle through available protocols until one works.
+        infile_tmp = infile.replace(protoc, protocol)
+        outfile_tmp = outfile.replace(protoc, protocol)
+        print("Attempting Protocol {0}".format(protocol))
+        for i in range(maxrange): # try max 10 times for now ;)
+            cmd = "gfal-copy {0} {1}".format(infile_tmp, outfile_tmp)
+            print(cmd)
+            retval = os.system(cmd)
+            if retval == 0:
+                return retval
+        # if copying to the grid and it has failed, remove before trying again
+            if retval != 0 and "file" not in outfile:
+                os.system("gfal-rm {0}".format(outfile_tmp))
+    return 9999999
+
+
         
 if __name__ == '__main__':
     from sys import version_info
