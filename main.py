@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python3.6
 
 ##### Call argument parser
 from src.argument_parser import arguments as args
