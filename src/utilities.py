@@ -340,19 +340,21 @@ class GridWrap:
         # lcg-cp returns always 0 even when it fails :___
         return path.isfile(whereTo)
 
-    def delete(self, tarfile, whereFrom):
+    def delete(self, tarfile, whereFrom, directory=False):
         from src.header import gfaldir
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, whereFrom, tarfile)
             cmd = ["/usr/bin/gfal-rm", gridname]
+            if directory:
+                cmd += ["-r"]
         else:
             args = [self.lfn + whereFrom + "/" + tarfile]
             cmd = self.delcmd + args
         return spCall(cmd)
 
     def checkForThis(self, filename, where):
-        from src.header import gfaldir
+        from src.header import gfaldir, logger
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, where)
@@ -360,14 +362,18 @@ class GridWrap:
         else:
             args = [where]
             cmd = self.listfi + args
+        logger.debug(" ".join(cmd))
         output = getOutputCall(cmd)
+        logger.debug(output)
+        logger.debug(filename)
+        logger.debug(filename in output)
         if filename in output:
             return True
         else:
             return False
 
     def get_dir_contents(self, directory):
-        from src.header import gfaldir
+        from src.header import gfaldir, logger
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, directory)
@@ -375,6 +381,7 @@ class GridWrap:
         else:
             args = [directory]
             cmd = self.listfi + args
+        logger.debug(" ".join(cmd))
         output = getOutputCall(cmd)
         return output
 
