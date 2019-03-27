@@ -231,7 +231,7 @@ def warmup_name(runcard, rname):
 
 def warmup_name_ns(runcard, rname, socket_no):
     # Save socketed run output with as well just in case one fails
-    out = "output{0}-warm-socket_{2}-{1}".format(runcard, rname, socket_no)
+    out = "output{0}-warm-socket_{2}-{1}.tar.gz".format(runcard, rname, socket_no)
     return out
 
 def output_name(runcard, rname, seed):

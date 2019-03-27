@@ -270,6 +270,21 @@ class Backend(object):
                                    suppress_errors=suppress_errors)
 
         if not success and not check_only:
+            if self._press_yes_to_continue("Grid files failed to copy. Try backups from individual sockets?") == 0:
+                backup_dir = os.path.join(lfn_warmup_dir,outnm.replace(".tar.gz",""))
+                backups = self.gridw.get_dir_contents(backup_dir)
+                if len(backups) == 0:
+                    logger.critical("No backups found. Did the warmup complete successfully?")
+                else:
+                    backup_files = backups.split()
+                    for idx, backup in enumerate(backup_files):
+                        logger.info("Attempting backup {1} [{0}]".format(idx+1, backup))
+                        success = self.gridw.bring(backup, backup_dir, tmpnm, shell = shell, 
+                                                   suppress_errors=suppress_errors)
+                        if success:
+                            break
+                    
+        if not success and not check_only:
             logger.critical("Grid files failed to copy from the LFN. Did the warmup complete successfully?")
         elif not success:
             return []
