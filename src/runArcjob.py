@@ -119,6 +119,9 @@ class RunArc(Backend):
         header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         port = header.port
         for r in rncards:
+            # Check whether this run has something on the gridStorage
+            self._checkfor_existing_warmup(r, dCards[r])
+
             if n_sockets > 1:
                 # Automagically activates the socket and finds the best port for it!
                 port = sapi.fire_up_socket_server(header.server_host, port, n_sockets, 
@@ -126,8 +129,6 @@ class RunArc(Backend):
                                                   tag="{0}-{1}".format(r,dCards[r]))
                 job_type = "Socket={}".format(port)
 
-            # Check whether this run has something on the gridStorage
-            self._checkfor_existing_warmup(r, dCards[r])
             # Generate the XRSL file
             arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr,
                                               sockets=sockets, port=port)

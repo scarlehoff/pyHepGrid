@@ -197,8 +197,14 @@ class Backend(object):
         logger.info("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
-            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(header.lfn_warmup_dir,checkname))
+            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(header.lfn_warmup_dir, checkname))
             self.gridw.delete(checkname, header.lfn_warmup_dir)
+
+        socket_dirname = checkname.replace(".tar.gz","")
+        if self.gridw.checkForThis(socket_dirname, header.lfn_warmup_dir):
+            self._press_yes_to_continue("Socket backups {1} already exist at lfn:{0}, do you want to remove them?".format(header.lfn_warmup_dir, socket_dirname))
+            self.gridw.delete(socket_dirname, header.lfn_warmup_dir, directory=True)
+
 
     def _checkfor_existing_output(self, r, rname):
         """ Check whether given runcard already has output in the grid
@@ -555,10 +561,10 @@ class Backend(object):
             logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
             warmupFiles = []
+            runcard_file = os.path.join(runFol, i)
             # Check whether warmup/production is active in the runcard
-            if not os.path.isfile(runFol + "/" + i):
+            if not os.path.isfile(runcard_file):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
-            runcard_file = runFol + "/" + i
             runcard_obj = NNLOJETruncard(runcard_file, logger=logger, use_cvmfs=header.use_cvmfs_lhapdf, 
                                          cvmfs_loc=header.cvmfs_lhapdf_location)
             self._check_warmup(runcard_obj, continue_warmup)
@@ -569,7 +575,7 @@ class Backend(object):
                 files += [match]
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
-            copy(runFol + "/" + i, os.getcwd())
+            copy(runcard_file, os.getcwd())
             if self.overwrite_warmup:
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
@@ -581,14 +587,13 @@ class Backend(object):
                     logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
-            if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
-                logger.info("Removing old version of " + tarfile + " from Grid Storage")
-                self.gridw.delete(tarfile, "input")
+            if self.gridw.checkForThis(tarfile,  header.lfn_input_dir): # Could we cache this? Just to speed up ini
+                logger.info("Removing old version of {0} from Grid storage input".format(tarfile))
+                self.gridw.delete(tarfile,  header.lfn_input_dir)
+
             if self.gridw.gfal:
-                logger.info("Sending " + tarfile + " to gfal input/")
-            else:
-                logger.info("Sending " + tarfile + " to lfn input/")
-            self.gridw.send(tarfile, "input", shell=True)
+                logger.info("Sending {0} to Grid Storage {1}".format(tarfile, header.lfn_input_dir))
+            self.gridw.send(tarfile, header.lfn_input_dir, shell=True)
             if not local:
                 for j in warmupFiles:
                     os.remove(j)
@@ -691,11 +696,11 @@ class Backend(object):
                 logger.info("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname,  shell = True, multichannel=multichannel)
             self.tarw.tarFiles(files + [i] +  warmupFiles, tarfile)
-            if self.gridw.checkForThis(tarfile, "input"):
+            if self.gridw.checkForThis(tarfile, header.lfn_input_dir):
                 logger.info("Removing old version of " + tarfile + " from Grid Storage")
-                self.gridw.delete(tarfile, "input")
+                self.gridw.delete(tarfile, header.lfn_input_dir)
             logger.info("Sending " + tarfile + " to Grid Storage")
-            self.gridw.send(tarfile, "input", shell = True)
+            self.gridw.send(tarfile, header.lfn_input_dir, shell = True)
             if local:
                 util.spCall(["rm", i, tarfile])
             else:
