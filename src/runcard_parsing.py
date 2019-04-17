@@ -59,8 +59,8 @@ class PROGRAMruncard:
             self.print("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i)
-        # self._check_numeric()
-        # self._check_pdf(grid_run)
+        self._check_numeric()
+        self._check_pdf(grid_run)
 
 
     def __check_local_pdf(self):
