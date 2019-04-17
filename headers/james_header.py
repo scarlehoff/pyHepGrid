@@ -31,9 +31,7 @@ lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
 use_gfal = False
-protocol = "srm" # "dav" "gsiftp"
 gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/jwhitehead/"
-cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.17/bin/" # set to None for environmentt gfal
 
 # TMUX config
 tmux_location= "tmux"
@@ -44,9 +42,7 @@ lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = get_cmd_output("lhapdf-config","--prefix")
-use_cvmfs_lhapdf = False
-cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/lhapdf/6.1.6"
-
+ 
 # NNLOJET Database Parameters
 dbname     = "NNLOJET_database.dat"     
 arcbase    = os.path.expanduser("~/.arc/jobs.dat")

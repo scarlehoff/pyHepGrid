@@ -1,5 +1,5 @@
 import subprocess as sp
-import os
+
 ##################################################
 #                Helper Functions                #
 # Can't use src.utilities due to circular imports :( #
@@ -8,38 +8,60 @@ def get_cmd_output(*args,**kwargs):
     outbyt = sp.Popen(args, stdout=sp.PIPE,**kwargs).communicate()[0]
     return outbyt.decode("utf-8")
 
+#
 # Global Variables (default values)
-runcardDir = "/mt/home/jmartinez/Runcards"
-NNLOJETdir = "/mt/home/jmartinez/not_nnlojet_at_all/"
+# 
+runcardDir = "/mt/home/jniehues/NNLOJET/driver/grid/"
+NNLOJETdir = "/mt/home/jniehues/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 16
-producRun  = 500
+producRun  = 100
 baseSeed   = 100
-jobName    = "testjob"
+jobName    = "gridjob"
 debug_level = 0
-stacksize = 100 #MB
+stacksize = 50 #MB
 
+#
 # Grid config 
-lfndir   = "/grid/pheno/jmartinez"
+#
+lfndir   = "/grid/pheno/jniehues"
+# The following options are not fully functional yet 
+# in particular they need to be propagated to DIRAC/ARC.py via ?cmd line args?
+# I may also have missed some hardcodings
 lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
 use_gfal = False
-gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/jmartinez/"
+gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/jniehues/"
 
 # TMUX config
 tmux_location= "tmux"
 
-# Lhapdf config
-lhapdf_grid_loc = "util/lhapdf.tar.gz"  
-lhapdf_loc = "lhapdf"
-lhapdf_ignore_dirs = []# ["doc", "examples", "config"]
+#lhapdf config
+lhapdf_grid_loc = "input/" # util/ for Juan
+lhapdf_loc = "lhapdf" # lhapdf for Juan
+lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
+
+# Use installed version of LHAPDF by default
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
-lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
  
+#
+# ARC parameters
+#
+ce_base = "ce2.dur.scotgrid.ac.uk"
+ce_test = "ce-test.dur.scotgrid.ac.uk"
+ce_listfile = "computing_elements.txt"
+arcbase  = "/mt/home/jniehues/.arc/jobs.dat" # arc database
+
+# DIRAC parameters
+dirac_name = "jan.niehues"
+DIRAC_BANNED_SITES = ["VAC.UKI-SCOTGRID-GLASGOW.uk"]
+
+#
 # NNLOJET Database Parameters
-dbname     = "job_data/July/nnlojetdb.dat"     
+#
+dbname     = "NNLOJET_november.dat"     
 provided_warmup_dir = None
 
 # Finalisation and storage options
@@ -57,27 +79,9 @@ default_runfolder = None
 warmup_base_dir = "/WarmupsRunGrids"
 production_base_dir = "/ResultsRunGrids"
 
-short_stats = True
-
-# ARC parameters
-ce_base = "ce1.dur.scotgrid.ac.uk"
-# ce_base = "ce02.tier2.hep.manchester.ac.uk"
-# ce_base = "svr009.gla.scotgrid.ac.uk"
-ce_test = "ce-test.dur.scotgrid.ac.uk"
-ce_listfile = "computing_elements.txt"
-arcbase  = "/mt/home/jmartinez/.arc/jobs.dat" # arc database
-
-# DIRAC parameters
-dirac_name = "juan.m.cruzmartinez"
-DIRAC_BANNED_SITES = ["VAC.UKI-SCOTGRID-GLASGOW.uk"]
-
 # src.finalise.py-only parameters
 finalise_runcards = None
 finalise_prefix = None
-
-# socket parameters
-server_host = "gridui1.dur.scotgrid.ac.uk"
-port = 8888
 wait_time = 3600 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)
 
 #SLURM parameters

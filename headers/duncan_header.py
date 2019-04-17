@@ -1,3 +1,4 @@
+
 import subprocess as sp
 import os
 import random
@@ -10,8 +11,8 @@ def get_cmd_output(*args,**kwargs):
     return outbyt.decode("utf-8")
 
 # Global Variables (default values)
-runcardDir = "/mt/home/dwalker/jobscripts/nnlojet_runcards/"
-NNLOJETdir = "/mt/home/dwalker/modules2/nnlojethg/"
+runcardDir = "/mt/home/dwalker/NNLOJET/driver/grid/"
+NNLOJETdir = "/mt/home/dwalker/NNLOJET/"
 NNLOJETexe = "NNLOJET"
 warmupthr  = 8
 producRun  = 1000
@@ -26,12 +27,8 @@ lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
 
-# GFAL Config
-use_gfal = True
-protocol = "srm" # "dav" "gsiftp" "xroot"
-gfaldir = "{0}://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/".format(protocol)
-cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.12/bin/" # set to None for environment gfal
-#gridui_gfal_location
+use_gfal = False
+gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
 
 # TMUX config
 tmux_location= "tmux"
@@ -44,8 +41,6 @@ lhapdf_ignore_dirs = ["doc", "examples", "config", "LHAPDF-6.2.1/share",
                       "src"]
 lhapdf = get_cmd_output("lhapdf-config","--prefix")
 lhapdf_central_scale_only = True #True # Only tar up central [0000.dat] PDF sets
-use_cvmfs_lhapdf = False
-cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/lhapdf/6.1.6"
 
 # NNLOJET Database Parameters
 dbname     = "/mt/home/dwalker/jobscripts/databases/CCDIS.dat"     
@@ -67,7 +62,7 @@ verbose_finalise = False
 default_runfolder = os.path.expanduser("~/warmups/")
 
 warmup_base_dir = None
-production_base_dir = os.path.expanduser("/scratch/dwalker/RESULTS/RADISH/VJ_RADISH/")
+production_base_dir = os.path.expanduser("/scratch/dwalker/RESULTS/")
 
 short_stats = True
 

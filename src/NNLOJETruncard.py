@@ -1,10 +1,29 @@
 import sys
 import os
-import src.utilities as util
 ############
 # NNLOJET runcard are partly line-fixed
 # In order to read new stuff from the fixed part just add here
-valid_channels = ["rr","rv","vv","r","v","lo","rr"]
+nnlojet_linecode = {
+        1 : "id",
+        2 : "proc",
+        3 : "events",
+        4 : "iterations",
+        5 : "seed",
+        6 : "warmup",
+        7 : "production",
+        8 : "pdf_name",
+        9 : "pdf_member",
+        10 : "jet_algorithm",
+        11 : "r_cut",
+        12 : "exclusive",
+        13 : "decay_type",
+        14 : "tc", # Technical cut
+        17 : "region", # a, b, all
+    }
+
+valid_channels = ["rr","rv","vv","r","v","lo","rra","rrb"]
+
+numeric_ids = [3,4,5,9,13]
 
 class NNLOJETruncard:
     """
@@ -17,20 +36,21 @@ class NNLOJETruncard:
     the inbuilt print function [set up controlled by _setup_logging()]
     """
 
-    def __init__(self, runcard_file = None, runcard_class = None, 
-                 blocks = {"channels":[], "process":{}, "run":{}, "misc":{}},
-                 logger=None, grid_run = True, use_cvmfs=False, cvmfs_loc = ""):
+    def __init__(self, runcard_file = None, runcard_class = None, blocks = ["channels"],
+                 logger=None, grid_run = True):
 
         self._setup_logging(logger)
         self.runcard_dict = {}
-        self.blocks = blocks
+        self.runcard_dict_case_preserving = {}
         if runcard_class and isinstance(runcard_class, type(self)):
             raise Exception("Not implemented yet")
         elif runcard_file:
+            pass
             # Preprocessing
             self.blocks_to_read = []
             for i in blocks:
                 self.blocks_to_read.append(i.lower())
+
         #     # Read the runcard into runcard_dict
             self._parse_runcard_from_file(runcard_file)
 
@@ -38,72 +58,46 @@ class NNLOJETruncard:
         #     # Check channels
             self.print("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
-                self._check_channel(i.lower())
-        self._check_pdf(grid_run, use_cvmfs=use_cvmfs, cvmfs_loc = cvmfs_loc)
-
-
-    def __repr__(self):
-        return str(self.runcard_dict)
-        
-
-    def parse_pdf_entry(self):
-        """TODO rewrite with regexp for niceness"""
-        pdf_tag = self.runcard_dict["run"]["pdf"]
-        pdf = pdf_tag.split("[")[0]
-        member = pdf_tag.split("[")[-1].split("]")[0]
-        return pdf, member
+                self._check_channel(i)
+        # self._check_numeric()
+        # self._check_pdf(grid_run)
 
 
     def __check_local_pdf(self):
         from subprocess import Popen, PIPE
-        pdf, member = self.parse_pdf_entry()
+        pdf = self.runcard_dict_case_preserving["pdf_name"]
         cmd = ["lhapdf","ls","--installed"]
         outbyt = Popen(cmd, stdout = PIPE).communicate()[0]
         pdfs = [i for i in outbyt.decode("utf-8").split("\n") if i != ""]
         try:
             assert pdf in pdfs
-            self.print("PDF set found")
         except AssertionError as e:
             self.critical("PDF set {0} is not installed in local version of LHAPDF".format(pdf))
 
 
-    def __check_grid_pdf(self, use_cvmfs=False, cvmfs_loc=""):
+    def __check_grid_pdf(self):
         import json
         infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo") 
-        pdf, member = self.parse_pdf_entry()
-        if not use_cvmfs:
-            try:
-                with open(infofile,"r") as f:
-                    data = json.load(f)
-                    try:
-                        members = data[pdf]
-                        self.print("PDF set found")
-                    except KeyError as e:
-                        self.critical("PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf))
-                    try:
-                        assert int(member) in members
-                        self.print("PDF member found")
-                    except AssertionError as e:
-                        self.critical("PDF member {1} for PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf, member))
-            except FileNotFoundError as e:
-                self.warning("No PDF info file found. Skipping check.")
-        else:
-            sharedir = "{0}/share/LHAPDF/".format(cvmfs_loc)
-            bindir = "{0}/bin/".format(cvmfs_loc)
-            os.environ["LHA_DATA_PATH"] = sharedir
-            os.environ["LHAPATH"] = sharedir
-            cvmfs_pdfs = util.getOutputCall([bindir+"lhapdf", "ls", "--installed"])
-            cvmfs_pdfs = [i.strip() for i in cvmfs_pdfs.split()]
-            if pdf not in cvmfs_pdfs:
-                self.critical("PDF set {0} is not included in cvmfs LHAPDF. Turn cvmfs PDF off and use your own one (or ask the admins nicely...".format(pdf))
-            else:
-                self.print("PDF set found in cvmfs LHAPDF setup")
+        try:
+            with open(infofile,"r") as f:
+                data = json.load(f)
+                pdf = self.runcard_dict_case_preserving["pdf_name"]
+                member = self.runcard_dict_case_preserving["pdf_member"]
+                try:
+                    members = data[pdf]
+                except KeyError as e:
+                    self.critical("PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf))
+                try:
+                    assert int(member) in members
+                except AssertionError as e:
+                    self.critical("PDF member {1} for PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf, member))
+        except FileNotFoundError as e:
+            self.warning("No PDF info file found. Skipping check.")
 
-
-    def _check_pdf(self, grid_run, use_cvmfs=False, cvmfs_loc=""):
-        self.print("Checking PDF set validity...")
+    def _check_pdf(self, grid_run):
+        self.print("Checking PDF set validity")
         if grid_run:
-            self.__check_grid_pdf(use_cvmfs=use_cvmfs, cvmfs_loc = cvmfs_loc)
+            self.__check_grid_pdf()
         else:
             self.__check_local_pdf()
 
@@ -132,42 +126,37 @@ class NNLOJETruncard:
                     self.error("{0} is not a valid channel in your NNLOJET runcard.".format(element.upper()))
                     sys.exit(-1)
 
-    def _parse_block(self, block_name, blocks):
+    # Parsing routines
+    def _parse_fixed(self):
+        """
+        Parse the fixed part of the NNLOJET runcard
+        """
+        for line_key in nnlojet_linecode:
+            line = self.runcard_list[line_key]
+            self.runcard_dict[nnlojet_linecode[line_key]] = line
+            line = self.runcard_list_case_preserving[line_key]
+            self.runcard_dict_case_preserving[nnlojet_linecode[line_key]] = line
+            self.debug("{0:<15}: {1:<20} {2}".format(nnlojet_linecode[line_key],
+                                                      line, os.path.basename(self.runcard_file)))
+
+    def _parse_block(self, block_name):
         """
         Parse NNLOJET blocks
         """
         block_start = block_name
         block_end = "end_{0}".format(block_name)
 
-        if isinstance(blocks[block_name], dict):
-            option_block = True
-        elif isinstance(blocks[block_name], list):
-            option_block = False
-
-        rc_list = self.runcard_list
-        rc_dict = self.runcard_dict
-
         reading = False
-        block_content = blocks[block_name]
-        for line in rc_list:
-            if line.lower() == block_end:
+        block_content = []
+        for line in self.runcard_list:
+            if line == block_end:
                 break
             if reading:
-                if option_block:
-                    option = [i.strip() for i in line.strip().split("=")]
-                    block_content[option[0].lower()] = option[1]
-                else:
-                    block_content.append(line)
-            splitline = [i.strip() for i in line.strip().split()]
-            if splitline[0].lower() == block_start.lower():
+                block_content.append(line)
+            if line == block_start:
                 reading = True
-                if len(splitline) > 1:
-                    if option_block:
-                        block_content[block_name] = " ".join(splitline[1:])
-                    elif "=" in splitline[1:]:
-                        blocks["misc"][splitline[1].lower()] = splitline[3]
-        rc_dict[block_name] = block_content
-        self.debug("{0:<15}: {1:<20} {2}".format(block_name, str(rc_dict[block_name]), 
+        self.runcard_dict[block_name] = block_content
+        self.debug("{0:<15}: {1:<20} {2}".format(block_name, " ".join(block_content), 
                                                  os.path.basename(self.runcard_file)))
 
     def _parse_runcard_from_file(self, filename):
@@ -180,12 +169,16 @@ class NNLOJETruncard:
         for line_raw in f:
             line = line_raw.strip().split("!")[0]
             if line:
-                self.runcard_list.append(line.strip())
+                self.runcard_list.append(line.strip().lower())
+                self.runcard_list_case_preserving.append(line.strip())
         f.close()
 
-        # Step 1, parse blocks into the dictionary
+        # Step 1, save everything from the fixed part of the runcard in the dictionary
+        self._parse_fixed()
+
+        # Step 2, parse blocks into the dictionary
         for block in self.blocks_to_read:
-            self._parse_block(block, self.blocks)
+            self._parse_block(block)
 
     # Internal functions for external API
     def _is_mode(self, mode, accepted = None):
@@ -195,15 +188,20 @@ class NNLOJETruncard:
         If accepted = [list of accepted values]  is provided 
         the check is done against this list
         """
-        runblock = self.runcard_dict["run"]
-        if mode in runblock.keys():
-            return True
-        else:
+        mode = self.runcard_dict[mode]
+        if accepted:
+            if mode in accepted:
+                return True
+            else:
+                return False
+        if mode in [".false.", "0"]:
             return False
+        elif mode in [".true.", "2", "1"]:
+            return True
 
     # External API
-    def is_continuation(self): # Legacy support. continuation no longer requires separate flag
-        return self._is_mode("warmup")
+    def is_continuation(self):
+        return self._is_mode("warmup", accepted = ["2"])
 
     def is_warmup(self):
         return self._is_mode("warmup")
@@ -216,21 +214,22 @@ class NNLOJETruncard:
         If the runcard is set with one and only one of the generic channel names (LO, R, V...)
         returns the corresponding warmup for the process. Otherwise don't fill suffix field
         """
-        # Currently breaks for VJJ type processes with Ra/b contributions
-
+        born = 'vb'
+        real = 'vr'
+        dreal = 'rr'
         channels_raw = " ".join(self.runcard_dict["channels"])
-        channels = channels_raw.strip().lower()
+        channels = channels_raw.strip()
         if channels in ['b', 'lo', 'v', 'vv']:
-            warmup_suffix = channels.upper()
+            warmup_suffix = born + self.runcard_dict["region"]
         elif channels in ['rv', 'r']:
-            warmup_suffix = channels.upper()
+            warmup_suffix = real + self.runcard_dict["region"]
         elif channels in ['rr']:
-            warmup_suffix = channels.upper() + self.runcard_dict["misc"]["region"]
+            warmup_suffix = dreal + self.runcard_dict["region"]
         else:
             warmup_suffix = ''
-        process_name = self.runcard_dict["process"]["process"]
-        runname = self.runcard_dict["run"]["run"]
-        tech_cut = '{0:.2E}'.format(float(self.runcard_dict["run"]["tcut"].replace("d","E")))
+        process_name = self.runcard_dict["proc"]
+        runname = self.runcard_dict["id"]
+        tech_cut = self.runcard_dict["tc"]
         warmup_name = "{0}.{1}.y{2}.{3}".format(process_name, runname, tech_cut, warmup_suffix)
 
         return warmup_name

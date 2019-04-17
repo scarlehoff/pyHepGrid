@@ -34,9 +34,9 @@ def spCall(cmd, suppress_errors = False, shell=False):
     try:
         logger.debug(cmd)
         if not suppress_errors:
-            return call(cmd, shell=shell)
+            call(cmd, shell=shell)
         else:
-            return call(cmd, stderr=DEVNULL, stdout=DEVNULL, shell=shell)
+            call(cmd, stderr=DEVNULL, stdout=DEVNULL, shell=shell)
         return 0
     except:
         raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
@@ -294,13 +294,8 @@ class GridWrap:
             file_str = today_str + "/" + unique_str
             gsiftp_wher = [gsiftp + file_str]
             gridname = os.path.join(gfaldir, whereTo, tarfile)
-            cmd = ["/usr/bin/gfal-copy", what[0], gridname]
-            max_repeats = 25
-            for i in range(max_repeats):
-                print("\033[1;35;47m[COPY Attempt {0}/{1}]\033[0m".format(i+1, max_repeats))
-                success = spCall(cmd, shell=shell)
-                if success ==0:
-                    return success
+            cmd = ["gfal-copy", what[0], gridname]
+            success = spCall(cmd, shell=shell)
             return success
         else:
             cmd = self.sendto + wher + what
@@ -328,7 +323,7 @@ class GridWrap:
         if self.gfal:
             #"gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/{0}/{1}".format(whereFrom, tarfile)
             gridname = path.join(gfaldir, whereFrom, tarfile)
-            cmd = ["/usr/bin/gfal-copy", gridname, whereTo]   
+            cmd = ["gfal-copy", gridname, whereTo]   
             if timeout:
                 cmd += ["-t", str(timeout)]
             success = spCall(cmd, shell=shell, suppress_errors=suppress_errors)
@@ -340,48 +335,41 @@ class GridWrap:
         # lcg-cp returns always 0 even when it fails :___
         return path.isfile(whereTo)
 
-    def delete(self, tarfile, whereFrom, directory=False):
+    def delete(self, tarfile, whereFrom):
         from src.header import gfaldir
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, whereFrom, tarfile)
-            cmd = ["/usr/bin/gfal-rm", gridname]
-            if directory:
-                cmd += ["-r"]
+            cmd = ["gfal-rm", gridname]
         else:
             args = [self.lfn + whereFrom + "/" + tarfile]
             cmd = self.delcmd + args
         return spCall(cmd)
 
     def checkForThis(self, filename, where):
-        from src.header import gfaldir, logger
+        from src.header import gfaldir
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, where)
-            cmd = ["/usr/bin/gfal-ls", gridname]
+            cmd = ["gfal-ls", gridname]
         else:
             args = [where]
             cmd = self.listfi + args
-        logger.debug(" ".join(cmd))
         output = getOutputCall(cmd)
-        logger.debug(output)
-        logger.debug(filename)
-        logger.debug(filename in output)
         if filename in output:
             return True
         else:
             return False
 
     def get_dir_contents(self, directory):
-        from src.header import gfaldir, logger
+        from src.header import gfaldir
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, directory)
-            cmd = ["/usr/bin/gfal-ls", gridname]
+            cmd = ["gfal-ls", gridname]
         else:
             args = [directory]
             cmd = self.listfi + args
-        logger.debug(" ".join(cmd))
         output = getOutputCall(cmd)
         return output
 
