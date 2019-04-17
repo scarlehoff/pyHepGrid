@@ -21,7 +21,7 @@ runcard_linecode = {
         17 : "region", # a, b, all
     }
 
-valid_channels = ["rr","rv","vv","r","v","lo"]
+valid_channels = ["rr","rv","vv","r","v","lo","rra","rrb"]
 
 numeric_ids = [3,4,5,9,13]
 
@@ -45,21 +45,22 @@ class PROGRAMruncard:
         if runcard_class and isinstance(runcard_class, type(self)):
             raise Exception("Not implemented yet")
         elif runcard_file:
+            pass
             # Preprocessing
             self.blocks_to_read = []
             for i in blocks:
                 self.blocks_to_read.append(i.lower())
 
-            # Read the runcard into runcard_dict
+        #     # Read the runcard into runcard_dict
             self._parse_runcard_from_file(runcard_file)
 
-            # Safety Checks
-            # Check channels
+        #     # Safety Checks
+        #     # Check channels
             self.print("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i)
-        self._check_numeric()
-        self._check_pdf(grid_run)
+        # self._check_numeric()
+        # self._check_pdf(grid_run)
 
 
     def __check_local_pdf(self):
