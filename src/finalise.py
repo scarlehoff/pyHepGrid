@@ -88,7 +88,7 @@ def pullrun(name, seed, run, tmpdir, attempts=0):
         with tarfile.open(name, 'r|gz') as tfile:
             for t in tfile:
                 if t.name.endswith(".dat"):
-                    tfile.extract(t, path="../")
+                    tfile.extract(t,path="../")
                     corrupted = False
                 elif t.name.endswith(".log") and "node_info" not in t.name:
                     tfile.extract(t,"../log/")
@@ -165,8 +165,7 @@ def do_finalise():
     os.chdir(dname)
 
     if config.use_gfal:
-        cmd = ['gfal-ls', os.path.join(config.gfaldir.replace(config.protocol, "dav"),
-                                       config.lfn_output_dir)]
+        cmd = ['gfal-ls', os.path.join(config.gfaldir, config.lfn_output_dir)]
     else:
         cmd = ['lfc-ls', config.lfn_output_dir]
     output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]

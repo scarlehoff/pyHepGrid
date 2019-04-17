@@ -170,22 +170,19 @@ class Backend(object):
     # Checks for the runcard
     def _check_production(self, runcard):
         logger.info("Checking production in runcard {0}".format(runcard.name))
-        if runcard.is_warmup():
-            self._press_yes_to_continue("Warmup is active in runcard")
-        if not runcard.is_production():
-            self._press_yes_to_continue("Production is not active in runcard")
-        logger.info("Production ok")
-
+        # if runcard.is_warmup():
+        #     self._press_yes_to_continue("Warmup is active in runcard")
+        # if not runcard.is_production():
+        #     self._press_yes_to_continue("Production is not active in runcard")
 
     def _check_warmup(self, runcard, continue_warmup = False):
         logger.info("Checking warmup in runcard {0}".format(runcard.name))
-        if not runcard.is_warmup():
-            self._press_yes_to_continue("Warmup is not active in runcard")
-        if continue_warmup and not runcard.is_continuation():
-            self._press_yes_to_continue("Continue warmup is not active in runcard")
-        if runcard.is_production():
-            self._press_yes_to_continue("Production is active in runcard")
-        logger.info("Warmup ok")
+        # if not runcard.is_warmup():
+        #     self._press_yes_to_continue("Warmup is not active in runcard")
+        # if continue_warmup and not runcard.is_continuation():
+        #     self._press_yes_to_continue("Continue warmup is not active in runcard")
+        # if runcard.is_production():
+        #     self._press_yes_to_continue("Production is active in runcard")
 
     def set_overwrite_warmup(self):
         self.overwrite_warmup = True
@@ -197,14 +194,8 @@ class Backend(object):
         logger.info("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
-            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(header.lfn_warmup_dir, checkname))
+            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(header.lfn_warmup_dir,checkname))
             self.gridw.delete(checkname, header.lfn_warmup_dir)
-
-        socket_dirname = checkname.replace(".tar.gz","")
-        if self.gridw.checkForThis(socket_dirname, header.lfn_warmup_dir):
-            self._press_yes_to_continue("Socket backups {1} already exist at lfn:{0}, do you want to remove them?".format(header.lfn_warmup_dir, socket_dirname))
-            self.gridw.delete(socket_dirname, header.lfn_warmup_dir, directory=True)
-
 
     def _checkfor_existing_output(self, r, rname):
         """ Check whether given runcard already has output in the grid
@@ -239,8 +230,7 @@ class Backend(object):
         local_dir_name = self.get_local_dir_name(r,rname)
         files = os.listdir(local_dir_name)
         runcard = NNLOJETruncard(runcard_file=os.path.join(local_dir_name,r),logger=logger, 
-                                 grid_run=False, use_cvmfs=header.use_cvmfs_location,
-                                 cvmfs_loc=header.cvmfs_lhapdf_location)
+                                 grid_run=False)
         runcard_id = runcard.runcard_dict_case_preserving["id"]
         logs = [f for f in files if f.endswith(".log") and runcard_id in f]
         logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
@@ -254,7 +244,7 @@ class Backend(object):
         return
 
 
-    def _bring_warmup_files(self, runcard, rname, shell = False, check_only = False, multichannel=False):
+    def _bring_warmup_files(self, runcard, rname, shell = False, check_only = False):
         """ Download the warmup file for a run to local directory
         extracts Vegas grid and log file and returns a list with their names
 
@@ -276,21 +266,6 @@ class Backend(object):
                                    suppress_errors=suppress_errors)
 
         if not success and not check_only:
-            if self._press_yes_to_continue("Grid files failed to copy. Try backups from individual sockets?") == 0:
-                backup_dir = os.path.join(lfn_warmup_dir,outnm.replace(".tar.gz",""))
-                backups = self.gridw.get_dir_contents(backup_dir)
-                if len(backups) == 0:
-                    logger.critical("No backups found. Did the warmup complete successfully?")
-                else:
-                    backup_files = backups.split()
-                    for idx, backup in enumerate(backup_files):
-                        logger.info("Attempting backup {1} [{0}]".format(idx+1, backup))
-                        success = self.gridw.bring(backup, backup_dir, tmpnm, shell = shell, 
-                                                   suppress_errors=suppress_errors)
-                        if success:
-                            break
-                    
-        if not success and not check_only:
             logger.critical("Grid files failed to copy from the LFN. Did the warmup complete successfully?")
         elif not success:
             return []
@@ -308,11 +283,6 @@ class Backend(object):
                 logger.critical("Logfile not found. Did the warmup complete successfully?")
             else:
                 return []
-
-        if multichannel and len([i for i in gridFiles if "channels" in i]) ==0:
-            logger.critical("No multichannel warmup found, but multichannel is set in the runcard.")
-        elif multichannel:
-            logger.info("Multichannel warmup files found.")
         if gridFiles == [] and not check_only: # No grid files found
             logger.critical("Grid files not found in warmup tarfile. Did the warmup complete successfully?")
         elif gridFiles == []:
@@ -422,7 +392,7 @@ class Backend(object):
         try:
             idout = jobid[0]['jobid']
         except IndexError:
-            logger.info("Selected job is %s out of bounds" % jobid)
+            print("Selected job is %s out of bounds" % jobid)
             idt   = input("> Select id to act upon: ")
             idout = self.get_id(idt)
         jobid_list = idout.split(" ")
@@ -446,7 +416,7 @@ class Backend(object):
         try:
             idout = jobid[0]['date']
         except IndexError:
-            logger.info("Selected job is %s out of bounds" % jobid)
+            print("Selected job is %s out of bounds" % jobid)
             idt   = input("> Select id to act upon: ")
             idout = self.get_date(idt)
         return idout
@@ -500,21 +470,6 @@ class Backend(object):
             else:
                 logger.critical("Continuation set in warmup but not requested at run time")
 
-    def check_runcard_multichannel(self, runcard_obj):
-        try:
-            multichannel_val = runcard_obj.runcard_dict["run"]["multi_channel"]
-            if multichannel_val.lower() == ".true.":
-                logger.info("Multichannel switched ON in runcard")
-                multichannel=True
-            else:
-                multichannel=False
-                logger.info("Multichannel switched OFF in runcard")
-        except KeyError as e:
-            multichannel = False
-            logger.info("Multichannel not enabled in runcard")
-        return multichannel
-
-
     def init_local_warmups(self, provided_warmup = None, continue_warmup=False, local=False):
         rncards, dCards = util.expandCard()
         for runcard in rncards:
@@ -561,39 +516,38 @@ class Backend(object):
             logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
             warmupFiles = []
-            runcard_file = os.path.join(runFol, i)
             # Check whether warmup/production is active in the runcard
-            if not os.path.isfile(runcard_file):
+            if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
-            runcard_obj = NNLOJETruncard(runcard_file, logger=logger, use_cvmfs=header.use_cvmfs_lhapdf, 
-                                         cvmfs_loc=header.cvmfs_lhapdf_location)
+            runcard_file = runFol + "/" + i
+            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
             self._check_warmup(runcard_obj, continue_warmup)
-            multichannel = self.check_runcard_multichannel(runcard_obj)
             if provided_warmup: 
                 # Copy warmup to current dir if not already there
                 match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
                 files += [match]
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
-            copy(runcard_file, os.getcwd())
+            copy(runFol + "/" + i, os.getcwd())
             if self.overwrite_warmup:
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
-                    logger.info("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
-                    warmup_files = self._bring_warmup_files(i, rname, shell=True, multichannel=multichannel)
+                    print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
+                    warmup_files = self._bring_warmup_files(i, rname, shell=True)
                     # if not warmup_files: # check now done in bring warmup files
                     #     logger.critical("No warmup grids found in warmup tar!")
                     files += warmup_files
-                    logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
+                    print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
-            if self.gridw.checkForThis(tarfile,  header.lfn_input_dir): # Could we cache this? Just to speed up ini
-                logger.info("Removing old version of {0} from Grid storage input".format(tarfile))
-                self.gridw.delete(tarfile,  header.lfn_input_dir)
-
+            if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
+                print("Removing old version of " + tarfile + " from Grid Storage")
+                self.gridw.delete(tarfile, "input")
             if self.gridw.gfal:
-                logger.info("Sending {0} to Grid Storage {1}".format(tarfile, header.lfn_input_dir))
-            self.gridw.send(tarfile, header.lfn_input_dir, shell=True)
+                print("Sending " + tarfile + " to gfal input/")
+            else:
+                print("Sending " + tarfile + " to lfn input/")
+            self.gridw.send(tarfile, "input", shell=True)
             if not local:
                 for j in warmupFiles:
                     os.remove(j)
@@ -677,9 +631,7 @@ class Backend(object):
             local = False
             # Check whether warmup/production is active in the runcard
             runcard_file = runFol + "/" + i
-            runcard_obj = NNLOJETruncard(runcard_file, logger=logger, use_cvmfs=header.use_cvmfs_lhapdf, 
-                                         cvmfs_loc=header.cvmfs_lhapdf_location)
-            multichannel = self.check_runcard_multichannel(runcard_obj)
+            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
             self._check_production(runcard_obj)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -693,14 +645,14 @@ class Backend(object):
                                                           header.provided_warmup_dir)
                 warmupFiles = [match]
             else:
-                logger.info("Retrieving warmup file from grid")
-                warmupFiles = self._bring_warmup_files(i, rname,  shell = True, multichannel=multichannel)
+                print("Retrieving warmup file from grid")
+                warmupFiles = self._bring_warmup_files(i, rname,  shell = True)
             self.tarw.tarFiles(files + [i] +  warmupFiles, tarfile)
-            if self.gridw.checkForThis(tarfile, header.lfn_input_dir):
-                logger.info("Removing old version of " + tarfile + " from Grid Storage")
-                self.gridw.delete(tarfile, header.lfn_input_dir)
-            logger.info("Sending " + tarfile + " to Grid Storage")
-            self.gridw.send(tarfile, header.lfn_input_dir, shell = True)
+            if self.gridw.checkForThis(tarfile, "input"):
+                print("Removing old version of " + tarfile + " from Grid Storage")
+                self.gridw.delete(tarfile, "input")
+            print("Sending " + tarfile + " to lfn:input/")
+            self.gridw.send(tarfile, "input", shell = True)
             if local:
                 util.spCall(["rm", i, tarfile])
             else:
@@ -711,7 +663,7 @@ class Backend(object):
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         from src.header import logger
-        logger.info(matchname, provided_warmup)
+        print(matchname, provided_warmup)
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
@@ -727,7 +679,7 @@ class Backend(object):
                 match = os.path.join(provided_warmup,matches[0])
         else:
             match = provided_warmup
-        logger.info("Using warmup {0}".format(match))
+        print("Using warmup {0}".format(match))
         if not match in os.listdir(sys.path[0]):
             local_match  =False
             copy(match,os.path.basename(match))
@@ -1116,26 +1068,21 @@ class Backend(object):
 
     def _format_args(self, *args, **kwargs):
         raise Exception("Any children classes of src.Backend.py should override this method")
-  
+
     def _get_default_args(self):
         # Defaults arguments that can always go in
         dictionary = {
-            'gfal_location':header.cvmfs_gfal_location,
-            'executable' : header.NNLOJETexe,
-            'lfndir' : header.lfndir,
-            'input_folder' : header.lfn_input_dir,
-            'output_folder' : header.lfn_output_dir,
-            'warmup_folder' : header.lfn_warmup_dir,
-            'lhapdf_grid' : header.lhapdf_grid_loc,
-            'lhapdf_local' : header.lhapdf_loc,
-            'debug' : str(header.debug_level),
-            'gfaldir': header.gfaldir,
-            'use_gfal' : str(header.use_gfal)
-            }
-        if header.use_cvmfs_lhapdf:
-            dictionary.update({
-            "use_cvmfs_lhapdf":header.use_cvmfs_lhapdf,
-            "cvmfs_lhapdf_location":header.cvmfs_lhapdf_location})
+                'executable' : header.NNLOJETexe,
+                'lfndir' : header.lfndir,
+                'input_folder' : header.lfn_input_dir,
+                'output_folder' : header.lfn_output_dir,
+                'warmup_folder' : header.lfn_warmup_dir,
+                'lhapdf_grid' : header.lhapdf_grid_loc,
+                'lhapdf_local' : header.lhapdf_loc,
+                'debug' : str(header.debug_level),
+                'gfaldir': header.gfaldir,
+                'use_gfal' : str(header.use_gfal)
+                }
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):
