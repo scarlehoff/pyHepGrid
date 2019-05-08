@@ -1,9 +1,9 @@
 import sys
 import os
 ############
-# NNLOJET runcard are partly line-fixed
+# Fortran runcards can be partly line-fixed
 # In order to read new stuff from the fixed part just add here
-nnlojet_linecode = {
+runcard_linecode = {
         1 : "id",
         2 : "proc",
         3 : "events",
@@ -21,13 +21,13 @@ nnlojet_linecode = {
         17 : "region", # a, b, all
     }
 
-valid_channels = ["rr","rv","vv","r","v","lo"]
+valid_channels = ["rr","rv","vv","r","v","lo","rra","rrb"]
 
 numeric_ids = [3,4,5,9,13]
 
-class NNLOJETruncard:
+class PROGRAMruncard:
     """
-    Reads a NNLOJET runcard into a class containing
+    Reads a PROGRAM runcard into a class containing
     all the different parameters
 
 
@@ -45,16 +45,17 @@ class NNLOJETruncard:
         if runcard_class and isinstance(runcard_class, type(self)):
             raise Exception("Not implemented yet")
         elif runcard_file:
+            pass
             # Preprocessing
             self.blocks_to_read = []
             for i in blocks:
                 self.blocks_to_read.append(i.lower())
 
-            # Read the runcard into runcard_dict
+        #     # Read the runcard into runcard_dict
             self._parse_runcard_from_file(runcard_file)
 
-            # Safety Checks
-            # Check channels
+        #     # Safety Checks
+        #     # Check channels
             self.print("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i)
@@ -104,9 +105,9 @@ class NNLOJETruncard:
         """ Asserts that runcard elements that need to be numeric indeed are """
         for i in numeric_ids:
             try:
-                float(self.runcard_dict[nnlojet_linecode[i]])
+                float(self.runcard_dict[runcard_linecode[i]])
             except:
-                self.critical("Line {0} [{1}] should be numeric type. Value is instead {2}.".format(i,nnlojet_linecode[i], self.runcard_dict[nnlojet_linecode[i]])) 
+                self.critical("Line {0} [{1}] should be numeric type. Value is instead {2}.".format(i,runcard_linecode[i], self.runcard_dict[runcard_linecode[i]])) 
                 print(self.logger)
 
     # Safety check functions
@@ -122,25 +123,25 @@ class NNLOJETruncard:
                 int(element) # numeric channel
             except ValueError as e:
                 if not element in valid_channels:
-                    self.error("{0} is not a valid channel in your NNLOJET runcard.".format(element.upper()))
+                    self.error("{0} is not a valid channel in your PROGRAM runcard.".format(element.upper()))
                     sys.exit(-1)
 
     # Parsing routines
     def _parse_fixed(self):
         """
-        Parse the fixed part of the NNLOJET runcard
+        Parse the fixed part of the PROGRAM runcard
         """
-        for line_key in nnlojet_linecode:
+        for line_key in runcard_linecode:
             line = self.runcard_list[line_key]
-            self.runcard_dict[nnlojet_linecode[line_key]] = line
+            self.runcard_dict[runcard_linecode[line_key]] = line
             line = self.runcard_list_case_preserving[line_key]
-            self.runcard_dict_case_preserving[nnlojet_linecode[line_key]] = line
-            self.debug("{0:<15}: {1:<20} {2}".format(nnlojet_linecode[line_key],
+            self.runcard_dict_case_preserving[runcard_linecode[line_key]] = line
+            self.debug("{0:<15}: {1:<20} {2}".format(runcard_linecode[line_key],
                                                       line, os.path.basename(self.runcard_file)))
 
     def _parse_block(self, block_name):
         """
-        Parse NNLOJET blocks
+        Parse PROGRAM blocks
         """
         block_start = block_name
         block_end = "end_{0}".format(block_name)

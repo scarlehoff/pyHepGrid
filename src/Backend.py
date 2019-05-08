@@ -4,7 +4,7 @@ from src.header import logger
 
 import src.utilities as util
 import src.header as header
-from src.NNLOJETruncard import NNLOJETruncard
+from src.runcard_parsing import runcard_parsing 
 
 counter = None
 def init_counter(args):
@@ -225,11 +225,11 @@ class Backend(object):
         """
         from src.header import logger
         import re
-        from src.NNLOJETruncard import NNLOJETruncard
+        from src.runcard_parsing import runcard_parsing 
         logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         local_dir_name = self.get_local_dir_name(r,rname)
         files = os.listdir(local_dir_name)
-        runcard = NNLOJETruncard(runcard_file=os.path.join(local_dir_name,r),logger=logger, 
+        runcard = runcard_parsing(runcard_file=os.path.join(local_dir_name,r),logger=logger, 
                                  grid_run=False)
         runcard_id = runcard.runcard_dict_case_preserving["id"]
         logs = [f for f in files if f.endswith(".log") and runcard_id in f]
@@ -271,8 +271,10 @@ class Backend(object):
             return []
 
         ## Now extract only the Vegas grid files and log file
-        gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb"]
-        extractFiles = self.tarw.extract_extensions(tmpnm, gridp+[".log"])
+        gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb", 
+                 ".V", ".R", ".LO", ".RV", ".VV"]
+        gridp += [i+"_channel" for i in gridp]
+        extractFiles = self.tarw.extract_extensions(tmpnm, gridp+[".log",".txt","channels"])
         try:
             gridFiles = [i for i in extractFiles if ".log" not in i]
             logfile = [i for i in extractFiles if ".log" in i][0]
@@ -444,15 +446,15 @@ class Backend(object):
     def init_single_local_warmup(self, runcard, tag, continue_warmup = False, 
                                  provided_warmup=False):
         import shutil
-        from src.header import NNLOJETdir, NNLOJETexe, runcardDir, slurm_kill_exe
+        from src.header import executable_src_dir, executable_exe, runcardDir, slurm_kill_exe
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
         os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
-        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
-        shutil.copy(nnlojetfull, run_dir)
+        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        shutil.copy(path_to_exe_full, run_dir)
         runcard_file = runcardDir + "/" + runcard
-        runcard_obj = NNLOJETruncard(runcard_file, logger=logger, grid_run=False)
+        runcard_obj = runcard_parsing(runcard_file, logger=logger, grid_run=False)
         self._check_warmup(runcard_obj, continue_warmup)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
@@ -479,12 +481,12 @@ class Backend(object):
         """ Initialises a warmup run. An warmup file can be provided and it will be 
         added to the .tar file sent to the grid storage. 
         Steps are:
-            1 - tar up NNLOJET, runcard and necessary files
+            1 - tar up executable, runcard and necessary files
             2 - sent it to the grid storage
         """
         from shutil import copy
         import tempfile
-        from src.header import NNLOJETdir, NNLOJETexe, logger
+        from src.header import executable_src_dir, executable_exe, logger
         from src.header import runcardDir as runFol
 
         if local:
@@ -505,11 +507,11 @@ class Backend(object):
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
         rncards, dCards = util.expandCard()
-        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
-        if not os.path.isfile(nnlojetfull): 
-            logger.critical("Could not find NNLOJET executable at {0}".format(nnlojetfull))
-        copy(nnlojetfull, os.getcwd()) 
-        files = [NNLOJETexe]
+        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        if not os.path.isfile(path_to_exe_full): 
+            logger.critical("Could not find executable at {0}".format(path_to_exe_full))
+        copy(path_to_exe_full, os.getcwd()) 
+        files = [executable_exe]
         for idx,i in enumerate(rncards):
             logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
@@ -518,7 +520,7 @@ class Backend(object):
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
             runcard_file = runFol + "/" + i
-            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
+            runcard_obj = runcard_parsing(runcard_file, logger=logger)
             self._check_warmup(runcard_obj, continue_warmup)
             if provided_warmup: 
                 # Copy warmup to current dir if not already there
@@ -551,7 +553,7 @@ class Backend(object):
                     os.remove(j)
             os.remove(i)
             os.remove(tarfile)
-        os.remove(NNLOJETexe)
+        os.remove(executable_exe)
         os.chdir(origdir)
 
     def init_local_production(self, provided_warmup = None, local=False):
@@ -565,15 +567,15 @@ class Backend(object):
         more tightly integrated with the warmup equivalent in future - lots of shared code 
         that can be refactored."""
         import shutil
-        from src.header import NNLOJETdir, NNLOJETexe, runcardDir
+        from src.header import executable_src_dir, executable_exe, runcardDir
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
         os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
-        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
-        shutil.copy(nnlojetfull, run_dir)
+        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        shutil.copy(path_to_exe_full, run_dir)
         runcard_file = runcardDir + "/" + runcard
-        runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
+        runcard_obj = runcard_parsing(runcard_file, logger=logger)
         self._check_production(runcard_obj)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
@@ -592,20 +594,20 @@ class Backend(object):
         retrieval step is skipped
         Steps are:
             0 - Retrieve warmup from the grid/local
-            1 - tar up NNLOJET, runcard and necessary files
+            1 - tar up executable, runcard and necessary files
             2 - sent it to the grid storage
         """
         from shutil import copy
         import tempfile
         from src.header import runcardDir as runFol
-        from src.header import NNLOJETexe, NNLOJETdir, logger
+        from src.header import executable_exe, executable_src_dir, logger
 
         if local:
             self.init_local_production(provided_warmup = provided_warmup)
             return
 
         rncards, dCards = util.expandCard()
-        nnlojetfull = NNLOJETdir + "/driver/" + NNLOJETexe
+        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
@@ -620,16 +622,16 @@ class Backend(object):
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
         
-        if not os.path.isfile(nnlojetfull): 
-            logger.critical("Could not find NNLOJET executable at {0}".format(nnlojetfull))
-        copy(nnlojetfull, os.getcwd())
-        files = [NNLOJETexe]
+        if not os.path.isfile(path_to_exe_full): 
+            logger.critical("Could not find executable at {0}".format(path_to_exe_full))
+        copy(path_to_exe_full, os.getcwd())
+        files = [executable_exe]
         for idx,i in enumerate(rncards):
             logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
             # Check whether warmup/production is active in the runcard
             runcard_file = runFol + "/" + i
-            runcard_obj = NNLOJETruncard(runcard_file, logger=logger)
+            runcard_obj = runcard_parsing(runcard_file, logger=logger)
             self._check_production(runcard_obj)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -655,7 +657,7 @@ class Backend(object):
                 util.spCall(["rm", i, tarfile])
             else:
                 util.spCall(["rm", i, tarfile] + warmupFiles)
-        os.remove(NNLOJETexe)
+        os.remove(executable_exe)
         os.chdir(origdir)
 
     def get_local_warmup_name(self, matchname, provided_warmup):
@@ -1071,7 +1073,7 @@ class Backend(object):
         # Defaults arguments that can always go in
         dictionary = {
                 'gfal_location' : header.cvmfs_gfal_location,
-                'executable' : header.NNLOJETexe,
+                'executable' : header.executable_exe,
                 'lfndir' : header.lfndir,
                 'input_folder' : header.lfn_input_dir,
                 'output_folder' : header.lfn_output_dir,

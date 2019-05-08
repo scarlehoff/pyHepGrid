@@ -46,7 +46,7 @@ slurmprodtable = "slurmjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue", "no_runs"]
 
 # DW This should be a hard link so socketed runs can be sent from other folders/locations
-socket_exe = "{0}/socket_server.py".format(os.path.dirname(os.path.realpath(__file__))) # Eventually will need to point towards NNLOJET/bin
+socket_exe = "{0}/socket_server.py".format(os.path.dirname(os.path.realpath(__file__))) # Eventually will need to point towards where the sockets are
 sockets_active = 1 # 1 socket == no sockets
 
 

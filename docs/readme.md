@@ -1,7 +1,6 @@
-README 
 (Incomplete, and always will be. The grid is a mysterious thing...)
 
-CONTENTS
+# CONTENTS
 1)  INITIAL SETUP
 2)  NNLOJET SETUP
 3)  LFN/GFAL SETUP
@@ -18,7 +17,7 @@ CONTENTS
 14) HAMILTON QUEUES
 
 ###################################################################################################
-1) INITIAL SETUP
+## 1) INITIAL SETUP
 
 Follow certificate setup as per Jeppe's tutorial @
 https://www.ippp.dur.ac.uk/~andersen/GridTutorial/gridtutorial.html
@@ -27,7 +26,7 @@ Make a careful note of passwords (can get confusing). Don't use passwords used e
 want to automate proxy renewal (like me and Juan)
 
 ###################################################################################################
-2) NNLOJET SETUP
+## 2) (for nnlojet developers) NNLOJET SETUP
 
 As usual - pull the NNLOJET repository, update to modules and make -jXX
 YOU MUST INSTALL WITH LHAPDF-6.1.6. 6.2.1 IS BROKEN, and will not work on the grid outside of Durham(!) 
@@ -39,7 +38,7 @@ YOU MUST INSTALL WITH LHAPDF-6.1.6. 6.2.1 IS BROKEN, and will not work on the gr
    above this are generally ok
  
 ###################################################################################################
-3) LFN SETUP
+## 3) LFN SETUP
 
 put this into your bashrc:
 export CC=gcc
@@ -80,14 +79,12 @@ se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/
 
 To enable, toggle use_gfal to True in your header file. This will also change over the finalise.py to use the gfal system where LFN files cannot be seen.
 
-# Todo update this section to include more on GFAL storage management
+TODO:update this section to include more on GFAL storage management
 
 ###################################################################################################
-4) GRID SCRIPTS SETUP [GANGALESS]
+## 4) GRID SCRIPTS SETUP 
 
-stored in repo ssh://<hepforgeuser>@login.hepforge.prg//hepforge/hg/nnlojet/private/grid
-
-gangaless_resources: create own header, copy template header
+create own header, copy template header
 adjust personal header
 adjust headername in general header.py file (only add the name of your header file to top)
 create folder for runcard storage and add to header file (e.g NNLOJET/driver/grid/)
@@ -97,7 +94,7 @@ add yourname_header.py file and altered header.py file to the repo, and COMMIT
 generate runcard.py following template_runcard.py example
 
 ###################################################################################################
-5) PROXY SETUP 
+## 5) PROXY SETUP 
 
 By default, jobs will fail if the proxy ends before they finish running, so it's a good idea 
 to keep them synced with new proxies as you need:
@@ -118,9 +115,7 @@ Make sure .proxy.sh is set up for your user (directories should point to your ga
 Then set up .proxy.sh to run as a cron job at least once per day (I suggest 2x in case of failure)
 
 ###################################################################################################
-6) GRID SCRIPTS USAGE
-
-[Must be run with python3.4 python3.6 breaks it. Don't ask why...]
+## 6) GRID SCRIPTS USAGE
 
 initialise libraries [LHAPDF,(OPENLOOPS?)]
 python3 main.py ini -L 
@@ -155,7 +150,7 @@ When running, the python script nnlorun.py is sent to the run location. This scr
      sending them back to the grid storage.
 
 ###################################################################################################
-7) FINALISING RESULTS
+## 7) FINALISING RESULTS
 
 -> The process of pulling the production results from grid storage to the gridui
 -> You have a choice of setups for this (or you can implement your own)
@@ -181,9 +176,14 @@ When running, the python script nnlorun.py is sent to the run location. This scr
    and it will download all .dat and .log files to
        warmup_base_dir/March/1/RUNNAME
 
-=> DUNCAN'S SETUP
+=> CUSTOM SETUPS
+   For your own custom setup, you just need to write a finalisation script which exposes a
+   function called do_finalise(). This function does the pulling from the grid storage. You
+   then set the variable finalisation_script to the name of your script (without the .py suffix)
+   Happy days!
+
+   For example:
        ./finalise.py 
-   or 
    set finalisation_script = "finalise" in your header and 
        ./main.py man --get_data
    This will find all of the runcards specified at the top of finalise_runcard.py (or 
@@ -192,17 +192,11 @@ When running, the python script nnlorun.py is sent to the run location. This scr
    The output will be stored in production_base_dir (as set in the header) with one folder 
    for each set of runs, and the prefix as set in finalise_prefix. Corrupted data in the 
    grid storage will be deleted.
-   ???
-=> CUSTOM SETUPS
-   For your own custom setup, you just need to write a finalisation script which exposes a
-   function called do_finalise(). This function does the pulling from the grid storage. You
-   then set the variable finalisation_script to the name of your script (without the .py suffix)
-   Happy days!
 
  [./src/finalise.py, ./main.py man --get_data]
 
 ###################################################################################################
-8) NORMAL WORKFLOW
+## 8) NORMAL WORKFLOW
 
 0) Make sure you have a working proxy
 1) initialise warmup runcard
@@ -213,7 +207,7 @@ When running, the python script nnlorun.py is sent to the run location. This scr
 6) pull down the results (finalisation)
 
 ###################################################################################################
-9) RUNCARD.PY FILES DETAILS
+## 9) RUNCARD.PY FILES DETAILS
 -> Include a dictionary of all of the runcards you want to submit/initialise/manage, along with an
    identification tag that you can use for local accounting
 -> template_runcard.py is the canonical example
@@ -224,7 +218,7 @@ When running, the python script nnlorun.py is sent to the run location. This scr
 -> You can even link/import functions to e.g dynamically find the best submission location
 
 ###################################################################################################
-10) DIRAC
+## 10) DIRAC
 
 Installing Dirac is quite easy nowadays! This information comes 
 directly from https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac. 
@@ -257,7 +251,7 @@ Instead of sourcing the dirac bashrc as above, you can alternatively add $DIRAC_
 to your PATH variable directly in your bashrc. It all seems to work ok with python 2.6.6
 
 ###################################################################################################
-11) DURHAM ARC MONITORING WEBSITE
+## 11) DURHAM ARC MONITORING WEBSITE
 https://grafana.dur.scotgrid.ac.uk/dashboard/db/uki-scotgrid-durham-grid-queues?refresh=15s&orgId=1
 
 DIRAC MONITORING WEBSITE
@@ -279,7 +273,7 @@ Usage:
 More info is given in the helptext (lscp.py -h)
 
 ###################################################################################################
-13) DISTRIBUTED WARMUP (to clean up)
+## 13) DISTRIBUTED WARMUP (to clean up)
 
 - compile NNLOJET with sockets=true to enable distribution
 - set up server NNLOJET/driver/bin/vegas_socket.py [./vegas_socket.py -p PORT -N NO_CLIENTS -w WAIT
@@ -293,7 +287,7 @@ More info is given in the helptext (lscp.py -h)
 - The server must set up on the same gridui as defined in the header parameter server_host. Otherwise the jobs will never be found by the running job.
 
 ###################################################################################################
-14) HAMILTON QUEUES
+## 14) HAMILTON QUEUES
 
 - There are multiple queues I suggest using on the HAMILTON cluster:
  -> par6.q 

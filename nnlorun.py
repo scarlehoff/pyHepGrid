@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 import os, sys, datetime
+try:
+    dirac = os.environ["DIRAC"]
+    sys.path.append("{0}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages".format(dirac))
+except KeyError as e:
+    pass
 
 MAX_COPY_TRIES = 15
 PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
@@ -119,6 +124,7 @@ def parse_arguments():
     return options
 
 def set_environment(lfndir, lhapdf_dir):
+    os.system("export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages")
     # GCC 
     cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
     gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
@@ -176,6 +182,19 @@ def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
         cmd = lcg_cp + " " + lfn
         cmd += grid_file + " " + local_file
         return os.system(cmd)
+
+def untar_file(local_file, debug):
+    if debug_level > 2:
+        cmd = "tar zxfv {0}".format(local_file)
+    else:
+        cmd = "tar zxf " + local_file
+    return os.system(cmd)
+
+def tar_this(tarfile, sourcefiles):
+    cmd = "tar -czf " + tarfile + " " + sourcefiles
+    stat = os.system(cmd)
+    os.system("ls")
+    return stat
 
 def copy_to_grid(local_file, grid_file, args, maxrange = 10):
     print_flush("Copying " + local_file + " to " + grid_file)
@@ -283,6 +302,7 @@ def print_node_info(outputfile):
 #################################################################################
 
 if __name__ == "__main__":
+
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
