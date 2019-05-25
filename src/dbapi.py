@@ -2,7 +2,8 @@ import sqlite3 as dbapi
 
 class database(object):
     def __init__(self, db, tables = None, fields = None):
-        self.db = dbapi.connect(db)
+        self.dbname = db
+        self.db = dbapi.connect(db, check_same_thread=True)
         self.list_disabled = False
         if tables: 
             # check whether table exists and create it othewise
@@ -12,6 +13,13 @@ class database(object):
                     self._protect_fields(table, fields) 
                 else:
                     self._create_table(table, fields)
+
+    def close(self):
+        self.db = None
+
+    def reopen(self):
+        self.db = dbapi.connect(self.dbname)
+
 
     def _protect_fields(self, table, fields):
         """ Make sure all the necessary fields exist in the table

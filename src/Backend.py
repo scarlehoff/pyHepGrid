@@ -136,7 +136,9 @@ class Backend(object):
             pool   = Pool(threads, initializer = init_counter, initargs = (counter,))
         else:
             pool   = Pool(threads)
+        self.dbase.close()  
         result = pool.map(function, arguments, chunksize = 1)
+        self.dbase.reopen()                                 
         pool.close()
         pool.join()
         return result
