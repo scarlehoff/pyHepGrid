@@ -1,3 +1,7 @@
+[![DOI](https://zenodo.org/badge/172027514.svg)](https://zenodo.org/badge/latestdoi/172027514)
+
+
+
 (Incomplete, and always will be. The grid is a mysterious thing...)
 
 # CONTENTS
