@@ -13,7 +13,7 @@ def management_routine(backend, args):
         exit(0)
 
     if args.updateArc:
-        if not args.runArc: 
+        if not args.runArc:
             raise Exception("Update ARC can only be used with ARC")
         backend.update_stdout()
         exit(0)
@@ -49,7 +49,7 @@ def management_routine(backend, args):
         if not args.runArc:
             import src.header as header
             header.logger.critical("Getting grid output from stdout only a valid mode for Arc warmups")
-#        elif 
+#        elif
 
     for idx,db_id in enumerate(id_list):
         # Setup for printing/function args
@@ -115,5 +115,3 @@ def management_routine(backend, args):
             backend.disable_db_entry(db_id)
         else:
             print(" ".join(i for i in jobid))
-
-

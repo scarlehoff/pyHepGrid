@@ -52,7 +52,7 @@ class Generic_Socket:
 
     def receive_str(self, max_len = 2048):
         """ Receive a string and strips out padding bytes
-        """ 
+        """
         data = self.sock.recv(max_len)
         if data == b'':
             raise RuntimeError("socket connection broken")
@@ -104,7 +104,7 @@ class Vegas_Socket(Generic_Socket):
     """
 
     def double_to_bytes(self, double):
-        """ takes a double and returns 
+        """ takes a double and returns
         its byte representation (len = 8 bytes)
         """
         return struct.pack('d', *[double])
@@ -170,7 +170,7 @@ class Vegas_Socket(Generic_Socket):
             adr = self.get_host_by_address(str(new_endpoint.address[0]))
             prt = str(new_endpoint.address[1])
             self._info_print("   New endpoint connected: {0}:{1} [{2}/{3}]".format(adr, prt,len(job_sockets)+1,n_jobs))
-        
+
             # Get the size of the array of doubles we are going to receive
             size = new_endpoint.get_size()
             if size == -1:
@@ -209,7 +209,7 @@ class Vegas_Socket(Generic_Socket):
             job_socket.send_total_integral(integral_value)
 
         return 0
-        
+
 def timeout_handler(signum, frame):
     raise Exception("The time has passed, it's time to run")
 
@@ -229,7 +229,7 @@ def create_stdout_log(logname):
     formatter = logging.Formatter("%(asctime) 8s %(message)s", datefmt="[%H:%M:%S %d/%m]")
     h.setFormatter(formatter)
     logger.addHandler(h)
-    
+
     username = getpass.getuser()
     datestr = datetime.datetime.now().strftime("%d-%m-%Y")
     logloc = "/tmp/{1}/{0}/{3}/{2}".format(os.path.splitext(os.path.basename(__file__))[0],
@@ -312,8 +312,8 @@ def do_server(args,log):
             except:
                 break
             greetings = new_client.receive_str()
-                
-            if greetings == "greetings": 
+
+            if greetings == "greetings":
                 # nnlorun.py sends the word "greetins" at the start
                 #print("ARC.py captured")
                 clients.append(new_client)
@@ -349,9 +349,9 @@ def do_server(args,log):
     # set a number of iterations
     while True:
         counter += 1
-        
+
         # Wait for n_clients connections.
-        # Once every client has sent its share of the data, sum it 
+        # Once every client has sent its share of the data, sum it
         # together and send it back
         success = server.harmonize_integral(n_clients, verbose = False)
         end_time = datetime.datetime.now()
@@ -359,7 +359,7 @@ def do_server(args,log):
         start_time = end_time
         hours, remainder = divmod(iteration_duration.total_seconds(), 3600)
         minutes, seconds = divmod(remainder, 60)
-        log.info("Iteration {0} completed in {1:02.0f}:{2:02.0f}:{3:02.0f}".format(counter, hours, 
+        log.info("Iteration {0} completed in {1:02.0f}:{2:02.0f}:{3:02.0f}".format(counter, hours,
                                                                  minutes, seconds))
         if success < 0:
             print("[WARNING] Something went wrong")
@@ -376,7 +376,7 @@ if __name__ == "__main__":
     args = parse_all_arguments()
 
     log = create_stdout_log(args.logfile)
-    
+
     try:
         do_server(args, log)
     except (Exception,KeyboardInterrupt) as e:

@@ -57,10 +57,10 @@ this_file = sys.modules[__name__]
 # Check that the all of the attributes in template are present...
 template_namespace = [i for i in dir(template) if not i.startswith("__")]
 # remove functions from template namespace
-template_attributes = [i for i in template_namespace if not 
+template_attributes = [i for i in template_namespace if not
                        callable(getattr(template, i))]
 # remove modules from template namespace
-template_attributes = [i for i in template_namespace if not 
+template_attributes = [i for i in template_namespace if not
                        isinstance(getattr(template, i),ModuleType)]
 
 for temp_attr in template_attributes:
@@ -160,10 +160,10 @@ if arcbase is None and os.path.basename(os.path.realpath(sys.argv[0]))=="main.py
 
 #
 # Templates
-# 
+#
 
 # # If a job is expected to run for long, use the following property (in minutes)
-# "(wallTime  =    \"3 days\")" 
+# "(wallTime  =    \"3 days\")"
 # it is also possible to specifiy the maximum cpu time instead (or 'as well')
 # "(cpuTime = \"3 days\")"
 # if nothing is used, the end system will decide what the maximum is

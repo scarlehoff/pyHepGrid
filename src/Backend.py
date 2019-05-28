@@ -4,7 +4,7 @@ from src.header import logger
 
 import src.utilities as util
 import src.header as header
-from src.runcard_parsing import runcard_parsing 
+from src.runcard_parsing import runcard_parsing
 
 counter = None
 def init_counter(args):
@@ -46,11 +46,11 @@ class Backend(object):
             print("{0}-{1}: ".format(dbid, runcard_info["runcard"]), end="")
             return
         if not short_stats:
-            string += "=> {0}: {1}".format(runcard_info["runcard"], 
+            string += "=> {0}: {1}".format(runcard_info["runcard"],
                                        runcard_info["runfolder"])
             print(string)
         else:
-            string += "{0:20}: {1:10} ".format(runcard_info["runcard"], 
+            string += "{0:20}: {1:10} ".format(runcard_info["runcard"],
                                          runcard_info["runfolder"])
             print(string, end="")
 
@@ -119,32 +119,32 @@ class Backend(object):
         else:
             return ""
 
-    def _multirun(self, function, arguments, n_threads = 15, 
+    def _multirun(self, function, arguments, n_threads = 15,
                   arglen=None, use_counter = False, timeout = False):
         """ Wrapper for multiprocessing
             For ARC only single thread is allow as the arc database needs
-            to be locked 
+            to be locked
         """
         from multiprocessing import Pool, Value
         # If required # calls is lower than the # threads given, use the minimum
         if arglen is None:
             arglen = n_threads
         threads = max(min(n_threads, arglen),1)
-        
+
         if use_counter:
             counter = Value('i', 0)
             pool   = Pool(threads, initializer = init_counter, initargs = (counter,))
         else:
             pool   = Pool(threads)
-        self.dbase.close()  
+        self.dbase.close()
         result = pool.map(function, arguments, chunksize = 1)
-        self.dbase.reopen()                                 
+        self.dbase.reopen()
         pool.close()
         pool.join()
         return result
 
     def _check_id_type(self, db_id):
-        """ Checks whether a job is production/warmup/socketed 
+        """ Checks whether a job is production/warmup/socketed
         """
         production = 'P'
         socketed_warmup = 'S'
@@ -168,7 +168,7 @@ class Backend(object):
                 return production
             else:
                 return warmup
-   
+
     # Checks for the runcard
     def _check_production(self, runcard):
         logger.info("Checking production in runcard {0}".format(runcard.name))
@@ -201,7 +201,7 @@ class Backend(object):
 
     def _checkfor_existing_output(self, r, rname):
         """ Check whether given runcard already has output in the grid
-        needs testing as it needs to be able to remove (many) things for production run 
+        needs testing as it needs to be able to remove (many) things for production run
         It relies on the base seed from the src.header file to remove the output
         """
         from src.header import lfn_output_dir, logger
@@ -227,16 +227,16 @@ class Backend(object):
         """
         from src.header import logger
         import re
-        from src.runcard_parsing import runcard_parsing 
+        from src.runcard_parsing import runcard_parsing
         logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         local_dir_name = self.get_local_dir_name(r,rname)
         files = os.listdir(local_dir_name)
-        runcard = runcard_parsing(runcard_file=os.path.join(local_dir_name,r),logger=logger, 
+        runcard = runcard_parsing(runcard_file=os.path.join(local_dir_name,r),logger=logger,
                                  grid_run=False)
         runcard_id = runcard.runcard_dict_case_preserving["id"]
         logs = [f for f in files if f.endswith(".log") and runcard_id in f]
         logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
-        existing_seeds = set([int(logseed_regex.search(i).group(1)) for i 
+        existing_seeds = set([int(logseed_regex.search(i).group(1)) for i
                               in logs])
         submission_seeds = set(range(baseSeed,baseSeed+producRun))
         overlap = existing_seeds.intersection(submission_seeds)
@@ -251,7 +251,7 @@ class Backend(object):
         extracts Vegas grid and log file and returns a list with their names
 
         check_only flag doesn't error out if the warmup doesn't exist, instead just returns
-        and empty list for later use [intended for checkwarmup mode so multiple warmups can 
+        and empty list for later use [intended for checkwarmup mode so multiple warmups can
         be checked consecutively.
         """
         from src.header import lfn_warmup_dir, logger
@@ -264,7 +264,7 @@ class Backend(object):
         logger.debug("Warmup LFN name: {0}".format(outnm))
         tmpnm = "tmp.tar.gz"
         logger.debug("local tmp tar name: {0}".format(tmpnm))
-        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell, 
+        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell,
                                    suppress_errors=suppress_errors)
 
         if not success and not check_only:
@@ -273,7 +273,7 @@ class Backend(object):
             return []
 
         ## Now extract only the Vegas grid files and log file
-        gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb", 
+        gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb",
                  ".V", ".R", ".LO", ".RV", ".VV"]
         gridp += [i+"_channel" for i in gridp]
         extractFiles = self.tarw.extract_extensions(tmpnm, gridp+[".log",".txt","channels"])
@@ -289,7 +289,7 @@ class Backend(object):
             logger.critical("Grid files not found in warmup tarfile. Did the warmup complete successfully?")
         elif gridFiles == []:
             return []
-        
+
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
         os.rename(logfile, newlog)
@@ -331,7 +331,7 @@ class Backend(object):
 
         rawvals = [i[0] for i in histogram]
         rawcounts = [i[1] for i in histogram]
-        
+
         newvals = []
         newcounts = []
         for i in range(0, 105, 5):
@@ -346,7 +346,7 @@ class Backend(object):
                 newvals.append(i)
                 newcounts.append(0)
 
-        do_plot(newvals, newcounts, title="Completion % Histogram (Unnormalised)", 
+        do_plot(newvals, newcounts, title="Completion % Histogram (Unnormalised)",
                 xlabel="% Completion", ylabel = "No. of jobs")
 
     def get_grid_from_stdout(self,jobid, jobinfo):
@@ -373,11 +373,11 @@ class Backend(object):
             base = header.warmup_base_dir
         else:
             base = header.default_runfolder
-        
+
         outloc = os.path.join(base,jobinfo["runfolder"],jobinfo["runcard"])
         grid_fname = os.path.join(outloc,gridname)
         os.makedirs(outloc,exist_ok=True)
-        if os.path.exists(grid_fname): 
+        if os.path.exists(grid_fname):
             self._press_yes_to_continue("  \033[93m WARNING:\033[0m Grid file already exists at {0}. do you want to overwrite it?".format(grid_fname))
         with open(grid_fname,"w") as gridfile:
             gridfile.write(grid)
@@ -412,7 +412,7 @@ class Backend(object):
             return jobid_list
 
     def get_date(self, db_id):
-        """ Returns date from a given database entry 
+        """ Returns date from a given database entry
         """
         jobid = self.dbase.list_data(self.table, ["date"], db_id)
         try:
@@ -443,9 +443,9 @@ class Backend(object):
 
     def get_stdout_dir_name(self, run_dir):
         return os.path.join(run_dir,"stdout/")
-        
 
-    def init_single_local_warmup(self, runcard, tag, continue_warmup = False, 
+
+    def init_single_local_warmup(self, runcard, tag, continue_warmup = False,
                                  provided_warmup=False):
         import shutil
         from src.header import executable_src_dir, executable_exe, runcardDir, slurm_kill_exe
@@ -461,10 +461,10 @@ class Backend(object):
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
         shutil.copy(slurm_kill_exe, run_dir)
-        if provided_warmup: 
+        if provided_warmup:
             # Copy warmup to rundir
             match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
-            shutil.copy(match, run_dir) 
+            shutil.copy(match, run_dir)
         if runcard_obj.is_continuation():
             # Assert warmup is present in dir. Will error out if not
             if continue_warmup:
@@ -475,13 +475,13 @@ class Backend(object):
     def init_local_warmups(self, provided_warmup = None, continue_warmup=False, local=False):
         rncards, dCards = util.expandCard()
         for runcard in rncards:
-            self.init_single_local_warmup(runcard, dCards[runcard], 
+            self.init_single_local_warmup(runcard, dCards[runcard],
                                           provided_warmup=provided_warmup,
                                           continue_warmup=continue_warmup)
-        
+
     def init_warmup(self, provided_warmup = None, continue_warmup=False, local=False):
-        """ Initialises a warmup run. An warmup file can be provided and it will be 
-        added to the .tar file sent to the grid storage. 
+        """ Initialises a warmup run. An warmup file can be provided and it will be
+        added to the .tar file sent to the grid storage.
         Steps are:
             1 - tar up executable, runcard and necessary files
             2 - sent it to the grid storage
@@ -492,7 +492,7 @@ class Backend(object):
         from src.header import runcardDir as runFol
 
         if local:
-            self.init_local_warmups(provided_warmup = provided_warmup, 
+            self.init_local_warmups(provided_warmup = provided_warmup,
                                     continue_warmup=continue_warmup)
             return
         origdir = os.path.abspath(os.getcwd())
@@ -505,14 +505,14 @@ class Backend(object):
                 provided_warmup = "{0}/{1}".format(origdir, provided_warmup)
 
         os.chdir(tmpdir)
-        
+
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
         rncards, dCards = util.expandCard()
         path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
-        if not os.path.isfile(path_to_exe_full): 
+        if not os.path.isfile(path_to_exe_full):
             logger.critical("Could not find executable at {0}".format(path_to_exe_full))
-        copy(path_to_exe_full, os.getcwd()) 
+        copy(path_to_exe_full, os.getcwd())
         files = [executable_exe]
         for idx,i in enumerate(rncards):
             logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
@@ -524,7 +524,7 @@ class Backend(object):
             runcard_file = runFol + "/" + i
             runcard_obj = runcard_parsing(runcard_file, logger=logger)
             self._check_warmup(runcard_obj, continue_warmup)
-            if provided_warmup: 
+            if provided_warmup:
                 # Copy warmup to current dir if not already there
                 match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
                 files += [match]
@@ -561,12 +561,12 @@ class Backend(object):
     def init_local_production(self, provided_warmup = None, local=False):
         rncards, dCards = util.expandCard()
         for runcard in rncards:
-            self.init_single_local_production(runcard, dCards[runcard], 
+            self.init_single_local_production(runcard, dCards[runcard],
                                               provided_warmup=provided_warmup)
 
     def init_single_local_production(self, runcard, tag, provided_warmup=False):
         """ Initialise single production run for the local environment. Can probably be
-        more tightly integrated with the warmup equivalent in future - lots of shared code 
+        more tightly integrated with the warmup equivalent in future - lots of shared code
         that can be refactored."""
         import shutil
         from src.header import executable_src_dir, executable_exe, runcardDir
@@ -581,10 +581,10 @@ class Backend(object):
         self._check_production(runcard_obj)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
-        if provided_warmup: 
+        if provided_warmup:
             # Copy warmup to rundir
             match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
-            shutil.copy(match, run_dir) 
+            shutil.copy(match, run_dir)
         else:
             # check warmup is in dir - check is case insensitive - be careful!
             rundirfiles = [i.lower() for i in os.listdir(run_dir)]
@@ -619,12 +619,12 @@ class Backend(object):
         if provided_warmup:
             if provided_warmup[0] != "/":
                 provided_warmup = "{0}/{1}".format(origdir, provided_warmup)
-        
+
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
-        
-        if not os.path.isfile(path_to_exe_full): 
+
+        if not os.path.isfile(path_to_exe_full):
             logger.critical("Could not find executable at {0}".format(path_to_exe_full))
         copy(path_to_exe_full, os.getcwd())
         files = [executable_exe]
@@ -639,7 +639,7 @@ class Backend(object):
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), 
+                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),
                                                           provided_warmup)
                 warmupFiles = [match]
             elif header.provided_warmup_dir:
@@ -692,13 +692,13 @@ class Backend(object):
 
 
     def check_warmup_files(self, db_id, rcard, resubmit=False):
-        """ Provides stats on whether a warmup file exists for a given run and optionally 
+        """ Provides stats on whether a warmup file exists for a given run and optionally
         resubmit if absent"""
         from shutil import copy
         import tempfile
         import tarfile
         from src.header import logger
-        
+
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
 
@@ -727,7 +727,7 @@ class Backend(object):
                 logger.warning("Job still running. Not resubmitting for now")
             else:
                 # Need to override dictCard for single job submission
-                expandedCard = ([runcard], {runcard:rname}) 
+                expandedCard = ([runcard], {runcard:rname})
                 logger.info("Warmup not found and job ended. Resubmitting to ARC")
                 from src.runArcjob import runWrapper
                 runWrapper(rcard, expandedCard = expandedCard)
@@ -792,9 +792,9 @@ class Backend(object):
     def print_stats(self, done, wait, run, fail, unk, total):
         import datetime
         from src.header import short_stats
-        total2 = done + wait + run + fail + unk 
+        total2 = done + wait + run + fail + unk
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-        
+
         if self.stats_one_line:
             string = "Done: [{0}/{1}];\n".format(done, total)
             print(string)
@@ -846,10 +846,10 @@ class Backend(object):
         else:
             return self.cUNK
 
-  
+
 
     def _get_data_warmup(self, db_id):
-        """ Given a database entry, retrieve its data from the 
+        """ Given a database entry, retrieve its data from the
         warmup folder to the folder defined in said database entry
         For arc jobs stdoutput will be downloaded in said folder as well
         """
@@ -916,7 +916,7 @@ class Backend(object):
             if yn == 0:
                 break
             initial_seed = int(input("Please, introduce the starting seed (ex: 400): "))
-            finalSeed  = int(input("Please, introduce the final seed (ex: 460): ")) 
+            finalSeed  = int(input("Please, introduce the final seed (ex: 460): "))
         try:
             os.makedirs(self.rfolder)
         except OSError as err:
@@ -925,7 +925,7 @@ class Backend(object):
                 print("to no avail. We are going to assume the directory was already there")
                 self._press_yes_to_continue("", "Folder {} already exists".format(self.rfolder))
             else:
-                raise 
+                raise
         os.chdir(self.rfolder)
         try:
             os.makedirs("log")
@@ -949,14 +949,14 @@ class Backend(object):
         all_output = self.gridw.get_dir_contents(header.lfn_output_dir).split()
         remote_tarfiles = list(set(all_remote) & set(all_output))
         print("Found data for {0} of the {1} seeds.".format(len(remote_tarfiles), len(seeds)))
-        
+
         # Download said data
         tarfiles = self._multirun(self._do_get_data, remote_tarfiles, n_threads, use_counter = True)
         tarfiles = list(filter(None, tarfiles))
         print("Downloaded 0 files", end ='\r')
         print("Downloaded {0} files, extracting...".format(len(tarfiles)))
 
-        # Extract some information from the first tarfile 
+        # Extract some information from the first tarfile
         for tarfile in tarfiles:
             if self._extract_output_warmup_data(tarfile):
                 break
@@ -968,7 +968,7 @@ class Backend(object):
         util.spCall(["mv", self.rfolder, pathfolder])
 
     def _do_get_data(self, filename):
-        """ Multithread wrapper used in get_data_production 
+        """ Multithread wrapper used in get_data_production
         to download information from the grid storage
         """
         local_name = filename.replace("output", "")
@@ -990,7 +990,7 @@ class Backend(object):
         """
         extensions = ["run", "vRa", "vRb", "vBa", "vBb", "RRa", "RRb", "log-warmup"]
         return self.tarw.extract_extensions(tarfile, extensions)
-  
+
     def _do_extract_outputData(self, tarfile):
         """ Multithread wrapper used in get_data_production
             for untaring files
@@ -1023,7 +1023,7 @@ class Backend(object):
             jobtype = self._check_id_type(db_id)
             self.jobtype_get[jobtype](db_id)
 
-    
+
     def list_runs(self, search_string = None):
         """ List all runs in the database.
         If a search_string is provided, only those runs matching the search_string in
@@ -1095,7 +1095,7 @@ class Backend(object):
         return self._format_args(dictionary)
 
     def _get_prod_args(self, runcard, runtag, seed):
-        """ Returns all arguments for production running. These arguments should 
+        """ Returns all arguments for production running. These arguments should
         match all those required by nnlorun.py"""
         base_string = self._make_base_argstring(runcard, runtag)
         production_dict = {'Production' : None,
@@ -1105,7 +1105,7 @@ class Backend(object):
         return base_string + production_str
 
     def _get_warmup_args(self, runcard, runtag, threads = 1, sockets = None, port=header.port):
-        """ Returns all necessary arguments for warmup running. These arguments 
+        """ Returns all necessary arguments for warmup running. These arguments
         should match those required by nnlorun.py."""
         base_string = self._make_base_argstring(runcard, runtag)
         warmup_dict = { 'Warmup' : None,
@@ -1118,7 +1118,7 @@ class Backend(object):
         warmup_str = self._format_args(warmup_dict)
         return base_string + warmup_str
 
-def generic_initialise(runcard, warmup=False, production=False, grid=None, 
+def generic_initialise(runcard, warmup=False, production=False, grid=None,
                        overwrite_grid=False, local=False):
     from src.header import logger
     logger.info("Initialising runcard: {0}".format(runcard))

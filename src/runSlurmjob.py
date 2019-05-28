@@ -6,7 +6,7 @@ import src.utilities as util
 
 class RunSlurm(Backend):
     """ Generic class for running Slurm scripts, both production and warmup"""
-    def __init__(self, prod=False,slurmscript = None, **kwargs): 
+    def __init__(self, prod=False,slurmscript = None, **kwargs):
         super(RunSlurm, self).__init__(**kwargs)
         if prod:
             self.table = header.slurmprodtable
@@ -45,11 +45,11 @@ class RunSlurm(Backend):
 
     def _get_warmup_args(self, runcard, tag, threads=1, n_sockets=1,
                          sockets=None, port=header.port, array=False, queue=None):
-        """ Sets and returns arguments to be passed as sbatch commands, which are 
-        substituted into the warmup SLURM template file using string formatting. 
+        """ Sets and returns arguments to be passed as sbatch commands, which are
+        substituted into the warmup SLURM template file using string formatting.
 
-        In order to add new options, add <option_name> into the args dictionary, with the 
-        corresponding value. Then in the template file, {<option_name>} will be replaced 
+        In order to add new options, add <option_name> into the args dictionary, with the
+        corresponding value. Then in the template file, {<option_name>} will be replaced
         by the corresponding value."""
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
                 "threads":threads, "sockets":sockets, "port":port, "host":header.server_host,
@@ -64,13 +64,13 @@ class RunSlurm(Backend):
         args = self.__do_common_args(args, threads, queue)
         return args
 
-    def _get_production_args(self, runcard, tag, baseSeed, producRun, threads, 
+    def _get_production_args(self, runcard, tag, baseSeed, producRun, threads,
                              array=True, queue=None):
-        """ Sets and returns arguments to be passed as sbatch commands, which are 
-        substituted into the production SLURM template file using string formatting. 
+        """ Sets and returns arguments to be passed as sbatch commands, which are
+        substituted into the production SLURM template file using string formatting.
 
-        In order to add new options, add <option_name> into the args dictionary, with the 
-        corresponding value. Then in the template file, {<option_name>} will be replaced 
+        In order to add new options, add <option_name> into the args dictionary, with the
+        corresponding value. Then in the template file, {<option_name>} will be replaced
         by the corresponding value."""
         args = {"runcard":runcard, "runcard_dir":self.get_local_dir_name(runcard, tag),
                 "baseSeed":baseSeed, "producRun":producRun,"threads":threads}
@@ -83,7 +83,7 @@ class RunSlurm(Backend):
 
     def _run_SLURM(self, filename, args, queue, test=False, socket=None, n_sockets=1):
         """ Takes a slurm runfile and submits it to the SLURM batch system.
-        
+
         Returns the jobid and queue used for submission"""
         from src.header import slurm_exclusive
         if queue is not None:
@@ -98,8 +98,8 @@ class RunSlurm(Backend):
 
 
     def _write_SLURM(self, dictData, template, filename = None):
-        """ Writes a unique SLURM file to disk for warmup/production runs based 
-        on the template file given. Substitutes the args given in dictData into 
+        """ Writes a unique SLURM file to disk for warmup/production runs based
+        on the template file given. Substitutes the args given in dictData into
         the template"""
         if not filename:
             filename = util.unique_filename()
@@ -128,7 +128,7 @@ class RunSlurm(Backend):
             rncards, dCards = util.expandCard()
         else:
             rncards, dCards = expandedCard
-        
+
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
@@ -148,7 +148,7 @@ class RunSlurm(Backend):
         for r in rncards:
             if n_sockets > 1:
                 # Automagically activates the socket and finds the best port for it!
-                port = sapi.fire_up_socket_server(header.server_host, port, n_sockets, 
+                port = sapi.fire_up_socket_server(header.server_host, port, n_sockets,
                                                   None, header.socket_exe,
                                                   tag="{0}-{1}".format(r,dCards[r]),
                                                   tmuxloc=header.tmux_location)
@@ -162,7 +162,7 @@ class RunSlurm(Backend):
                 array=False
             arguments = self._get_warmup_args(r, dCards[r], n_sockets = n_sockets,
                                               threads=warmupthr,
-                                              sockets=sockets, port=port, 
+                                              sockets=sockets, port=port,
                                               array=array, queue=queue)
             slurmfile = self._write_SLURM(arguments, self.templ)
             header.logger.info(" > Path of slurm file: {0}".format(slurmfile))
@@ -206,10 +206,10 @@ class RunSlurm(Backend):
         header.logger.info("Runcards selected: {0}".format(" ".join(rncards)))
         for r in rncards:
             self._checkfor_existing_output_local(r, dCards[r], baseSeed, producRun)
-            
+
             # Generate the SLURM file
             arguments = self._get_production_args(r, dCards[r], baseSeed, producRun,
-                                                  production_threads, array=True, 
+                                                  production_threads, array=True,
                                                   queue = queue)
             slurmfile = self._write_SLURM(arguments, self.prodtempl)
             header.logger.info("Path of slurm file: {0}".format(slurmfile))

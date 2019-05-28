@@ -1,13 +1,13 @@
 - Warmup and dat files in ARC/DIRAC sandbox - if job fails halfway through you can retrieve output... Alternatively, find whether there is a "backup" system so that we can copy the files somewhere else. It might also be a problem with lfc-ls?...
 
-- Have -kill for socketed jobs remove socket server 
+- Have -kill for socketed jobs remove socket server
 |=> unique filename for each session stored in database
 
 - Make the script gfal ready...
 
 - Option to do arcsync from main.py so that it queries the database and we only do arcsync for jobs and CEs that are actually being used.
 
-- Play around with priority systems for get_site_info.py 
+- Play around with priority systems for get_site_info.py
 
 - shell script that sets up:
   - proxy generation crontabs
@@ -18,7 +18,7 @@
 
 - Investigate race condition between netcat and the server when the check for a server happens at the same time as it is retrieving data from NNLOJET.
     - Option 1: Remove the ability to fire up remote sockets altogether
-    - Option 2 (preferred): Receive error codes through tmux through ssh 
+    - Option 2 (preferred): Receive error codes through tmux through ssh
 
 ###### Done in the form of a bash script
 - Support for passing multiple runcards for initialisation/submission at once (requires modules reloading for runcard.py overrides)

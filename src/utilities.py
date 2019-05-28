@@ -29,7 +29,7 @@ def expandCard(dummy=None):
 
 #
 # Subprocess Wrappers
-# 
+#
 def spCall(cmd, suppress_errors = False, shell=False):
     from subprocess import call, DEVNULL
     from src.header import logger
@@ -132,7 +132,7 @@ def batch_gen(data, batch_size):
 # Library initialisation
 #
 def lhapdfIni():
-    import shutil, os 
+    import shutil, os
     import src.header as header
     import collections, re
     import json
@@ -177,8 +177,8 @@ def lhapdfIni():
                                        ).group(0).replace("_","").replace(".dat",""))
                 pdfs[setname].update(set([member]))
 
-    
-    pdf_file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo") 
+
+    pdf_file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo")
     for key,val in pdfs.items():
         pdfs[key]=list(val)
 
@@ -216,7 +216,7 @@ class TarWrap:
     def tarDir(self, inputDir, output_name):
         with tarfile.open(output_name, "w:gz") as output_tar:
             output_tar.add(inputDir)
-            
+
     def tarFiles(self, inputList, output_name):
         with tarfile.open(output_name, "w:gz") as output_tar:
             for infile in inputList:
@@ -249,7 +249,7 @@ class TarWrap:
                     if t.name.endswith(ext):
                         tfile.extract(t, path = extension_dict[ext])
                         break
-                
+
 
     def extract_extensions(self, tarred_file, extensions):
         matches = []
@@ -262,7 +262,7 @@ class TarWrap:
         return matches
 #
 # GridUtilities
-# 
+#
 class GridWrap:
     from src.header import use_gfal, gfaldir
     # Defaults
@@ -282,7 +282,7 @@ class GridWrap:
         if retriv: self.retriv = retriv
         if delete: self.delcmd = delete
         if lfn: self.lfn = lfn
-    
+
     def send(self, tarfile, whereTo, shell=False):
         import os
         from src.header import logger, gfaldir
@@ -320,7 +320,7 @@ class GridWrap:
             gridname = path.join(gfaldir, whereFrom, tarfile)
             destpath = "file://$PWD/{0}".format(whereTo)
             success = gfal_copy(gridname, destpath)
-            # cmd = ["gfal-copy", gridname, whereTo]   
+            # cmd = ["gfal-copy", gridname, whereTo]
             # if timeout:
             #     cmd += ["-t", str(timeout)]
             # success = spCall(cmd, shell=shell, suppress_errors=suppress_errors)
@@ -400,7 +400,7 @@ def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES):
     return 9999999
 
 
-        
+
 if __name__ == '__main__':
     from sys import version_info
     tar  = TarWrap()
@@ -433,8 +433,3 @@ if __name__ == '__main__':
     print("Dictionary: ", dictCards)
     print("Runfolder: ", runfolder)
     print("Todo: test to the gridwrap")
-
-
-
-
-

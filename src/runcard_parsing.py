@@ -77,7 +77,7 @@ class PROGRAMruncard:
 
     def __check_grid_pdf(self):
         import json
-        infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo") 
+        infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo")
         try:
             with open(infofile,"r") as f:
                 data = json.load(f)
@@ -107,7 +107,7 @@ class PROGRAMruncard:
             try:
                 float(self.runcard_dict[runcard_linecode[i]])
             except:
-                self.critical("Line {0} [{1}] should be numeric type. Value is instead {2}.".format(i,runcard_linecode[i], self.runcard_dict[runcard_linecode[i]])) 
+                self.critical("Line {0} [{1}] should be numeric type. Value is instead {2}.".format(i,runcard_linecode[i], self.runcard_dict[runcard_linecode[i]]))
                 print(self.logger)
 
     # Safety check functions
@@ -156,7 +156,7 @@ class PROGRAMruncard:
             if line == block_start:
                 reading = True
         self.runcard_dict[block_name] = block_content
-        self.debug("{0:<15}: {1:<20} {2}".format(block_name, " ".join(block_content), 
+        self.debug("{0:<15}: {1:<20} {2}".format(block_name, " ".join(block_content),
                                                  os.path.basename(self.runcard_file)))
 
     def _parse_runcard_from_file(self, filename):
@@ -183,9 +183,9 @@ class PROGRAMruncard:
     # Internal functions for external API
     def _is_mode(self, mode, accepted = None):
         """
-        Checks whether the mode is set to true from a set of 
-        predefined values. 
-        If accepted = [list of accepted values]  is provided 
+        Checks whether the mode is set to true from a set of
+        predefined values.
+        If accepted = [list of accepted values]  is provided
         the check is done against this list
         """
         mode = self.runcard_dict[mode]
@@ -205,7 +205,7 @@ class PROGRAMruncard:
 
     def is_warmup(self):
         return self._is_mode("warmup")
-    
+
     def is_production(self):
         return self._is_mode("production")
 
@@ -233,7 +233,7 @@ class PROGRAMruncard:
         warmup_name = "{0}.{1}.y{2}.{3}".format(process_name, runname, tech_cut, warmup_suffix)
 
         return warmup_name
-        
+
     def _setup_logging(self,logger):
         if logger is not None:
             self.print = logger.info
@@ -249,5 +249,3 @@ class PROGRAMruncard:
             self.warning = print
             self.debug = print
             self.error = print
-
-

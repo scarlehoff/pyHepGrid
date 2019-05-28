@@ -3,7 +3,7 @@ import sys
 import src.utilities as util
 import shutil
 import src.header as header
-import subprocess 
+import subprocess
 
 def setup():
     oldpath = os.getcwd()
@@ -19,7 +19,7 @@ def setup():
 
 def run_test(args, runcard):
     # header.debug_level = 99999
-    
+
     if args.runArc:
         from src.runArcjob import testWrapper
     elif args.runArcProduction:
