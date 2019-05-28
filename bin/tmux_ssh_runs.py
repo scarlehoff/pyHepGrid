@@ -17,8 +17,8 @@ import src.header as header
 import src.socket_api as socket_api
 import src.Backend as backend
 
-serverloc = header.socket_exe 
-killserverloc = header.slurm_kill_exe 
+serverloc = header.socket_exe
+killserverloc = header.slurm_kill_exe
 desktop_list = header.desktop_list
 tot= len(desktop_list)
 port = header.port
@@ -69,7 +69,7 @@ def do_single_run(host, port, runcard, serverloc, tot, desktop_list, run_directo
         create_NNLOJET_instance(valid_port, host, no, tot, window_name, runcard, desktop, run_directory)
         print("NNLOJET instance [{0}/{1}] submitted to {2}.".format(no+1, tot, desktop))
     arrange_tmux_window(window_name)
-    
+
 
 if __name__ == "__main__":
     for runcard in header.dictCard:

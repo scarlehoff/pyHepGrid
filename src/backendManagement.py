@@ -29,7 +29,7 @@ class Arc(Backend):
         return "Arc"
 
     def update_stdout(self):
-        """ retrieves stdout of all running jobs and store the current state 
+        """ retrieves stdout of all running jobs and store the current state
         into its correspondent folder
         """
         fields = ["rowid", "jobid", "pathfolder", "runfolder"]
@@ -37,11 +37,11 @@ class Arc(Backend):
         for job in dictC:
             # Retrieve data from database
             jobid   = str(job['jobid'])
-            rfold   = str(job['runfolder']) 
+            rfold   = str(job['runfolder'])
             pfold   = str(job['pathfolder']) + "/" + rfold
             flnam   = pfold + "/stdout"
             # Create target folder if it doesn't exist
-            if not os.path.exists(pfold): 
+            if not os.path.exists(pfold):
                 os.makedirs(pfold)
             cmd     = self.cmd_print + ' ' +  jobid.strip()
             # It seems script is the only right way to save data with arc
@@ -146,7 +146,7 @@ class Dirac(Backend):
 
     def __str__(self):
         return "Dirac"
-    
+
     def cat_job(self, jobids, jobinfo, print_stderr = None):
         print("Printing the last 20 lines of the last job")
         jobid = jobids[-1]
@@ -249,9 +249,9 @@ class Slurm(Backend):
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.list_data(self.table, fields, db_id)[0]
         production_output_dir = self.get_local_dir_name(data["runcard"],data["runfolder"])
-        dat_files = [i for i in os.listdir(production_output_dir) 
+        dat_files = [i for i in os.listdir(production_output_dir)
                         if i.endswith(".dat")]
-        log_files = [i for i in os.listdir(production_output_dir) 
+        log_files = [i for i in os.listdir(production_output_dir)
                         if i.endswith(".log")]
         header.logger.info(dat_files, data["pathfolder"])
         production_dir = os.path.join(header.production_base_dir,data["runfolder"])
@@ -281,7 +281,7 @@ class Slurm(Backend):
         expected_seeds = set(range(int(jobinfo["iseed"]),int(jobinfo["iseed"])+int(jobinfo["no_runs"])))
 
         logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
-        logseeds_in_dir = set([int(logseed_regex.search(i).group(1)) for i 
+        logseeds_in_dir = set([int(logseed_regex.search(i).group(1)) for i
                                in glob.glob('{0}/*.log'.format(run_dir))])
         seeds_to_print = (logseeds_in_dir.union(expected_seeds))
 
@@ -292,7 +292,7 @@ class Slurm(Backend):
                     cat_logs.append(log_file)
                     seeds_to_print.remove(seed)
                     break
-        
+
         for log in cat_logs:
             cmd = ["cat", os.path.join(run_dir,log)]
             util.spCall(cmd)
@@ -301,7 +301,7 @@ class Slurm(Backend):
 
     def get_status(self, jobid, status):
         stat = len([i for i in util.getOutputCall(["squeue", "-j{0}".format(jobid),"-r","-t",status],
-                                                  suppress_errors=True).split("\n")[1:] 
+                                                  suppress_errors=True).split("\n")[1:]
                     if "error" not in i]) #strip header from results
         if stat >0:
             stat = stat-1
@@ -333,7 +333,7 @@ class Slurm(Backend):
         output = []
         if jobinfo["jobtype"] == "Production" or "Socket" in jobinfo["jobtype"]:
             for subjobno in range(1,int(jobinfo["no_runs"])+1):
-                stdoutfile=os.path.join(dir_name,"slurm-{0}_{1}.out".format(jobid,subjobno)) 
+                stdoutfile=os.path.join(dir_name,"slurm-{0}_{1}.out".format(jobid,subjobno))
                 if print_stderr:
                     stdoutfile = stdoutfile.replace(".out",".err")
                 cmd = ["cat", stdoutfile]
@@ -342,7 +342,7 @@ class Slurm(Backend):
                 else:
                     output.append(util.getOutputCall(cmd,suppress_errors=True))
         else:
-            stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid)) 
+            stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid))
             if print_stderr:
                 stdoutfile = stdoutfile.replace(".out",".err")
             cmd = ["cat", stdoutfile]

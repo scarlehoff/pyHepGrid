@@ -14,7 +14,7 @@ class RunDirac(Backend):
 
     #
     # XRSL file utilities
-    # 
+    #
     def _format_args(self, input_args):
         if isinstance(input_args, dict):
             string_arg = ""
@@ -35,7 +35,7 @@ class RunDirac(Backend):
 
 
     def _write_JDL(self, argument_string, start_seed, no_runs, filename = None):
-        """ Writes a unique JDL file 
+        """ Writes a unique JDL file
         which instructs the dirac job to run
         """
         if not filename:
@@ -52,7 +52,7 @@ class RunDirac(Backend):
         return filename
 
     def _run_JDL(self, filename):
-        """ Sends JDL file to the dirac 
+        """ Sends JDL file to the dirac
         management system
         """
         cmd = "dirac-wms-job-submit {}".format(filename)

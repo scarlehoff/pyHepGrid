@@ -58,7 +58,7 @@ def createdirs(currentdir, runcard):
     mkdir(logdir)
     nodedir = os.path.join(logdir, 'node_info')
     mkdir(nodedir)
-    logcheck = set([logseed_regex.search(i).group(1) for i 
+    logcheck = set([logseed_regex.search(i).group(1) for i
                     in get_PROGRAM_logfiles(logdir)])
     return logcheck, targetdir
 
@@ -95,7 +95,7 @@ def pullrun(name, seed, run, tmpdir, attempts=0):
                     corrupted = False
                 elif t.name.endswith(".log") and "node_info"in t.name:
                     tfile.extract(t,"../log/node_info/")
-                    os.rename("../log/node_info/"+t.name, 
+                    os.rename("../log/node_info/"+t.name,
                               "../log/node_info/node_info_{0}.log".format(seed))
         os.remove(name)
     except (FileNotFoundError, tarfile.ReadError) as e:
@@ -152,8 +152,8 @@ def print_final_stats(start_time, tot_no_new_files, corrupt_no):
     total_time = (end_time-start_time).__str__().split(".")[0]
     print("\033[92m{0:^80}\033[0m".format("Finalisation finished!"))
     print("Total time: {0} ".format(total_time))
-    print("New files found: {0}".format(tot_no_new_files)) 
-    print("Corrupted files: {0}".format(corrupt_no)) 
+    print("New files found: {0}".format(tot_no_new_files))
+    print("Corrupted files: {0}".format(corrupt_no))
     print("Finish time: {0}".format(end_time.strftime('%H:%M:%S')))
 
 
@@ -169,7 +169,7 @@ def do_finalise():
     else:
         cmd = ['lfc-ls', config.lfn_output_dir]
     output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
-    currentdir = os.getcwd()    
+    currentdir = os.getcwd()
 
     output = set([x for x in str(output).split("\\n")])
 
@@ -197,7 +197,7 @@ def do_finalise():
         runcard_name_no_seed = "output{0}-".format(dirtag)
 
         output_file_names,lfn_seeds = [],[]
-        for i in output: 
+        for i in output:
             if runcard_name_no_seed in i:
                 lfn_seeds.append(tarfile_regex.search(i).group(1))
                 output_file_names.append(i)
@@ -207,7 +207,7 @@ def do_finalise():
             continue
 
         # Makes the second runcard slightly quicker by removing matched files :)
-        output = output.difference(set(output_file_names)) 
+        output = output.difference(set(output_file_names))
 
         logseeds, targetdir = createdirs(currentdir, dirtag)
         pull_seeds = set(lfn_seeds).difference(logseeds)
@@ -217,7 +217,7 @@ def do_finalise():
 
         if no_files_found>0:
             tot_no_new_files += no_files_found
-            results = pool.starmap(pull_seed_data, zip(pull_seeds, 
+            results = pool.starmap(pull_seed_data, zip(pull_seeds,
                                              it.repeat(runcard_name_no_seed),
                                              it.repeat(targetdir),
                                              it.repeat(runcard)),

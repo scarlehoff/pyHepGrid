@@ -1,5 +1,5 @@
 #runcardDir = "/custom/runcard/directory" # overwrites header
-#NNLOJETdir = "/custom/nnlojet/directory" 
+#NNLOJETdir = "/custom/nnlojet/directory"
 print("Sourcing runcard")
 dictCard = {
     # 'LO.run':'DM_LO',
@@ -16,7 +16,7 @@ dictCard = {
 # sockets_active = 5
 # port = 8888
 
-# You can overwrite any value in your header by specifying the same attribute here. 
+# You can overwrite any value in your header by specifying the same attribute here.
 # E.g to set the number of jobs 99999 for this runcard, you could include the line
 # producRun = 999999
 

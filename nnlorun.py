@@ -13,7 +13,7 @@ PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
 def print_flush(string):
     print string
     sys.stdout.flush()
-    
+
 ####
 
 # Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
@@ -47,8 +47,8 @@ def parse_arguments():
     from optparse import OptionParser
     from getpass import getuser
 
-    default_user_lfn = "/grid/pheno/{0}".format(getuser())  
-    default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
+    default_user_lfn = "/grid/pheno/{0}".format(getuser())
+    default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())
     parser = OptionParser(usage = "usage: %prog [options]")
 
     parser.add_option("-r","--runcard", help = "Runcard to be run")
@@ -68,17 +68,17 @@ def parse_arguments():
     parser.add_option("-w", "--warmup_folder",
                       help = "lfn warmup folder, relative to --lfndir or gfaldir depending on which mode is used",
                       default = "warmup")
-    parser.add_option("-o", "--output_folder", 
-                      help = "lfn output folder, relative to --lfndir or gfaldir depending on which mode is used", 
+    parser.add_option("-o", "--output_folder",
+                      help = "lfn output folder, relative to --lfndir or gfaldir depending on which mode is used",
                       default = "output")
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
-    parser.add_option("--use_gfal", default="False", 
+    parser.add_option("--use_gfal", default="False",
                       help = "Use gfal for file transfer and storage rather than the LFN")
-    parser.add_option("--gfal_location", default="", 
+    parser.add_option("--gfal_location", default="",
                       help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
     # LHAPDF options
-    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir", 
+    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir",
                       default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
 
@@ -118,14 +118,14 @@ def parse_arguments():
                 parser.error("No node can run more than 16 threads at a time!")
         if options.Sockets:
             parser.error("Probably a bad idea to run sockets in production")
-    
+
     print_flush("Arguments: {0}".format(options))
 
     return options
 
 def set_environment(lfndir, lhapdf_dir):
     os.system("export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages")
-    # GCC 
+    # GCC
     cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
     gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
     gcc_lib64path = os.path.join(cvmfs_gcc_dir, "lib64")
@@ -134,7 +134,7 @@ def set_environment(lfndir, lhapdf_dir):
     lha_PATH = lhapdf_dir + "/bin"
     lhapdf_lib = lhapdf_dir + "/lib"
     lhapdf_share = lhapdf_dir + "/share/LHAPDF"
-    
+
     old_PATH = os.environ["PATH"]
     os.environ["PATH"] = "%s:%s:%s" % (gcc_PATH,lha_PATH,old_PATH)
     old_ldpath                    = os.environ["LD_LIBRARY_PATH"]
@@ -158,7 +158,7 @@ def set_environment(lfndir, lhapdf_dir):
         os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
     return 0
 # export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
-    
+
 
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
 lcg_cp = "lcg-cp"
@@ -295,7 +295,7 @@ def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
     # os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
     os.system("gcc --version >> {0}".format(outputfile))
-    os.system("python --version >> {0}".format(outputfile))    
+    os.system("python --version >> {0}".format(outputfile))
 
 
 #################################################################################
@@ -317,8 +317,8 @@ if __name__ == "__main__":
         print_node_info("node_info.log")
         syscall("lsb_release -a")
 
-    nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads, 
-                                                                  args.executable, 
+    nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads,
+                                                                  args.executable,
                                                                   args.runcard)
 
     bring_status = bring_lhapdf(args.lhapdf_grid, debug_level)
@@ -348,7 +348,7 @@ if __name__ == "__main__":
     if debug_level > 1:
         os.system("ls")
         os.system("ldd -v {0}".format(args.executable))
-        
+
     os.system("chmod +x {0}".format(args.executable))
     nnlojet_command +=" 2>&1 outfile.out"
     print_flush(" > Executed command: {0}".format(nnlojet_command))
@@ -396,7 +396,7 @@ if __name__ == "__main__":
 
     if args.Sockets:
         try: # only the first one arriving will go through!
-            print_flush("Close Socket connection") 
+            print_flush("Close Socket connection")
             _ = socket_sync_str(host, port, "bye!") # Be polite
         except:
             pass

@@ -1,6 +1,6 @@
 #
 # Utilities to deal with ARC and Dirac proxys
-# 
+#
 
 def arcProxy(validity, password = None):
     from subprocess import call
@@ -23,4 +23,3 @@ def diracProxy(password = None):
         pass
     call(cmdb)
     return 0
-

@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # Checks on modes
     db = database(dbname, tables = [arctable, diractable, slurmtable,
-                                    arcprodtable,slurmprodtable], 
+                                    arcprodtable,slurmprodtable],
                   fields = dbfields)
 
     mode = rmode[:3]
