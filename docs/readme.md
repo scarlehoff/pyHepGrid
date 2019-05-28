@@ -78,9 +78,12 @@ TODO:update this section to include more on GFAL storage management
 # 3) GRID SCRIPTS SETUP
 
 create own header, copy template header
+
 adjust personal header
+
 adjust headername in general header.py file (only add the name of your header file to top)
-create folder for runcard storage and add to header file (e.g NNLOJET/driver/grid/)
+
+create folder for runcard storage and add to header file (e.g `NNLOJET/driver/grid/`)
 
 add yourname_header.py file and altered header.py file to the repo, and COMMIT
 
@@ -103,11 +106,16 @@ arcproxy -S pheno -N -c validityPeriod=24h -c vomsACvalidityPeriod=24h
 ```
 
 Automated (set & forget):
+
 I've added some proxy automation scripts to the repo in `gangaless_resources/proxy_renewal/`
+
 To get these working, simply add your certificate password in to .script2.exp (plaintext I
    know, so it's bad...)
+
 Make sure `.proxy.sh` is set up for your user (directories should point to your gangaless resources)
- Run by hand to check (shouldn't need your password)
+
+Run by hand to check (shouldn't need your password)
+
 Then set up `.proxy.sh` to run as a cron job at least once per day (I suggest 2x in case of failure)
 
 # 5) GRID SCRIPTS USAGE
@@ -145,21 +153,23 @@ include the flags:
      -I/-i for job info
 ```
 
-For running anything on the grid, the help text in main.py (python3 main.py -h) is useful for
+For running anything on the grid, the help text in main.py (`python3 main.py -h`) is useful for
 hidden options that aren't all necessarily documented(!)
        -- These features include warmup continuation, getting warmup data from running warmup jobs,
            initialising with your own warmup from elsewhere, database management stuff, local
      runcard testing
 
 When running, the python script nnlorun.py is sent to the run location. This script then runs
-     automatically, and pulls all of the appropriate files from grid storage (NNLOJET exe, runcard
-     (warmups)). It then runs NNLOJET in the appropriate mode, before tarring up output files and
+     automatically, and pulls all of the appropriate files from grid storage (exe, runcard
+     (warmups)). It then runs the executable in the appropriate mode, before tarring up output files and
      sending them back to the grid storage.
 
 # 6) FINALISING RESULTS
 
 -> The process of pulling the production results from grid storage to the gridui
+
 -> You have a choice of setups for this (or you can implement your own)
+
 => DEFAULT SETUP
    By default, `./main.py` ships a "--get_data" script that allows you to retrieve jobs looking
    at the database.
