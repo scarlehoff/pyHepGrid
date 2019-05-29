@@ -82,10 +82,8 @@ gfal-mkdir gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/<d
 The folder setup that the GFAL setup uses should be the same as for LFN, so you
 will need an input, output and warmup folder as normal
 
-GFAL should be much more stable and quick than the LFN, though I've not tested
-it through DIRAC yet. It has been tested for both production and warmup (plus
-ini) with Durham and Glasgow, so it just depends on whether Gfal is set up on
-Dirac systems
+GFAL should be much more stable and quick than the LFN, and has been testsed with DIRAC.
+It has been tested for both production and warmup directly via ARC as well.
 
 It works for ARC, and you can view the files in a web browser at
 http://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/
@@ -93,8 +91,6 @@ http://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/
 To enable, toggle `use_gfal` to `True` in your header file. This will also
 change over the `finalise.py` to use the gfal system where LFN files cannot be
 seen.
-
-**TODO:** update this section to include more on GFAL storage management
 
 ## 4. GRID SCRIPTS SETUP
 
@@ -321,20 +317,19 @@ https://dirac.gridpp.ac.uk:8443/DIRAC/
 ```
 
 ## 12. GRID STORAGE MANAGEMENT
+I've written a wrapper to the gfal commands in order to simplify manual navigation of
+the DPM filesystems. 
 
-I've written a wrapper to the `lfn` commands (`lscp.py`) in order to simplify
-manual navigation of the LFN filesystem, stored in
-`useful_bits_and_bobs/duncan/grid_helpers/` (I suggest adding it to your path or
-symlinking it somewhere nice)
+A frequently updated version can be found [here](https://github.com/DWalker487/dpm-manager "dpm_manager").
 
 Usage:
 ```bash
-  lscp.py <lfn_dir> -s <file search terms> -r <file reject terms>
+  dpm_manager <gfal_dir> -s <file search terms> -r <file reject terms>
     [-cp (copy to gridui)] [-rm (delete from grid storage)] [-j (number threads)]
-    [-cpg (copy from gridui to storage)]
+    [-cpg (copy from gridui to storage)]...
 ```
 
-More info is given in the help text (`lscp.py -h`)
+More info is given in the help text (`dpm_manager -h`)
 
 ## 13. DISTRIBUTED WARMUP
 ***to clean up***
