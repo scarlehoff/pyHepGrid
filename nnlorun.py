@@ -177,19 +177,6 @@ def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
         cmd += grid_file + " " + local_file
         return os.system(cmd)
 
-def untar_file(local_file, debug):
-    if debug_level > 2:
-        cmd = "tar zxfv {0}".format(local_file)
-    else:
-        cmd = "tar zxf " + local_file
-    return os.system(cmd)
-
-def tar_this(tarfile, sourcefiles):
-    cmd = "tar -czf " + tarfile + " " + sourcefiles
-    stat = os.system(cmd)
-    os.system("ls")
-    return stat
-
 def copy_to_grid(local_file, grid_file, args, maxrange = 10):
     print_flush("Copying " + local_file + " to " + grid_file)
     fileout = lfn + grid_file
