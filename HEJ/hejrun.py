@@ -121,27 +121,11 @@ def parse_arguments():
 
 def set_environment(lfndir, lhapdf_dir):
     os.system("export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages")
-    # GCC
-    cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
-    gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
-    gcc_lib64path = os.path.join(cvmfs_gcc_dir, "lib64")
-    gcc_PATH = os.path.join(cvmfs_gcc_dir, "bin")
-    # LHAPDF
-    lha_PATH = lhapdf_dir + "/bin"
-    lhapdf_lib = lhapdf_dir + "/lib"
-    lhapdf_share = lhapdf_dir + "/share/LHAPDF"
-
-    old_PATH = os.environ["PATH"]
-    os.environ["PATH"] = "%s:%s:%s" % (gcc_PATH,lha_PATH,old_PATH)
-    old_ldpath                    = os.environ["LD_LIBRARY_PATH"]
-    os.environ["LD_LIBRARY_PATH"] = "%s:%s:%s:%s" % (gcc_libpath, gcc_lib64path, lhapdf_lib, old_ldpath)
     os.environ["LFC_HOST"]         = "lfc01.dur.scotgrid.ac.uk"
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
     os.environ["LFC_HOME"]         = lfndir
     os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
     os.environ['OMP_STACKSIZE']    = "999999"
-    os.environ['LHAPATH']          = lhapdf_share
-    os.environ['LHA_DATA_PATH']    = lhapdf_share
     # os.environ['PYTHONPATH']       = os.environ["PYTHONPATH"]+":"+os.environ["DIRAC"]+ \
     #     "/linux_x86_64_glibc-2.12/lib/python2.6/site-packages/"
     try:
@@ -178,19 +162,6 @@ def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
         cmd = lcg_cp + " " + lfn
         cmd += grid_file + " " + local_file
         return os.system(cmd)
-
-def untar_file(local_file, debug):
-    if debug_level > 2:
-        cmd = "tar zxfv {0}".format(local_file)
-    else:
-        cmd = "tar zxf " + local_file
-    return os.system(cmd)
-
-def tar_this(tarfile, sourcefiles):
-    cmd = "tar -czf " + tarfile + " " + sourcefiles
-    stat = os.system(cmd)
-    os.system("ls")
-    return stat
 
 def copy_to_grid(local_file, grid_file, args, maxrange = 10):
     print_flush("Copying " + local_file + " to " + grid_file)
@@ -260,22 +231,7 @@ def tar_this(tarfile, sourcefiles):
     os.system("ls")
     return stat
 
-
-
-def socket_sync_str(host, port, handshake = "greetings"):
-    # Blocking call, it will receive a str of the form
-    # -sockets {0} -ns {1}
-    import socket
-    sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sid.connect((host, int(port)))
-    sid.send(handshake)
-    return sid.recv(32)
-
-def bring_lhapdf(lhapdf_grid, debug):
-    tmp_tar = "lhapdf.tar.gz"
-    stat = copy_from_grid(lhapdf_grid, tmp_tar, args)
-    stat += untar_file(tmp_tar, debug)
-    return os.system("rm {0}".format(tmp_tar))+stat
+### Download executable ###
 
 def bring_nnlojet(input_grid, runcard, runname, debug):
     # Todo: this is not very general, is it?
@@ -286,6 +242,8 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
     stat += os.system("rm {0}".format(tmp_tar))
     stat += os.system("ls")
     return stat
+
+### Misc ###
 
 def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
@@ -310,12 +268,12 @@ if __name__ == "__main__":
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
-    sys.exit(0)
 
     args = parse_arguments()
     debug_level = int(args.debug)
 
     set_environment(args.lfndir, args.lhapdf_local)
+
 
     if debug_level > -1:
         # Architecture info
@@ -323,30 +281,15 @@ if __name__ == "__main__":
         print_node_info("node_info.log")
         syscall("lsb_release -a")
 
+    sys.exit(0)
+
     nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads,
                                                                   args.executable,
                                                                   args.runcard)
 
-    bring_status = bring_lhapdf(args.lhapdf_grid, debug_level)
     bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
     if debug_level > 2:
         os.system("env")
-
-    if args.Sockets:
-        host = args.Host
-        port = args.port
-        if bring_status != 0:
-            print_flush("Not able to bring data from LFN, removing myself from the pool")
-            socket_sync_str(host, port, handshake = "oupsities")
-            sys.exit(-95)
-        print_flush("Sockets are active, trying to connect to {0}:{1}".format(host,port))
-        socket_config = socket_sync_str(host, port)
-        if "die" in socket_config:
-            print_flush("Timeout'd by socket server")
-            sys.exit(0)
-        socketed = True
-        print_flush("Connected to socket server")
-        nnlojet_command += " -port {0} -host {1} {2}".format(port, host,  socket_config)
 
     if args.Production:
         nnlojet_command += " -iseed {0}".format(args.seed)
@@ -376,36 +319,17 @@ if __name__ == "__main__":
     if args.Production:
         local_out = output_name(args.runcard, args.runname, args.seed)
         output_file = args.output_folder + "/" + local_out
-    elif args.Warmup:
-        local_out = warmup_name(args.runcard, args.runname)
-        output_file = args.warmup_folder + "/" + local_out
 
     if debug_level > 1:
         os.system("ls")
 
     status_tar = tar_this(local_out, "*")
 
-    if args.Sockets:
-        status_copy = copy_to_grid(local_out, output_file, args, maxrange = 1)
-    else:
-        status_copy = copy_to_grid(local_out, output_file, args)
+    status_copy = copy_to_grid(local_out, output_file, args)
 
     if status_copy == 0:
         print_flush("Copied over to grid storage!")
-    elif args.Sockets:
-        print_flush("This was a socketed run so we are copying the grid to stderr just in case")
-        os.system("cat $(ls *.y* | grep -v .txt) 1>&2")
-        status_copy = 0
-    elif args.Warmup:
-        print_flush("Failure! Outputing vegas warmup to stdout")
-        os.system("cat $(ls *.y* | grep -v .txt)")
 
-    if args.Sockets:
-        try: # only the first one arriving will go through!
-            print_flush("Close Socket connection")
-            _ = socket_sync_str(host, port, "bye!") # Be polite
-        except:
-            pass
     end_time = datetime.datetime.now()
     print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
 
