@@ -156,7 +156,7 @@ def set_environment(lfndir, lhapdf_dir):
 # export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
 
 
-gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
+gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
 lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
 lfn    = "lfn:"
