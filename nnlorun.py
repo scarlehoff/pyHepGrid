@@ -39,10 +39,6 @@ def do_shell(*args):
     return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok
 os.system = do_shell
 
-
-
-
-
 def parse_arguments():
     from optparse import OptionParser
     from getpass import getuser
@@ -95,7 +91,6 @@ def parse_arguments():
     parser.add_option("--pedantic", help = "Enable various checks", action = "store_true", default = False)
 
     (options, positional) = parser.parse_args()
-
 
     if options.use_gfal.lower() == "true":
         options.use_gfal = True
@@ -158,7 +153,6 @@ def set_environment(lfndir, lhapdf_dir):
         os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
     return 0
 # export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
-
 
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
 lcg_cp = "lcg-cp"
@@ -228,7 +222,6 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
             exit_code=500
     return exit_code
 
-
 def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     print_flush("Copying {0} to {1}".format(infile, outfile))
     protoc = args.gfaldir.split(":")[0]
@@ -248,7 +241,6 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
                 os.system("gfal-rm {0}".format(outfile_tmp))
     return 9999999
 
-
 #### TAR ####
 
 def untar_file(local_file, debug):
@@ -263,8 +255,6 @@ def tar_this(tarfile, sourcefiles):
     stat = os.system(cmd)
     os.system("ls")
     return stat
-
-
 
 def socket_sync_str(host, port, handshake = "greetings"):
     # Blocking call, it will receive a str of the form
@@ -296,7 +286,6 @@ def print_node_info(outputfile):
     # os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
     os.system("gcc --version >> {0}".format(outputfile))
     os.system("python --version >> {0}".format(outputfile))
-
 
 #################################################################################
 #################################################################################
