@@ -243,14 +243,7 @@ def tar_this(tarfile, sourcefiles):
     os.system("ls")
     return stat
 
-def socket_sync_str(host, port, handshake = "greetings"):
-    # Blocking call, it will receive a str of the form
-    # -sockets {0} -ns {1}
-    import socket
-    sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sid.connect((host, int(port)))
-    sid.send(handshake)
-    return sid.recv(32)
+### Get dependences & executable ###
 
 def bring_lhapdf(lhapdf_grid, debug):
     tmp_tar = "lhapdf.tar.gz"
@@ -267,6 +260,17 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
     stat += os.system("rm {0}".format(tmp_tar))
     stat += os.system("ls")
     return stat
+
+### misc ###
+
+def socket_sync_str(host, port, handshake = "greetings"):
+    # Blocking call, it will receive a str of the form
+    # -sockets {0} -ns {1}
+    import socket
+    sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sid.connect((host, int(port)))
+    sid.send(handshake)
+    return sid.recv(32)
 
 def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
