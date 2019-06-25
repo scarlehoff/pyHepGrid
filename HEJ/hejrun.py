@@ -255,6 +255,10 @@ def print_node_info(outputfile):
 #################################################################################
 #################################################################################
 
+# python3 main.py test runcards/hej_runcard.py -B (test)
+# -B = arc production
+# python3 main.py run runcards/hej_runcard.py -B (run on arc)
+
 if __name__ == "__main__":
 
     if sys.argv[0] and not "ENVSET" in os.environ:
