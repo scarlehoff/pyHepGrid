@@ -81,16 +81,16 @@ finalise_prefix = None
 # socket default parameters
 server_host = "url.of.the.socket.server"
 port = 9999
-wait_time = 3600 # default waiting time for the socket server (time between the first job activates and nnlojet starting to run)
+wait_time = 3600
 
-#SLURM parameters
+# SLURM parameters
 local_run_directory = "/mt/home/mheil/grid_tst/"
-warmup_queue = "nameOfWarmupQueue"
-test_queue = "nameOfTestQueue"
-production_queue = "nameOfProductionQueue"
-production_threads = 24
+warmup_queue = None
+test_queue = None
+production_queue = None
+production_threads = 1
 slurm_exclusive = True
 slurm_exclude = []
 
-# LOCAL
-desktop_list = []
+# LOCAL (this doesn't work)
+desktop_list = ["d76"]
