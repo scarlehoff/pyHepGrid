@@ -4,7 +4,6 @@ from src.header import logger
 
 import src.utilities as util
 import src.header as header
-from src.runcard_parsing import runcard_parsing
 
 counter = None
 def init_counter(args):
