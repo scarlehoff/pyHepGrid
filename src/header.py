@@ -11,7 +11,7 @@ header_mappings = {"jmartinez":"headers.juan_header",
                    "qpsv27":"headers.duncan_hamilton_header",
                    "jniehues":"headers.jan_header",
                    "jwhitehead":"headers.james_header",
-                   "mheil":"headers.marian_header"}
+                   "mheil":"HEJ.hej_header"}
 
 if "phyip3" in socket.gethostname(): # Hack to get different headers for batch and grid w/ same username
     header_mappings["dwalker"]="headers.duncan_batch_header"
