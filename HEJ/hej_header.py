@@ -65,10 +65,10 @@ production_base_dir = "/ResultsRunGrids"
 short_stats = False
 
 # ARC parameters
-ce_base = "base_computing_element.ac.uk"
-ce_test = "test_computing_element.ac.uk"
+ce_base = "ce2.dur.scotgrid.ac.uk"
+ce_test = "ce-test.dur.scotgrid.ac.uk"
 ce_listfile = "computing_elements.txt"
-arcbase  = "/mt/home/mheil/grid_tst/.arc/jobs.dat" # arc database
+arcbase  = "/mt/home/mheil/tst_grid/.arc/jobs.dat" # arc database
 
 # DIRAC parameters
 dirac_name = "user_name_for_dirac"
