@@ -67,8 +67,8 @@ class RunArc(Backend):
             from src.header import ce_test as ce
         else:
             from src.header import ce_base as ce
-        if ".dur.scotgrid.ac.uk" in ce:
-            ce = random.choice(["ce1.dur.scotgrid.ac.uk","ce2.dur.scotgrid.ac.uk"])
+            if ".dur.scotgrid.ac.uk" in ce:
+                ce = random.choice(["ce1.dur.scotgrid.ac.uk","ce2.dur.scotgrid.ac.uk"])
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
         # Can only use direct in Durham. Otherwise fails! 
         # Speeds up submission (according to Stephen)
