@@ -10,21 +10,23 @@ def get_cmd_output(*args,**kwargs):
 
 # Global Variables
 # Global Variables (default values, can be changed by runcard.py)
-runcardDir = "/path/to/runcard/directory/" # Directory for grid runcard storage
+# for initialisation
+runcardDir = "" # ONLY FOR NNNLOjets
 executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/HEJ/bin"             # Directory for exe
 executable_exe = "HEJ"                               # Exectuable name
 warmupthr  = 0
 producRun  = 10
 baseSeed   = 1234
 jobName    = "testjob"
-debug_level = 0
-stacksize = 50 #MB
+debug_level = 15
+stacksize = 5000 #MB # RAM per job smaller->higher priority
 
 # Grid config for LFN
 lfndir         = "/grid/group/user/folder/"
+# these are also used by gfal
 lfn_input_dir  = "input"
 lfn_output_dir = "output"
-lfn_warmup_dir = "warmup"
+lfn_warmup_dir = "warmup" # could be useful for Sherpa
 
 use_gfal = True
 gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
@@ -41,11 +43,12 @@ lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = lhapdf_grid_loc
 
 # NNLOJET Database Parameters
-dbname     = ""
+dbname     = "nice_test"
 provided_warmup_dir = None
+runfile = "hejrun.py"
 
 # Finalisation and storage options
-finalise_no_cores = 15
+finalise_no_cores = 16
 timeout = 60
 
 # finalisation script, if "None" use native ./main.py man -[DA] -g
