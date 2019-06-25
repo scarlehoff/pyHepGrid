@@ -5,7 +5,7 @@ import src.header as header
 import src.socket_api as sapi
 
 class RunArc(Backend):
-    def __init__(self, prod=False, arcscript = None, **kwargs): 
+    def __init__(self, prod=False, arcscript = None, **kwargs):
         super(RunArc, self).__init__(**kwargs)
         if not prod:
             self.table     = header.arctable
@@ -39,7 +39,7 @@ class RunArc(Backend):
             raise Exception("Type of input arguments: {} not regocnised in ARC ._format_args".format(type(input_args)))
 
     def _write_XRSL(self, dictData, filename = None):
-        """ Writes a unique XRSL file 
+        """ Writes a unique XRSL file
         which instructs the arc job to run
         """
         if not filename:
@@ -70,7 +70,7 @@ class RunArc(Backend):
             if ".dur.scotgrid.ac.uk" in ce:
                 ce = random.choice(["ce1.dur.scotgrid.ac.uk","ce2.dur.scotgrid.ac.uk"])
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
-        # Can only use direct in Durham. Otherwise fails! 
+        # Can only use direct in Durham. Otherwise fails!
         # Speeds up submission (according to Stephen)
         if arc_direct and ".dur.scotgrid.ac.uk" in ce:
             cmd += " --direct "
@@ -96,7 +96,7 @@ class RunArc(Backend):
             from src.header import ce_test as ce
         else:
             from src.header import ce_base as ce
-        
+
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
@@ -121,7 +121,7 @@ class RunArc(Backend):
         for r in rncards:
             if n_sockets > 1:
                 # Automagically activates the socket and finds the best port for it!
-                port = sapi.fire_up_socket_server(header.server_host, port, n_sockets, 
+                port = sapi.fire_up_socket_server(header.server_host, port, n_sockets,
                                                   header.wait_time, header.socket_exe,
                                                   tag="{0}-{1}".format(r,dCards[r]))
                 job_type = "Socket={}".format(port)
@@ -168,7 +168,7 @@ class RunArc(Backend):
 
     def run_wrap_production(self, test = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
-            Writes XRSL file with the appropiate information and send a producrun 
+            Writes XRSL file with the appropiate information and send a producrun
             number of jobs to the arc queue
         """
         # runcard names (keys)
@@ -183,9 +183,9 @@ class RunArc(Backend):
             joblist = []
             # Check whether this run has something on the gridStorage
             self._checkfor_existing_output(r, dCards[r])
-            # use the same unique name for all seeds since 
+            # use the same unique name for all seeds since
             # we cannot multiprocess the arc submission
-            xrslfile = None 
+            xrslfile = None
             keyquit = None
             try:
                 for seed in range(baseSeed, baseSeed + producRun):

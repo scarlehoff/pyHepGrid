@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -o {stdoutfile}
 #SBATCH --error {stderrfile}
-#SBATCH --mem {memsize}M         
+#SBATCH --mem {memsize}M
 #SBATCH --cpus-per-task={threads}
 #SBATCH --job-name={jobName}
-{partition}         
+{partition}
 {array}
 {exclusive}
 {exclude_list}

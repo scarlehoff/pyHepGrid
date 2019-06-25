@@ -5,12 +5,12 @@ class database(object):
         self.dbname = db
         self.db = dbapi.connect(db, check_same_thread=True)
         self.list_disabled = False
-        if tables: 
+        if tables:
             # check whether table exists and create it othewise
             for table in tables:
                 if self._is_this_table_here(table):
                     # if table does exist, check the list of tables is correct and correct it otherwise
-                    self._protect_fields(table, fields) 
+                    self._protect_fields(table, fields)
                 else:
                     self._create_table(table, fields)
 
@@ -72,7 +72,7 @@ class database(object):
         """ Checks whether table table exists"""
         query = "SELECT name FROM sqlite_master WHERE type='table' AND name='{}';".format(table)
         c = self._execute_and_retrieve(query)
-        for i in c: 
+        for i in c:
             c.close()
             return True
         c.close()
@@ -179,7 +179,7 @@ class database(object):
     def disable_entry(self, table, rowid, revert = None):
         """ Disables (or enables) rowid entry"""
         newStat = "inactive"
-        if revert: 
+        if revert:
             newStat = "active"
         query = "update " + table + " set status = \"" + newStat + "\""
         rid = " where rowid = " + rowid + " ;"
@@ -190,7 +190,7 @@ def get_next_seed(dbname=None):
     from src.header import arctable, arcprodtable, diractable, slurmtable, slurmprodtable, dbfields
     if dbname is None:
         from src.header import dbname
-    db = database(dbname, tables = [arctable, arcprodtable, diractable, slurmtable, slurmprodtable], 
+    db = database(dbname, tables = [arctable, arcprodtable, diractable, slurmtable, slurmprodtable],
                   fields=dbfields)
     db.list_disabled = True
     alldata = db.list_data(arctable,["iseed","jobid"])

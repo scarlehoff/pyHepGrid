@@ -39,15 +39,15 @@ def good_site_present(line, goodelements):
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--all", "-a",
-                        help = "Look at all ces, not just known good ones", 
+                        help = "Look at all ces, not just known good ones",
                         action = "store_true",
                         default = False)
     parser.add_argument("--rev", "-r",
-                        help = "Reverse output", 
+                        help = "Reverse output",
                         action = "store_false",
                         default = True)
     parser.add_argument("--sort", "-s",
-                        help = "Sort by given attribute. Case insensitive, and will sort by first attribute that matches the provided string (e.g -s fre will match attribute Free.)", 
+                        help = "Sort by given attribute. Case insensitive, and will sort by first attribute that matches the provided string (e.g -s fre will match attribute Free.)",
                         nargs = "+",
                         default = False)
     parser.add_argument("--print_sort_possibilities","-psp",
@@ -91,7 +91,7 @@ class CE_Data():
                 return  "{0}: {1:5}  ".format(name, val)
 
         string = "{0:33} ".format(self.CE)
-        string += addline("Free CPUs", self.Free, '\033[92m', 
+        string += addline("Free CPUs", self.Free, '\033[92m',
                           total = self.CPU)
         string += addline("Waiting", self.Waiting, '\033[93m')
         string += addline("Running", self.Running, '\033[94m')
@@ -108,22 +108,22 @@ def get_ces(all_ces):
         good_idx=get_idx("Known to work", celines)+1
         end_good_idx=get_idx("Known NOT to work", celines)
         celines = celines[good_idx:end_good_idx]
-    good_elements = [get_ce(line) for line in celines 
+    good_elements = [get_ce(line) for line in celines
                      if "." in line and len(line)>0]
 
-    result = sp.Popen(["lcg-infosites","ce","--vo","pheno"], 
+    result = sp.Popen(["lcg-infosites","ce","--vo","pheno"],
                       stdout=sp.PIPE, stderr=sp.PIPE)
     out, err = result.communicate()
     site_info = str(out).split("\\n")
     site_info = [si.replace("\\t","   ") for si in site_info]
-    site_info = [CE_Data(si) for si in site_info if 
+    site_info = [CE_Data(si) for si in site_info if
                  good_site_present(si, good_elements)]
     return site_info
 
 def get_most_free_cores():
     """API for main.py to link in"""
     site_info = get_ces(False)
-    site_info = sorted(site_info, 
+    site_info = sorted(site_info,
                        key=lambda x: getattr(x,"Free"), reverse = False)
     return site_info[-1].CE
 
@@ -140,21 +140,21 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if args.print_sort_possibilities:
-        attributes = [i for i in dir(site_info[0]) if not i.startswith("__") 
+        attributes = [i for i in dir(site_info[0]) if not i.startswith("__")
                       and not callable(getattr(site_info[0], i))]
         for attr in attributes:
             print(attr)
         sys.exit(0)
 
     if args.sort:
-        attributes = [i for i in dir(site_info[0]) if not i.startswith("__") 
+        attributes = [i for i in dir(site_info[0]) if not i.startswith("__")
                       and not callable(getattr(site_info[0], i))]
         for attribute in attributes:
             if args.sort[0].lower() in attribute.lower():
                 sortval = attribute
                 break
 
-    site_info = sorted(site_info, key=lambda x: getattr(x,sortval), 
+    site_info = sorted(site_info, key=lambda x: getattr(x,sortval),
                        reverse = args.rev)
     for site in site_info:
         print(site)

@@ -45,7 +45,7 @@ def print_output(stats, do_total):
     if do_total:
         print(RuncardStats.divider_string())
         print(RuncardStats.print_format("Total Files",no_files,""))
-        
+
 
 def get_stats(args):
     stats = []
@@ -64,7 +64,7 @@ def get_stats(args):
 
 
 class RuncardStats():
-    
+
     print_string = "{0:<{runcard}} | {1:<{no_files}} | {2:<{modified_time}}"
     tag_flag = False
     column_names = {"runcard":"Runcard Name","tag":"Tag", # Identifies attr names with column titles
@@ -76,7 +76,7 @@ class RuncardStats():
 
     def divider_string():
         return "="*len(RuncardStats.print_format(0,0,0,0))
-    
+
     def adjust_column_widths(self):
         for key in RuncardStats.pads:
             RuncardStats.pads[key] = max(RuncardStats.pads[key],len(str(getattr(self,key))))
@@ -111,10 +111,10 @@ class RuncardStats():
     def __repr__(self):
         if not self.args.tag:
             retstr = RuncardStats.print_format(
-                self.runcard,self.no_files, self.modified_time )    
+                self.runcard,self.no_files, self.modified_time )
         else:
             retstr = RuncardStats.print_format(
-                self.runcard,self.tag,self.no_files, self.modified_time )    
+                self.runcard,self.tag,self.no_files, self.modified_time )
         return retstr
 
 def parser_setup():

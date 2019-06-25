@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python3
 
 ##### Call argument parser
 from src.argument_parser import arguments as args
@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # Checks on modes
     db = database(dbname, tables = [arctable, diractable, slurmtable,
-                                    arcprodtable,slurmprodtable], 
+                                    arcprodtable,slurmprodtable],
                   fields = dbfields)
 
     mode = rmode[:3]

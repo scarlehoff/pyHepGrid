@@ -10,7 +10,7 @@ def do_management(args,rcard):
         backends.append(backend_Arc(act_only_on_done = args.done))
     if args.runArcProduction:
         from src.backendManagement import Arc as backend_ArcProd
-        backends.append(backend_ArcProd(act_only_on_done = args.done, 
+        backends.append(backend_ArcProd(act_only_on_done = args.done,
                                         production=True))
     if args.runDirac:
         from src.backendManagement import Dirac as backend_Dirac
@@ -42,7 +42,7 @@ def do_initialise(args,rcard):
     if args.runSlurm or args.runSlurmProduction:
         local = True
     if mode_Warmup:
-        generic_initialise(rcard, warmup=True, grid=args.provWarm, 
+        generic_initialise(rcard, warmup=True, grid=args.provWarm,
                            overwrite_grid=args.continue_warmup, local=local)
     elif mode_Production:
         generic_initialise(rcard, production=True, grid=args.provWarm, local=local)

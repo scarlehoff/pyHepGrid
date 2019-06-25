@@ -3,7 +3,7 @@ runcard = None
 import __main__
 import os
 
-def check_mode(rmode,args,logger):       
+def check_mode(rmode,args,logger):
     if len(rmode) < 3:
         logger.critical("Mode ", rmode, " not valid")
 
@@ -16,7 +16,7 @@ def check_mode(rmode,args,logger):
             logger.critical("Please choose Dirac (-D), Arc (-A), Arc Production Mode (-B), Slurm Warmup mode (-E) or Slurm production mode (-F)")
 
 try:
-    caller_script = os.path.basename(os.path.realpath(__main__.__file__)) 
+    caller_script = os.path.basename(os.path.realpath(__main__.__file__))
 except:
     caller_script = "None"
 
@@ -49,7 +49,7 @@ if caller_script == "main.py":
     # Option override
     parser_global.add_argument("--yes", help = "Assume answer yes to all questions in management (use with care!)", action = "store_true")
 
- 
+
 
 
     ######## Initialisation options
@@ -119,7 +119,7 @@ if caller_script == "main.py":
     override_ce_base = arguments.most_free_cores
     additional_arguments = {}
 
-    # Save to logger as header not loaded yet. 
+    # Save to logger as header not loaded yet.
     # Reference copied to header.logger at the top of header when loaded
     src.logger.logger = src.logger.setup_logger(arguments.debuglevel.upper())
     check_mode(arguments.mode, arguments,src.logger.logger)
@@ -132,6 +132,3 @@ if caller_script == "main.py":
         else:
             for i in range(0,len(arguments.args),2):
                 additional_arguments[arguments.args[i]]=arguments.args[i+1]
-
-
-

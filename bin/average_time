@@ -110,7 +110,7 @@ def print_short_output(directory, times, skip_count, total_runs):
     hr = " hrs"
     print("{4:55} {0:<5.2f} +/- {1:<5.2f} {2}   {5:<5.2f} {2} [{3} runs]".format(
             mean,stdev,hr, len(times),directory, tot))
-        
+
 def do_search(args, path):
     if args.search is not None:
         for searchstr in args.search:
