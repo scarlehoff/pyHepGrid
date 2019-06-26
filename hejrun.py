@@ -259,9 +259,13 @@ def print_node_info(outputfile):
 #################################################################################
 #################################################################################
 
-# python3 main.py test runcards/hej_runcard.py -B (test)
+## test
+# python3 main.py test runcards/hej_runcard.py -B
 # -B = arc production
-# python3 main.py run runcards/hej_runcard.py -B (run on arc)
+## run on arc
+# python3 main.py run runcards/hej_runcard.py -B
+## test job for arc
+# python3 main.py run runcards/hej_runcard.py -B --test
 
 # get job info
 # python3 main.py man runcards/hej_runcard.py -B
