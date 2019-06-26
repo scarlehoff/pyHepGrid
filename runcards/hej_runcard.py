@@ -29,4 +29,4 @@ dictCard = {
 import src.dbapi as dbapi
 baseSeed = dbapi.get_next_seed()
 ## If overwriting dbname in this runcard.py file, pass through the name here:
-baseSeed = dbapi.get_next_seed(dbname = "nice_test")
+baseSeed = dbapi.get_next_seed(dbname = "hej_database")

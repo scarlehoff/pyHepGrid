@@ -44,9 +44,9 @@ lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = lhapdf_grid_loc
 
 # NNLOJET Database Parameters
-dbname     = "nice_test"
+dbname     = "hej_database"
 provided_warmup_dir = None
-runfile = "hejrun.py"
+runfile    = "hejrun.py"
 
 # Finalisation and storage options
 finalise_no_cores = 16
