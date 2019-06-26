@@ -16,6 +16,7 @@ executable_exe = "NNLOJET"                               # Exectuable name
 warmupthr  = 8
 producRun  = 100
 baseSeed   = 100
+events     = 100
 jobName    = "testjob"
 debug_level = 0
 stacksize = 50 #MB

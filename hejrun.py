@@ -55,6 +55,7 @@ def parse_arguments():
     parser.add_option("-e", "--executable", help = "Executable to be run", default = "NNLOJET")
     parser.add_option("-d", "--debug", help = "Debug level", default="0")
     parser.add_option("-s", "--seed", help = "Run seed for NNLOJET", default="1")
+    parser.add_option("-E", "--events", help = "Number of events", default="100")
 
     # Grid configuration options
     parser.add_option("-l", "--lfndir", help = "LFNDIR", default = default_user_lfn)
@@ -293,6 +294,10 @@ if __name__ == "__main__":
         print_flush("Python version: {0}".format(sys.version))
         print_node_info("node_info.log")
 
+    if debug_level > 16:
+        os.system("env")
+
+    print_flush("Running with "+args.events+" events")
     # TODO download runcard
 
     sys.exit(0)
@@ -302,8 +307,6 @@ if __name__ == "__main__":
                                                                   args.runcard)
 
     bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
-    if debug_level > 2:
-        os.system("env")
 
     if args.Production:
         nnlojet_command += " -iseed {0}".format(args.seed)

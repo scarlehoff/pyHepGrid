@@ -17,6 +17,7 @@ executable_exe = "HEJ"                               # Exectuable name
 warmupthr  = 0
 producRun  = 10
 baseSeed   = 1234
+events     = 123
 jobName    = "testjob"
 debug_level = 15
 stacksize = 5000 #MB # RAM per job smaller->higher priority

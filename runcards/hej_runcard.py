@@ -6,6 +6,8 @@ dictCard = {
     # 'RRa.run':'DM_RRa'
 }
 
+# events = 10
+
 ## Optional values
 # sockets_active = 5
 # port = 8888
