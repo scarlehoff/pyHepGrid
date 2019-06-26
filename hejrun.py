@@ -229,7 +229,7 @@ def untar_file(local_file, debug):
     return os.system(cmd)
 
 def tar_this(tarfile, sourcefiles):
-    cmd = "tar -czf " + tarfile + " " + sourcefiles
+    cmd = "tar -cvzf " + tarfile + " " + sourcefiles
     stat = os.system(cmd)
     os.system("ls")
     return stat
@@ -237,15 +237,23 @@ def tar_this(tarfile, sourcefiles):
 ### Download executable ###
 
 def download_program(debug):
-    # Todo: this is not very general, is it?
+    # TODO read tar and source name from header
     tar_name = "HEJ.tar.gz"
     source = "HEJ/{0}".format(tar_name)
     stat = copy_from_grid(source, tar_name, args)
     stat += untar_file(tar_name, debug)
     stat += os.system("rm {0}".format(tar_name))
     if debug_level > 2:
-        os.system("ls")
+        os.system("ls -l HEJ")
     return stat
+
+def download_runcard(input_folder, runcard, runname, debug_level):
+    print_flush("TODO download runcard")
+    # TODO download:
+    #   SherpaLHEF
+    #   rivet analysis
+    #   Scale setters
+    return 0
 
 ### Misc ###
 
@@ -255,9 +263,49 @@ def print_node_info(outputfile):
     os.system("gcc --version >> {0}".format(outputfile))
     os.system("python --version >> {0}".format(outputfile))
 
+def end_program(status):
+    # TODO print debug infos here if status!=0
+    if status != 0:
+        os.system("cat outfile.out")
+        os.system("ls")
+    end_time = datetime.datetime.now()
+    print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
+    print_flush("Final Error Code: {0}".format(status))
+    sys.exit(status)
 
-#################################################################################
-#################################################################################
+
+########################## Actual run commands ##########################
+
+def run_sherpa(args):
+    print_flush("TODO Sherpa not implemented yet")
+
+    command = "Sherpa"
+    command += " RSEED:={0}".format(args.seed)
+    command +=" 2>&1 outfile.out"
+    print_flush(" > Executed command: {0}".format(command))
+    # TODO run:
+    #   Sherpa
+    #   SherpaLHEF (with chmod)
+    #   unweighter (maybe)
+    return 1
+
+def run_HEJFOG(args):
+    print_flush("TODO HEJFOG not implemented yet")
+    command = "HEJ/bin/HEJFOG"
+    os.system("chmod +x {0}".format(command))
+    # TODO:
+    #   parse runcard
+    #   run HEJ-FOG (with chmod)
+    return 1
+
+def run_HEJ(args):
+    print_flush("TODO HEJ not implemented yet")
+    # TODO:
+    #   parse runcard
+    #   run HEJ (with chmod)
+    return 1
+
+########################## main ##########################
 
 ## test
 # python3 main.py test runcards/hej_runcard.py -B
@@ -300,64 +348,53 @@ if __name__ == "__main__":
         print_flush("Python version: {0}".format(sys.version))
         print_node_info("node_info.log")
 
+    # Debug info
     if debug_level > 16:
         os.system("env")
+        os.system("voms-proxy-info --all")
 
-    print_flush("Running with "+args.events+" events")
-    # TODO download runcard
+    # Download components
+    status = download_program(debug_level)
 
-    bring_status = download_program(debug_level)
+    os.system("chmod +x {0}".format(args.executable))
 
     if debug_level > 8:
         os.system("ldd {0}".format(args.executable))
 
-    # download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
+    status += download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
 
-    sys.exit(0)
+    if status != 0:
+        print_flush("download failed")
+        end_program(status)
 
-    nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads,
-                                                                  args.executable,
-                                                                  args.runcard)
-
-
-    if args.Production:
-        nnlojet_command += " -iseed {0}".format(args.seed)
-
-    os.system("chmod +x {0}".format(args.executable))
-    nnlojet_command +=" 2>&1 outfile.out"
-    print_flush(" > Executed command: {0}".format(nnlojet_command))
-
-    # Run command
-    status_nnlojet = os.system(nnlojet_command)
-    if status_nnlojet == 0:
-        print_flush("Command successfully executed")
+    if "Sherpa" in args.runname:
+        status += run_sherpa(args)
+    elif "HEJFOG" in args.runname:
+        status += run_HEJFOG(args)
     else:
-        print_flush("Something went wrong")
-        os.system("cat outfile.out")
-        debug_level = 9999
+        print_flush("Unknown runcard")
+        status += 1
 
-    # Debug info
-    os.system("voms-proxy-info --all")
+    if status != 0:
+        print_flush("FOG failed")
+        end_program(status)
 
-    # Copy stuff to grid storage, remove executable and lhapdf folder
-    os.system("rm -rf {0} {1}".format(args.executable, args.lhapdf_local))
-    if args.Production:
-        local_out = output_name(args.runcard, args.runname, args.seed)
-        output_file = args.output_folder + "/" + local_out
+    status += run_HEJ(args)
+    if status != 0:
+        print_flush("HEJ failed")
+        end_program(status)
+
+    local_out = output_name(args.runcard, args.runname, args.seed)
+    output_file = args.output_folder + "/" + local_out
+
+    status += tar_this(local_out, "*.yoda")
+
+    status += copy_to_grid(local_out, output_file, args)
 
     if debug_level > 1:
         os.system("ls")
 
-    status_tar = tar_this(local_out, "*")
-
-    status_copy = copy_to_grid(local_out, output_file, args)
-
-    if status_copy == 0:
+    if status == 0:
         print_flush("Copied over to grid storage!")
 
-    end_time = datetime.datetime.now()
-    print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
-
-    final_state = sum(abs(i) for i in [status_nnlojet,status_copy,status_tar,bring_status])
-    print_flush("Final Error Code: {0}".format(final_state))
-    sys.exit(final_state)
+    end_program(status)

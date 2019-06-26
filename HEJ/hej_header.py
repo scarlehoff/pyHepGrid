@@ -85,7 +85,7 @@ port = 9999
 wait_time = 3600
 
 # SLURM parameters
-local_run_directory = "/mt/home/mheil/grid_tst/"
+local_run_directory = "/mt/home/mheil/tst_grid/"
 warmup_queue = None
 test_queue = None
 production_queue = None
