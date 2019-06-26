@@ -220,7 +220,7 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
 #### TAR ####
 
 def untar_file(local_file, debug):
-    if debug_level > 2:
+    if debug_level > 16:
         cmd = "tar zxfv {0}".format(local_file)
     else:
         cmd = "tar zxf " + local_file
