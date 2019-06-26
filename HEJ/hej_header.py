@@ -12,8 +12,8 @@ def get_cmd_output(*args,**kwargs):
 # Global Variables (default values, can be changed by runcard.py)
 # for initialisation
 runcardDir = "" # ONLY FOR NNNLOjets
-executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/HEJ/bin"             # Directory for exe
-executable_exe = "HEJ"                               # Exectuable name
+executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/"             # Directory for exe
+executable_exe = "HEJ/bin/HEJ"                               # Exectuable name
 warmupthr  = 0
 producRun  = 10
 baseSeed   = 1234

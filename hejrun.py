@@ -137,6 +137,8 @@ def set_environment(lfndir, lhapdf_dir):
         # If gfal can't be imported then the site packages need to be added to the python path because ? :(
         os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
         os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
+    # HEJ environment
+    os.environ['LD_LIBRARY_PATH'] = "./HEJ/lib"+":"+os.environ["LD_LIBRARY_PATH"]
     return 0
 # export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
 
@@ -234,14 +236,15 @@ def tar_this(tarfile, sourcefiles):
 
 ### Download executable ###
 
-def bring_nnlojet(input_grid, runcard, runname, debug):
+def download_program(debug):
     # Todo: this is not very general, is it?
-    tmp_tar = "nnlojet.tar.gz"
-    input_name = "{0}/{1}{2}.tar.gz".format(input_grid, runcard, runname)
-    stat = copy_from_grid(input_name, tmp_tar, args)
-    stat += untar_file(tmp_tar, debug)
-    stat += os.system("rm {0}".format(tmp_tar))
-    stat += os.system("ls")
+    tar_name = "HEJ.tar.gz"
+    source = "HEJ/{0}".format(tar_name)
+    stat = copy_from_grid(source, tar_name, args)
+    stat += untar_file(tar_name, debug)
+    stat += os.system("rm {0}".format(tar_name))
+    if debug_level > 2:
+        os.system("ls")
     return stat
 
 ### Misc ###
@@ -299,20 +302,22 @@ if __name__ == "__main__":
     print_flush("Running with "+args.events+" events")
     # TODO download runcard
 
+    bring_status = download_program(debug_level)
+
+    if debug_level > 8:
+        os.system("ldd {0}".format(args.executable))
+
+    # download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
+
     sys.exit(0)
 
     nnlojet_command = "OMP_NUM_THREADS={0} ./{1} -run {2}".format(args.threads,
                                                                   args.executable,
                                                                   args.runcard)
 
-    bring_status += bring_nnlojet(args.input_folder, args.runcard, args.runname, debug_level)
 
     if args.Production:
         nnlojet_command += " -iseed {0}".format(args.seed)
-
-    if debug_level > 1:
-        os.system("ls")
-        os.system("ldd -v {0}".format(args.executable))
 
     os.system("chmod +x {0}".format(args.executable))
     nnlojet_command +=" 2>&1 outfile.out"
