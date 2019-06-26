@@ -52,9 +52,9 @@ def parse_arguments():
 
     # Run options
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
-    parser.add_option("-e", "--executable", help = "Executable to be run", default = "NNLOJET")
+    parser.add_option("-e", "--executable", help = "Executable to be run", default = "HEJ")
     parser.add_option("-d", "--debug", help = "Debug level", default="0")
-    parser.add_option("-s", "--seed", help = "Run seed for NNLOJET", default="1")
+    parser.add_option("-s", "--seed", help = "Run seed", default="1")
     parser.add_option("-E", "--events", help = "Number of events", default="100")
 
     # Grid configuration options
@@ -281,7 +281,6 @@ if __name__ == "__main__":
 
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
-
 
     args = parse_arguments()
     debug_level = int(args.debug)
