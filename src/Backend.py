@@ -452,7 +452,7 @@ class Backend(object):
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
         os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
-        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        path_to_exe_full = executable_src_dir + executable_exe
         shutil.copy(path_to_exe_full, run_dir)
         runcard_file = runcardDir + "/" + runcard
         runcard_obj = runcard_parsing(runcard_file, logger=logger, grid_run=False)
@@ -508,7 +508,7 @@ class Backend(object):
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
         rncards, dCards = util.expandCard()
-        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        path_to_exe_full = executable_src_dir + executable_exe
         if not os.path.isfile(path_to_exe_full):
             logger.critical("Could not find executable at {0}".format(path_to_exe_full))
         copy(path_to_exe_full, os.getcwd())
@@ -573,7 +573,7 @@ class Backend(object):
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
         os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
-        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        path_to_exe_full = executable_src_dir + executable_exe
         shutil.copy(path_to_exe_full, run_dir)
         runcard_file = runcardDir + "/" + runcard
         runcard_obj = runcard_parsing(runcard_file, logger=logger)
@@ -608,7 +608,7 @@ class Backend(object):
             return
 
         rncards, dCards = util.expandCard()
-        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        path_to_exe_full = executable_src_dir + executable_exe
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
