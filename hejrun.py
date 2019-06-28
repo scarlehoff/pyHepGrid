@@ -14,16 +14,19 @@ def print_flush(string):
     print string
     sys.stdout.flush()
 
-####
+#####################################################################################
+#                                                                                   #
+# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :( #
+#                                                                                   #
+#####################################################################################
 
-# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
+# This function must always be the same as the one in Backend.py
 def warmup_name(runcard, rname):
-    # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-warm-" + rname + ".tar.gz"
     return out
 
+# This function must always be the same as the one in Backend.py
 def output_name(runcard, rname, seed):
-    # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 

@@ -682,7 +682,7 @@ class Backend(object):
             match = provided_warmup
         print("Using warmup {0}".format(match))
         if not match in os.listdir(sys.path[0]):
-            local_match  =False
+            local_match = False
             copy(match,os.path.basename(match))
             match = os.path.basename(match)
         else:
