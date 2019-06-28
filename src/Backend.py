@@ -664,13 +664,14 @@ class Backend(object):
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         from src.header import logger
+        exclude_patterns = [".txt",".log",".tex",".lhe",".bak",".yoda"]
         print(matchname, provided_warmup)
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
             for potfile in potential_files:
-                if potfile.lower().startswith(matchname) and\
-                        not potfile.endswith(".txt") and not potfile.endswith(".log"):
+                if potfile.lower().startswith(matchname) \
+                    and not any(potfile.endswith(p) for p in exclude_patterns):
                     matches.append(potfile)
             if len(matches) > 1:
                 logger.critical("Multiple warmup matches found in {1}: {0}".format(" ".join(i for i in matches), provided_warmup))
