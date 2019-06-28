@@ -251,9 +251,9 @@ def download_program(debug):
     return stat
 
 def download_runcard(input_folder, runcard, runname, debug_level):
+    stat = copy_from_grid("bin/SherpaLHEF", "SherpaLHEF", args)
     print_flush("TODO download runcard")
     # TODO download:
-    #   SherpaLHEF
     #   rivet analysis
     #   Scale setters
     return 0
