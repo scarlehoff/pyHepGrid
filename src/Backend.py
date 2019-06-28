@@ -632,21 +632,26 @@ class Backend(object):
         for idx,i in enumerate(rncards):
             local = False
             # Check whether warmup/production is active in the runcard
-            folder = runFol + i.split("-")[0] + "/"
-            card   = dCards[i]
-            tarfile = i +"+"+ card + ".tar.gz"
+            tarfile = i +"+"+ dCards[i] + ".tar.gz"
+            base_folder = i.split("-")[0] + "/"
             logger.info("Initialising {0} to {1} [{2}/{3}]".format(i,tarfile,idx+1,len(rncards)))
-            warmupFiles = ["Process","Run.dat","Results.db",card+".yml"]
+            run_dir = runFol + base_folder
+            runFiles = [dCards[i]+".yml"]
+            for f in runFiles:
+                os.system("cp -r "+run_dir+f+" "+tmpdir)
+
+            if provided_warmup:
+                warmup_dir = provided_warmup + base_folder
+            elif header.provided_warmup_dir:
+                warmup_dir = header.provided_warmup_dir + base_folder
+            else:
+                print("Retrieving warmup file from grid")
+                warmupFiles = self._bring_warmup_files(i, dCards[i], shell = True)
+            warmupFiles = ["Process","Run.dat","Results.db"]
             for f in warmupFiles:
-                os.system("cp -r "+folder+f+" "+tmpdir)
+                os.system("cp -r "+warmup_dir+f+" "+tmpdir)
 
-            #TODO this would be neater:
-            # elif provided_warmup:
-            # elif header.provided_warmup_dir:
-            #     match, local = self.get_local_warmup_name(file,folder)
-            # else:
-
-            self.tarw.tarFiles(warmupFiles, tarfile)
+            self.tarw.tarFiles(warmupFiles+runFiles, tarfile)
             # break
             if self.gridw.checkForThis(tarfile, lfn_input_dir):
                 print("Removing old version of " + tarfile + " from Grid Storage")

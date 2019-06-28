@@ -27,7 +27,7 @@ lfndir         = None #"/grid/group/user/folder/"
 # these are also used by gfal
 lfn_input_dir  = "tst_grid/input"
 lfn_output_dir = "tst_grid/output"
-lfn_warmup_dir = "tst_grid/warmup" # could be useful for Sherpa
+lfn_warmup_dir = lfn_input_dir # no idea what's the difference
 
 use_gfal = True
 gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
@@ -45,7 +45,7 @@ lhapdf             = lhapdf_grid_loc
 
 # NNLOJET Database Parameters
 dbname     = "hej_database"
-provided_warmup_dir = None
+provided_warmup_dir = runcardDir
 runfile    = "hejrun.py"
 
 # Finalisation and storage options
