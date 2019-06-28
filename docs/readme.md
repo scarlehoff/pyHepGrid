@@ -320,7 +320,7 @@ https://dirac.gridpp.ac.uk:8443/DIRAC/
 
 ## 12. GRID STORAGE MANAGEMENT
 I've written a wrapper to the gfal commands in order to simplify manual navigation of
-the DPM filesystems. 
+the DPM filesystems.
 
 A frequently updated version can be found [here](https://github.com/DWalker487/dpm-manager "dpm_manager").
 

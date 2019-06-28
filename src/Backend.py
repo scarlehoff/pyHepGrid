@@ -601,10 +601,9 @@ class Backend(object):
             1 - tar up executable, runcard and necessary files
             2 - sent it to the grid storage
         """
-        from shutil import copy
         import tempfile
         from src.header import runcardDir as runFol
-        from src.header import executable_exe, executable_src_dir, logger
+        from src.header import executable_exe, executable_src_dir, logger, lfn_input_dir
         from src.runcard_parsing import PROGRAMruncard
 
         if local:
@@ -630,40 +629,32 @@ class Backend(object):
         #     logger.critical("Could not find executable at {0}".format(path_to_exe_full))
         # copy(path_to_exe_full, os.getcwd())
         # files = [executable_exe]
-        files = []
         for idx,i in enumerate(rncards):
-            logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
             # Check whether warmup/production is active in the runcard
-            runcard_file = runFol + "/" + i
-            runcard_obj = PROGRAMruncard(runcard_file, logger=logger)
-            self._check_production(runcard_obj)
-            rname   = dCards[i]
-            tarfile = i + rname + ".tar.gz"
-            copy(runFol + "/" + i, os.getcwd())
-            if provided_warmup:
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),
-                                                          provided_warmup)
-                warmupFiles = [match]
-            elif header.provided_warmup_dir:
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),
-                                                          header.provided_warmup_dir)
-                warmupFiles = [match]
-            else:
-                print("Retrieving warmup file from grid")
-                warmupFiles = self._bring_warmup_files(i, rname,  shell = True)
-            self.tarw.tarFiles(files + [i] +  warmupFiles, tarfile)
-            if self.gridw.checkForThis(tarfile, "input"):
+            folder = runFol + i.split("-")[0] + "/"
+            card   = dCards[i]
+            tarfile = i +"+"+ card + ".tar.gz"
+            logger.info("Initialising {0} to {1} [{2}/{3}]".format(i,tarfile,idx+1,len(rncards)))
+            warmupFiles = ["Process","Run.dat","Results.db",card+".yml"]
+            for f in warmupFiles:
+                os.system("cp -r "+folder+f+" "+tmpdir)
+
+            #TODO this would be neater:
+            # elif provided_warmup:
+            # elif header.provided_warmup_dir:
+            #     match, local = self.get_local_warmup_name(file,folder)
+            # else:
+
+            self.tarw.tarFiles(warmupFiles, tarfile)
+            # break
+            if self.gridw.checkForThis(tarfile, lfn_input_dir):
                 print("Removing old version of " + tarfile + " from Grid Storage")
-                self.gridw.delete(tarfile, "input")
-            print("Sending " + tarfile + " to lfn:input/")
-            self.gridw.send(tarfile, "input", shell = True)
-            if local:
-                util.spCall(["rm", i, tarfile])
-            else:
-                util.spCall(["rm", i, tarfile] + warmupFiles)
-        os.remove(executable_exe)
+                self.gridw.delete(tarfile, lfn_input_dir)
+            print("Sending " + tarfile + " to "+lfn_input_dir)
+            self.gridw.send(tarfile, lfn_input_dir, shell = True)
         os.chdir(origdir)
+        os.system("rm -r "+tmpdir) # clean up afterwards
 
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy

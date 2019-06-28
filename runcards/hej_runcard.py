@@ -1,9 +1,9 @@
 #runcardDir = "/custom/runcard/directory" # overwrites header
 #NNLOJETdir = "/custom/nnlojet/directory"
 print("Sourcing runcard")
-dictCard = {
-    'LO.run':'DM_LO' # first: -r second: -j
-    # 'RRa.run':'DM_RRa'
+dictCard = { # first: -r second: -j
+    'Wp2j_mw_13TeV-all': 'config_all',
+    'Wp2j_HT2_13TeV-all':'config_all'
 }
 
 # events = 10

@@ -11,7 +11,7 @@ def get_cmd_output(*args,**kwargs):
 # Global Variables
 # Global Variables (default values, can be changed by runcard.py)
 # for initialisation
-runcardDir = "" # ONLY FOR NNNLOjets
+runcardDir = "/mt/home/mheil/tst_grid/setup/"
 executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/"             # Directory for exe
 executable_exe = "HEJ/bin/HEJ"                               # Exectuable name
 warmupthr  = 0
@@ -19,15 +19,15 @@ producRun  = 10
 baseSeed   = 1234
 events     = 123
 jobName    = "testjob"
-debug_level = 15
+debug_level = 16
 stacksize = 5000 #MB # RAM per job smaller->higher priority
 
 # Grid config for LFN
-lfndir         = "/grid/group/user/folder/"
+lfndir         = None #"/grid/group/user/folder/"
 # these are also used by gfal
-lfn_input_dir  = "input"
-lfn_output_dir = "output"
-lfn_warmup_dir = "warmup" # could be useful for Sherpa
+lfn_input_dir  = "tst_grid/input"
+lfn_output_dir = "tst_grid/output"
+lfn_warmup_dir = "tst_grid/warmup" # could be useful for Sherpa
 
 use_gfal = True
 gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
