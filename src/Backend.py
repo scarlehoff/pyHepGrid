@@ -21,7 +21,7 @@ class Backend(object):
 
     ### IMPORTANT: NAMING FUNCTIONS SHOULD BE THE SAME IN ARC.py AND DIRAC.py
     def warmup_name(self, runcard, rname):
-        out = "output" + runcard + "-warm-" + rname + ".tar.gz"
+        out = runcard + "+" + rname + ".tar.gz"
         return out
 
     def output_name(self, runcard, rname, seed):

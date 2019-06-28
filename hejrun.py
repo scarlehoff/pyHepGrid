@@ -22,7 +22,7 @@ def print_flush(string):
 
 # This function must always be the same as the one in Backend.py
 def warmup_name(runcard, rname):
-    out = "output" + runcard + "-warm-" + rname + ".tar.gz"
+    out = runcard + "+" + rname + ".tar.gz"
     return out
 
 # This function must always be the same as the one in Backend.py
