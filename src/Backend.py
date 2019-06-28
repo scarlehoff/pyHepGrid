@@ -626,10 +626,11 @@ class Backend(object):
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
-        if not os.path.isfile(path_to_exe_full):
-            logger.critical("Could not find executable at {0}".format(path_to_exe_full))
-        copy(path_to_exe_full, os.getcwd())
-        files = [executable_exe]
+        # if not os.path.isfile(path_to_exe_full):
+        #     logger.critical("Could not find executable at {0}".format(path_to_exe_full))
+        # copy(path_to_exe_full, os.getcwd())
+        # files = [executable_exe]
+        files = []
         for idx,i in enumerate(rncards):
             logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
