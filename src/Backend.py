@@ -631,15 +631,18 @@ class Backend(object):
         # files = [executable_exe]
         for idx,i in enumerate(rncards):
             local = False
-            # Check whether warmup/production is active in the runcard
+
             tarfile = i +"+"+ dCards[i] + ".tar.gz"
             base_folder = i.split("-")[0] + "/"
             logger.info("Initialising {0} to {1} [{2}/{3}]".format(i,tarfile,idx+1,len(rncards)))
+
+            # runcards
             run_dir = runFol + base_folder
             runFiles = [dCards[i]+".yml"]
             for f in runFiles:
                 os.system("cp -r "+run_dir+f+" "+tmpdir)
 
+            # warmup files
             if provided_warmup:
                 warmup_dir = provided_warmup + base_folder
             elif header.provided_warmup_dir:
@@ -651,15 +654,18 @@ class Backend(object):
             for f in warmupFiles:
                 os.system("cp -r "+warmup_dir+f+" "+tmpdir)
 
+            # tar up & send to grid storage
             self.tarw.tarFiles(warmupFiles+runFiles, tarfile)
-            # break
+
             if self.gridw.checkForThis(tarfile, lfn_input_dir):
                 print("Removing old version of " + tarfile + " from Grid Storage")
                 self.gridw.delete(tarfile, lfn_input_dir)
             print("Sending " + tarfile + " to "+lfn_input_dir)
             self.gridw.send(tarfile, lfn_input_dir, shell = True)
+
+        # clean up afterwards
         os.chdir(origdir)
-        os.system("rm -r "+tmpdir) # clean up afterwards
+        os.system("rm -r "+tmpdir)
 
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
