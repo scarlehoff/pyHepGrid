@@ -311,20 +311,23 @@ def run_HEJ(args):
 ########################## main ##########################
 
 ## test
-# python3 main.py test runcards/hej_runcard.py -B
+# ./main.py test runcards/hej_runcard.py -B
 # -B = arc production
 ## run on arc
-# python3 main.py run runcards/hej_runcard.py -B
-## test job for arc
-# python3 main.py run runcards/hej_runcard.py -B --test
+# ./main.py run runcards/hej_runcard.py -B
+## send test job to arc
+# ./main.py run runcards/hej_runcard.py -B --test
 
-# get job info
-# python3 main.py man runcards/hej_runcard.py -B
+## init (uploads runcards & Sherpa to gfal)
+# ./main.py ini runcards/hej_runcard.py -B
+
+## get job info
+# ./main.py man runcards/hej_runcard.py -B
 # -s for stats
 # -p for print
 # ask the help for more
 
-# getting (known) queues
+## getting (known) queues
 # ./get_site_info.py
 
 if __name__ == "__main__":
