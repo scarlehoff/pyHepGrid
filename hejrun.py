@@ -274,10 +274,10 @@ def print_node_info(outputfile):
     os.system("gcc --version >> {0}".format(outputfile))
     os.system("python --version >> {0}".format(outputfile))
 
-def end_program(status):
+def end_program(status, debug_level):
     # TODO print debug infos here if status!=0
-    if status != 0:
-        os.system("cat outfile.out")
+    if status != 0 or debug_level > 8:
+        os.system("cat "+LOG_FILE)
         os.system("ls")
     end_time = datetime.datetime.now()
     print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
@@ -372,7 +372,7 @@ if __name__ == "__main__":
 
     if status != 0:
         print_flush("download failed")
-        end_program(status)
+        end_program(status, debug_level)
 
     if "HEJFOG" in args.runname:
         status += run_HEJFOG(args)
@@ -381,12 +381,12 @@ if __name__ == "__main__":
 
     if status != 0:
         print_flush("FOG failed")
-        end_program(status)
+        end_program(status, debug_level)
 
     status += run_HEJ(args)
     if status != 0:
         print_flush("HEJ failed")
-        end_program(status)
+        end_program(status, debug_level)
 
     local_out = output_name(args.runcard, args.runname, args.seed)
     output_file = args.output_folder + "/" + local_out
@@ -401,4 +401,4 @@ if __name__ == "__main__":
     if status == 0:
         print_flush("Copied over to grid storage!")
 
-    end_program(status)
+    end_program(status, debug_level)
