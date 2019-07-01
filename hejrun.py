@@ -8,6 +8,8 @@ except KeyError as e:
 
 MAX_COPY_TRIES = 15
 PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
+LHE_FILE="SherpaLHE_fixed.lhe"
+LOG_FILE="output.log"
 
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
 def print_flush(string):
@@ -153,6 +155,12 @@ lfn    = "lfn:"
 
 # Define some utilites
 
+
+def run_command(command):
+    command += " 1>> {0} 2>&1".format(LOG_FILE)
+    print_flush(" > Executed command: {0}".format(command))
+    return os.system(command)
+
 #### COPYING ####
 
 def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
@@ -201,7 +209,6 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
             exit_code=500
     return exit_code
 
-
 def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     print_flush("Copying {0} to {1}".format(infile, outfile))
     protoc = args.gfaldir.split(":")[0]
@@ -220,7 +227,6 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             if retval != 0 and "file" not in outfile and not args.Sockets:
                 os.system("gfal-rm {0}".format(outfile_tmp))
     return 9999999
-
 
 #### TAR ####
 
@@ -282,17 +288,11 @@ def end_program(status):
 ########################## Actual run commands ##########################
 
 def run_sherpa(args):
-    print_flush("TODO Sherpa not implemented yet")
-
-    command = "Sherpa"
-    command += " RSEED:={0}".format(args.seed)
-    command +=" 2>&1 outfile.out"
-    print_flush(" > Executed command: {0}".format(command))
+    status = run_command("Sherpa RSEED:={0} -e {1}".format(args.seed, args.events))
+    status += run_command("SherpaLHEF SherpaLHE.lhe {0}".format(LHE_FILE))
     # TODO run:
-    #   Sherpa
-    #   SherpaLHEF (with chmod)
     #   unweighter (maybe)
-    return 1
+    return status
 
 def run_HEJFOG(args):
     print_flush("TODO HEJFOG not implemented yet")
