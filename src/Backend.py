@@ -25,7 +25,7 @@ class Backend(object):
         return out
 
     def output_name(self, runcard, rname, seed):
-        out = "output" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
+        out = "output-" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
         return out
 
     def output_name_array(self, runcard, rname, seeds):

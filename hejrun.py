@@ -29,7 +29,7 @@ def warmup_name(runcard, rname):
 
 # This function must always be the same as the one in Backend.py
 def output_name(runcard, rname, seed):
-    out = "output" + runcard + "-" + rname + "-" + seed + ".tar.gz"
+    out = "output-" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 
 #### Override os.system with custom version that auto sets debug level on failure
