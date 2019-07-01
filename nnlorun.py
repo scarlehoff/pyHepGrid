@@ -152,8 +152,10 @@ def set_environment(lfndir, lhapdf_dir):
         pass
     except ImportError as e:
         # If gfal can't be imported then the site packages need to be added to the python path because ? :(
-        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
-        os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
+        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"]\
+            +":"+args.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
+        os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]\
+            +":"+args.gfal_location.replace("/bin/","/lib/")
     return 0
 # export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
 
