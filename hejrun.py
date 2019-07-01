@@ -223,7 +223,8 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
         outfile_tmp = outfile.replace(protoc, protocol)
         print_flush("Attempting Protocol {0}".format(protocol))
         for i in range(maxrange): # try max 10 times for now ;)
-            cmd = "{2}gfal-copy {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
+            cmd = "{2}gfal-copy --checksum-mode both --abort-on-failure -f {0} {1}".format(
+                infile_tmp, outfile_tmp, args.gfal_location)
             if args.debug > 1:
                 print_flush(cmd)
             retval = syscall(cmd)
@@ -294,7 +295,8 @@ def end_program(status, debug_level):
 ########################## Actual run commands ##########################
 
 def run_sherpa(args):
-    status = run_command("Sherpa RSEED:={0} -e {1}".format(args.seed, args.events))
+    status = run_command("Sherpa RSEED:={0} -e {1} ANALYSIS_OUTPUT=Sherpa_{0}"
+        .format(args.seed, args.events))
     status += run_command("SherpaLHEF SherpaLHE.lhe {0}".format(LHE_FILE))
     # TODO run:
     #   unweighter (maybe)
@@ -404,7 +406,7 @@ if __name__ == "__main__":
     local_out = output_name(args.runcard, args.runname, args.seed)
     output_file = args.output_folder + "/" + local_out
 
-    status += tar_this(local_out, "*.yoda")
+    status += tar_this(local_out, "*.yoda *.log")
 
     status += copy_to_grid(local_out, output_file, args)
 
