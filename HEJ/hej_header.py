@@ -15,10 +15,10 @@ runcardDir = "/mt/home/mheil/tst_grid/setup/"
 executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/"             # Directory for exe
 executable_exe = "HEJ/bin/HEJ"                               # Exectuable name
 warmupthr  = 0
-producRun  = 10
-baseSeed   = 1234
+producRun  = 20
+baseSeed   = 1
 events     = 123
-jobName    = "testjob"
+jobName    = "HEJ"
 debug_level = 16
 stacksize = 5000 #MB # RAM per job smaller->higher priority
 

@@ -406,7 +406,7 @@ if __name__ == "__main__":
     local_out = output_name(args.runcard, args.runname, args.seed)
     output_file = args.output_folder + "/" + local_out
 
-    status += tar_this(local_out, "*.yoda *.log")
+    status += tar_this(local_out, "*.yoda *.log *.yml Run.dat")
 
     status += copy_to_grid(local_out, output_file, args)
 
