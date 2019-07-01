@@ -2,7 +2,8 @@
 #NNLOJETdir = "/custom/nnlojet/directory"
 print("Sourcing runcard")
 dictCard = { # first: -r second: -j
-    'Wp2j_mw_13TeV-all': 'config_all',
+  # we use -r as the name and -j as the runcard
+    # 'Wp2j_mw_13TeV-all': 'config_all',
     'Wp2j_HT2_13TeV-all':'config_all'
 }
 
