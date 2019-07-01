@@ -39,10 +39,6 @@ def do_shell(*args):
     return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok
 os.system = do_shell
 
-
-
-
-
 def parse_arguments():
     from optparse import OptionParser
     from getpass import getuser
@@ -297,7 +293,6 @@ def print_node_info(outputfile):
     os.system("gcc --version >> {0}".format(outputfile))
     os.system("python --version >> {0}".format(outputfile))
 
-
 #################################################################################
 #################################################################################
 
@@ -350,7 +345,7 @@ if __name__ == "__main__":
         os.system("ldd -v {0}".format(args.executable))
 
     os.system("chmod +x {0}".format(args.executable))
-    nnlojet_command +=" 2>&1 outfile.out"
+    nnlojet_command +=" 1> outfile.out 2>&1"
     print_flush(" > Executed command: {0}".format(nnlojet_command))
 
     # Run command
