@@ -23,7 +23,7 @@ debug_level = 16
 stacksize = 5000 #MB # RAM per job smaller->higher priority
 
 # Grid config for LFN
-lfndir         = None #"/grid/group/user/folder/"
+lfndir         = "DUMMY" #"/grid/group/user/folder/"
 # these are also used by gfal
 lfn_input_dir  = "tst_grid/input"
 lfn_output_dir = "tst_grid/output"
