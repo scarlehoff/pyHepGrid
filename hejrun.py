@@ -251,12 +251,14 @@ def download_program(debug):
     return stat
 
 def download_runcard(input_folder, runcard, runname, debug_level):
-    stat = copy_from_grid("bin/SherpaLHEF", "SherpaLHEF", args)
-    print_flush("TODO download runcard")
+    tar = warmup_name(runcard,runname)
+    print_flush("downloading "+input_folder+"/"+tar)
+    stat = copy_from_grid(input_folder+"/"+tar, tar, args)
+    stat += untar_file(tar, debug_level)
     # TODO download:
     #   rivet analysis
     #   Scale setters
-    return 0
+    return os.system("rm {0}".format(tar))+stat
 
 ### Misc ###
 
@@ -347,7 +349,6 @@ if __name__ == "__main__":
     debug_level = int(args.debug)
 
     set_environment(args.lfndir, args.lhapdf_local)
-
 
     if debug_level > -1:
         # Architecture info
