@@ -32,6 +32,12 @@ def output_name(runcard, rname, seed):
     out = "output-" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 
+def yoda_name(seed):
+    return "HEJ_{0}".format(seed)
+
+def config_name(rname):
+    return "{0}.yml".format(rname)
+
 #### Override os.system with custom version that auto sets debug level on failure
 # Abusive...
 syscall = os.system
@@ -304,11 +310,18 @@ def run_HEJFOG(args):
     return 1
 
 def run_HEJ(args):
-    os.system("chmod +x {0}".format(args.executable))
-    # TODO:
-    #   parse runcard
-    return run_command(
-        "{0} {1}.yml {2}".format(args.executable, args.runname, LHE_FILE) )
+    config = config_name(args.runname)
+    seed = args.seed
+    status = os.system(
+        'sed -i -e "s/seed:.1/seed: {0}/g" {1}'.format(seed, config) )
+    status += os.system(
+        'sed -i -e "s/output:.HEJ/output: {0}/g" {1}'.format(
+            yoda_name(seed), config) )
+    status += os.system("chmod +x {0}".format(args.executable))
+    if status == 0:
+        status += run_command(
+            "{0} {1} {2}".format(args.executable, config, LHE_FILE) )
+    return status
 
 ########################## main ##########################
 
