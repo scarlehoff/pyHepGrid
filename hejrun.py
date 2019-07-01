@@ -304,11 +304,11 @@ def run_HEJFOG(args):
     return 1
 
 def run_HEJ(args):
-    print_flush("TODO HEJ not implemented yet")
+    os.system("chmod +x {0}".format(args.executable))
     # TODO:
     #   parse runcard
-    #   run HEJ (with chmod)
-    return 1
+    return run_command(
+        "{0} {1}.yml {2}".format(args.executable, args.runname, LHE_FILE) )
 
 ########################## main ##########################
 
