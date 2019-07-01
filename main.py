@@ -7,9 +7,10 @@ from src.header import arctable, diractable, arcprodtable, slurmprodtable, \
     dbname, dbfields, logger, slurmtable
 from src.dbapi  import database
 from src.modes import do_proxy, do_run, do_initialise, do_test, do_management
-
+import os
 
 if __name__ == "__main__":
+    os.chdir(os.path.dirname(__file__))
     modes = {"pro":do_proxy, "run":do_run, "ini":do_initialise,
              "tes":do_test, "man":do_management}
     rcard = args.runcard
