@@ -374,13 +374,10 @@ if __name__ == "__main__":
         print_flush("download failed")
         end_program(status)
 
-    if "Sherpa" in args.runname:
-        status += run_sherpa(args)
-    elif "HEJFOG" in args.runname:
+    if "HEJFOG" in args.runname:
         status += run_HEJFOG(args)
     else:
-        print_flush("Unknown runcard")
-        status += 1
+        status += run_sherpa(args)
 
     if status != 0:
         print_flush("FOG failed")
