@@ -4,7 +4,6 @@ from src.header import logger
 
 import src.utilities as util
 import src.header as header
-from src.runcard_parsing import runcard_parsing
 
 counter = None
 def init_counter(args):
@@ -227,11 +226,11 @@ class Backend(object):
         """
         from src.header import logger
         import re
-        from src.runcard_parsing import runcard_parsing
+        from src.runcard_parsing import PROGRAMruncard
         logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         local_dir_name = self.get_local_dir_name(r,rname)
         files = os.listdir(local_dir_name)
-        runcard = runcard_parsing(runcard_file=os.path.join(local_dir_name,r),logger=logger,
+        runcard = PROGRAMruncard(runcard_file=os.path.join(local_dir_name,r),logger=logger,
                                  grid_run=False)
         runcard_id = runcard.runcard_dict_case_preserving["id"]
         logs = [f for f in files if f.endswith(".log") and runcard_id in f]
@@ -449,14 +448,15 @@ class Backend(object):
                                  provided_warmup=False):
         import shutil
         from src.header import executable_src_dir, executable_exe, runcardDir, slurm_kill_exe
+        from src.runcard_parsing import PROGRAMruncard
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
         os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
-        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        path_to_exe_full = executable_src_dir + executable_exe
         shutil.copy(path_to_exe_full, run_dir)
         runcard_file = runcardDir + "/" + runcard
-        runcard_obj = runcard_parsing(runcard_file, logger=logger, grid_run=False)
+        runcard_obj = PROGRAMruncard(runcard_file, logger=logger, grid_run=False)
         self._check_warmup(runcard_obj, continue_warmup)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
@@ -490,6 +490,7 @@ class Backend(object):
         import tempfile
         from src.header import executable_src_dir, executable_exe, logger
         from src.header import runcardDir as runFol
+        from src.runcard_parsing import PROGRAMruncard
 
         if local:
             self.init_local_warmups(provided_warmup = provided_warmup,
@@ -509,7 +510,7 @@ class Backend(object):
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
         rncards, dCards = util.expandCard()
-        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        path_to_exe_full = executable_src_dir + executable_exe
         if not os.path.isfile(path_to_exe_full):
             logger.critical("Could not find executable at {0}".format(path_to_exe_full))
         copy(path_to_exe_full, os.getcwd())
@@ -522,7 +523,7 @@ class Backend(object):
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
             runcard_file = runFol + "/" + i
-            runcard_obj = runcard_parsing(runcard_file, logger=logger)
+            runcard_obj = PROGRAMruncard(runcard_file, logger=logger)
             self._check_warmup(runcard_obj, continue_warmup)
             if provided_warmup:
                 # Copy warmup to current dir if not already there
@@ -570,14 +571,15 @@ class Backend(object):
         that can be refactored."""
         import shutil
         from src.header import executable_src_dir, executable_exe, runcardDir
+        from src.runcard_parsing import PROGRAMruncard
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
         os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
-        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        path_to_exe_full = executable_src_dir + executable_exe
         shutil.copy(path_to_exe_full, run_dir)
         runcard_file = runcardDir + "/" + runcard
-        runcard_obj = runcard_parsing(runcard_file, logger=logger)
+        runcard_obj = PROGRAMruncard(runcard_file, logger=logger)
         self._check_production(runcard_obj)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
@@ -603,13 +605,14 @@ class Backend(object):
         import tempfile
         from src.header import runcardDir as runFol
         from src.header import executable_exe, executable_src_dir, logger
+        from src.runcard_parsing import PROGRAMruncard
 
         if local:
             self.init_local_production(provided_warmup = provided_warmup)
             return
 
         rncards, dCards = util.expandCard()
-        path_to_exe_full = executable_src_dir + "/driver/" + executable_exe
+        path_to_exe_full = executable_src_dir + executable_exe
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
@@ -623,7 +626,6 @@ class Backend(object):
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
-
         if not os.path.isfile(path_to_exe_full):
             logger.critical("Could not find executable at {0}".format(path_to_exe_full))
         copy(path_to_exe_full, os.getcwd())
@@ -633,7 +635,7 @@ class Backend(object):
             local = False
             # Check whether warmup/production is active in the runcard
             runcard_file = runFol + "/" + i
-            runcard_obj = runcard_parsing(runcard_file, logger=logger)
+            runcard_obj = PROGRAMruncard(runcard_file, logger=logger)
             self._check_production(runcard_obj)
             rname   = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -665,13 +667,14 @@ class Backend(object):
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         from src.header import logger
+        exclude_patterns = [".txt",".log"]
         print(matchname, provided_warmup)
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
             for potfile in potential_files:
-                if potfile.lower().startswith(matchname) and\
-                        not potfile.endswith(".txt") and not potfile.endswith(".log"):
+                if potfile.lower().startswith(matchname) \
+                    and not any(potfile.endswith(p) for p in exclude_patterns):
                     matches.append(potfile)
             if len(matches) > 1:
                 logger.critical("Multiple warmup matches found in {1}: {0}".format(" ".join(i for i in matches), provided_warmup))
@@ -683,7 +686,7 @@ class Backend(object):
             match = provided_warmup
         print("Using warmup {0}".format(match))
         if not match in os.listdir(sys.path[0]):
-            local_match  =False
+            local_match = False
             copy(match,os.path.basename(match))
             match = os.path.basename(match)
         else:
