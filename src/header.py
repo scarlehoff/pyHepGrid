@@ -195,6 +195,7 @@ DIRACSCRIPTDEFAULT = [
         "StdError   = \"StdErr\";",
         "InputSandbox  = {{\"{0}\"}};".format(runfile),
         "OutputSandbox = {\"StdOut\",\"StdErr\"};",
+        "Platform = \"EL7\";"
         ]
 
 # If Dirac banned sites are specified, include them in JDL
