@@ -14,9 +14,12 @@ def print_flush(string):
     print string
     sys.stdout.flush()
 
-####
+#####################################################################################
+#                                                                                   #
+# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :( #
+#                                                                                   #
+#####################################################################################
 
-# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
     out = "output" + runcard + "-warm-" + rname + ".tar.gz"
@@ -92,7 +95,6 @@ def parse_arguments():
 
     (options, positional) = parser.parse_args()
 
-
     if options.use_gfal.lower() == "true":
         options.use_gfal = True
         print("Using GFAL for storage")
@@ -151,12 +153,11 @@ def set_environment(lfndir, lhapdf_dir):
     except ImportError as e:
         # If gfal can't be imported then the site packages need to be added to the python path because ? :(
         os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"]\
-            +":"+args.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
+            +":"+args.gfal_location.replace("/bin/","/lib/python2.7/site-packages/")
         os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]\
             +":"+args.gfal_location.replace("/bin/","/lib/")
     return 0
 # export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
-
 
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
 lcg_cp = "lcg-cp"
@@ -180,19 +181,6 @@ def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
         cmd = lcg_cp + " " + lfn
         cmd += grid_file + " " + local_file
         return os.system(cmd)
-
-def untar_file(local_file, debug):
-    if debug_level > 2:
-        cmd = "tar zxfv {0}".format(local_file)
-    else:
-        cmd = "tar zxf " + local_file
-    return os.system(cmd)
-
-def tar_this(tarfile, sourcefiles):
-    cmd = "tar -czf " + tarfile + " " + sourcefiles
-    stat = os.system(cmd)
-    os.system("ls")
-    return stat
 
 def copy_to_grid(local_file, grid_file, args, maxrange = 10):
     print_flush("Copying " + local_file + " to " + grid_file)
@@ -226,7 +214,6 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
             exit_code=500
     return exit_code
 
-
 def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     print_flush("Copying {0} to {1}".format(infile, outfile))
     protoc = args.gfaldir.split(":")[0]
@@ -246,7 +233,6 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
                 os.system("gfal-rm {0}".format(outfile_tmp))
     return 9999999
 
-
 #### TAR ####
 
 def untar_file(local_file, debug):
@@ -262,16 +248,7 @@ def tar_this(tarfile, sourcefiles):
     os.system("ls")
     return stat
 
-
-
-def socket_sync_str(host, port, handshake = "greetings"):
-    # Blocking call, it will receive a str of the form
-    # -sockets {0} -ns {1}
-    import socket
-    sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sid.connect((host, int(port)))
-    sid.send(handshake)
-    return sid.recv(32)
+### Get dependences & executable ###
 
 def bring_lhapdf(lhapdf_grid, debug):
     tmp_tar = "lhapdf.tar.gz"
@@ -288,6 +265,17 @@ def bring_nnlojet(input_grid, runcard, runname, debug):
     stat += os.system("rm {0}".format(tmp_tar))
     stat += os.system("ls")
     return stat
+
+### misc ###
+
+def socket_sync_str(host, port, handshake = "greetings"):
+    # Blocking call, it will receive a str of the form
+    # -sockets {0} -ns {1}
+    import socket
+    sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sid.connect((host, int(port)))
+    sid.send(handshake)
+    return sid.recv(32)
 
 def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
@@ -347,7 +335,7 @@ if __name__ == "__main__":
         os.system("ldd -v {0}".format(args.executable))
 
     os.system("chmod +x {0}".format(args.executable))
-    nnlojet_command +=" 1> outfile.out 2>&1"
+    nnlojet_command +=" &> outfile.out"
     print_flush(" > Executed command: {0}".format(nnlojet_command))
 
     # Run command

@@ -96,17 +96,36 @@ seen.
 
 ## 4. GRID SCRIPTS SETUP
 
-1. create own header, copy template header
-2. adjust personal header
-3. adjust header name in general `header.py` file (only add the name of your
-    header file to top)
-4. create folder for runcard storage and add to header file (e.g
-    NNLOJET/driver/grid/)
+To start using `pyHepGrid` you need to do the following steps.
 
-add `yourname_header.py` file and altered `header.py` file to the repo, and
-**commit**
+0. Keep track of all your changes by committing them (e.g. fork the remote)
+1. Create your own header (e.g. copy and edit the `headers/template_header.py`)
+2. Add yourself to the `header_mappings` in `src/header.py`.
+    This is used for a python import so a header in `some_folder/your_header.py`
+    would require `your_name: some_folder.your_header`
+3. Generate a `runcard.py` similar to `template_runcard.py` inside the `runcards`
+    folder. `runcard.py` is used to run `pyHepGrid` *not your program*. The only
+    required setting in there is `dictCard`, but you can also overwrite any
+    setting you have in your personal header, e.g. `BaseSeed` or `producRun`.
+4. Create folders on gfal/lfn to save your in and output. They have to match
+    `lfn_input_dir`, `lfn_output_dir` and `lfn_warmup_dir` of your header
+5. For non NNNLOJet developers: Write you own `runfile` similar to `nnlorun.py`.
+    This script will be ran on each node, so it should be *self-contained* and
+    *Python 2.4 compatible*. It should also be able to handle all arguments of
+    the `nnnnlorun.py`, even if they are not used in the script itself. It is
+    easiest to simply copy the `parse_arguments` function from there. Most
+    arguments correspond to a similar named setting from the runcard/header.
+    To run on Dirac make sure you do not depend on a specific local setup, i.e.
+    download all required programs from gfal/lfn or use what is available on the
+    `/cvmfs/`.
 
-generate `runcard.py` following `template_runcard.py` example
+After this you should be able to run `./main.py test runcards/your_runcard.py
+-B`. This will execute the your `runfile` locally inside the `test_sandbox`
+folder. You might want to try running it with a *clean* environment, e.g.
+without sourcing your `~/.bashrc`. If this works fine you can try submitting to
+the arc  test queue with `./main.py run runcards/your_runcard.py -B --test`. The
+test queue highly limited in resources. **Only submit a few short jobs to it**
+(<10).
 
 ## 5. PROXY SETUP
 
@@ -171,17 +190,16 @@ include the flags:
   - `-I/-i` for job info
 
 For running anything on the grid, the help text in `main.py` (`python3 main.py
--h`) is useful for hidden options that aren't all necessarily documented(!)
+-h`) is useful for hidden options that aren't all necessarily documented(!).
+These features include warmup continuation, getting warmup data from running
+warmup jobs, initialising with your own warmup from elsewhere, database
+management stuff, local runcard testing.
 
-> These features include warmup continuation, getting warmup data from running
-> warmup jobs, initialising with your own warmup from elsewhere, database
-> management stuff, local runcard testing
-
-When running, the python script `nnlorun.py` is sent to the run location. This
-script then runs automatically, and pulls all of the appropriate files from grid
-storage (NNLOJET exe, runcard (warmups)). It then runs NNLOJET in the
-appropriate mode, before tarring up output files and sending them back to the
-grid storage.
+When running, the python script `runfile` (e.g. `nnlorun.py`) is sent to the run
+location. This script then runs automatically, and pulls all of the appropriate
+files from grid storage (NNNNLOJET exe, runcard (warmups)). It then runs
+NNNNNLOJET in the appropriate mode, before tarring up output files and sending
+them back to the grid storage.
 
 ## 7. FINALISING RESULTS
 The process of pulling the production results from grid storage to the gridui

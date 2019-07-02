@@ -44,7 +44,7 @@ lhapdf             = "/path/to/lhapdf"
 # NNLOJET Database Parameters
 dbname     = "/path/to/sqlite/database/for/storage.dat"
 provided_warmup_dir = None
-runfile    = "nnnnnlorun.py"
+runfile    = "nnlorun.py"
 
 # Finalisation and storage options
 finalise_no_cores = 15
@@ -72,6 +72,7 @@ arcbase  = "/path/to/ARC/base/.arc/jobs.dat" # arc database
 # DIRAC parameters
 dirac_name = "user_name_for_dirac"
 DIRAC_BANNED_SITES = []
+dirac_platform = "EL7"
 
 # finalise.py-only parameters
 finalise_runcards = None

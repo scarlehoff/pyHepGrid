@@ -670,7 +670,7 @@ class Backend(object):
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         from src.header import logger
-        exclude_patterns = [".txt",".log",".tex",".lhe",".bak",".yoda"]
+        exclude_patterns = [".txt",".log"]
         print(matchname, provided_warmup)
         if os.path.isdir(provided_warmup):
             matches = []
