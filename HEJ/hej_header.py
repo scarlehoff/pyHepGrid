@@ -18,7 +18,7 @@ runcardDir = base_dir("setup/")
 executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/"             # Directory for exe
 executable_exe = "HEJ/bin/HEJ"                               # Exectuable name
 warmupthr  = 0
-producRun  = 200
+producRun  = 2
 baseSeed   = 1
 events     = 123
 jobName    = "HEJ"
@@ -77,6 +77,7 @@ arcbase  = base_dir(".arc/jobs.dat") # arc database
 # DIRAC parameters
 dirac_name = "marian.heil"
 DIRAC_BANNED_SITES = []
+dirac_platform = "EL7"
 
 # finalise.py-only parameters
 finalise_runcards = None
