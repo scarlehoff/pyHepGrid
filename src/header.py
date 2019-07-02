@@ -188,12 +188,13 @@ ARCSCRIPTDEFAULTPRODUCTION = ["&",
         ]
 
 DIRACSCRIPTDEFAULT = [
-        "JobName    = \"{0}\";".format(jobName),
-        "Executable = \"{0}\";".format(runfile),
-        "StdOutput  = \"StdOut\";",
-        "StdError   = \"StdErr\";",
-        "InputSandbox  = {{\"{0}\"}};".format(runfile),
-        "OutputSandbox = {\"StdOut\",\"StdErr\"};",
+    "JobName    = \"{0}\";".format(jobName),
+    "Executable = \"{0}\";".format(runfile),
+    "StdOutput  = \"StdOut\";",
+    "StdError   = \"StdErr\";",
+    "InputSandbox  = {{\"{0}\"}};".format(runfile),
+    "OutputSandbox = {\"StdOut\",\"StdErr\"};",
+    "Platform = \"{0}\";".format(dirac_platform)
         ]
 
 # If Dirac banned sites are specified, include them in JDL
