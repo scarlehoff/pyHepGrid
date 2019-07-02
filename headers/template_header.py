@@ -70,6 +70,7 @@ arcbase  = "/path/to/ARC/base/.arc/jobs.dat" # arc database
 # DIRAC parameters
 dirac_name = "user_name_for_dirac"
 DIRAC_BANNED_SITES = []
+dirac_platform = "EL7"
 
 # finalise.py-only parameters
 finalise_runcards = None
