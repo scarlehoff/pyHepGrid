@@ -7,7 +7,7 @@ import itertools as it
 import multiprocessing as mp
 import os
 import re
-import src.header as config
+import pyHepGrid.src.header as config
 import subprocess
 import tarfile
 

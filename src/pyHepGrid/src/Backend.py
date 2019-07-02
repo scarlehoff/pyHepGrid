@@ -1,10 +1,10 @@
 import os
 import sys
-from src.header import logger
+from pyHepGrid.src.header import logger
 
-import src.utilities as util
-import src.header as header
-from src.runcard_parsing import runcard_parsing
+import pyHepGrid.src.utilities as util
+import pyHepGrid.src.header as header
+from pyHepGrid.src.runcard_parsing import runcard_parsing
 
 counter = None
 def init_counter(args):
@@ -37,7 +37,7 @@ class Backend(object):
         self.stats_one_line = True
 
     def stats_print_setup(self, runcard_info, dbid = ""):
-        from src.header import short_stats
+        from pyHepGrid.src.header import short_stats
         if dbid == "":
             string = ""
         else:
@@ -56,12 +56,12 @@ class Backend(object):
 
 
     def __init__(self, act_only_on_done = False):
-        from src.header import dbname, baseSeed
-        import src.dbapi
+        from pyHepGrid.src.header import dbname, baseSeed
+        import pyHepGrid.src.dbapi
         self.overwrite_warmup = False
         self.tarw  = util.TarWrap()
         self.gridw = util.GridWrap()
-        self.dbase = src.dbapi.database(dbname)
+        self.dbase = pyHepGrid.src.dbapi.database(dbname)
         self.table = None
         self.bSeed = baseSeed
         self.jobtype_get = {
@@ -192,7 +192,7 @@ class Backend(object):
     # Checks for the grid storage system
     def _checkfor_existing_warmup(self, r, rname):
         """ Check whether given runcard already has a warmup output in the grid """
-        from src.header import logger
+        from pyHepGrid.src.header import logger
         logger.info("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
@@ -202,15 +202,15 @@ class Backend(object):
     def _checkfor_existing_output(self, r, rname):
         """ Check whether given runcard already has output in the grid
         needs testing as it needs to be able to remove (many) things for production run
-        It relies on the base seed from the src.header file to remove the output
+        It relies on the base seed from the pyHepGrid.src.header file to remove the output
         """
-        from src.header import lfn_output_dir, logger
+        from pyHepGrid.src.header import lfn_output_dir, logger
         logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         checkname = r + "-" + rname
         files = self.gridw.get_dir_contents(lfn_output_dir)
         first = True
         if checkname in files:
-            from src.header import baseSeed, producRun
+            from pyHepGrid.src.header import baseSeed, producRun
             for seed in range(baseSeed, baseSeed + producRun):
                 filename = "output" + checkname + "-" + str(seed) + ".tar.gz"
                 if filename in files:
@@ -225,9 +225,9 @@ class Backend(object):
     def _checkfor_existing_output_local(self, r, rname, baseSeed, producRun):
         """ Check whether given runcard already has output in the local run dir (looks for log files)
         """
-        from src.header import logger
+        from pyHepGrid.src.header import logger
         import re
-        from src.runcard_parsing import runcard_parsing
+        from pyHepGrid.src.runcard_parsing import runcard_parsing
         logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         local_dir_name = self.get_local_dir_name(r,rname)
         files = os.listdir(local_dir_name)
@@ -254,7 +254,7 @@ class Backend(object):
         and empty list for later use [intended for checkwarmup mode so multiple warmups can
         be checked consecutively.
         """
-        from src.header import lfn_warmup_dir, logger
+        from pyHepGrid.src.header import lfn_warmup_dir, logger
         gridFiles = []
         suppress_errors = False
         if check_only:
@@ -303,7 +303,7 @@ class Backend(object):
 
     def get_completion_stats(self, jobid, jobinfo, args):
         from collections import Counter
-        from src.gnuplot import do_plot
+        from pyHepGrid.src.gnuplot import do_plot
         job_outputs = self.cat_job(jobid, jobinfo, store = True)
         vals = []
         for idx,job_stdout in enumerate(job_outputs):
@@ -350,7 +350,7 @@ class Backend(object):
                 xlabel="% Completion", ylabel = "No. of jobs")
 
     def get_grid_from_stdout(self,jobid, jobinfo):
-        from src.header import logger, warmup_base_dir, default_runfolder
+        from pyHepGrid.src.header import logger, warmup_base_dir, default_runfolder
         import re, os
 
         stdout = "\n".join(self.cat_job(jobid, jobinfo, store = True))
@@ -389,7 +389,7 @@ class Backend(object):
         """ Returns a list of DIRAC/ARC jobids
         for a given database entry
         """
-        from src.header import logger
+        from pyHepGrid.src.header import logger
         jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
         try:
             idout = jobid[0]['jobid']
@@ -435,7 +435,7 @@ class Backend(object):
 
     ### Initialisation functions
     def get_local_dir_name(self,runcard, tag):
-        from src.header import local_run_directory
+        from pyHepGrid.src.header import local_run_directory
         runname = "{0}-{1}".format(runcard, tag)
         dir_name = os.path.join(local_run_directory,runname)
         logger.info("Run directory: {0}".format(dir_name))
@@ -448,7 +448,7 @@ class Backend(object):
     def init_single_local_warmup(self, runcard, tag, continue_warmup = False,
                                  provided_warmup=False):
         import shutil
-        from src.header import executable_src_dir, executable_exe, runcardDir, slurm_kill_exe
+        from pyHepGrid.src.header import executable_src_dir, executable_exe, runcardDir, slurm_kill_exe
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
@@ -488,8 +488,8 @@ class Backend(object):
         """
         from shutil import copy
         import tempfile
-        from src.header import executable_src_dir, executable_exe, logger
-        from src.header import runcardDir as runFol
+        from pyHepGrid.src.header import executable_src_dir, executable_exe, logger
+        from pyHepGrid.src.header import runcardDir as runFol
 
         if local:
             self.init_local_warmups(provided_warmup = provided_warmup,
@@ -569,7 +569,7 @@ class Backend(object):
         more tightly integrated with the warmup equivalent in future - lots of shared code
         that can be refactored."""
         import shutil
-        from src.header import executable_src_dir, executable_exe, runcardDir
+        from pyHepGrid.src.header import executable_src_dir, executable_exe, runcardDir
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
@@ -601,8 +601,8 @@ class Backend(object):
         """
         from shutil import copy
         import tempfile
-        from src.header import runcardDir as runFol
-        from src.header import executable_exe, executable_src_dir, logger
+        from pyHepGrid.src.header import runcardDir as runFol
+        from pyHepGrid.src.header import executable_exe, executable_src_dir, logger
 
         if local:
             self.init_local_production(provided_warmup = provided_warmup)
@@ -664,7 +664,7 @@ class Backend(object):
 
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
-        from src.header import logger
+        from pyHepGrid.src.header import logger
         print(matchname, provided_warmup)
         if os.path.isdir(provided_warmup):
             matches = []
@@ -697,7 +697,7 @@ class Backend(object):
         from shutil import copy
         import tempfile
         import tarfile
-        from src.header import logger
+        from pyHepGrid.src.header import logger
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
@@ -729,11 +729,11 @@ class Backend(object):
                 # Need to override dictCard for single job submission
                 expandedCard = ([runcard], {runcard:rname})
                 logger.info("Warmup not found and job ended. Resubmitting to ARC")
-                from src.runArcjob import runWrapper
+                from pyHepGrid.src.runArcjob import runWrapper
                 runWrapper(rcard, expandedCard = expandedCard)
 
 
-    # src.Backend "independent" management options
+    # pyHepGrid.src.Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
     # for both ARC and DIRAC)
     def stats_job(self, dbid, do_print=True):
@@ -791,7 +791,7 @@ class Backend(object):
 
     def print_stats(self, done, wait, run, fail, unk, total):
         import datetime
-        from src.header import short_stats
+        from pyHepGrid.src.header import short_stats
         total2 = done + wait + run + fail + unk
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
@@ -825,7 +825,7 @@ class Backend(object):
     def _do_stats_job(self, jobid_raw):
         """ version of stats job multithread ready
         """
-        import src.header as header
+        import pyHepGrid.src.header as header
         if isinstance(jobid_raw, tuple):
             if jobid_raw[1] == self.cDONE or jobid_raw[1] == self.cFAIL:
                 return jobid_raw[1]
@@ -854,7 +854,7 @@ class Backend(object):
         For arc jobs stdoutput will be downloaded in said folder as well
         """
         # Retrieve data from database
-        from src.header import arcbase, lfn_warmup_dir
+        from pyHepGrid.src.header import arcbase, lfn_warmup_dir
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
@@ -943,7 +943,7 @@ class Backend(object):
                         new_seed.append(seed)
             seeds = new_seed
 
-        from src.header import finalise_no_cores as n_threads
+        from pyHepGrid.src.header import finalise_no_cores as n_threads
         # Check which of the seeds actually produced some data
         all_remote = self.output_name_array(self.rcard, self.rfolder, seeds)
         all_output = self.gridw.get_dir_contents(header.lfn_output_dir).split()
@@ -1009,7 +1009,7 @@ class Backend(object):
 
     def get_data(self, db_id, jobid = None, custom_get = None):
         """ External interface for the get_data routines.
-        If a custom_get is defined in the src.header, it will be used
+        If a custom_get is defined in the pyHepGrid.src.header, it will be used
         instead of the 'native' _get_data_{production/warmup}.
         Custom scripts need to have a public "do_finalise()" function for this to work
         """
@@ -1069,7 +1069,7 @@ class Backend(object):
         return all_ids
 
     def _format_args(self, *args, **kwargs):
-        raise Exception("Any children classes of src.Backend.py should override this method")
+        raise Exception("Any children classes of pyHepGrid.src.Backend.py should override this method")
 
     def _get_default_args(self):
         # Defaults arguments that can always go in
@@ -1120,7 +1120,7 @@ class Backend(object):
 
 def generic_initialise(runcard, warmup=False, production=False, grid=None,
                        overwrite_grid=False, local=False):
-    from src.header import logger
+    from pyHepGrid.src.header import logger
     logger.info("Initialising runcard: {0}".format(runcard))
     back = Backend()
 

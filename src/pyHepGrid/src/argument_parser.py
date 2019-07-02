@@ -20,15 +20,15 @@ try:
 except:
     caller_script = "None"
 
-if caller_script == "main.py":
+if caller_script in ("main.py", "pyHepGrid"):
     import argparse
-    import src.logger
+    import pyHepGrid.src.logger
     parser = argparse.ArgumentParser()
 
     parser.add_argument("mode", help = "Mode [initialize/run/manage/test] ")
     parser.add_argument("runcard", nargs = "?", help = "Runcard to act upon")
 
-    # src.Backend selection
+    # pyHepGrid.src.Backend selection
     parser_back = parser.add_argument_group("backend selection")
     parser_back.add_argument("-A", "--runArc",   help = "Run/manage/test an Arc job (warmup)", action = "store_true")
     parser_back.add_argument("-B", "--runArcProduction",   help = "Run/manage/test an Arc job (production)", action = "store_true")
@@ -61,7 +61,7 @@ if caller_script == "main.py":
         def __init__(self, nargs=0, **kw):
             super().__init__(nargs=nargs, **kw)
         def __call__(self, parser, namespace, values, option_string=None):
-            from src.utilities import lhapdfIni
+            from pyHepGrid.src.utilities import lhapdfIni
             lhapdfIni()
             parser.exit(0)
     parser_ini.add_argument("-L", "--lhapdf", help = "Send LHAPDF to Grid", action = LHAPDF_initAction)
@@ -121,12 +121,12 @@ if caller_script == "main.py":
 
     # Save to logger as header not loaded yet.
     # Reference copied to header.logger at the top of header when loaded
-    src.logger.logger = src.logger.setup_logger(arguments.debuglevel.upper())
-    check_mode(arguments.mode, arguments,src.logger.logger)
+    pyHepGrid.src.logger.logger = pyHepGrid.src.logger.setup_logger(arguments.debuglevel.upper())
+    check_mode(arguments.mode, arguments,pyHepGrid.src.logger.logger)
 
     if arguments.args is not None:
         if len(arguments.args)%2!=0:
-            src.logger.logger.error("Not all additional arguments specified at prompt have values.")
+            pyHepGrid.src.logger.logger.error("Not all additional arguments specified at prompt have values.")
             import sys
             sys.exit(-1)
         else:

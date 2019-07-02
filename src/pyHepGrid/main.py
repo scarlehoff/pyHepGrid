@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
 ##### Call argument parser
-from src.argument_parser import arguments as args
+from pyHepGrid.src.argument_parser import arguments as args
 
-from src.header import arctable, diractable, arcprodtable, slurmprodtable, \
+from pyHepGrid.src.header import arctable, diractable, arcprodtable, slurmprodtable, \
     dbname, dbfields, logger, slurmtable
-from src.dbapi  import database
-from src.modes import do_proxy, do_run, do_initialise, do_test, do_management
+from pyHepGrid.src.dbapi  import database
+from pyHepGrid.src.modes import do_proxy, do_run, do_initialise, do_test, do_management
 
 
-if __name__ == "__main__":
+def main():
     modes = {"pro":do_proxy, "run":do_run, "ini":do_initialise,
              "tes":do_test, "man":do_management}
+
     rcard = args.runcard
     rmode = args.mode
 

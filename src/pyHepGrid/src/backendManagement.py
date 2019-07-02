@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 #
-# src.Backend Management classes
+# pyHepGrid.src.Backend Management classes
 #
-import src.utilities as util
-import src.header as header
-from src.Backend import Backend
+import pyHepGrid.src.utilities as util
+import pyHepGrid.src.header as header
+from pyHepGrid.src.Backend import Backend
 import shutil
 import os
 
@@ -362,7 +362,7 @@ class Slurm(Backend):
         #     hostname = header.server_host
         #     port  = jobinfo["jobtype"].split("=")[-1]
         #     self._press_yes_to_continue("  \033[93m WARNING:\033[0m Killing TMUX server for job at {0}:{1}".format(hostname,port))
-        #     import src.socket_api as sapi
+        #     import pyHepGrid.src.socket_api as sapi
         #     sapi.socket_sync_str(hostname,port,b"bye!")
 
 
@@ -382,7 +382,7 @@ class Slurm(Backend):
 
 if __name__ == '__main__':
     from sys import version_info
-    print("Test for src.backendManagement.py")
+    print("Test for pyHepGrid.src.backendManagement.py")
     print("Running with: Python ", version_info.major)
     print("This test needs to be ran at gridui")
     arc   = Arc()
