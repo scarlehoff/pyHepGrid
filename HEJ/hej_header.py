@@ -8,19 +8,22 @@ def get_cmd_output(*args,**kwargs):
     outbyt = sp.Popen(args, stdout=sp.PIPE,**kwargs).communicate()[0]
     return outbyt.decode("utf-8")
 
+def base_dir(folder):
+    return "/mt/home/mheil/tst_grid/{0}".format(folder)
+
 # Global Variables
 # Global Variables (default values, can be changed by runcard.py)
 # for initialisation
-runcardDir = "/mt/home/mheil/tst_grid/setup/"
+runcardDir = base_dir("setup/")
 executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/"             # Directory for exe
 executable_exe = "HEJ/bin/HEJ"                               # Exectuable name
 warmupthr  = 0
-producRun  = 20
+producRun  = 200
 baseSeed   = 1
 events     = 123
 jobName    = "HEJ"
 debug_level = 16
-stacksize = 5000 #MB # RAM per job smaller->higher priority
+stacksize = 5000 # MB RAM per job smaller->higher priority # slurm only
 
 # Grid config for LFN
 lfndir         = "DUMMY" #"/grid/group/user/folder/"
@@ -44,7 +47,7 @@ lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = lhapdf_grid_loc
 
 # NNLOJET Database Parameters
-dbname     = "hej_database"
+dbname     = base_dir("hej_database")
 provided_warmup_dir = runcardDir
 runfile    = "hejrun.py"
 
@@ -63,16 +66,16 @@ default_runfolder = None
 warmup_base_dir = ""
 production_base_dir = "/ResultsRunGrids"
 
-short_stats = False
+short_stats = True
 
 # ARC parameters
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 ce_listfile = "computing_elements.txt"
-arcbase  = "/mt/home/mheil/tst_grid/.arc/jobs.dat" # arc database
+arcbase  = base_dir(".arc/jobs.dat") # arc database
 
 # DIRAC parameters
-dirac_name = "user_name_for_dirac"
+dirac_name = "marian.heil"
 DIRAC_BANNED_SITES = []
 
 # finalise.py-only parameters
@@ -85,7 +88,7 @@ port = 9999
 wait_time = 3600
 
 # SLURM parameters
-local_run_directory = "/mt/home/mheil/tst_grid/"
+local_run_directory = base_dir("Wjets/")
 warmup_queue = None
 test_queue = None
 production_queue = None
