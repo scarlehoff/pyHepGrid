@@ -206,8 +206,6 @@ class NNLOJET(ProgramInterface):
             # Assert warmup is present in dir. Will error out if not
             if continue_warmup:
                 match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), run_dir)
-            else:
-                logger.critical("Continuation set in warmup but not requested at run time")
 
     def init_local_warmups(self, provided_warmup=None, continue_warmup=False,
                            local=False):
