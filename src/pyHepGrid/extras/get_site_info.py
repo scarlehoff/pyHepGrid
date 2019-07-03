@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-import src.header
+import pyHepGrid.src.header
 import subprocess as sp
 import sys
 
@@ -101,7 +101,7 @@ class CE_Data():
 
 
 def get_ces(all_ces):
-    from src.header import ce_listfile
+    from pyHepGrid.src.header import ce_listfile
     with open(ce_listfile) as cefile:
         celines = cefile.readlines()
 
@@ -128,7 +128,7 @@ def get_most_free_cores():
                        key=lambda x: getattr(x,"Free"), reverse = False)
     return site_info[-1].CE
 
-if __name__ == "__main__":
+def main():
     args = get_args()
     site_info = get_ces(args.all)
     sortval = "Free"
@@ -159,3 +159,6 @@ if __name__ == "__main__":
                        reverse = args.rev)
     for site in site_info:
         print(site)
+
+if __name__ == "__main__":
+    main()

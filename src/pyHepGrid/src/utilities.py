@@ -22,7 +22,7 @@ def pythonVersion():
 # Runcard parser
 #
 def expandCard(dummy=None):
-    import src.header as header
+    import pyHepGrid.src.header as header
     dictCard = header.dictCard
     rcards = dictCard.keys()
     return rcards, dictCard
@@ -32,7 +32,7 @@ def expandCard(dummy=None):
 #
 def spCall(cmd, suppress_errors = False, shell=False):
     from subprocess import call, DEVNULL
-    from src.header import logger
+    from pyHepGrid.src.header import logger
     if shell:
         cmd = [" ".join(cmd)]
     try:
@@ -48,7 +48,7 @@ def spCall(cmd, suppress_errors = False, shell=False):
 
 def getOutputCall(cmd, suppress_errors = False):
     from subprocess import Popen, PIPE, DEVNULL
-    from src.header import logger
+    from pyHepGrid.src.header import logger
     try:
         logger.debug(cmd)
         if not suppress_errors:
@@ -88,7 +88,7 @@ def checkIfThere(dirPath, file):
         return True
 
 def generatePath(warmup):
-    from src.header import finalisation_script
+    from pyHepGrid.src.header import finalisation_script
     from os import path, makedirs, environ
     from datetime import datetime
     # Check whether the folder already exist
@@ -97,15 +97,15 @@ def generatePath(warmup):
     day      = str(date.day)
     homePath = environ['HOME']
     if warmup:
-        from src.header import warmup_base_dir as baseDir
+        from pyHepGrid.src.header import warmup_base_dir as baseDir
     else:
-        from src.header import production_base_dir as baseDir
+        from pyHepGrid.src.header import production_base_dir as baseDir
     if baseDir is not None:
         basePath = homePath + baseDir
         monthlyPath = basePath + "/" + month
         dailyPath = monthlyPath + "/" + day
     # Only create the folder structure if we are using the "native" get_data
-        from src.header import finalisation_script
+        from pyHepGrid.src.header import finalisation_script
         if not finalisation_script and not path.exists(dailyPath):
             print("Creating daily path at " + dailyPath)
             makedirs(dailyPath)
@@ -133,17 +133,17 @@ def batch_gen(data, batch_size):
 #
 def lhapdfIni():
     import shutil, os
-    import src.header as header
+    import pyHepGrid.src.header as header
     import collections, re
     import json
-    from src.header import logger
+    from pyHepGrid.src.header import logger
     lha_conf = "lhapdf-config"
     if getOutputCall(["which", lha_conf]) != "":
         logger.info("Using lhapdf-config to get lhapdf directory")
         lha_raw = getOutputCall([lha_conf, "--prefix"])
         lha_dir = lha_raw.rstrip()
     else:
-        from src.header import lhapdf as lha_dir
+        from pyHepGrid.src.header import lhapdf as lha_dir
     lhapdf = header.lhapdf_loc
     logger.info("Copying lhapdf from {0} to {1}".format(lha_dir, lhapdf))
     bring_lhapdf_pwd = ["cp", "-LR", lha_dir, lhapdf]
@@ -264,7 +264,7 @@ class TarWrap:
 # GridUtilities
 #
 class GridWrap:
-    from src.header import use_gfal, gfaldir
+    from pyHepGrid.src.header import use_gfal, gfaldir
     # Defaults
     # Need to refactor post dpm gfal
     sendto = ["lcg-cr", "--vo", "pheno", "-l"]
@@ -285,10 +285,10 @@ class GridWrap:
 
     def send(self, tarfile, whereTo, shell=False):
         import os
-        from src.header import logger, gfaldir
+        from pyHepGrid.src.header import logger, gfaldir
         if self.gfal:
             what = ["file:///{0}/".format(os.getcwd()) + tarfile]
-            from src.header import gsiftp
+            from pyHepGrid.src.header import gsiftp
             gridname = os.path.join(gfaldir, whereTo, tarfile)
             cmd = ["gfal-copy", what[0], gridname]
         else:
@@ -315,7 +315,7 @@ class GridWrap:
 
     def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False):
         from os import path
-        from src.header import gfaldir
+        from pyHepGrid.src.header import gfaldir
         if self.gfal:
             gridname = path.join(gfaldir, whereFrom, tarfile)
             destpath = "file://$PWD/{0}".format(whereTo)
@@ -333,7 +333,7 @@ class GridWrap:
         return path.isfile(whereTo)
 
     def delete(self, tarfile, whereFrom):
-        from src.header import gfaldir
+        from pyHepGrid.src.header import gfaldir
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, whereFrom, tarfile)
@@ -344,7 +344,7 @@ class GridWrap:
         return spCall(cmd)
 
     def checkForThis(self, filename, where):
-        from src.header import gfaldir
+        from pyHepGrid.src.header import gfaldir
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, where)
@@ -359,7 +359,7 @@ class GridWrap:
             return False
 
     def get_dir_contents(self, directory):
-        from src.header import gfaldir
+        from pyHepGrid.src.header import gfaldir
         import os
         if self.gfal:
             gridname = os.path.join(gfaldir, directory)
@@ -381,7 +381,7 @@ class GridWrap:
 
 def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES):
     print("Copying {0} to {1}".format(infile, outfile))
-    from src.header import gfaldir
+    from pyHepGrid.src.header import gfaldir
     import os
     protoc = gfaldir.split(":")[0]
     for protocol in PROTOCOLS: # cycle through available protocols until one works.

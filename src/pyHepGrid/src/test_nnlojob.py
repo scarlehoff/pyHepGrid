@@ -1,8 +1,8 @@
 import os
 import sys
-import src.utilities as util
+import pyHepGrid.src.utilities as util
 import shutil
-import src.header as header
+import pyHepGrid.src.header as header
 import subprocess
 
 def setup():
@@ -21,15 +21,15 @@ def run_test(args, runcard):
     # header.debug_level = 99999
 
     if args.runArc:
-        from src.runArcjob import testWrapper
+        from pyHepGrid.src.runArcjob import testWrapper
     elif args.runArcProduction:
-        from src.runArcjob import testWrapperProduction as testWrapper
+        from pyHepGrid.src.runArcjob import testWrapperProduction as testWrapper
     elif args.runDirac:
-        from src.runDiracjob import testWrapper
+        from pyHepGrid.src.runDiracjob import testWrapper
     elif args.runSlurm:
-        from src.runSlurmjob import testWrapper
+        from pyHepGrid.src.runSlurmjob import testWrapper
     elif args.runSlurmProduction:
-        from src.runSlurmjob import testWrapperProduction as testWrapper
+        from pyHepGrid.src.runSlurmjob import testWrapperProduction as testWrapper
     else:
         raise Exception("Choose what you want to test -(A/B/D/E/F)")
 

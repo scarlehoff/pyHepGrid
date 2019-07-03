@@ -1,8 +1,8 @@
 from datetime import datetime
-from src.Backend import Backend
-import src.header as header
-import src.socket_api as sapi
-import src.utilities as util
+from pyHepGrid.src.Backend import Backend
+import pyHepGrid.src.header as header
+import pyHepGrid.src.socket_api as sapi
+import pyHepGrid.src.utilities as util
 
 class RunSlurm(Backend):
     """ Generic class for running Slurm scripts, both production and warmup"""
@@ -22,7 +22,7 @@ class RunSlurm(Backend):
 
     def __do_common_args(self,args,threads, queue):
         """ Setup for all arguments common to production and warmup"""
-        from src.header import slurm_exclusive, slurm_exclude, jobName
+        from pyHepGrid.src.header import slurm_exclusive, slurm_exclude, jobName
 
         if slurm_exclusive:
             args["exclusive"] = "#SBATCH --exclusive"
@@ -85,7 +85,7 @@ class RunSlurm(Backend):
         """ Takes a slurm runfile and submits it to the SLURM batch system.
 
         Returns the jobid and queue used for submission"""
-        from src.header import slurm_exclusive
+        from pyHepGrid.src.header import slurm_exclusive
         if queue is not None:
             queuetag = "-p {0}".format(queue)
         else:
@@ -116,11 +116,11 @@ class RunSlurm(Backend):
 
             ExpandedCard is an override for util.expandCard for use in auto-resubmission
         """
-        from src.header import warmupthr, jobName
+        from pyHepGrid.src.header import warmupthr, jobName
         if test:
-            from src.header import test_queue as queue
+            from pyHepGrid.src.header import test_queue as queue
         else:
-            from src.header import warmup_queue as queue
+            from pyHepGrid.src.header import warmup_queue as queue
 
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
@@ -195,12 +195,12 @@ class RunSlurm(Backend):
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
         rncards, dCards = util.expandCard()
         if test:
-            from src.header import test_queue as queue
+            from pyHepGrid.src.header import test_queue as queue
         else:
-            from src.header import production_queue as queue
+            from pyHepGrid.src.header import production_queue as queue
         job_type="Production"
         self.runfolder = header.runcardDir
-        from src.header import producRun, jobName, baseSeed, production_threads
+        from pyHepGrid.src.header import producRun, jobName, baseSeed, production_threads
         # loop over all .run files defined in runcard.py
 
         header.logger.info("Runcards selected: {0}".format(" ".join(rncards)))
