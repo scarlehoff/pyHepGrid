@@ -4,7 +4,6 @@ from pyHepGrid.src.header import logger
 
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
-from pyHepGrid.src.runcard_parsing import runcard_parsing
 import pyHepGrid.src.runmodes
 
 counter = None
@@ -12,7 +11,7 @@ def init_counter(args):
     global counter
     counter = args
 
-_mode = src.runmodes.mode_selector[src.header.runmode]
+_mode = pyHepGrid.src.runmodes.mode_selector[pyHepGrid.src.header.runmode]
 class Backend(_mode):
     """ Abstract class
     """

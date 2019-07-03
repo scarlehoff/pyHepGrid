@@ -1,4 +1,4 @@
-from src.header import logger
+from pyHepGrid.src.header import logger
 import sys
 
 class ProgramInterface(object):

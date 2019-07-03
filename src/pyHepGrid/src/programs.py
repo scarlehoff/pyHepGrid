@@ -1,12 +1,12 @@
 import os
 import sys
-from src.header import logger
+from pyHepGrid.src.header import logger
 
-import src.utilities as util
-import src.header as header
-import src.runmodes
-from src.runcard_parsing import PROGRAMruncard
-from src.program_interface import ProgramInterface
+import pyHepGrid.src.utilities as util
+import pyHepGrid.src.header as header
+import pyHepGrid.src.runmodes
+from pyHepGrid.src.runcard_parsing import PROGRAMruncard
+from pyHepGrid.src.program_interface import ProgramInterface
 
 class NNLOJET(ProgramInterface):
     def warmup_name(self, runcard, rname):
@@ -52,13 +52,13 @@ class NNLOJET(ProgramInterface):
         needs testing as it needs to be able to remove (many) things for production run
         It relies on the base seed from the src.header file to remove the output
         """
-        from src.header import lfn_output_dir, logger
+        from pyHepGrid.src.header import lfn_output_dir, logger
         logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         checkname = r + "-" + rname
         files = self.gridw.get_dir_contents(lfn_output_dir)
         first = True
         if checkname in files:
-            from src.header import baseSeed, producRun
+            from pyHepGrid.src.header import baseSeed, producRun
             for seed in range(baseSeed, baseSeed + producRun):
                 filename = "output" + checkname + "-" + str(seed) + ".tar.gz"
                 if filename in files:
@@ -100,7 +100,7 @@ class NNLOJET(ProgramInterface):
         and empty list for later use [intended for checkwarmup mode so multiple warmups can
         be checked consecutively.
         """
-        from src.header import lfn_warmup_dir
+        from pyHepGrid.src.header import lfn_warmup_dir
         gridFiles = []
         suppress_errors = False
         if check_only:
@@ -149,7 +149,7 @@ class NNLOJET(ProgramInterface):
 
 
     def get_grid_from_stdout(self,jobid, jobinfo):
-        from src.header import warmup_base_dir, default_runfolder
+        from pyHepGrid.src.header import warmup_base_dir, default_runfolder
         import re, os
 
         stdout = "\n".join(self.cat_job(jobid, jobinfo, store = True))
@@ -184,7 +184,7 @@ class NNLOJET(ProgramInterface):
 
     ### Initialisation functions
     def get_local_dir_name(self,runcard, tag):
-        from src.header import local_run_directory
+        from pyHepGrid.src.header import local_run_directory
         runname = "{0}-{1}".format(runcard, tag)
         dir_name = os.path.join(local_run_directory,runname)
         logger.info("Run directory: {0}".format(dir_name))
@@ -201,7 +201,7 @@ class NNLOJET(ProgramInterface):
     def init_single_local_warmup(self, runcard, tag, continue_warmup = False,
                                  provided_warmup=False):
         import shutil
-        from src.header import executable_src_dir, executable_exe, runcardDir, slurm_kill_exe
+        from pyHepGrid.src.header import executable_src_dir, executable_exe, runcardDir, slurm_kill_exe
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
@@ -241,8 +241,8 @@ class NNLOJET(ProgramInterface):
         """
         from shutil import copy
         import tempfile
-        from src.header import executable_src_dir, executable_exe, logger
-        from src.header import runcardDir as runFol
+        from pyHepGrid.src.header import executable_src_dir, executable_exe, logger
+        from pyHepGrid.src.header import runcardDir as runFol
 
         if local:
             self.init_local_warmups(provided_warmup = provided_warmup,
@@ -322,7 +322,7 @@ class NNLOJET(ProgramInterface):
         more tightly integrated with the warmup equivalent in future - lots of shared code
         that can be refactored."""
         import shutil
-        from src.header import executable_src_dir, executable_exe, runcardDir
+        from pyHepGrid.src.header import executable_src_dir, executable_exe, runcardDir
         run_dir = self.get_local_dir_name(runcard, tag)
         os.makedirs(run_dir,exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
@@ -354,8 +354,8 @@ class NNLOJET(ProgramInterface):
         """
         from shutil import copy
         import tempfile
-        from src.header import runcardDir as runFol
-        from src.header import executable_exe, executable_src_dir, logger
+        from pyHepGrid.src.header import runcardDir as runFol
+        from pyHepGrid.src.header import executable_exe, executable_src_dir, logger
 
         if local:
             self.init_local_production(provided_warmup = provided_warmup)
@@ -417,7 +417,7 @@ class NNLOJET(ProgramInterface):
 
     def get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
-        from src.header import logger
+        from pyHepGrid.src.header import logger
         print(matchname, provided_warmup)
         if os.path.isdir(provided_warmup):
             matches = []
@@ -450,7 +450,7 @@ class NNLOJET(ProgramInterface):
         from shutil import copy
         import tempfile
         import tarfile
-        from src.header import logger
+        from pyHepGrid.src.header import logger
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
@@ -482,7 +482,7 @@ class NNLOJET(ProgramInterface):
                 # Need to override dictCard for single job submission
                 expandedCard = ([runcard], {runcard:rname})
                 logger.info("Warmup not found and job ended. Resubmitting to ARC")
-                from src.runArcjob import runWrapper
+                from pyHepGrid.src.runArcjob import runWrapper
                 runWrapper(rcard, expandedCard = expandedCard)
 
     def _get_prod_args(self, runcard, runtag, seed):
@@ -533,8 +533,8 @@ class HEJ(NNLOJET):
             2 - sent it to the grid storage
         """
         import tempfile
-        from src.header import runcardDir as runFol
-        from src.header import executable_exe, executable_src_dir, lfn_input_dir
+        from pyHepGrid.src.header import runcardDir as runFol
+        from pyHepGrid.src.header import executable_exe, executable_src_dir, lfn_input_dir
 
         if local:
             self.init_local_production(provided_warmup = provided_warmup)
