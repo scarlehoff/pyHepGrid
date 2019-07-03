@@ -34,6 +34,7 @@ gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/g
 LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
 LFC_CATALOG_TYPE = "lfc"
 runfile = "nnlorun.py"
+runmode = "NNLOJET"
 sandbox_dir = "test_sandbox"
 arc_direct = True
 slurm_kill_exe = "{0}/kill_server.py".format(os.path.dirname(os.path.realpath(__file__)))
