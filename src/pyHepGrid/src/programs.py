@@ -1,10 +1,8 @@
 import os
 import sys
 from pyHepGrid.src.header import logger
-
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
-import pyHepGrid.src.runmodes
 from pyHepGrid.src.runcard_parsing import PROGRAMruncard
 from pyHepGrid.src.program_interface import ProgramInterface
 
@@ -16,7 +14,6 @@ class NNLOJET(ProgramInterface):
     def output_name(self, runcard, rname, seed):
         out = "output" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
         return out
-
 
 # Checks for the runcard
     def _check_production(self, runcard):
@@ -78,7 +75,8 @@ class NNLOJET(ProgramInterface):
         local_dir_name = self.get_local_dir_name(r,rname)
         files = os.listdir(local_dir_name)
         runcard = PROGRAMruncard(runcard_file=os.path.join(local_dir_name,r),logger=logger,
-                                 grid_run=False)
+                                 grid_run=False, use_cvmfs=header.use_cvmfs_lhapdf,
+                                 cvmfs_loc=header.cvmfs_lhapdf_location)
         runcard_id = runcard.runcard_dict_case_preserving["id"]
         logs = [f for f in files if f.endswith(".log") and runcard_id in f]
         logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
@@ -193,7 +191,7 @@ class NNLOJET(ProgramInterface):
     def get_stdout_dir_name(self, run_dir):
         return os.path.join(run_dir,"stdout/")
 
-        
+
     def _exe_fullpath(self, executable_src_dir, executable_exe):
         return os.path.join(executable_src_dir, "driver", executable_exe)
 
@@ -209,7 +207,9 @@ class NNLOJET(ProgramInterface):
         path_to_exe_full = self._exe_fullpath(executable_src_dir, executable_exe)
         shutil.copy(path_to_exe_full, run_dir)
         runcard_file = runcardDir + "/" + runcard
-        runcard_obj = PROGRAMruncard(runcard_file, logger=logger, grid_run=False)
+        runcard_obj = PROGRAMruncard(runcard_file, logger=logger, grid_run=False,
+                                     use_cvmfs=header.use_cvmfs_lhapdf,
+                                     cvmfs_loc=header.cvmfs_lhapdf_location)
         self._check_warmup(runcard_obj, continue_warmup)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
@@ -275,7 +275,9 @@ class NNLOJET(ProgramInterface):
             if not os.path.isfile(runFol + "/" + i):
                 self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
             runcard_file = runFol + "/" + i
-            runcard_obj = PROGRAMruncard(runcard_file, logger=logger)
+            runcard_obj = PROGRAMruncard(runcard_file, logger=logger,
+                                         use_cvmfs=header.use_cvmfs_lhapdf,
+                                         cvmfs_loc=header.cvmfs_lhapdf_location)
             self._check_warmup(runcard_obj, continue_warmup)
             if provided_warmup:
                 # Copy warmup to current dir if not already there
@@ -287,16 +289,16 @@ class NNLOJET(ProgramInterface):
             if self.overwrite_warmup:
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
-                    print("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
+                    logger.info("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
                     warmup_files = self._bring_warmup_files(i, rname, shell=True)
                     # if not warmup_files: # check now done in bring warmup files
                     #     logger.critical("No warmup grids found in warmup tar!")
                     files += warmup_files
-                    print("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
+                    logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
             if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
-                print("Removing old version of " + tarfile + " from Grid Storage")
+                print("Removing old version of {0} from Grid Storage".format(tarfile))
                 self.gridw.delete(tarfile, "input")
             if self.gridw.gfal:
                 print("Sending " + tarfile + " to gfal input/")
@@ -311,7 +313,7 @@ class NNLOJET(ProgramInterface):
         os.remove(executable_exe)
         os.chdir(origdir)
 
-    def init_local_production(self, provided_warmup = None, local=False):
+    def init_local_production(self, provided_warmup=None, local=False):
         rncards, dCards = util.expandCard()
         for runcard in rncards:
             self.init_single_local_production(runcard, dCards[runcard],
@@ -324,13 +326,15 @@ class NNLOJET(ProgramInterface):
         import shutil
         from pyHepGrid.src.header import executable_src_dir, executable_exe, runcardDir
         run_dir = self.get_local_dir_name(runcard, tag)
-        os.makedirs(run_dir,exist_ok=True)
+        os.makedirs(run_dir, exist_ok=True)
         stdoutdir = self.get_stdout_dir_name(run_dir)
-        os.makedirs(stdoutdir,exist_ok=True) # directory for slurm stdout files
+        os.makedirs(stdoutdir, exist_ok=True) # directory for slurm stdout files
         path_to_exe_full = self._exe_fullpath(executable_src_dir, executable_exe)
         shutil.copy(path_to_exe_full, run_dir)
         runcard_file = runcardDir + "/" + runcard
-        runcard_obj = PROGRAMruncard(runcard_file, logger=logger)
+        runcard_obj = PROGRAMruncard(runcard_file, logger=logger,
+                                     use_cvmfs=header.use_cvmfs_lhapdf,
+                                     cvmfs_loc=header.cvmfs_lhapdf_location)
         self._check_production(runcard_obj)
         logger.debug("Copying runcard {0} to {1}".format(runcard_file, run_dir))
         shutil.copy(runcard_file, run_dir)
@@ -358,7 +362,7 @@ class NNLOJET(ProgramInterface):
         from pyHepGrid.src.header import executable_exe, executable_src_dir, logger
 
         if local:
-            self.init_local_production(provided_warmup = provided_warmup)
+            self.init_local_production(provided_warmup=provided_warmup)
             return
 
         rncards, dCards = util.expandCard()
@@ -381,14 +385,16 @@ class NNLOJET(ProgramInterface):
             logger.critical("Could not find executable at {0}".format(path_to_exe_full))
         copy(path_to_exe_full, os.getcwd())
         files = [executable_exe]
-        for idx,i in enumerate(rncards):
+        for idx, i in enumerate(rncards):
             logger.info("Initialising {0} [{1}/{2}]".format(i,idx+1,len(rncards)))
             local = False
             # Check whether warmup/production is active in the runcard
             runcard_file = runFol + "/" + i
-            runcard_obj = PROGRAMruncard(runcard_file, logger=logger)
+            runcard_obj = PROGRAMruncard(runcard_file, logger=logger,
+                                         use_cvmfs=header.use_cvmfs_lhapdf,
+                                         cvmfs_loc=header.cvmfs_lhapdf_location)
             self._check_production(runcard_obj)
-            rname   = dCards[i]
+            rname = dCards[i]
             tarfile = i + rname + ".tar.gz"
             copy(runFol + "/" + i, os.getcwd())
             if provided_warmup:
@@ -401,10 +407,10 @@ class NNLOJET(ProgramInterface):
                 warmupFiles = [match]
             else:
                 print("Retrieving warmup file from grid")
-                warmupFiles = self._bring_warmup_files(i, rname,  shell = True)
-            self.tarw.tarFiles(files + [i] +  warmupFiles, tarfile)
+                warmupFiles = self._bring_warmup_files(i, rname, shell=True)
+            self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
-                print("Removing old version of " + tarfile + " from Grid Storage")
+                logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
                 self.gridw.delete(tarfile, "input")
             print("Sending " + tarfile + " to lfn:input/")
             self.gridw.send(tarfile, "input", shell = True)
@@ -523,7 +529,7 @@ class HEJ(NNLOJET):
         out = "output-" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
         return out
 
-    def init_production(self, provided_warmup = None, continue_warmup=False, 
+    def init_production(self, provided_warmup = None, continue_warmup=False,
                         local=False):
         """ Initialises a production run. If a warmup file is provided
         retrieval step is skipped

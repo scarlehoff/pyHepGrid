@@ -23,11 +23,11 @@ class Backend(_mode):
 
     ### IMPORTANT: NAMING FUNCTIONS SHOULD BE THE SAME IN RUNFILE
     def warmup_name(self, runcard, rname):
-        out = "output" + runcard + "-warm-" + rname + ".tar.gz"
+        out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
         return out
 
     def output_name(self, runcard, rname, seed):
-        out = "output" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
+        out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
         return out
 
     def output_name_array(self, runcard, rname, seeds):
@@ -624,6 +624,10 @@ class Backend(_mode):
             'use_gfal' : str(header.use_gfal),
             'events' : str(header.events)
         }
+        if header.use_cvmfs_lhapdf:
+            dictionary.update({
+            "use_cvmfs_lhapdf":header.use_cvmfs_lhapdf,
+            "cvmfs_lhapdf_location":header.cvmfs_lhapdf_location})
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):
