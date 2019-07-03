@@ -18,6 +18,7 @@ rl1 = "arc-ce01.gridpp.rl.ac.uk"
 rl3 = "arc-ce03.gridpp.rl.ac.uk"
 rl4 = "arc-ce04.gridpp.rl.ac.uk"
 rlpheno = "heplnv147.pp.rl.ac.uk"
+manchester = "ce02.tier2.hep.manchester.ac.uk"
 #
 aliases=set(dir()).difference(set(_old_dir))
 #####

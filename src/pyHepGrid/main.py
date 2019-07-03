@@ -8,8 +8,9 @@ from pyHepGrid.src.header import arctable, diractable, arcprodtable, slurmprodta
 from pyHepGrid.src.dbapi  import database
 from pyHepGrid.src.modes import do_proxy, do_run, do_initialise, do_test, do_management
 
-
 def main():
+    # import os 
+    # os.chdir(os.path.dirname(__file__))
     modes = {"pro":do_proxy, "run":do_run, "ini":do_initialise,
              "tes":do_test, "man":do_management}
 

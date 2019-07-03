@@ -38,11 +38,12 @@ lhapdf_grid_loc    = "location/relative/to/lfndir/lhapdf.tar.gz"
 lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
-lhapdf             = get_cmd_output("lhapdf-config","--prefix")
+lhapdf             = "/path/to/lhapdf"
 
 # NNLOJET Database Parameters
-dbname     = "/pat/to/sqlite/database/for/storage.dat"
+dbname     = "/path/to/sqlite/database/for/storage.dat"
 provided_warmup_dir = None
+runfile    = "nnlorun.py"
 
 # Finalisation and storage options
 finalise_no_cores = 15
@@ -70,6 +71,7 @@ arcbase  = "/path/to/ARC/base/.arc/jobs.dat" # arc database
 # DIRAC parameters
 dirac_name = "user_name_for_dirac"
 DIRAC_BANNED_SITES = []
+dirac_platform = "EL7"
 
 # finalise.py-only parameters
 finalise_runcards = None
