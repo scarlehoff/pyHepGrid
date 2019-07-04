@@ -461,7 +461,7 @@ class NNLOJET(ProgramInterface):
         return base_string + warmup_str
 
 
-class HEJ(NNLOJET):
+class HEJ(ProgramInterface):
 
     def _exe_fullpath(self, executable_src_dir, executable_exe):
         return os.path.join(executable_src_dir, executable_exe)
@@ -529,8 +529,9 @@ class HEJ(NNLOJET):
             elif header.provided_warmup_dir:
                 warmup_dir = header.provided_warmup_dir + base_folder
             else:
-                print("Retrieving warmup file from grid")
-                warmupFiles = self._bring_warmup_files(i, dCards[i], shell=True)
+                # print("Retrieving warmup file from grid")
+                # warmupFiles = self._bring_warmup_files(i, dCards[i], shell=True)
+                logger.critical("Retrieving warmup file from grid: Not implemented")
             warmupFiles = ["Process", "Run.dat", "Results.db"]
             for f in warmupFiles:
                 os.system("cp -r "+warmup_dir+f+" "+tmpdir)
