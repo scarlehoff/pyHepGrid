@@ -34,33 +34,9 @@ class NNLOJET(ProgramInterface):
         if runcard.is_production():
             self._press_yes_to_continue("Production is active in runcard")
 
-    def set_overwrite_warmup(self):
-        self.overwrite_warmup = True
-
     # Checks for the grid storage system
-    def _checkfor_existing_output(self, r, rname):
-        """ Check whether given runcard already has output in the grid
-        needs testing as it needs to be able to remove (many) things for production run
-        It relies on the base seed from the src.header file to remove the output
-        """
-        from pyHepGrid.src.header import lfn_output_dir, logger
-        logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
-        checkname = r + "-" + rname
-        files = self.gridw.get_dir_contents(lfn_output_dir)
-        first = True
-        if checkname in files:
-            from pyHepGrid.src.header import baseSeed, producRun
-            for seed in range(baseSeed, baseSeed + producRun):
-                filename = self.output_name(r, rname, seed)
-                if filename in files:
-                    if first:
-                        self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output with a seed you are trying to submit (looked for {}). Do you want to remove it/them?".format(checkname))
-                        logger.warning("Runcard {0} has at least one file at output".format(r))
-                        first = False
-                    self.gridw.delete(filename, lfn_output_dir)
-            logger.info("Output check complete")
 
-    def _checkfor_existing_output_local(self, r, rname, baseSeed, producRun):
+    def check_for_existing_output_local(self, r, rname, baseSeed, producRun):
         """ Check whether given runcard already has output in the local run dir (looks for log files)
         """
         import re
@@ -174,9 +150,6 @@ class NNLOJET(ProgramInterface):
         logger.info("Grid written locally to {0}".format(os.path.relpath(grid_fname)))
 
     ### Initialisation functions
-    def get_stdout_dir_name(self, run_dir):
-        return os.path.join(run_dir, "stdout/")
-
     def _exe_fullpath(self, executable_src_dir, executable_exe):
         return os.path.join(executable_src_dir, "driver", executable_exe)
 
@@ -200,20 +173,12 @@ class NNLOJET(ProgramInterface):
         shutil.copy(slurm_kill_exe, run_dir)
         if provided_warmup:
             # Copy warmup to rundir
-            match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
+            match, local = self._get_local_warmup_name(runcard_obj.warmup_filename(), provided_warmup)
             shutil.copy(match, run_dir)
         if runcard_obj.is_continuation():
             # Assert warmup is present in dir. Will error out if not
             if continue_warmup:
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(), run_dir)
-
-    def init_local_warmups(self, provided_warmup=None, continue_warmup=False,
-                           local=False):
-        rncards, dCards = util.expandCard()
-        for runcard in rncards:
-            self.init_single_local_warmup(runcard, dCards[runcard],
-                                          provided_warmup=provided_warmup,
-                                          continue_warmup=continue_warmup)
+                match, local = self._get_local_warmup_name(runcard_obj.warmup_filename(), run_dir)
 
     def init_warmup(self, provided_warmup=None, continue_warmup=False,
                     local=False):
@@ -267,7 +232,7 @@ class NNLOJET(ProgramInterface):
             self._check_warmup(runcard_obj, continue_warmup)
             if provided_warmup:
                 # Copy warmup to current dir if not already there
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),
+                match, local = self._get_local_warmup_name(runcard_obj.warmup_filename(),
                                                           provided_warmup)
                 files += [match]
             rname = dCards[i]
@@ -298,12 +263,6 @@ class NNLOJET(ProgramInterface):
         os.remove(executable_exe)
         os.chdir(origdir)
 
-    def init_local_production(self, provided_warmup=None, local=False):
-        rncards, dCards = util.expandCard()
-        for runcard in rncards:
-            self.init_single_local_production(runcard, dCards[runcard],
-                                              provided_warmup=provided_warmup)
-
     def init_single_local_production(self, runcard, tag, provided_warmup=False):
         """ Initialise single production run for the local environment. Can probably be
         more tightly integrated with the warmup equivalent in future - lots of shared code
@@ -325,7 +284,7 @@ class NNLOJET(ProgramInterface):
         shutil.copy(runcard_file, run_dir)
         if provided_warmup:
             # Copy warmup to rundir
-            match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),
+            match, local = self._get_local_warmup_name(runcard_obj.warmup_filename(),
                                                       provided_warmup)
             shutil.copy(match, run_dir)
         else:
@@ -384,11 +343,11 @@ class NNLOJET(ProgramInterface):
             tarfile = i + rname + ".tar.gz"
             copy(os.path.join(runFol, i), os.getcwd())
             if provided_warmup:
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),
+                match, local = self._get_local_warmup_name(runcard_obj.warmup_filename(),
                                                           provided_warmup)
                 warmupFiles = [match]
             elif header.provided_warmup_dir:
-                match, local = self.get_local_warmup_name(runcard_obj.warmup_filename(),
+                match, local = self._get_local_warmup_name(runcard_obj.warmup_filename(),
                                                           header.provided_warmup_dir)
                 warmupFiles = [match]
             else:
@@ -407,15 +366,15 @@ class NNLOJET(ProgramInterface):
         os.remove(executable_exe)
         os.chdir(origdir)
 
-    def get_local_warmup_name(self, matchname, provided_warmup):
+    def _get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
-        from pyHepGrid.src.header import logger
+        exclude_patterns = [".txt", ".log"]
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
             for potfile in potential_files:
-                if potfile.lower().startswith(matchname) and\
-                        not potfile.endswith(".txt") and not potfile.endswith(".log"):
+                if potfile.lower().startswith(matchname) \
+                    and not any(potfile.endswith(p) for p in exclude_patterns):
                     matches.append(potfile)
             if len(matches) > 1:
                 logger.critical("Multiple warmup matches found in {1}: {0}".format(" ".join(i for i in matches), provided_warmup))
@@ -433,7 +392,6 @@ class NNLOJET(ProgramInterface):
         else:
             local_match = True
         return match, local_match
-
 
     def check_warmup_files(self, db_id, rcard, resubmit=False):
         """ Provides stats on whether a warmup file exists for a given run and optionally
@@ -589,30 +547,3 @@ class HEJ(NNLOJET):
         # clean up afterwards
         os.chdir(origdir)
         os.system("rm -r "+tmpdir)
-
-    def get_local_warmup_name(self, matchname, provided_warmup):
-        from shutil import copy
-        exclude_patterns = [".txt", ".log", ".tex", ".lhe", ".bak", ".yoda"]
-        if os.path.isdir(provided_warmup):
-            matches = []
-            potential_files = os.listdir(provided_warmup)
-            for potfile in potential_files:
-                if potfile.lower().startswith(matchname) \
-                    and not any(potfile.endswith(p) for p in exclude_patterns):
-                    matches.append(potfile)
-            if len(matches) > 1:
-                logger.critical("Multiple warmup matches found in {1}: {0}".format(" ".join(i for i in matches), provided_warmup))
-            elif len(matches) ==0 :
-                logger.critical("No warmup matches found in {0}.".format(provided_warmup))
-            else:
-                match = os.path.join(provided_warmup, matches[0])
-        else:
-            match = provided_warmup
-        logger.info("Using warmup {0}".format(match))
-        if not match in os.listdir(sys.path[0]):
-            local_match = False
-            copy(match, os.path.basename(match))
-            match = os.path.basename(match)
-        else:
-            local_match = True
-        return match, local_match

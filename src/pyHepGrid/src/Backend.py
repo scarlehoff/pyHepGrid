@@ -75,25 +75,6 @@ class Backend(_mode):
     def set_list_disabled(self):
         self.dbase.set_list_disabled()
 
-    def _press_yes_to_continue(self, msg, error=None, fallback=None):
-        """ Press y to continue
-            or n to exit the program
-        """
-        if self.assume_yes:
-            return 0
-        if msg is not None:
-            print(msg)
-        yn = input("Do you want to continue (y/n) ").lower()
-        if yn.startswith("y"):
-            return 0
-        else:
-            if fallback:
-                return fallback
-            if error:
-                raise Exception(error)
-            else:
-                sys.exit(-1)
-
     def _db_list(self, fields, search_string=None,
                  search_fields=["runcard", "runfolder", "jobtype"]):
         """ Returns a list with a dict for each member of the list.

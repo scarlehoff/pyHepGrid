@@ -205,7 +205,7 @@ class RunSlurm(Backend):
 
         header.logger.info("Runcards selected: {0}".format(" ".join(rncards)))
         for r in rncards:
-            self._checkfor_existing_output_local(r, dCards[r], baseSeed, producRun)
+            self.check_for_existing_output_local(r, dCards[r], baseSeed, producRun)
 
             # Generate the SLURM file
             arguments = self._get_production_args(r, dCards[r], baseSeed, producRun,
