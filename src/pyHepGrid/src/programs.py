@@ -434,6 +434,13 @@ class NNLOJET(ProgramInterface):
                 from pyHepGrid.src.runArcjob import runWrapper
                 runWrapper(rcard, expandedCard=expandedCard)
 
+
+def _init_Sherpa_single(warmup_dir):
+    origdir = os.path.abspath(os.getcwd())
+    os.chdir(warmup_dir)
+    os.system("Sherpa INIT_ONLY=1")
+    os.chdir(origdir)
+
 class HEJ(ProgramInterface):
 
     def _exe_fullpath(self, executable_src_dir, executable_exe):
@@ -446,6 +453,16 @@ class HEJ(ProgramInterface):
     def output_name(self, runcard, rname, seed):
         out = "output-{0}-{1}-{2}.tar.gz".format(runcard, rname, str(seed))
         return out
+
+    def _init_Sherpa(self,warmup_base,rncards):
+        import multiprocessing as mp
+        warmup_dirs = []
+        for idx, i in enumerate(rncards):
+            warmup_dir = warmup_base + i.split("-")[0] + "/"
+            if not os.path.isdir(warmup_dir+"Process"):
+                warmup_dirs.append(warmup_dir)
+        pool = mp.Pool( mp.cpu_count()-5 )
+        pool.map(_init_Sherpa_single, warmup_dirs, chunksize=1)
 
     def init_production(self, provided_warmup=None, continue_warmup=False,
                         local=False):
@@ -476,6 +493,16 @@ class HEJ(ProgramInterface):
             if provided_warmup[0] != "/":
                 provided_warmup = "{0}/{1}".format(origdir, provided_warmup)
 
+        if provided_warmup:
+            warmup_base = provided_warmup
+        elif header.provided_warmup_dir:
+            warmup_base = header.provided_warmup_dir
+        else:
+            # print("Retrieving warmup file from grid")
+            # warmupFiles = self._bring_warmup_files(i, dCards[i], shell=True)
+            logger.critical("Retrieving warmup file from grid: Not implemented")
+        self._init_Sherpa(warmup_base,rncards)
+
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
@@ -497,17 +524,9 @@ class HEJ(ProgramInterface):
                 os.system("cp -r "+run_dir+f+" "+tmpdir)
 
             # warmup files
-            if provided_warmup:
-                warmup_dir = provided_warmup + base_folder
-            elif header.provided_warmup_dir:
-                warmup_dir = header.provided_warmup_dir + base_folder
-            else:
-                # print("Retrieving warmup file from grid")
-                # warmupFiles = self._bring_warmup_files(i, dCards[i], shell=True)
-                logger.critical("Retrieving warmup file from grid: Not implemented")
             warmupFiles = ["Process", "Run.dat", "Results.db"]
             for f in warmupFiles:
-                os.system("cp -r "+warmup_dir+f+" "+tmpdir)
+                os.system("cp -r "+warmup_base+base_folder+f+" "+tmpdir)
 
             # tar up & send to grid storage
             self.tarw.tarFiles(warmupFiles+runFiles, tarfile)

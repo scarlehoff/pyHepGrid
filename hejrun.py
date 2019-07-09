@@ -66,7 +66,7 @@ def parse_arguments():
     parser.add_option("-e", "--executable", help = "Executable to be run", default = "HEJ")
     parser.add_option("-d", "--debug", help = "Debug level", default="0")
     parser.add_option("-s", "--seed", help = "Run seed", default="1")
-    parser.add_option("-E", "--events", help = "Number of events", default="100")
+    parser.add_option("-E", "--events", help = "Number of events", default="-1")
 
     # Grid configuration options
     parser.add_option("-l", "--lfndir", help = "LFNDIR", default = default_user_lfn)
@@ -300,8 +300,10 @@ def end_program(status, debug_level):
 ########################## Actual run commands ##########################
 
 def run_sherpa(args):
-    status = run_command("Sherpa RSEED:={0} -e {1} ANALYSIS_OUTPUT=Sherpa_{0}"
-        .format(args.seed, args.events))
+    command = "Sherpa RSEED:={0} ANALYSIS_OUTPUT=Sherpa_{0}".format(args.seed)
+    if args.events > 0:
+        command += " -e {0} ".format(args.events)
+    status = run_command(command)
     status += run_command("SherpaLHEF SherpaLHE.lhe {0}".format(LHE_FILE))
     # TODO run:
     #   unweighter (maybe)
@@ -333,18 +335,18 @@ def run_HEJ(args):
 ########################## main ##########################
 
 ## test
-# ./main.py test runcards/hej_runcard.py -B
+# pyHepGrid test runcards/hej_runcard.py -B
 # -B = arc production
 ## run on arc
-# ./main.py run runcards/hej_runcard.py -B
+# pyHepGrid run runcards/hej_runcard.py -B
 ## send test job to arc
-# ./main.py run runcards/hej_runcard.py -B --test
+# pyHepGrid run runcards/hej_runcard.py -B --test
 
 ## init (uploads runcards & Sherpa to gfal)
-# ./main.py ini runcards/hej_runcard.py -B
+# pyHepGrid ini runcards/hej_runcard.py -B
 
 ## get job info
-# ./main.py man runcards/hej_runcard.py -B
+# pyHepGrid man runcards/hej_runcard.py -B
 # -s for stats
 # -p for print
 # ask the help for more
