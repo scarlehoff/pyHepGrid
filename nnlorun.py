@@ -117,7 +117,10 @@ def setup_environment(lfndir, lhapdf_dir, options):
         pass
     except ImportError as e:
         # If gfal can't be imported then the site packages need to be added to the python path because ? :(
-        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
+        try:
+            os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] +":"+options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
+        except KeyError:
+            os.environ["PYTHONPATH"] =  options.gfal_location.replace("/bin/","/lib/python2.6/site-packages/")
         os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"] +":"+options.gfal_location.replace("/bin/","/lib/")
     return 0
 
@@ -343,7 +346,7 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
         print_flush("Attempting Protocol {0}".format(protocol))
         for i in range(maxrange): # try max 10 times for now ;)
             cmd = "{2}gfal-copy {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
-            if args.debug > 1:
+            if debug_level > 1:
                 print_flush(cmd)
             retval = syscall(cmd)
             if retval == 0:

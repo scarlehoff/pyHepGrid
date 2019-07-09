@@ -21,7 +21,6 @@ events     = 100
 jobName    = "testjob"
 debug_level = 0
 stacksize = 50 #MB
-events = 300
 
 # Grid config for LFN
 lfndir         = "/grid/group/user/folder/"

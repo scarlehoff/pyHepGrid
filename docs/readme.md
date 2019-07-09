@@ -130,6 +130,14 @@ to drop it.
 We currently need to be in develop mode given the way that the header system works - 
 the plan is for this to change at some point.
 
+Alternatively: if you wish to run pyHepGrid from within a Conda environment, install the scripts by moving to the directory containing setup.py and running:
+```bash
+conda install conda-build
+conda develop .
+```
+If prompted to install any dependencies required by conda-build in step (1), type 'Y' to proceed.
+
+
 After this you should be able to run `pyHepGrid test runcards/your_runcard.py
 -B`. This will execute the your `runfile` locally inside the `test_sandbox`
 folder. You might want to try running it with a *clean* environment, e.g.
