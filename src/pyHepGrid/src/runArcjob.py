@@ -127,7 +127,7 @@ class RunArc(Backend):
                 job_type = "Socket={}".format(port)
 
             # Check whether this run has something on the gridStorage
-            self._checkfor_existing_warmup(r, dCards[r])
+            self.check_for_existing_warmup(r, dCards[r])
             # Generate the XRSL file
             arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr,
                                               sockets=sockets, port=port)
@@ -182,7 +182,7 @@ class RunArc(Backend):
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
-            self._checkfor_existing_output(r, dCards[r])
+            self.check_for_existing_output(r, dCards[r])
             # use the same unique name for all seeds since
             # we cannot multiprocess the arc submission
             xrslfile = None

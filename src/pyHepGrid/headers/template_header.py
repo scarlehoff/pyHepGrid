@@ -13,18 +13,22 @@ def get_cmd_output(*args,**kwargs):
 runcardDir = "/path/to/runcard/directory/" # Directory for grid runcard storage
 executable_src_dir = "/path/to/nnlojet/directory"             # Directory for NNLOJET
 executable_exe = "NNLOJET"                               # Exectuable name
+runmode    = "NNLOJET"
 warmupthr  = 8
 producRun  = 100
 baseSeed   = 100
+events     = 100
 jobName    = "testjob"
 debug_level = 0
 stacksize = 50 #MB
+events = 300
 
 # Grid config for LFN
 lfndir         = "/grid/group/user/folder/"
 lfn_input_dir  = "input"
 lfn_output_dir = "output"
 lfn_warmup_dir = "warmup"
+runfile    = "nnlorun.py"
 
 use_gfal = False
 gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
@@ -39,11 +43,12 @@ lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = "/path/to/lhapdf"
+use_cvmfs_lhapdf = False
+cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/lhapdf/6.1.6"
 
-# NNLOJET Database Parameters
+# SQLite Database Parameters
 dbname     = "/path/to/sqlite/database/for/storage.dat"
 provided_warmup_dir = None
-runfile    = "nnlorun.py"
 
 # Finalisation and storage options
 finalise_no_cores = 15

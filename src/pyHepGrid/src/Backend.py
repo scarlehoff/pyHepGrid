@@ -7,11 +7,14 @@ import pyHepGrid.src.header as header
 import pyHepGrid.src.runmodes
 
 counter = None
+_mode = pyHepGrid.src.runmodes.mode_selector[pyHepGrid.src.header.runmode]
+
+
 def init_counter(args):
     global counter
     counter = args
 
-_mode = pyHepGrid.src.runmodes.mode_selector[pyHepGrid.src.header.runmode]
+
 class Backend(_mode):
     """ Abstract class
     """
@@ -21,15 +24,6 @@ class Backend(_mode):
     cRUN  = 2
     cUNK  = 99
 
-    ### IMPORTANT: NAMING FUNCTIONS SHOULD BE THE SAME IN RUNFILE
-    def warmup_name(self, runcard, rname):
-        out = "output" + runcard + "-warm-" + rname + ".tar.gz"
-        return out
-
-    def output_name(self, runcard, rname, seed):
-        out = "output" + runcard + "-" + rname + "-" + str(seed) + ".tar.gz"
-        return out
-
     def output_name_array(self, runcard, rname, seeds):
         return [self.output_name(runcard, rname, seed) for seed in seeds]
     #########################################################################
@@ -37,38 +31,38 @@ class Backend(_mode):
     def set_oneliner_output(self):
         self.stats_one_line = True
 
-    def stats_print_setup(self, runcard_info, dbid = ""):
+    def stats_print_setup(self, runcard_info, dbid=""):
         from pyHepGrid.src.header import short_stats
         if dbid == "":
             string = ""
         else:
-            string = "{0:5} ".format("["+dbid+"]")
+            string = "{0:5} ".format("[{0}]".format(dbid))
+
         if self.stats_one_line:
             print("{0}-{1}: ".format(dbid, runcard_info["runcard"]), end="")
             return
         if not short_stats:
             string += "=> {0}: {1}".format(runcard_info["runcard"],
-                                       runcard_info["runfolder"])
+                                           runcard_info["runfolder"])
             print(string)
         else:
             string += "{0:20}: {1:10} ".format(runcard_info["runcard"],
-                                         runcard_info["runfolder"])
+                                               runcard_info["runfolder"])
             print(string, end="")
 
-
-    def __init__(self, act_only_on_done = False):
+    def __init__(self, act_only_on_done=False):
         from pyHepGrid.src.header import dbname, baseSeed
         import pyHepGrid.src.dbapi
         self.overwrite_warmup = False
-        self.tarw  = util.TarWrap()
+        self.tarw = util.TarWrap()
         self.gridw = util.GridWrap()
         self.dbase = pyHepGrid.src.dbapi.database(dbname)
         self.table = None
         self.bSeed = baseSeed
         self.jobtype_get = {
-                'P' : self._get_data_production,
-                'W' : self._get_data_warmup,
-                'S' : self._get_data_warmup
+                'P': self._get_data_production,
+                'W': self._get_data_warmup,
+                'S': self._get_data_warmup
                 }
         self.assume_yes = False
         self.act_only_on_done = act_only_on_done
@@ -81,26 +75,8 @@ class Backend(_mode):
     def set_list_disabled(self):
         self.dbase.set_list_disabled()
 
-    def _press_yes_to_continue(self, msg, error = None, fallback = None):
-        """ Press y to continue
-            or n to exit the program
-        """
-        if self.assume_yes:
-            return 0
-        if msg is not None:
-            print(msg)
-        yn = input("Do you want to continue (y/n) ").lower()
-        if yn.startswith("y"):
-            return 0
-        else:
-            if fallback:
-                return fallback
-            if error:
-                raise Exception(error)
-            else:
-                sys.exit(-1)
-
-    def _db_list(self, fields, search_string = None, search_fields = ["runcard", "runfolder", "jobtype"]):
+    def _db_list(self, fields, search_string=None,
+                 search_fields=["runcard", "runfolder", "jobtype"]):
         """ Returns a list with a dict for each member of the list.
             If a search_string is provided, only entries matching searc_string in search_fields
             will be returned
@@ -116,12 +92,12 @@ class Backend(_mode):
         happens before .ac.uk _and_ after the first ."""
         comp_element = id_example.split('.ac.uk')[0]
         if "dur" not in comp_element and "." in comp_element:
-            return " at {}".format(comp_element.split('.',1)[1])
+            return " at {}".format(comp_element.split('.', 1)[1])
         else:
             return ""
 
-    def _multirun(self, function, arguments, n_threads = 15,
-                  arglen=None, use_counter = False, timeout = False):
+    def _multirun(self, function, arguments, n_threads=15,
+                  arglen=None, use_counter=False, timeout=False):
         """ Wrapper for multiprocessing
             For ARC only single thread is allow as the arc database needs
             to be locked
@@ -134,11 +110,11 @@ class Backend(_mode):
 
         if use_counter:
             counter = Value('i', 0)
-            pool   = Pool(threads, initializer = init_counter, initargs = (counter,))
+            pool = Pool(threads, initializer=init_counter, initargs=(counter,))
         else:
-            pool   = Pool(threads)
+            pool = Pool(threads)
         self.dbase.close()
-        result = pool.map(function, arguments, chunksize = 1)
+        result = pool.map(function, arguments, chunksize=1)
         self.dbase.reopen()
         pool.close()
         pool.join()
@@ -624,6 +600,10 @@ class Backend(_mode):
             'use_gfal' : str(header.use_gfal),
             'events' : str(header.events)
         }
+        if header.use_cvmfs_lhapdf:
+            dictionary.update({
+            "use_cvmfs_lhapdf":header.use_cvmfs_lhapdf,
+            "cvmfs_lhapdf_location":header.cvmfs_lhapdf_location})
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):
@@ -631,6 +611,31 @@ class Backend(_mode):
         dictionary['runcard'] = runcard
         dictionary['runname'] = runtag
         return self._format_args(dictionary)
+
+    def _get_prod_args(self, runcard, runtag, seed):
+        """ Returns all arguments for production running. These arguments should
+        match all those required by nnlorun.py"""
+        base_string = self._make_base_argstring(runcard, runtag)
+        production_dict = {'Production': None,
+                        'seed': seed }
+
+        production_str = self._format_args(production_dict)
+        return base_string + production_str
+
+    def _get_warmup_args(self, runcard, runtag, threads=1,
+                         sockets=None, port=header.port):
+        """ Returns all necessary arguments for warmup running. These arguments
+        should match those required by nnlorun.py."""
+        base_string = self._make_base_argstring(runcard, runtag)
+        warmup_dict = {'Warmup': None,
+                       'threads': threads}
+        if sockets:
+            warmup_dict['port'] = port
+            warmup_dict['Host'] = header.server_host
+            warmup_dict['Sockets'] = None
+
+        warmup_str = self._format_args(warmup_dict)
+        return base_string + warmup_str
 
 
 def generic_initialise(runcard, warmup=False, production=False, grid=None,

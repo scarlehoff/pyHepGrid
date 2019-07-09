@@ -11,6 +11,7 @@ header_mappings = {"jmartinez":"pyHepGrid.headers.juan_header",
                    "qpsv27":"pyHepGrid.headers.duncan_hamilton_header",
                    "jniehues":"pyHepGrid.headers.jan_header",
                    "jwhitehead":"pyHepGrid.headers.james_header",
+                   "mheil":"HEJ.hej_header"
                    }
 
 if "phyip3" in socket.gethostname(): # Hack to get different headers for batch and grid w/ same username
