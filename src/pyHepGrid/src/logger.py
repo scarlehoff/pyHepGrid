@@ -4,11 +4,11 @@ import os
 
 ###################################### README #########################################
 # Use:
-# For all print/error/warning statements, import logger from src.header
+# For all print/error/warning statements, import logger from pyHepGrid.src.header
 #
 #             LOG FUNCTION     PURPOSE                                         LEVEL
 # Then use -> logger.debug     debug statement                                   10
-#             logger.value     value setting in src.header                       15
+#             logger.value     value setting in pyHepGrid.src.header                       15
 #             logger.info      generic print                                     20
 #             logger.warning   warning message, continue with running            30
 #             logger.error     error message, continue with running              40

@@ -1,8 +1,8 @@
-from src.Backend import Backend
+from pyHepGrid.src.Backend import Backend
 from datetime import datetime
-import src.utilities as util
-import src.header as header
-import src.socket_api as sapi
+import pyHepGrid.src.utilities as util
+import pyHepGrid.src.header as header
+import pyHepGrid.src.socket_api as sapi
 
 class RunArc(Backend):
     def __init__(self, prod=False, arcscript = None, **kwargs):
@@ -62,11 +62,11 @@ class RunArc(Backend):
         If test = True, use test queue
         """
         import random
-        from src.header import arc_direct
+        from pyHepGrid.src.header import arc_direct
         if test:
-            from src.header import ce_test as ce
+            from pyHepGrid.src.header import ce_test as ce
         else:
-            from src.header import ce_base as ce
+            from pyHepGrid.src.header import ce_base as ce
             if ".dur.scotgrid.ac.uk" in ce:
                 ce = random.choice(["ce1.dur.scotgrid.ac.uk","ce2.dur.scotgrid.ac.uk"])
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
@@ -93,9 +93,9 @@ class RunArc(Backend):
         else:
             rncards, dCards = expandedCard
         if test:
-            from src.header import ce_test as ce
+            from pyHepGrid.src.header import ce_test as ce
         else:
-            from src.header import ce_base as ce
+            from pyHepGrid.src.header import ce_base as ce
 
         if header.sockets_active > 1:
             sockets = True
@@ -113,7 +113,7 @@ class RunArc(Backend):
                 job_type = "Warmup"
 
         self.runfolder = header.runcardDir
-        from src.header import warmupthr, jobName, warmup_base_dir
+        from pyHepGrid.src.header import warmupthr, jobName, warmup_base_dir
         # loop over al .run files defined in runcard.py
 
         header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
@@ -127,7 +127,7 @@ class RunArc(Backend):
                 job_type = "Socket={}".format(port)
 
             # Check whether this run has something on the gridStorage
-            self._checkfor_existing_warmup(r, dCards[r])
+            self.check_for_existing_warmup(r, dCards[r])
             # Generate the XRSL file
             arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr,
                                               sockets=sockets, port=port)
@@ -176,13 +176,13 @@ class RunArc(Backend):
         rncards, dCards = util.expandCard()
         self.runfolder = header.runcardDir
         job_type = "Production"
-        from src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, executable_exe, lfn_output_dir
+        from pyHepGrid.src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, executable_exe, lfn_output_dir
 
         header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
-            self._checkfor_existing_output(r, dCards[r])
+            self.check_for_existing_output(r, dCards[r])
             # use the same unique name for all seeds since
             # we cannot multiprocess the arc submission
             xrslfile = None

@@ -1,17 +1,18 @@
-import headers.template_header as template
+import pyHepGrid.headers.template_header as template
 import sys, os
 from types import ModuleType
 import getpass
 import importlib
-import get_site_info
-import src.logger as logmod
+import pyHepGrid.extras.get_site_info as get_site_info
+import pyHepGrid.src.logger as logmod
 import socket
-header_mappings = {"jmartinez":"headers.juan_header",
-                   "dwalker":"headers.duncan_header",
-                   "qpsv27":"headers.duncan_hamilton_header",
-                   "jniehues":"headers.jan_header",
-                   "jwhitehead":"headers.james_header",
-                   "mheil":"HEJ.hej_header"}
+header_mappings = {"jmartinez":"pyHepGrid.headers.juan_header",
+                   "dwalker":"pyHepGrid.headers.duncan_header",
+                   "qpsv27":"pyHepGrid.headers.duncan_hamilton_header",
+                   "jniehues":"pyHepGrid.headers.jan_header",
+                   "jwhitehead":"pyHepGrid.headers.james_header",
+                   "mheil":"HEJ.hej_header"
+                   }
 
 if "phyip3" in socket.gethostname(): # Hack to get different headers for batch and grid w/ same username
     header_mappings["dwalker"]="headers.duncan_batch_header"
@@ -34,6 +35,7 @@ gsiftp   = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/g
 LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
 LFC_CATALOG_TYPE = "lfc"
 runfile = "nnlorun.py"
+runmode = "NNLOJET"
 sandbox_dir = "test_sandbox"
 arc_direct = True
 slurm_kill_exe = "{0}/kill_server.py".format(os.path.dirname(os.path.realpath(__file__)))
@@ -93,7 +95,7 @@ for i in template_attributes:
 
 
 #### RUNCARD OVERRIDES ####
-from src.argument_parser import runcard as runcard_file
+from pyHepGrid.src.argument_parser import runcard as runcard_file
 if runcard_file:
     runcard = importlib.import_module(runcard_file.replace(".py","").replace("/","."))
     # todo: some safety checks
@@ -110,7 +112,7 @@ if runcard_file:
                 logger.value(attr_name, attr_value, runcard.__name__)
             setattr(this_file, attr_name, attr_value)
 try:
-    from src.argument_parser import override_ce_base as use_best_ce
+    from pyHepGrid.src.argument_parser import override_ce_base as use_best_ce
     if use_best_ce:
         setattr(this_file, "ce_base", get_site_info.get_most_free_cores())
         logger.value("ce_base", ce_base, get_site_info.get_most_free_cores())
@@ -121,7 +123,7 @@ except ImportError as e:
 #### CMD LINE ARG OVERRIDES ####
 
 try:
-    from src.argument_parser import additional_arguments
+    from pyHepGrid.src.argument_parser import additional_arguments
     for attr_name in additional_arguments:
         new = False
         if not hasattr(this_file, attr_name) and attr_name is not "dictCard":

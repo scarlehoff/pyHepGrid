@@ -187,9 +187,9 @@ class database(object):
         self._execute_and_commit(total_query, verbose = True)
 
 def get_next_seed(dbname=None):
-    from src.header import arctable, arcprodtable, diractable, slurmtable, slurmprodtable, dbfields
+    from pyHepGrid.src.header import arctable, arcprodtable, diractable, slurmtable, slurmprodtable, dbfields
     if dbname is None:
-        from src.header import dbname
+        from pyHepGrid.src.header import dbname
     db = database(dbname, tables = [arctable, arcprodtable, diractable, slurmtable, slurmprodtable],
                   fields=dbfields)
     db.list_disabled = True

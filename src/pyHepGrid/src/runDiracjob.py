@@ -1,7 +1,7 @@
-from src.Backend import Backend
+from pyHepGrid.src.Backend import Backend
 from datetime import datetime
-import src.utilities as util
-import src.header as header
+import pyHepGrid.src.utilities as util
+import pyHepGrid.src.header as header
 
 class RunDirac(Backend):
     def __init__(self, **kwargs):
@@ -70,11 +70,11 @@ class RunDirac(Backend):
         rncards, dCards = util.expandCard()
         header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         self.runfolder  = header.runcardDir
-        from src.header    import baseSeed, producRun
+        from pyHepGrid.src.header    import baseSeed, producRun
         for r in rncards:
             header.logger.info("> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
             header.logger.info("> Beginning at seed {0} in increments of 1000.".format(baseSeed))
-            self._checkfor_existing_output(r, dCards[r])
+            self.check_for_existing_output(r, dCards[r])
             jdlfile = None
             args = self._get_prod_args(r, dCards[r], "%s")
             joblist, remaining_seeds, seed_start = [], producRun, baseSeed

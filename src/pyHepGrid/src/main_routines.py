@@ -7,7 +7,7 @@ def management_routine(backend, args):
     if args.list_disabled:
         backend.set_list_disabled()
 
-    from src.header import finalisation_script
+    from pyHepGrid.src.header import finalisation_script
     if args.get_data and finalisation_script:
         backend.get_data(0, custom_get = finalisation_script)
         exit(0)
@@ -44,10 +44,10 @@ def management_routine(backend, args):
 
     if args.get_grid_stdout:
         # if no_ids > 1:
-        #     import src.header as header
+        #     import pyHepGrid.src.header as header
         #     header.logger.critical("Only one job at a time can be used when getting grid output from stdout in case to prevent overwriting")
         if not args.runArc:
-            import src.header as header
+            import pyHepGrid.src.header as header
             header.logger.critical("Getting grid output from stdout only a valid mode for Arc warmups")
 #        elif
 
