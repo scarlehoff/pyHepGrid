@@ -24,6 +24,7 @@ events     = 123
 jobName    = "HEJ"
 debug_level = 16
 stacksize = 5000 # MB RAM per job smaller->higher priority # slurm only
+runmode = "HEJ"
 
 # Grid config for LFN
 lfndir         = "DUMMY" #"/grid/group/user/folder/"
@@ -40,7 +41,9 @@ cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.1
 tmux_location= "tmux"
 
 # Lhapdf config
-lhapdf_grid_loc    = "/cvmfs/pheno.egi.eu/HEJ/LHAPDF" # not needed with cvmfs ?
+cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/HEJ/LHAPDF"
+use_cvmfs_lhapdf = True
+lhapdf_grid_loc    = cvmfs_lhapdf_location # not needed with cvmfs ?
 lhapdf_loc         = "/cvmfs/pheno.egi.eu/HEJ/LHAPDF/bin/lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
