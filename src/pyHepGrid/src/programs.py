@@ -3,7 +3,7 @@ import sys
 from pyHepGrid.src.header import logger
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
-from pyHepGrid.src.runcard_parsing import PROGRAMruncard
+from pyHepGrid.src.runcard_parsing import PROGRAMruncard, warmup_extensions
 from pyHepGrid.src.program_interface import ProgramInterface
 
 
@@ -60,7 +60,7 @@ class NNLOJET(ProgramInterface):
         return
 
     def _bring_warmup_files(self, runcard, rname, shell=False,
-                            check_only=False):
+                            check_only=False, multichannel=False):
         """ Download the warmup file for a run to local directory
         extracts Vegas grid and log file and returns a list with their names
 
@@ -68,7 +68,8 @@ class NNLOJET(ProgramInterface):
         and empty list for later use [intended for checkwarmup mode so multiple warmups can
         be checked consecutively.
         """
-        from pyHepGrid.src.header import lfn_warmup_dir
+
+        from pyHepGrid.src.header import lfn_warmup_dir, logger
         gridFiles = []
         suppress_errors = False
         if check_only:
@@ -78,19 +79,38 @@ class NNLOJET(ProgramInterface):
         logger.debug("Warmup LFN name: {0}".format(outnm))
         tmpnm = "tmp.tar.gz"
         logger.debug("local tmp tar name: {0}".format(tmpnm))
-        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell=shell,
+        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell, 
                                    suppress_errors=suppress_errors)
 
+        success ==  self.__check_pulled_warmup(success, tmpnm, warmup_extensions)
+
+
         if not success and not check_only:
-            logger.critical("Grid files failed to copy from the LFN. Did the warmup complete successfully?")
-        elif not success:
-            return []
+            if self._press_yes_to_continue("Grid files failed to copy. Try backups from individual sockets?") == 0:
+                backup_dir = os.path.join(lfn_warmup_dir,outnm.replace(".tar.gz",""))
+                backups = self.gridw.get_dir_contents(backup_dir)
+                if len(backups) == 0:
+                    logger.critical("No backups found. Did the warmup complete successfully?")
+                else:
+                    backup_files = backups.split()
+                    for idx, backup in enumerate(backup_files):
+                        logger.info("Attempting backup {1} [{0}]".format(idx+1, backup))
+                        success = self.gridw.bring(backup, backup_dir, tmpnm, shell = shell, force=True)
+
+                        success ==  self.__check_pulled_warmup(success, tmpnm, warmup_extensions)
+                        if success:
+                            break
+
+        if not success:
+            logger.critical("Grid files failed to copy. Did the warmup complete successfully?")
+        else:
+            logger.info("Grid files copied ok.")
 
         ## Now extract only the Vegas grid files and log file
-        gridp = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb",
-                 ".V", ".R", ".LO", ".RV", ".VV"]
+        gridp = warmup_extensions
         gridp += [i+"_channel" for i in gridp]
-        extractFiles = self.tarw.extract_extensions(tmpnm, gridp+[".log",".txt","channels"])
+        extractFiles = self.tarw.extract_extensions(tmpnm, 
+                                                    gridp+[".log",".txt","channels"])
         try:
             gridFiles = [i for i in extractFiles if ".log" not in i]
             logfile = [i for i in extractFiles if ".log" in i][0]
@@ -99,11 +119,17 @@ class NNLOJET(ProgramInterface):
                 logger.critical("Logfile not found. Did the warmup complete successfully?")
             else:
                 return []
+
+
+        if multichannel and len([i for i in gridFiles if "channels" in i]) ==0:
+            logger.critical("No multichannel warmup found, but multichannel is set in the runcard.")
+        elif multichannel:
+            logger.info("Multichannel warmup files found.")
         if gridFiles == [] and not check_only: # No grid files found
             logger.critical("Grid files not found in warmup tarfile. Did the warmup complete successfully?")
         elif gridFiles == []:
             return []
-
+        
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
         os.rename(logfile, newlog)
@@ -147,6 +173,20 @@ class NNLOJET(ProgramInterface):
         with open(grid_fname, "w") as gridfile:
             gridfile.write(grid)
         logger.info("Grid written locally to {0}".format(os.path.relpath(grid_fname)))
+
+    def check_runcard_multichannel(self, runcard_obj):
+        try:
+            multichannel_val = runcard_obj.runcard_dict["run"]["multi_channel"]
+            if multichannel_val.lower() == ".true.":
+                logger.info("Multichannel switched ON in runcard")
+                multichannel=True
+            else:
+                multichannel=False
+                logger.info("Multichannel switched OFF in runcard")
+        except KeyError as e:
+            multichannel = False
+            logger.info("Multichannel not enabled in runcard")
+        return multichannel
 
     ### Initialisation functions
     def _exe_fullpath(self, executable_src_dir, executable_exe):
@@ -221,14 +261,15 @@ class NNLOJET(ProgramInterface):
             local = False
             warmupFiles = []
             # Check whether warmup/production is active in the runcard
-            if not os.path.isfile(os.path.join(runFol, i)):
-                self._press_yes_to_continue("Could not find runcard {0}".format(i),
-                                            error="Could not find runcard")
-            runcard_file = runFol + "/" + i
+            runcard_file = os.path.join(runFol, i)
+
+            if not os.path.isfile(runcard_file):
+                self._press_yes_to_continue("Could not find runcard {0}".format(i), error="Could not find runcard")
             runcard_obj = PROGRAMruncard(runcard_file, logger=logger,
                                          use_cvmfs=header.use_cvmfs_lhapdf,
                                          cvmfs_loc=header.cvmfs_lhapdf_location)
             self._check_warmup(runcard_obj, continue_warmup)
+            multichannel = self.check_runcard_multichannel(runcard_obj)
             if provided_warmup:
                 # Copy warmup to current dir if not already there
                 match, local = self._get_local_warmup_name(runcard_obj.warmup_filename(),
@@ -241,7 +282,8 @@ class NNLOJET(ProgramInterface):
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
                     logger.info("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
-                    warmup_files = self._bring_warmup_files(i, rname, shell=True)
+                    warmup_files = self._bring_warmup_files(i, rname, shell=True, 
+                                                            multichannel=multichannel)
                     files += warmup_files
                     logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
@@ -337,6 +379,7 @@ class NNLOJET(ProgramInterface):
             runcard_obj = PROGRAMruncard(runcard_file, logger=logger,
                                          use_cvmfs=header.use_cvmfs_lhapdf,
                                          cvmfs_loc=header.cvmfs_lhapdf_location)
+            multichannel = self.check_runcard_multichannel(runcard_obj)
             self._check_production(runcard_obj)
             rname = dCards[i]
             tarfile = i + rname + ".tar.gz"
@@ -351,7 +394,7 @@ class NNLOJET(ProgramInterface):
                 warmupFiles = [match]
             else:
                 logger.info("Retrieving warmup file from grid")
-                warmupFiles = self._bring_warmup_files(i, rname, shell=True)
+                warmupFiles = self._bring_warmup_files(i, rname, shell=True, multichannel=multichannel)
             self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
