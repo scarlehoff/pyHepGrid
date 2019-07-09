@@ -86,6 +86,9 @@ def parse_arguments():
                       help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
     # LHAPDF options
+    parser.add_option("--use_cvmfs_lhapdf", action = "store_true", default = True)
+    parser.add_option("--cvmfs_lhapdf_location", default="",
+                      help = "Provide a cvmfs location for LHAPDF.")
     parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir",
                       default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
