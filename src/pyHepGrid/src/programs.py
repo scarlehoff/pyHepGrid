@@ -435,32 +435,6 @@ class NNLOJET(ProgramInterface):
                 from pyHepGrid.src.runArcjob import runWrapper
                 runWrapper(rcard, expandedCard=expandedCard)
 
-    def _get_prod_args(self, runcard, runtag, seed):
-        """ Returns all arguments for production running. These arguments should
-        match all those required by nnlorun.py"""
-        base_string = self._make_base_argstring(runcard, runtag)
-        production_dict = {'Production': None,
-                        'seed': seed }
-
-        production_str = self._format_args(production_dict)
-        return base_string + production_str
-
-    def _get_warmup_args(self, runcard, runtag, threads=1,
-                         sockets=None, port=header.port):
-        """ Returns all necessary arguments for warmup running. These arguments
-        should match those required by nnlorun.py."""
-        base_string = self._make_base_argstring(runcard, runtag)
-        warmup_dict = {'Warmup': None,
-                       'threads': threads}
-        if sockets:
-            warmup_dict['port'] = port
-            warmup_dict['Host'] = header.server_host
-            warmup_dict['Sockets'] = None
-
-        warmup_str = self._format_args(warmup_dict)
-        return base_string + warmup_str
-
-
 class HEJ(ProgramInterface):
 
     def _exe_fullpath(self, executable_src_dir, executable_exe):
