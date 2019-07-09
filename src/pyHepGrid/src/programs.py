@@ -17,7 +17,7 @@ class NNLOJET(ProgramInterface):
         out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
         return out
 
-# Checks for the runcard
+    # Checks for the runcard
     def _check_production(self, runcard):
         logger.info("Checking production in runcard {0}".format(runcard.name))
         if runcard.is_warmup():
@@ -35,7 +35,6 @@ class NNLOJET(ProgramInterface):
             self._press_yes_to_continue("Production is active in runcard")
 
     # Checks for the grid storage system
-
     def check_for_existing_output_local(self, r, rname, baseSeed, producRun):
         """ Check whether given runcard already has output in the local run dir (looks for log files)
         """
@@ -351,7 +350,7 @@ class NNLOJET(ProgramInterface):
                                                           header.provided_warmup_dir)
                 warmupFiles = [match]
             else:
-                print("Retrieving warmup file from grid")
+                logger.info("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname, shell=True)
             self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, "input"):
