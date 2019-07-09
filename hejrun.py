@@ -303,7 +303,7 @@ def run_sherpa(args):
     command = "Sherpa RSEED:={0} ANALYSIS_OUTPUT=Sherpa_{0}".format(args.seed)
     if args.events > 0:
         command += " -e {0} ".format(args.events)
-    status = run_command()
+    status = run_command(command)
     status += run_command("SherpaLHEF SherpaLHE.lhe {0}".format(LHE_FILE))
     # TODO run:
     #   unweighter (maybe)
