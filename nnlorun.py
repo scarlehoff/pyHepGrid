@@ -25,15 +25,22 @@ def print_flush(string):
 #                                                                                   #
 #####################################################################################
 
+####### FILE NAME HELPERS #######     
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
-    out = "output" + runcard + "-warm-" + rname + ".tar.gz"
+    out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
+    return out
+
+def warmup_name_ns(runcard, rname, socket_no):
+    # Save socketed run output with as well just in case one fails
+    out = "output{0}-warm-socket_{2}-{1}.tar.gz".format(runcard, rname, socket_no)
     return out
 
 def output_name(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py
-    out = "output" + runcard + "-" + rname + "-" + seed + ".tar.gz"
+    out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
     return out
+####### END FILE NAME HELPERS #######     
 
 #### Override os.system with custom version that auto sets debug level on failure
 # Abusive...
@@ -244,7 +251,6 @@ def tar_this(tarfile, sourcefiles):
     stat = os.system(cmd)
     return stat
 ####### END TAR UTILITIES #######
-
 
 
 
