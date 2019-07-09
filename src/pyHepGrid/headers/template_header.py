@@ -13,9 +13,11 @@ def get_cmd_output(*args,**kwargs):
 runcardDir = "/path/to/runcard/directory/" # Directory for grid runcard storage
 executable_src_dir = "/path/to/nnlojet/directory"             # Directory for NNLOJET
 executable_exe = "NNLOJET"                               # Exectuable name
+runmode    = "NNLOJET"
 warmupthr  = 8
 producRun  = 100
 baseSeed   = 100
+events     = 100
 jobName    = "testjob"
 debug_level = 0
 stacksize = 50 #MB

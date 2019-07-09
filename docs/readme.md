@@ -99,8 +99,8 @@ seen.
 To start using `pyHepGrid` you need to do the following steps.
 
 0. Keep track of all your changes by committing them (e.g. fork the remote)
-1. Create your own header (e.g. copy and edit the `headers/template_header.py`)
-2. Add yourself to the `header_mappings` in `src/header.py`.
+1. Create your own header (e.g. copy and edit the `src/pyHepGrid/headers/template_header.py`)
+2. Add yourself to the `header_mappings` in `src/pyHepGrid/src/header.py`.
     This is used for a python import so a header in `some_folder/your_header.py`
     would require `your_name: some_folder.your_header`
 3. Generate a `runcard.py` similar to `template_runcard.py` inside the `runcards`
@@ -118,12 +118,23 @@ To start using `pyHepGrid` you need to do the following steps.
     To run on Dirac make sure you do not depend on a specific local setup, i.e.
     download all required programs from gfal/lfn or use what is available on the
     `/cvmfs/`.
+6. To install and run the scripts, run
+```bash
+python3 setup.py install --user
+python3 setup.py develop --user
+```
+(Include the `--prefix` option and add to a location contained in `$PYTHONPATH` 
+if you want to install it elsewhere). `--user` is used on the gridui as we don't 
+have access to the python3 installation - if you have your own install, feel free
+to drop it. 
+We currently need to be in develop mode given the way that the header system works - 
+the plan is for this to change at some point.
 
-After this you should be able to run `./main.py test runcards/your_runcard.py
+After this you should be able to run `pyHepGrid test runcards/your_runcard.py
 -B`. This will execute the your `runfile` locally inside the `test_sandbox`
 folder. You might want to try running it with a *clean* environment, e.g.
 without sourcing your `~/.bashrc`. If this works fine you can try submitting to
-the arc  test queue with `./main.py run runcards/your_runcard.py -B --test`. The
+the arc  test queue with `pyHepGrid run runcards/your_runcard.py -B --test`. The
 test queue highly limited in resources. **Only submit a few short jobs to it**
 (<10).
 
@@ -160,26 +171,26 @@ in case of failure)
 
 1. initialise libraries [LHAPDF,(OPENLOOPS?)]
 ```bash
-python3 main.py ini -L
+pyHepGrid ini -L
 ```
 
 2. initialise runcard
 ```bash
-python3 main ini runcard.py -Bn -w warmup.file
+pyHepGrid ini runcard.py -Bn -w warmup.file
 ```
  `-B` is production in arc `-D` in dirac `-A` is warmup in arc
 
 
 3. send the jobs to run with one of:
 ```bash
-python3 main.py run <runcard.py> -A # ARC WARMUP
-python3 main.py run <runcard.py> -B # ARC PRODUCTION
-python3 main.py run <runcard.py> -D # DIRAC PRODUCTION
+pyHepGrid run <runcard.py> -A # ARC WARMUP
+pyHepGrid run <runcard.py> -B # ARC PRODUCTION
+pyHepGrid run <runcard.py> -D # DIRAC PRODUCTION
 ```
 
 4. manage the jobs/view the database of runs with:
 ```bash
-python3 main.py man <runcard.py> -(A/B/D)
+pyHepGrid man <runcard.py> -(A/B/D)
 ```
 
 include the flags:
@@ -189,7 +200,7 @@ include the flags:
   - `-P` to print the job log file (selects last job of set if production)
   - `-I/-i` for job info
 
-For running anything on the grid, the help text in `main.py` (`python3 main.py
+For running anything on the grid, the help text in `pyHepGrid` (`pyHepGrid
 -h`) is useful for hidden options that aren't all necessarily documented(!).
 These features include warmup continuation, getting warmup data from running
 warmup jobs, initialising with your own warmup from elsewhere, database
@@ -208,15 +219,15 @@ You have a choice of setups for this (or you can implement your own)
 
 ### DEFAULT SETUP
 
-By default, `./main.py ships a "--get_data"` script that allows you to retrieve
+By default, `pyHepGrid ships a "--get_data"` script that allows you to retrieve
 jobs looking at the database.
 ```bash
-./main.py man -A --get_data
+pyHepGrid man -A --get_data
 ```
 For ARC runs (either production or warmup)
 or
 ```bash
-./main.py man -D --get_data
+pyHepGrid man -D --get_data
 ```
 for DIRAC runs.
 
@@ -228,7 +239,7 @@ will put the contents in the folders defined in your header.
 For instance, let's suppose you sent 4000 production runs to Dirac on the 1st of
 March and this job's entry is 14, you can do
 ```bash
-./main.py man -D -g -j 14
+pyHepGrid man -D -g -j 14
 ```
 and it will download all .dat and .log files to
 ```bash
@@ -248,7 +259,7 @@ your script (without the `.py` suffix). Happy days!
 ```
 set `finalisation_script = "finalise"` in your header and
 ```bash
-./main.py man --get_data
+pyHepGrid man --get_data
 ```
 
 This will find all of the runcards specified at the top of `finalise_runcard.py`
