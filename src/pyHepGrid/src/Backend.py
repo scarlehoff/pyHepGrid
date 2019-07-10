@@ -527,9 +527,11 @@ class Backend(_mode):
         Custom scripts need to have a public "do_finalise()" function for this to work
         """
         if custom_get:
-            from importlib import import_module
-            custom_get = custom_get.replace("/",".")
-            import_module(custom_get).do_finalise()
+            import importlib
+            sys.path.append(os.path.dirname(os.path.expanduser(custom_get)))
+            finalise_mod = importlib.import_module(
+                os.path.basename(custom_get.replace(".py","")) )
+            finalise_mod.do_finalise()
         else:
             # Check whether we are in a production or a warmup run before continuing
             # and call the corresponding get_function
