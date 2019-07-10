@@ -22,12 +22,12 @@ def print_flush(string):
 #                                                                                   #
 #####################################################################################
 
-# This function must always be the same as the one in Backend.py
+# This function must always be the same as the one in program.py
 def warmup_name(runcard, rname):
     out = runcard + "+" + rname + ".tar.gz"
     return out
 
-# This function must always be the same as the one in Backend.py
+# This function must always be the same as the one in program.py
 def output_name(runcard, rname, seed):
     out = "output-" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
