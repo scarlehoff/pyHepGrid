@@ -26,7 +26,6 @@ head = importlib.import_module(header_mappings[grid_username])
 
 logger.info("Using header file {0}.py".format(head.__name__))
 
-
 ############ General header #################
 # This should not be changed unless you really know what you are doing!
 # Grid config
@@ -51,7 +50,6 @@ dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', '
 # DW This should be a hard link so socketed runs can be sent from other folders/locations
 socket_exe = "{0}/socket_server.py".format(os.path.dirname(os.path.realpath(__file__))) # Eventually will need to point towards where the sockets are
 sockets_active = 1 # 1 socket == no sockets
-
 
 ############ COPY NAMESPACE FROM MY_HEADER #############
 # Only slightly abusive...
@@ -80,7 +78,6 @@ for i in dir(head):
             logger.warning("attribute {0} not present in {1}".format(i, template.__name__))
             logger.info("Please add it in before committing so you don't break compatibility(!)")
 
-
 # Raise errors if you try to run without parameters specified in the template
 for i in template_attributes:
     try:
@@ -90,9 +87,6 @@ for i in template_attributes:
                 i, head.__name__, template.__name__))
         logger.info("Check that {0}.py file is up to date as functionality may be broken otherwise.".format(head.__name__))
         sys.exit(1)
-
-
-
 
 #### RUNCARD OVERRIDES ####
 from pyHepGrid.src.argument_parser import runcard as runcard_file
@@ -118,7 +112,6 @@ try:
         logger.value("ce_base", ce_base, get_site_info.get_most_free_cores())
 except ImportError as e:
     pass
-
 
 #### CMD LINE ARG OVERRIDES ####
 
