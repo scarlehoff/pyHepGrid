@@ -230,7 +230,7 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
         for i in range(maxrange): # try max 10 times for now ;)
             cmd = "{2}gfal-copy --checksum-mode both --abort-on-failure -f {0} {1}".format(
                 infile_tmp, outfile_tmp, args.gfal_location)
-            if args.debug > 1:
+            if debug_level > 1:
                 print_flush(cmd)
             retval = syscall(cmd)
             if retval == 0:
