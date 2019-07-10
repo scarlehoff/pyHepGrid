@@ -250,6 +250,16 @@ class TarWrap:
                         tfile.extract(t, path = extension_dict[ext])
                         break
 
+    def check_filesizes(self, tarred_file, extensions):
+        matches = []
+        sizes = []
+        tuple_ext = tuple(extensions)
+        with tarfile.open(tarred_file, 'r|gz') as tfile:
+            for t in tfile:
+                if t.name.endswith(tuple_ext):
+                    sizes.append(t.size)
+                    matches.append(t.name)
+        return matches, sizes
 
     def extract_extensions(self, tarred_file, extensions):
         matches = []
