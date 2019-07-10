@@ -201,8 +201,8 @@ def do_finalise():
         counter = "[{0}/{1}]".format(rc_no+1,tot_rc_no)
         print("{0:<60}{1:<7}".format(printstr, counter), end="")
 
-        dirtag = runcard + "-" + tag
-        runcard_name_no_seed = "output{0}-".format(dirtag)
+        dirtag = tag + "-" + runcard
+        runcard_name_no_seed = "output-{0}-".format(dirtag)
 
         output_file_names,lfn_seeds = [],[]
         for i in output:
