@@ -8,8 +8,8 @@ import numpy as np
 np.warnings.filterwarnings('ignore')
 # Janky af, but allows script to be called from other directories
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-from src.header import production_base_dir as rootdir
-import src.gnuplot
+from pyHepGrid.src.header import production_base_dir as rootdir
+import pyHepGrid.src.gnuplot
 
 def get_time_hrs(f):
     for line in f.readlines():

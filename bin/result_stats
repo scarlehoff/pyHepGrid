@@ -5,7 +5,7 @@ import time
 import argparse as ap
 # Janky af, but allows script to be called from other directories
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-from src.header import production_base_dir as rootdir
+from pyHepGrid.src.header import production_base_dir as rootdir
 
 def do_search(args, path):
     if args.search is not None:
