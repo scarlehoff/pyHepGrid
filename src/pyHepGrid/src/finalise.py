@@ -29,6 +29,8 @@ os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
 os.environ["LFC_HOME"] = config.lfndir
 
 if FINALISE_ALL:
+    runcards = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    sys.path.append(runcards)
     rc = importlib.import_module(config.finalise_runcards.replace("/","."))
 else:
     sys.path.append(os.path.dirname(os.path.expanduser(sys.argv[1])))
@@ -165,7 +167,7 @@ def print_final_stats(start_time, tot_no_new_files, corrupt_no):
     print("Finish time: {0}".format(end_time.strftime('%H:%M:%S')))
 
 
-def do_finalise():
+def do_finalise(*args):
     start_time = datetime.datetime.now()
 
     abspath = os.path.abspath(__file__)

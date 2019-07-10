@@ -13,7 +13,8 @@ for path, subdirs, files in os.walk(runcard_basedir):
         if fnmatch(name, pattern):
             runcard_files.append(os.path.relpath(os.path.join(path,name),runcard_basedir).replace("/","."))
 runcards = [rc.replace(".py","") for rc in runcard_files if rc.endswith(".py")
-            and "template" not in rc and "finalise" not in rc and "#" not in rc]
+            and "template" not in rc and "finalise" not in rc 
+            and "#" not in rc and "HEJ" not in rc.upper()]
 
 # Disable
 def blockPrint():
