@@ -301,7 +301,7 @@ def end_program(status, debug_level):
 
 def run_sherpa(args):
     command = "Sherpa RSEED:={0} ANALYSIS_OUTPUT=Sherpa_{0}".format(args.seed)
-    if args.events > 0:
+    if int(args.events) > 0:
         command += " -e {0} ".format(args.events)
     status = run_command(command)
     status += run_command("SherpaLHEF SherpaLHE.lhe {0}".format(LHE_FILE))
