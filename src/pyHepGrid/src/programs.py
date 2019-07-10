@@ -59,6 +59,19 @@ class NNLOJET(ProgramInterface):
             self._press_yes_to_continue(None)
         return
 
+
+    def __check_pulled_warmup(self, success, tmpnm, warmup_extensions):
+        if success:
+            matches, sizes = self.tarw.check_filesizes(tmpnm, warmup_extensions)
+            if len(matches)==0:
+                logger.warning("No warmup file found on main Grid Storage")
+                return False
+            if any(size==0 for size in sizes):
+                logger.warning("Empty warmup file found on Grid Storage")
+                return False
+        return success
+
+
     def _bring_warmup_files(self, runcard, rname, shell=False,
                             check_only=False, multichannel=False):
         """ Download the warmup file for a run to local directory
