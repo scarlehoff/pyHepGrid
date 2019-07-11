@@ -39,7 +39,7 @@ def warmup_name_ns(runcard, rname, socket_no):
 def output_name(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
-    return out
+    return os.path.join(rname, out)
 ####### END FILE NAME HELPERS #######     
 
 #### Override os.system with custom version that auto sets debug level on failure
@@ -351,7 +351,7 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
         outfile_tmp = outfile.replace(protoc, protocol)
         print_flush("Attempting Protocol {0}".format(protocol))
         for i in range(maxrange): # try max 10 times for now ;)
-            cmd = "{2}gfal-copy {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
+            cmd = "{2}gfal-copy {0} {1} -p".format(infile_tmp, outfile_tmp, args.gfal_location)
             if debug_level > 1:
                 print_flush(cmd)
             retval = syscall(cmd)

@@ -22,6 +22,10 @@ verbose = config.verbose_finalise
 DELETE_CORRUPTED = False
 MAX_ATTEMPTS = 5
 FINALISE_ALL = True
+try:
+    RECURSIVE = config.recursive_finalise
+except AttributeError as e:
+    RECURSIVE = False
 
 # Set up environment
 os.environ["LFC_HOST"] = config.LFC_HOST
@@ -167,21 +171,25 @@ def print_final_stats(start_time, tot_no_new_files, corrupt_no):
     print("Finish time: {0}".format(end_time.strftime('%H:%M:%S')))
 
 
-def do_finalise(*args):
+def pull_folder(foldername, folders=[]):
+    print("\033[94mPulling Folder: {0} \033[0m".format(foldername))
     start_time = datetime.datetime.now()
 
-    abspath = os.path.abspath(__file__)
-    dname = os.path.dirname(abspath)
-    os.chdir(dname)
-
     if config.use_gfal:
-        cmd = ['gfal-ls', os.path.join(config.gfaldir, config.lfn_output_dir)]
+        cmd = ['gfal-ls', os.path.join(config.gfaldir, foldername), "-l"]
     else:
-        cmd = ['lfc-ls', config.lfn_output_dir]
-    output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+        cmd = ['lfc-ls', foldername]
+    _output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
+    __output = []
+    for x in str(_output).split("\n"):
+        line = x.split()
+        if len(line)>0:
+            __output.append(line)
+
     currentdir = os.getcwd()
 
-    output = set([x for x in str(output).split("\\n")])
+    output_files = set([x[-1] for x in __output if x[0][0] != "d"])
+    output_folders = set([x[-1] for x in __output if x[0][0] == "d"])
 
     pool = mp.Pool(processes=no_processes)
 
@@ -207,7 +215,7 @@ def do_finalise(*args):
         runcard_name_no_seed = "output{0}-".format(dirtag)
 
         output_file_names,lfn_seeds = [],[]
-        for i in output:
+        for i in output_files:
             if runcard_name_no_seed in i:
                 lfn_seeds.append(tarfile_regex.search(i).group(1))
                 output_file_names.append(i)
@@ -217,7 +225,7 @@ def do_finalise(*args):
             continue
 
         # Makes the second runcard slightly quicker by removing matched files :)
-        output = output.difference(set(output_file_names))
+        output_files = output_files.difference(set(output_file_names))
 
         logseeds, targetdir = createdirs(currentdir, dirtag)
         pull_seeds = set(lfn_seeds).difference(logseeds)
@@ -237,6 +245,23 @@ def do_finalise(*args):
             print_run_stats(no_files_found, corrupt_no)
 
     print_final_stats(start_time,tot_no_new_files,tot_no_corrupted_files)
+    if RECURSIVE:
+        for output_folder in output_folders:
+            if any([tag==output_folder for tag in folders]):
+                pull_folder(os.path.join(foldername, output_folder))
+
+
+def do_finalise(*args, **kwargs):
+    tags = set()
+    for i in rc.dictCard:
+        tags = tags.union(set(rc.dictCard[i]))
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
+
+    pull_folder(config.lfn_output_dir, folders=tags)
+
+
 
 if __name__ == "__main__":
     do_finalise()
