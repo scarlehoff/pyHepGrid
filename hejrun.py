@@ -153,6 +153,8 @@ def set_environment(lfndir, lhapdf_dir):
             +":"+args.gfal_location.replace("/bin/","/lib/")
     # HEJ environment
     os.environ['LD_LIBRARY_PATH'] = "./HEJ/lib"+":"+os.environ["LD_LIBRARY_PATH"]
+    # LHAPDF
+    os.environ['LHAPDF_DATA_PATH'] = lhapdf_dir
     return 0
 
 
@@ -339,7 +341,11 @@ if __name__ == "__main__":
     args = parse_arguments()
     debug_level = int(args.debug)
 
-    set_environment(args.lfndir, args.lhapdf_local)
+    lhapdf_local = ""
+    if args.use_cvmfs_lhapdf:
+        lhapdf_local = args.cvmfs_lhapdf_location
+
+    set_environment(args.lfndir, lhapdf_local)
 
     if debug_level > -1:
         # Architecture info
