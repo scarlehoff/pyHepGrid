@@ -50,13 +50,16 @@ else:
     timeoutstr = ""
 
 def mkdir(directory):
-    os.system('mkdir {0} > /dev/null 2>&1'.format(directory))
+    os.system('mkdir {0} -p > /dev/null 2>&1'.format(directory))
 
 
-def get_output_dir_name(runcard):
+def get_output_dir_name(runcard, rtag):
     basedir = config.production_base_dir
     subdir = "{0}{1}".format(config.finalise_prefix, runcard)
-    return os.path.join(basedir, subdir)
+    if rtag is None:
+        return os.path.join(basedir, subdir)
+    else:
+        return os.path.join(basedir, rtag, subdir)
 
 
 def get_PROGRAM_logfiles(logdir):
@@ -65,8 +68,8 @@ def get_PROGRAM_logfiles(logdir):
             yield i
 
 
-def createdirs(currentdir, runcard):
-    targetdir = os.path.join(currentdir, get_output_dir_name(runcard))
+def createdirs(currentdir, runcard, rtag):
+    targetdir = os.path.join(currentdir, get_output_dir_name(runcard, rtag))
     mkdir(targetdir)
     logdir = os.path.join(targetdir, 'log')
     mkdir(logdir)
@@ -233,7 +236,7 @@ def pull_folder(foldername, folders=[], pool=None, rtag=None):
         # Makes the second runcard slightly quicker by removing matched files :)
         output_files = output_files.difference(set(output_file_names))
 
-        logseeds, targetdir = createdirs(currentdir, dirtag)
+        logseeds, targetdir = createdirs(currentdir, dirtag, rtag)
         pull_seeds = set(lfn_seeds).difference(logseeds)
 
         no_files_found = len(pull_seeds)
