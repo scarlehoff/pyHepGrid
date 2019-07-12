@@ -171,7 +171,7 @@ def print_final_stats(start_time, tot_no_new_files, corrupt_no):
     print("Finish time: {0}".format(end_time.strftime('%H:%M:%S')))
 
 
-def pull_folder(foldername, folders=[]):
+def pull_folder(foldername, folders=[], pool=None, rtag=None):
     print("\033[94mPulling Folder: {0} \033[0m".format(foldername))
     start_time = datetime.datetime.now()
 
@@ -179,29 +179,31 @@ def pull_folder(foldername, folders=[]):
         cmd = ['gfal-ls', os.path.join(config.gfaldir, foldername), "-l"]
     else:
         cmd = ['lfc-ls', foldername]
-    _output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
-    __output = []
-    for x in str(_output).split("\n"):
+    cmd_output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
+    output = []
+    for x in str(cmd_output).split("\n"):
         line = x.split()
         if len(line)>0:
-            __output.append(line)
+            output.append(line)
 
     currentdir = os.getcwd()
 
-    output_files = set([x[-1] for x in __output if x[0][0] != "d"])
-    output_folders = set([x[-1] for x in __output if x[0][0] == "d"])
-
-    pool = mp.Pool(processes=no_processes)
+    output_files = set([x[-1] for x in output if x[0][0] != "d"])
+    output_folders = set([x[-1] for x in output if x[0][0] == "d"])
 
     tot_no_new_files = 0
     tot_no_corrupted_files = 0
     use_list = []
     for runcard in rc.dictCard:
         if type(rc.dictCard[runcard]) == str:
-            use_list.append((runcard,rc.dictCard[runcard]))
+            use_list.append((runcard, rc.dictCard[runcard]))
         if type(rc.dictCard[runcard]) == list:
             for entry in rc.dictCard[runcard]:
-                use_list.append((runcard,entry))
+                use_list.append((runcard, entry))
+
+    if rtag is not None:
+        use_list = [i for i in use_list if i[0] == rtag]
+
     tot_rc_no = len(use_list)
     print("Finalisation setup complete. Preparing to pull data.")
 
@@ -248,7 +250,7 @@ def pull_folder(foldername, folders=[]):
     if RECURSIVE:
         for output_folder in output_folders:
             if any([tag==output_folder for tag in folders]):
-                pull_folder(os.path.join(foldername, output_folder))
+                pull_folder(os.path.join(foldername, output_folder), pool=pool, rtag=output_folder)
 
 
 def do_finalise(*args, **kwargs):
@@ -259,7 +261,10 @@ def do_finalise(*args, **kwargs):
     dname = os.path.dirname(abspath)
     os.chdir(dname)
 
-    pull_folder(config.lfn_output_dir, folders=tags)
+
+    pool = mp.Pool(processes=no_processes)
+
+    pull_folder(config.lfn_output_dir, folders=tags, pool=pool)
 
 
 
