@@ -77,7 +77,7 @@ def createdirs(currentdir, runcard):
     return logcheck, targetdir
 
 
-def pullrun(name, seed, run, tmpdir, attempts=0):
+def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
     seedstr = ".s{0}.log".format(seed)
 
     if attempts == 0: # Otherwise already in the tmp dir
@@ -90,7 +90,11 @@ def pullrun(name, seed, run, tmpdir, attempts=0):
         print("Retrying {0}, seed {1}. Attempt {2}".format(run, seed, attempts+1))
 
     if config.use_gfal:
-        gridname = os.path.join(config.gfaldir, config.lfn_output_dir, name)
+        if subfolder is not None:
+            __folder = os.path.join(config.lfn_output_dir, subfolder)
+        else:
+            __folder = config.lfn_output_dir
+        gridname = os.path.join(config.gfaldir, __folder, name)
         command = 'gfal-copy {0} {1} {2} > /dev/null 2>&1'.format(gridname, name, timeoutstr)
     else:
         command = 'lcg-cp lfn:{2}/{0} {0} 2>/dev/null {1}'.format(name,
@@ -118,7 +122,7 @@ def pullrun(name, seed, run, tmpdir, attempts=0):
 
     if corrupted:
         if attempts<MAX_ATTEMPTS-1:
-            return pullrun(name, seed, run, tmpdir, attempts=attempts+1)
+            return pullrun(name, seed, run, tmpdir, subfolder, attempts=attempts+1)
         if DELETE_CORRUPTED:
         # Hits if seed not found in any of the output files
             if verbose:
@@ -134,10 +138,10 @@ def pullrun(name, seed, run, tmpdir, attempts=0):
     return 0
 
 
-def pull_seed_data(seed, runcard, targetdir, runcardname):
+def pull_seed_data(seed, runcard, targetdir, runcardname, subfolder):
     tarname = "{0}{1}.tar.gz".format(runcard,seed)
     tmpdir = os.path.join(targetdir, "log")
-    return pullrun(tarname, seed, runcardname, tmpdir)
+    return pullrun(tarname, seed, runcardname, tmpdir, subfolder)
 
 
 def print_no_files_found(no_files):
@@ -202,7 +206,7 @@ def pull_folder(foldername, folders=[], pool=None, rtag=None):
                 use_list.append((runcard, entry))
 
     if rtag is not None:
-        use_list = [i for i in use_list if i[0] == rtag]
+        use_list = [i for i in use_list if i[1] == rtag]
 
     tot_rc_no = len(use_list)
     print("Finalisation setup complete. Preparing to pull data.")
@@ -238,9 +242,10 @@ def pull_folder(foldername, folders=[], pool=None, rtag=None):
         if no_files_found>0:
             tot_no_new_files += no_files_found
             results = pool.starmap(pull_seed_data, zip(pull_seeds,
-                                             it.repeat(runcard_name_no_seed),
-                                             it.repeat(targetdir),
-                                             it.repeat(runcard)),
+                                                       it.repeat(runcard_name_no_seed),
+                                                       it.repeat(targetdir),
+                                                       it.repeat(runcard), 
+                                                       it.repeat(rtag)),
                                    chunksize=1)
             corrupt_no = sum(results)
             tot_no_corrupted_files += corrupt_no
