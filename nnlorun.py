@@ -39,7 +39,7 @@ def warmup_name_ns(runcard, rname, socket_no):
 def output_name(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
-    return os.path.join(rname, out)
+    return out
 ####### END FILE NAME HELPERS #######     
 
 #### Override os.system with custom version that auto sets debug level on failure
@@ -306,7 +306,7 @@ def store_output(args, socketed=False, socket_config=""):
         os.system("rm -rf {0} {1}".format(args.executable, args.lhapdf_local))
     if args.Production:
         local_out = output_name(args.runcard, args.runname, args.seed)
-        output_file = os.path.join(args.output_folder, local_out)
+        output_file = os.path.join(args.output_folder, args.runname, local_out)
     elif args.Warmup:
         local_out = warmup_name(args.runcard, args.runname)
         output_file = os.path.join(args.warmup_folder, local_out)

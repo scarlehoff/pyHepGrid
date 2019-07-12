@@ -92,19 +92,22 @@ class Arc(Backend):
         """Sometimes the std output doesn't get updated
         but we can choose to access the logs themselves"""
         output_folder = ["file:///tmp/"]
-        cmd_base =  ["globus-url-copy", "-v"]
+        cmd_base =  ["arccp", "-i"]
         cmd_str = "cat /tmp/"
         for jobid in jobids:
-            cmd = cmd_base + [jobid + "/*.log"] + output_folder
-            output = util.getOutputCall(cmd).split()
-            for text in output:
-                if ".log" in text:
-                    util.spCall((cmd_str + text).split())
+            files = util.getOutputCall(["arcls", jobid]).split()
+            logfiles = [i for i in files if i.endswith(".log")]
+            for logfile in logfiles:
+                cmd = cmd_base + [os.path.join(jobid, logfile)] + output_folder
+                output = util.getOutputCall(cmd).split()
+                for text in output:
+                    if ".log" in text:
+                        util.spCall((cmd_str + text).split())
 
     def bring_current_warmup(self, db_id):
         """ Sometimes we want to retrieve the warmup before the job finishes """
         output_folder = ["file:///tmp/"]
-        cmd_base =  ["globus-url-copy", "-v"]
+        cmd_base =  ["gfal-copy", "-v"]
         fields = ["pathfolder", "runfolder", "jobid"]
         data = self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
