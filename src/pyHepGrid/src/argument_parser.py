@@ -100,7 +100,7 @@ if caller_script in ("main.py", "pyHepGrid"):
 
     # Options that act directly on the database
     parser_db = parser.add_argument_group("database options", "These options act directly on the database selecting specific entries or subjobs within said entries")
-    parser_db.add_argument("-j", "--idjob", help = "id of the job to act upon")
+    parser_db.add_argument("-j", "--idjob", help = "id of the job(s) to act on. -jall Will act on all jobs, and multiple jobs can be selected with a comma separated list and ranges sspecified by hyphens. e.g. -j1,4-6 selects jobs 1,4,5,6")
     parser_db.add_argument("-e", "--enableme", help = "enable database entry", action = "store_true")
     parser_db.add_argument("-d", "--disableme", help = "disable database entry", action = "store_true")
     parser_db.add_argument("-f", "--find", help = "Only database entries in which a certain string is found are shown")
