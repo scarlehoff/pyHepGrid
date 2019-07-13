@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
-
+import collections
+from datetime import datetime
+import json
+import os
+import pyHepGrid.src.header as header
+import re
+import shutil
+import subprocess
+from sys import version_info
+import tarfile
+from uuid import uuid4
 #
 # Misc. Utilities
 #
 #
-
 
 MAX_COPY_TRIES = 10
 PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
 
 ###################################
 def pythonVersion():
-    from sys import version_info
     try:
         return version_info.major
     except:
@@ -22,7 +30,6 @@ def pythonVersion():
 # Runcard parser
 #
 def expandCard(dummy=None):
-    import pyHepGrid.src.header as header
     dictCard = header.dictCard
     rcards = dictCard.keys()
     return rcards, dictCard
@@ -31,30 +38,26 @@ def expandCard(dummy=None):
 # Subprocess Wrappers
 #
 def spCall(cmd, suppress_errors = False, shell=False):
-    from subprocess import call, DEVNULL
-    from pyHepGrid.src.header import logger
     if shell:
         cmd = [" ".join(cmd)]
     try:
-        logger.debug(cmd)
+        header.logger.debug(cmd)
         if not suppress_errors:
-            return call(cmd, shell=shell)
+            return subprocess.call(cmd, shell=shell)
         else:
-            return call(cmd, stderr=DEVNULL, stdout=DEVNULL, shell=shell)
+            return subprocess.call(cmd, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, shell=shell)
         return 0
     except:
         raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
         return -1
 
 def getOutputCall(cmd, suppress_errors = False):
-    from subprocess import Popen, PIPE, DEVNULL
-    from pyHepGrid.src.header import logger
     try:
-        logger.debug(cmd)
+        header.logger.debug(cmd)
         if not suppress_errors:
-            outbyt = Popen(cmd, stdout = PIPE).communicate()[0]
+            outbyt = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
         else:
-            outbyt = Popen(cmd, stdout = PIPE, stderr=DEVNULL).communicate()[0]
+            outbyt = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).communicate()[0]
         outstr = outbyt.decode("utf-8")
         return outstr
     except:
@@ -68,7 +71,6 @@ def unique_filename():
     """ Create a unique filename in /tmp/
     if possible, otherwise create file in current directory
     """
-    from uuid import uuid4
     unique_name = str(uuid4().hex)
     filename = "/tmp/" + unique_name
     # better ask for forgiveness than for permission
@@ -79,36 +81,30 @@ def unique_filename():
     except:
         return unique_name
 
-
 def checkIfThere(dirPath, file):
-    from os import path
-    if not path.exists(dirPath + "/" + file):
+    if not os.path.exists(os.path.join(dirPath, file)):
         return False
     else:
         return True
 
 def generatePath(warmup):
-    from pyHepGrid.src.header import finalisation_script
-    from os import path, makedirs, environ
-    from datetime import datetime
     # Check whether the folder already exist
     date     = datetime.now()
     month    = date.strftime("%B")
     day      = str(date.day)
-    homePath = environ['HOME']
+    homePath = os.environ['HOME']
     if warmup:
-        from pyHepGrid.src.header import warmup_base_dir as baseDir
+        baseDir = header.warmup_base_dir
     else:
-        from pyHepGrid.src.header import production_base_dir as baseDir
+        baseDir = header.production_base_dir
     if baseDir is not None:
         basePath = homePath + baseDir
-        monthlyPath = basePath + "/" + month
-        dailyPath = monthlyPath + "/" + day
+        monthlyPath = os.path.join(basePath, month)
+        dailyPath = os.path.join(monthlyPath, day)
     # Only create the folder structure if we are using the "native" get_data
-        from pyHepGrid.src.header import finalisation_script
-        if not finalisation_script and not path.exists(dailyPath):
-            print("Creating daily path at " + dailyPath)
-            makedirs(dailyPath)
+        if not header.finalisation_script and not os.path.exists(dailyPath):
+            header.logger.info("Creating daily path at {0}".format(dailyPath))
+            os.makedirs(dailyPath)
         return dailyPath
 
 def sanitiseGeneratedPath(dailyPath, rname):
@@ -117,7 +113,7 @@ def sanitiseGeneratedPath(dailyPath, rname):
     while checkIfThere(dailyPath, finalname):
         i += 1
         finalname = rname + "-n" + str(i)
-    finalPlacement = dailyPath + "/" + finalname
+    finalPlacement = os.path.join(dailyPath, finalname)
     return finalPlacement
 
 #
@@ -127,25 +123,19 @@ def batch_gen(data, batch_size):
     for i in range(0, len(data), batch_size):
             yield data[i:i+batch_size]
 
-
 #
 # Library initialisation
 #
 def lhapdfIni():
-    import shutil, os
-    import pyHepGrid.src.header as header
-    import collections, re
-    import json
-    from pyHepGrid.src.header import logger
     lha_conf = "lhapdf-config"
     if getOutputCall(["which", lha_conf]) != "":
-        logger.info("Using lhapdf-config to get lhapdf directory")
+        header.logger.info("Using lhapdf-config to get lhapdf directory")
         lha_raw = getOutputCall([lha_conf, "--prefix"])
         lha_dir = lha_raw.rstrip()
     else:
-        from pyHepGrid.src.header import lhapdf as lha_dir
+        lha_dir = header.lhapdf
     lhapdf = header.lhapdf_loc
-    logger.info("Copying lhapdf from {0} to {1}".format(lha_dir, lhapdf))
+    header.logger.info("Copying lhapdf from {0} to {1}".format(lha_dir, lhapdf))
     bring_lhapdf_pwd = ["cp", "-LR", lha_dir, lhapdf]
     spCall(bring_lhapdf_pwd)
     # Remove any unwanted directory from lhapdf
@@ -160,7 +150,7 @@ def lhapdfIni():
                         break
     pdfs = collections.defaultdict(set)
     if header.lhapdf_central_scale_only:
-        logger.info("Removing non-central scales from lhapdf")
+        header.logger.info("Removing non-central scales from lhapdf")
 
     for root, dirs, files in os.walk(lhapdf):
         for xfile in files:
@@ -171,7 +161,7 @@ def lhapdfIni():
                     continue
                 elif header.lhapdf_central_scale_only:
                     prettyname = fullpath.split("/")[-1].replace("_0000.dat","")
-                    logger.info("Including central PDF for {0} from {1}".format(prettyname,root))
+                    header.logger.info("Including central PDF for {0} from {1}".format(prettyname,root))
                 setname = re.sub(r"_([0-9]*).dat","",fullpath.split("/")[-1])
                 member = int(re.search(r"_([0-9]*).dat",fullpath.split("/")[-1]
                                        ).group(0).replace("_","").replace(".dat",""))
@@ -183,7 +173,7 @@ def lhapdfIni():
         pdfs[key]=list(val)
 
     pdfs = dict(pdfs)
-    logger.info("Writing pdf contents to .pdfinfo file")
+    header.logger.info("Writing pdf contents to .pdfinfo file")
 
     with open(pdf_file_name,"w") as pdf_file_obj:
         pdf_file_obj.write(json.dumps(pdfs))
@@ -196,11 +186,11 @@ def lhapdfIni():
     grid_w = GridWrap()
     tar_w.tarDir(lhapdf, lhapdf_gridname)
     size = os.path.getsize(lhapdf_gridname)/float(1<<20)
-    logger.info("> LHAPDF tar size: {0:>6.3f} MB".format(size))
+    header.logger.info("> LHAPDF tar size: {0:>6.3f} MB".format(size))
     if grid_w.checkForThis(lhapdf_gridname, lhapdf_griddir):
-        logger.info("> Removing previous version of lhapdf in the grid")
+        header.logger.info("> Removing previous version of lhapdf in the grid")
         grid_w.delete(lhapdf_gridname, lhapdf_griddir)
-    logger.info("> Sending new lhapdf to grid as {0}".format(lhapdf_gridname))
+    header.logger.info("> Sending new lhapdf to grid as {0}".format(lhapdf_gridname))
     grid_w.send(lhapdf_gridname, lhapdf_griddir)
     shutil.rmtree(lhapdf)
     os.remove(lhapdf_gridname)
@@ -208,8 +198,6 @@ def lhapdfIni():
 #
 # Tar wrappers
 #
-
-import tarfile
 
 class TarWrap:
 
@@ -270,11 +258,11 @@ class TarWrap:
                     tfile.extract(t)
                     matches.append(t.name)
         return matches
+
 #
 # GridUtilities
 #
 class GridWrap:
-    from pyHepGrid.src.header import use_gfal, gfaldir
     # Defaults
     # Need to refactor post dpm gfal
     sendto = ["lcg-cr", "--vo", "pheno", "-l"]
@@ -284,8 +272,7 @@ class GridWrap:
     rename = ["lfc-rename"]
     listfi = ["lfc-ls"]
     lfn = "lfn:"
-    gfal = use_gfal
-
+    gfal = header.use_gfal
 
     def init(self, sendto = None, retriv = None, delete = None, lfn = None):
         if sendto: self.sendto = sendto
@@ -294,12 +281,9 @@ class GridWrap:
         if lfn: self.lfn = lfn
 
     def send(self, tarfile, whereTo, shell=False):
-        import os
-        from pyHepGrid.src.header import logger, gfaldir
         if self.gfal:
             what = ["file:///{0}/".format(os.getcwd()) + tarfile]
-            from pyHepGrid.src.header import gsiftp
-            gridname = os.path.join(gfaldir, whereTo, tarfile)
+            gridname = os.path.join(header.gfaldir, whereTo, tarfile)
             cmd = ["gfal-copy", what[0], gridname]
         else:
             wher = [self.lfn + whereTo + "/" + tarfile]
@@ -312,41 +296,33 @@ class GridWrap:
             if self.checkForThis(tarfile, whereTo):
                 break
             elif count < 3: # 3 attempts before asking for input...
-                logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
-                logger.info("Automatically trying again...")
+                header.logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                header.logger.info("Automatically trying again...")
             else:
-                logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
+                header.logger.warning("{0} could not be copied to the grid storage /for some reason/ after {1} attempt(s)".format(tarfile,count))
                 yn = input(" Try again? (y/n) ")
                 if not yn.startswith("y"):
-                    logger.error("{0} was not copied to the grid storage after {1} attempt(s)".format(tarfile,count))
+                    header.logger.error("{0} was not copied to the grid storage after {1} attempt(s)".format(tarfile,count))
                     break
             count +=1
         return success
 
     def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False):
-        from os import path
-        from pyHepGrid.src.header import gfaldir
         if self.gfal:
-            gridname = path.join(gfaldir, whereFrom, tarfile)
+            gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
             destpath = "file://$PWD/{0}".format(whereTo)
             success = gfal_copy(gridname, destpath)
-            # cmd = ["gfal-copy", gridname, whereTo]
-            # if timeout:
-            #     cmd += ["-t", str(timeout)]
-            # success = spCall(cmd, shell=shell, suppress_errors=suppress_errors)
         else:
             args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
             if timeout:
                 args += ["--sendreceive-timeout", str(timeout)]
             success = spCall(self.retriv + args, shell=shell, suppress_errors=suppress_errors)
-        # lcg-cp returns always 0 even when it fails :___
-        return path.isfile(whereTo)
+            # lcg-cp returns always 0 even when it fails :___
+        return os.path.isfile(whereTo)
 
     def delete(self, tarfile, whereFrom):
-        from pyHepGrid.src.header import gfaldir
-        import os
         if self.gfal:
-            gridname = os.path.join(gfaldir, whereFrom, tarfile)
+            gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
             cmd = ["gfal-rm", gridname]
         else:
             args = [self.lfn + whereFrom + "/" + tarfile]
@@ -354,10 +330,8 @@ class GridWrap:
         return spCall(cmd)
 
     def checkForThis(self, filename, where):
-        from pyHepGrid.src.header import gfaldir
-        import os
         if self.gfal:
-            gridname = os.path.join(gfaldir, where)
+            gridname = os.path.join(header.gfaldir, where)
             cmd = ["gfal-ls", gridname]
         else:
             args = [where]
@@ -369,10 +343,8 @@ class GridWrap:
             return False
 
     def get_dir_contents(self, directory):
-        from pyHepGrid.src.header import gfaldir
-        import os
         if self.gfal:
-            gridname = os.path.join(gfaldir, directory)
+            gridname = os.path.join(header.gfaldir, directory)
             cmd = ["gfal-ls", gridname]
         else:
             args = [directory]
@@ -388,31 +360,27 @@ class GridWrap:
         return spCall(self.delete_dir + [directory])
 
 
-
 def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES):
-    print("Copying {0} to {1}".format(infile, outfile))
-    from pyHepGrid.src.header import gfaldir
-    import os
-    protoc = gfaldir.split(":")[0]
+    header.logger.info("Copying {0} to {1}".format(infile, outfile))
+    protoc = header.gfaldir.split(":")[0]
     for protocol in PROTOCOLS: # cycle through available protocols until one works.
         infile_tmp = infile.replace(protoc, protocol)
         outfile_tmp = outfile.replace(protoc, protocol)
-        print("Attempting Protocol {0}".format(protocol))
+        header.logger.debug("Attempting Protocol {0}".format(protocol))
         for i in range(maxrange): # try max 10 times for now ;)
             cmd = "gfal-copy {0} {1}".format(infile_tmp, outfile_tmp)
-            print(cmd)
+            header.logger.debug(cmd)
             retval = os.system(cmd)
             if retval == 0:
                 return retval
         # if copying to the grid and it has failed, remove before trying again
             if retval != 0 and "file" not in outfile:
                 os.system("gfal-rm {0}".format(outfile_tmp))
+    header.logger.error("Copy failed.")
     return 9999999
 
 
-
 if __name__ == '__main__':
-    from sys import version_info
     tar  = TarWrap()
     grid = GridWrap()
     print("Test for Utilities.py")
