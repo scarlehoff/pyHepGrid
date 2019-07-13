@@ -71,6 +71,7 @@ class RunDirac(Backend):
         header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         self.runfolder  = header.runcardDir
         from pyHepGrid.src.header    import baseSeed, producRun
+
         for r in rncards:
             header.logger.info("> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
             header.logger.info("> Beginning at seed {0} in increments of 1000.".format(baseSeed))
@@ -105,6 +106,8 @@ class RunDirac(Backend):
 
 def runWrapper(runcard, test = None):
     header.logger.info("Running dirac job for {0}".format(runcard))
+    if test is not None:
+        header.logger.critical("--test flag disallowed for Dirac as there is no test queue.")
     dirac = RunDirac()
     dirac.run_wrap_production()
 

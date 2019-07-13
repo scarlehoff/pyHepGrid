@@ -51,12 +51,12 @@ class Backend(_mode):
             print(string, end="")
 
     def __init__(self, act_only_on_done=False):
-        from pyHepGrid.src.header import dbname, baseSeed
+        from pyHepGrid.src.header import dbname, baseSeed, logger
         import pyHepGrid.src.dbapi
         self.overwrite_warmup = False
         self.tarw = util.TarWrap()
         self.gridw = util.GridWrap()
-        self.dbase = pyHepGrid.src.dbapi.database(dbname)
+        self.dbase = pyHepGrid.src.dbapi.database(dbname, logger=logger)
         self.table = None
         self.bSeed = baseSeed
         self.jobtype_get = {

@@ -59,6 +59,10 @@ class Arc(Backend):
     def kill_job(self, jobids, jobinfo):
         """ kills given job """
         self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill the job!")
+
+        if len(jobids) == 0:
+            header.logger.critical("No jobids stored associated with this database entry, therefore nothing to kill.")
+            
         for jobid_set in util.batch_gen(jobids, 150): # Kill in groups of 150 for speeeed
             stripped_set = [i.strip() for i in jobid_set]
             cmd = [self.cmd_kill, "-j", header.arcbase] + stripped_set
@@ -217,6 +221,10 @@ class Dirac(Backend):
     def kill_job(self, jobids, jobinfo):
         """ kill all jobs associated with this run """
         self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill all jobs for this run!")
+
+        if len(jobids) == 0:
+            header.logger.critical("No jobids stored associated with this database entry, therefore nothing to kill.")
+
         cmd = [self.cmd_kill] + jobids
         util.spCall(cmd)
 
@@ -358,6 +366,9 @@ class Slurm(Backend):
 
     def kill_job(self,jobids, jobinfo):
         header.logger.debug(jobids, jobinfo)
+        if len(jobids) == 0:
+            header.logger.critical("No jobids stored associated with this database entry, therefore nothing to kill.")
+
         for jobid in jobids:
             util.spCall(["scancel",str(jobid)])
         # Kill the socket server if needed

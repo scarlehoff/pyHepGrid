@@ -1,7 +1,8 @@
 import sqlite3 as dbapi
 
 class database(object):
-    def __init__(self, db, tables = None, fields = None):
+    def __init__(self, db, tables = None, fields = None, logger=None):
+        self._setup_logger(logger)
         self.dbname = db
         self.db = dbapi.connect(db, check_same_thread=True)
         self.list_disabled = False
@@ -20,6 +21,15 @@ class database(object):
     def reopen(self):
         self.db = dbapi.connect(self.dbname)
 
+    def _setup_logger(self, logger):
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = type("", (), {})()
+            self.logger.info = print
+            self.logger.error = print
+            self.logger.debug = print
+            self.logger.critical = lambda : print
 
     def _protect_fields(self, table, fields):
         """ Make sure all the necessary fields exist in the table
@@ -32,26 +42,26 @@ class database(object):
     def _execute_and_commit(self, query, verbose = False):
         """ Executes a query and commits to the database """
         if verbose:
-            print(query)
+            self.logger.debug(query)
         c = self.db.cursor()
         try:
             c.execute(query)
-        except:
-            print("Executed query: {0}".format(query))
-            raise
+        except Exception as e:
+            self.logger.critical("Executed query: {0}".format(query))
+            raise e # For default case w/ no logger
         c.close()
         self.db.commit()
 
     def _execute_and_retrieve(self, query, verbose = False):
         """ Executes a query and returns the cursor """
         if verbose:
-            print(query)
+            self.logger.debug(query)
         c = self.db.cursor()
         try:
             c.execute(query)
-        except:
-            print("Executed query: {0}".format(query))
-            raise Exception
+        except Exception as e:
+            self.logger.critical("Executed query: {0}".format(query))
+            raise e # For default case w/ no logger
         return c
 
     def _create_table(self, tablename, fields):
@@ -60,7 +70,8 @@ class database(object):
         """
         head = "create table " + tablename
         tail = "("
-        print(fields)
+        self.logger.info("Creating new table: {0}".format(tablename))
+        self.logger.debug(fields)
         for i in fields:
             tail += i + " text, "
         tail = tail[:-2]
@@ -187,11 +198,11 @@ class database(object):
         self._execute_and_commit(total_query, verbose = True)
 
 def get_next_seed(dbname=None):
-    from pyHepGrid.src.header import arctable, arcprodtable, diractable, slurmtable, slurmprodtable, dbfields
+    from pyHepGrid.src.header import arctable, arcprodtable, diractable, slurmtable, slurmprodtable, dbfields, logger
     if dbname is None:
         from pyHepGrid.src.header import dbname
     db = database(dbname, tables = [arctable, arcprodtable, diractable, slurmtable, slurmprodtable],
-                  fields=dbfields)
+                  fields=dbfields, logger=logger)
     db.list_disabled = True
     alldata = db.list_data(arctable,["iseed","jobid"])
     alldata += db.list_data(arcprodtable,["iseed","jobid"])
