@@ -301,11 +301,11 @@ class NNLOJET(ProgramInterface):
                     logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
-            if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
+            if self.gridw.checkForThis(tarfile, header.lfn_input_dir): # Could we cache this? Just to speed up ini
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
-                self.gridw.delete(tarfile, "input")
-            logger.info("Sending {0} to gfal input/".format(tarfile))
-            self.gridw.send(tarfile, "input", shell=True)
+                self.gridw.delete(tarfile, header.lfn_input_dir)
+            logger.info("Sending {0} to gfal {1}/".format(tarfile, header.lfn_input_dir))
+            self.gridw.send(tarfile, header.lfn_input_dir, shell=True)
             if not local:
                 for j in warmupFiles:
                     os.remove(j)
