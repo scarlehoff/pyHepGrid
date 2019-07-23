@@ -1,7 +1,6 @@
 import sqlite3 as dbapi
 
 
-
 class database(object):
     def __init__(self, db, tables = None, fields = None, logger=None):
         self._setup_logger(logger)
@@ -29,9 +28,10 @@ class database(object):
         else:
             database.logger = type("", (), {})()
             database.logger.info = print
+            database.logger.plain = print
             database.logger.error = print
             database.logger.debug = print
-            database.logger.critical = lambda : print
+            database.logger.critical = print
 
     def _protect_fields(self, table, fields):
         """ Make sure all the necessary fields exist in the table

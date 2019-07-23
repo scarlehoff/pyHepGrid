@@ -80,6 +80,8 @@ def setup_logger(debuglevel):
     logger.addHandler(err_handler)
     logger.addHandler(out_handler)
 
+    logger.plain = print
+
     return logger
 
 class MyFormatter(logging.Formatter):
