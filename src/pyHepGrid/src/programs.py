@@ -89,7 +89,7 @@ class NNLOJET(ProgramInterface):
             suppress_errors = True
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
-        logger.debug("Warmup LFN name: {0}".format(outnm))
+        logger.debug("Warmup GFAL name: {0}".format(outnm))
         tmpnm = "tmp.tar.gz"
         logger.debug("local tmp tar name: {0}".format(tmpnm))
         success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell, 
@@ -294,7 +294,7 @@ class NNLOJET(ProgramInterface):
             if self.overwrite_warmup:
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
-                    logger.info("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
+                    logger.info("Warmup found in GFAL:{0}!".format(header.lfn_warmup_dir))
                     warmup_files = self._bring_warmup_files(i, rname, shell=True, 
                                                             multichannel=multichannel)
                     files += warmup_files
@@ -406,11 +406,11 @@ class NNLOJET(ProgramInterface):
                 logger.info("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname, shell=True, multichannel=multichannel)
             self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
-            if self.gridw.checkForThis(tarfile, "input"):
+            if self.gridw.checkForThis(tarfile, header.lfn_input_dir):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
-                self.gridw.delete(tarfile, "input")
-            logger.info("Sending {0} to lfn:input/".format(tarfile))
-            self.gridw.send(tarfile, "input", shell=True)
+                self.gridw.delete(tarfile, header.lfn_input_dir)
+            logger.info("Sending {0} to GFAL {1}/".format(tarfile, header.lfn_input_dir))
+            self.gridw.send(tarfile, header.lfn_input_dir, shell=True)
             if local:
                 util.spCall(["rm", i, tarfile])
             else:
