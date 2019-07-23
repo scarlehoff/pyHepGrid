@@ -50,10 +50,11 @@ def management_routine(backend, args):
         if not args.runArc:
             pyHepGrid.src.header.logger.critical("Getting grid output from stdout only a valid mode for Arc warmups")
 
-    for idx,db_id in enumerate(id_list):
+    for idx, db_id in enumerate(id_list):
         # Setup for printing/function args
         jdx= idx+1
-        alljobinfo = backend.dbase.list_data(backend.table, ["runcard", "jobtype","runfolder","iseed","no_runs"], db_id)
+        request_fields = ["runcard", "jobtype","runfolder","iseed","no_runs"]
+        alljobinfo = backend.dbase.list_data(backend.table, request_fields, db_id)
         if len(alljobinfo)==0:
             pyHepGrid.src.header.logger.critical("Job {0} requested, which does not exist in database".format(db_id))
         jobinfo = alljobinfo[0]
@@ -61,56 +62,60 @@ def management_routine(backend, args):
         jobid = backend.get_id(db_id) # a list
         printstr = "{0} for job"+" {0}: {3:20} [{1}/{2}]".format(db_id,jdx,no_ids,jobname)
 
-        # Could we make this more generic? i.e pass function with opt args using a dictionary
-        # rather than just making copies for every possibility
-        # Options that keep the database entry after they are done
         if args.simple_string:
             backend.set_oneliner_output()
 
+        # Could we make this more generic? i.e pass function with opt args using a dictionary
+        # rather than just making copies for every possibility
+        # Options that keep the database entry after they are done
         if args.stats:
             backend.stats_job(db_id)
-        elif args.info or args.infoVerbose:
+        if args.info or args.infoVerbose:
             pyHepGrid.src.header.logger.info(printstr.format("Retrieving information"))
             backend.status_job(jobid, args.infoVerbose)
-        elif args.renewArc:
+        if args.renewArc:
             pyHepGrid.src.header.logger.info(printstr.format("Renewing proxy"))
             backend.renew_proxy(jobid)
-        elif args.printme:
+        if args.printme:
             pyHepGrid.src.header.logger.info(printstr.format("Printing information"))
             backend.cat_job(jobid, jobinfo, print_stderr = args.error)
             pyHepGrid.src.header.logger.info("\n") # As our % complete sometimes has a carriage return :P
-        elif args.printmelog:
+        if args.printmelog:
             pyHepGrid.src.header.logger.info(printstr.format("Printing information from logfile"))
             backend.cat_log_job(jobid, jobinfo)
-        elif args.getmewarmup:
+        if args.checkwarmup:
+            backend.check_warmup_files(db_id, args.runcard, resubmit=args.resubmit)
+        if args.getmewarmup:
             pyHepGrid.src.header.logger.info(printstr.format("Retrieving warmup"))
             backend.bring_current_warmup(db_id)
-        elif args.checkwarmup:
-            backend.check_warmup_files(db_id, args.runcard, resubmit=args.resubmit)
-        elif args.get_grid_stdout:
+        if args.get_grid_stdout:
             backend.get_grid_from_stdout(jobid, jobinfo)
-        elif args.completion:
+        if args.completion:
             backend.get_completion_stats(jobid, jobinfo, args)
 
         # Options that deactivate the database entry once they're done
-        elif args.get_data:
+        if args.get_data:
             pyHepGrid.src.header.logger.info(printstr.format("Retrieving data"))
             backend.get_data(db_id)
             if not args.done and not args.runSlurmProduction: # if --done is used we assume there are jobs which are _not_ done
                 backend.disable_db_entry(db_id)
-        elif args.kill_job:
+        if args.kill_job:
             pyHepGrid.src.header.logger.info(printstr.format("Killing"))
             backend.kill_job(jobid, jobinfo)
             backend.disable_db_entry(db_id)
-        elif args.clean:
+        if args.clean:
             pyHepGrid.src.header.logger.info(printstr.format("Cleaning"))
             backend.clean_job(jobid)
             backend.disable_db_entry(db_id)
 
         # Enable back any database entry
-        elif args.enableme:
+        if args.enableme:
             backend.enable_db_entry(db_id)
-        elif args.disableme:
+        if args.disableme:
             backend.disable_db_entry(db_id)
-        else:
+
+        if not any([args.stats, args.info, args.infoVerbose, args.renewArc, args.printme, 
+                    args.printmelog, args.checkwarmup, args.getmewarmup, args.get_grid_stdout, 
+                    args.completion, args.get_data, args.kill_job, args.clean, args.enableme, 
+                    args.disableme]):
             pyHepGrid.src.header.logger.plain(" ".join(i for i in jobid))
