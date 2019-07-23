@@ -22,10 +22,7 @@ verbose = config.verbose_finalise
 DELETE_CORRUPTED = False
 MAX_ATTEMPTS = 5
 FINALISE_ALL = True
-try:
-    RECURSIVE = config.recursive_finalise
-except AttributeError as e:
-    RECURSIVE = False
+RECURSIVE = config.recursive_finalise
 
 # Set up environment
 os.environ["LFC_HOST"] = config.LFC_HOST
@@ -42,10 +39,7 @@ else:
 
 
 if config.timeout is not None:
-    if config.use_gfal:
-        timeoutstr = "-t {0}".format(config.timeout)
-    else:
-        timeoutstr = "--sendreceive-timeout {0}".format(config.timeout)
+    timeoutstr = "-t {0}".format(config.timeout)
 else:
     timeoutstr = ""
 
@@ -92,16 +86,14 @@ def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
     elif verbose:
         print("Retrying {0}, seed {1}. Attempt {2}".format(run, seed, attempts+1))
 
-    if config.use_gfal:
-        if subfolder is not None:
-            __folder = os.path.join(config.lfn_output_dir, subfolder)
-        else:
-            __folder = config.lfn_output_dir
-        gridname = os.path.join(config.gfaldir, __folder, name)
-        command = 'gfal-copy {0} {1} {2} > /dev/null 2>&1'.format(gridname, name, timeoutstr)
+
+    if subfolder is not None:
+        __folder = os.path.join(config.lfn_output_dir, subfolder)
     else:
-        command = 'lcg-cp lfn:{2}/{0} {0} 2>/dev/null {1}'.format(name,
-                                                                  timeoutstr, config.lfn_output_dir)
+        __folder = config.lfn_output_dir
+    gridname = os.path.join(config.gfaldir, __folder, name)
+    command = 'gfal-copy {0} {1} {2} > /dev/null 2>&1'.format(gridname, name, timeoutstr)
+    
     os.system(command)
 
     corrupted = True
@@ -130,13 +122,8 @@ def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
         # Hits if seed not found in any of the output files
             if verbose:
                 print("\033[91mDeleting {0}, seed {1}. Corrupted output\033[0m".format(run, seed))
-            if config.use_gfal:
-                os.system("gfal-rm {0}".format(gridname))
-                return 1
-            else:
-                os.system('lcg-del -a lfn:{1}/{0} >/dev/null 2>&1'.format(name, config.lfn_output_dir))
-                os.system('lfc-rm {1}/{0} -f 2>/dev/null 2>&1'.format(name, config.lfn_output_dir))
-                os.system('lfc-rm {1}/{0} -a -f >/dev/null 2>&1'.format(name, config.lfn_output_dir))
+            os.system("gfal-rm {0}".format(gridname))
+            return 1
         return 1
     return 0
 
@@ -182,10 +169,8 @@ def pull_folder(foldername, folders=[], pool=None, rtag=None):
     print("\033[94mPulling Folder: {0} \033[0m".format(foldername))
     start_time = datetime.datetime.now()
 
-    if config.use_gfal:
-        cmd = ['gfal-ls', os.path.join(config.gfaldir, foldername), "-l"]
-    else:
-        cmd = ['lfc-ls', foldername]
+    cmd = ['gfal-ls', os.path.join(config.gfaldir, foldername), "-l"]
+    
     cmd_output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
     output = []
     for x in str(cmd_output).split("\n"):
@@ -273,7 +258,6 @@ def do_finalise(*args, **kwargs):
     pool = mp.Pool(processes=no_processes)
 
     pull_folder(config.lfn_output_dir, folders=tags, pool=pool)
-
 
 
 if __name__ == "__main__":

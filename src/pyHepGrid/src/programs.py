@@ -304,10 +304,7 @@ class NNLOJET(ProgramInterface):
             if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
                 self.gridw.delete(tarfile, "input")
-            if self.gridw.gfal:
-                logger.info("Sending {0} to gfal input/".format(tarfile))
-            else:
-                logger.info("Sending {0} to lfn input/".format(tarfile))
+            logger.info("Sending {0} to gfal input/".format(tarfile))
             self.gridw.send(tarfile, "input", shell=True)
             if not local:
                 for j in warmupFiles:

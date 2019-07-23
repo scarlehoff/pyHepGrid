@@ -55,9 +55,13 @@ def getOutputCall(cmd, suppress_errors = False):
     try:
         header.logger.debug(cmd)
         if not suppress_errors:
-            outbyt = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+            outbyt, syserr = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()
+            header.logger.debug(outbyt)
+            header.logger.debug(syserr)
         else:
-            outbyt = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).communicate()[0]
+            outbyt, syserr = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).communicate()
+            header.logger.debug(outbyt)
+            header.logger.debug(syserr)
         outstr = outbyt.decode("utf-8")
         return outstr
     except:
@@ -72,7 +76,7 @@ def unique_filename():
     if possible, otherwise create file in current directory
     """
     unique_name = str(uuid4().hex)
-    filename = "/tmp/" + unique_name
+    filename = os.path.join("/tmp/", unique_name)
     # better ask for forgiveness than for permission
     try:
         f = open(filename, 'w')
@@ -176,7 +180,7 @@ def lhapdfIni():
     header.logger.info("Writing pdf contents to .pdfinfo file")
 
     with open(pdf_file_name,"w") as pdf_file_obj:
-        pdf_file_obj.write(json.dumps(pdfs))
+        pdf_file_obj.write(json.dumps(pdfs, sort_keys=True, indent=2, separators=(',', ':')))
 
     # Tar lhapdf and prepare it to be sent
     lhapdf_remote = header.lhapdf_grid_loc
@@ -265,30 +269,12 @@ class TarWrap:
 class GridWrap:
     # Defaults
     # Need to refactor post dpm gfal
-    sendto = ["lcg-cr", "--vo", "pheno", "-l"]
-    retriv = ["lcg-cp"]
-    delcmd = ["lcg-del", "-a"]
-    delete_dir = ["lfc-rm", "-r"]
-    rename = ["lfc-rename"]
-    listfi = ["lfc-ls"]
-    lfn = "lfn:"
-    gfal = header.use_gfal
-
-    def init(self, sendto = None, retriv = None, delete = None, lfn = None):
-        if sendto: self.sendto = sendto
-        if retriv: self.retriv = retriv
-        if delete: self.delcmd = delete
-        if lfn: self.lfn = lfn
 
     def send(self, tarfile, whereTo, shell=False):
-        if self.gfal:
-            what = ["file:///{0}/".format(os.getcwd()) + tarfile]
-            gridname = os.path.join(header.gfaldir, whereTo, tarfile)
-            cmd = ["gfal-copy", what[0], gridname]
-        else:
-            wher = [self.lfn + whereTo + "/" + tarfile]
-            what = ["file:" + tarfile]
-            cmd = self.sendto + wher + what
+        what = ["file:///{0}/".format(os.getcwd()) + tarfile]
+        gridname = os.path.join(header.gfaldir, whereTo, tarfile)
+        cmd = ["gfal-copy", what[0], gridname]
+
         count = 1
         while True:
             success = spCall(cmd, shell=shell)
@@ -308,34 +294,19 @@ class GridWrap:
         return success
 
     def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False):
-        if self.gfal:
-            gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
-            destpath = "file://$PWD/{0}".format(whereTo)
-            success = gfal_copy(gridname, destpath)
-        else:
-            args = [self.lfn + whereFrom + "/" + tarfile, whereTo]
-            if timeout:
-                args += ["--sendreceive-timeout", str(timeout)]
-            success = spCall(self.retriv + args, shell=shell, suppress_errors=suppress_errors)
-            # lcg-cp returns always 0 even when it fails :___
+        gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
+        destpath = "file://$PWD/{0}".format(whereTo)
+        success = gfal_copy(gridname, destpath)
         return os.path.isfile(whereTo)
 
     def delete(self, tarfile, whereFrom):
-        if self.gfal:
-            gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
-            cmd = ["gfal-rm", gridname]
-        else:
-            args = [self.lfn + whereFrom + "/" + tarfile]
-            cmd = self.delcmd + args
+        gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
+        cmd = ["gfal-rm", gridname]
         return spCall(cmd)
 
     def checkForThis(self, filename, where):
-        if self.gfal:
-            gridname = os.path.join(header.gfaldir, where)
-            cmd = ["gfal-ls", gridname]
-        else:
-            args = [where]
-            cmd = self.listfi + args
+        gridname = os.path.join(header.gfaldir, where)
+        cmd = ["gfal-ls", gridname]
         output = getOutputCall(cmd)
         if filename in output:
             return True
@@ -343,12 +314,8 @@ class GridWrap:
             return False
 
     def get_dir_contents(self, directory):
-        if self.gfal:
-            gridname = os.path.join(header.gfaldir, directory)
-            cmd = ["gfal-ls", gridname]
-        else:
-            args = [directory]
-            cmd = self.listfi + args
+        gridname = os.path.join(header.gfaldir, directory)
+        cmd = ["gfal-ls", gridname]
         output = getOutputCall(cmd)
         return output
 

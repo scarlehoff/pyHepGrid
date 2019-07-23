@@ -169,7 +169,7 @@ def parse_arguments():
                       help = "storage  output folder, relative to --lfndir or gfaldir depending on which mode is used", 
                       default = "output")
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
-    parser.add_option("--use_gfal", default="False", 
+    parser.add_option("--use_gfal", default="True", 
                       help = "Use gfal for file transfer and storage rather than the LFN")
     parser.add_option("--gfal_location", default="", 
                       help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
@@ -198,19 +198,16 @@ def parse_arguments():
     (options, positional) = parser.parse_args()
 
     # Post-parsing setup/checks
-    if options.use_gfal.lower() == "true":
-        options.use_gfal = True
-        print_flush("Using GFAL for storage")
-        if os.path.exists(options.gfal_location) and options.gfal_location != "":
-            print_flush("GFAL location found: {0}".format(options.gfal_location))
-        elif options.gfal_location == "":
-            print_flush("Using environment gfal. Good luck!")
-        else:
-            print_flush("GFAL location not found!")
-            print_flush("Reverting to environment gfal commands")
-            options.gfal_location = ""
+
+    print_flush("Using GFAL for storage")
+    if os.path.exists(options.gfal_location) and options.gfal_location != "":
+        print_flush("GFAL location found: {0}".format(options.gfal_location))
+    elif options.gfal_location == "":
+        print_flush("Using environment gfal. Good luck!")
     else:
-        options.use_gfal = False
+        print_flush("GFAL location not found!")
+        print_flush("Reverting to environment gfal commands")
+        options.gfal_location = ""
 
     if options.use_cvmfs_lhapdf:
         print_flush("Using cvmfs LHAPDF at {0}".format(options.cvmfs_lhapdf_location))
