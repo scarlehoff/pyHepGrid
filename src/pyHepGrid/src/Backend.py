@@ -367,7 +367,7 @@ class Backend(_mode):
         For arc jobs stdoutput will be downloaded in said folder as well
         """
         # Retrieve data from database
-        from pyHepGrid.src.header import arcbase, lfn_warmup_dir
+        from pyHepGrid.src.header import arcbase, grid_warmup_dir
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
@@ -399,7 +399,7 @@ class Backend(_mode):
             print("Trying to retrieve data from grid storage anyway")
         # Retrieve warmup from the grid storage warmup folder
         wname = self.warmup_name(runcard, runfolder)
-        self.gridw.bring(wname, lfn_warmup_dir, finfolder + "/" + wname)
+        self.gridw.bring(wname, grid_warmup_dir, finfolder + "/" + wname)
 
     def _get_data_production(self, db_id):
         """ Given a database entry, retrieve its data from
@@ -459,7 +459,7 @@ class Backend(_mode):
         from pyHepGrid.src.header import finalise_no_cores as n_threads
         # Check which of the seeds actually produced some data
         all_remote = self.output_name_array(self.rcard, self.rfolder, seeds)
-        all_output = self.gridw.get_dir_contents(header.lfn_output_dir).split()
+        all_output = self.gridw.get_dir_contents(header.grid_output_dir).split()
         remote_tarfiles = list(set(all_remote) & set(all_output))
         print("Found data for {0} of the {1} seeds.".format(len(remote_tarfiles), len(seeds)))
 
@@ -486,7 +486,7 @@ class Backend(_mode):
         """
         local_name = filename.replace("output", "")
         local_file = self.rfolder + "/" + local_name
-        self.gridw.bring(filename, header.lfn_output_dir, local_file, timeout = header.timeout)
+        self.gridw.bring(filename, header.grid_output_dir, local_file, timeout = header.timeout)
         from os.path import isfile
         if isfile(local_name):
             global counter
@@ -592,9 +592,9 @@ class Backend(_mode):
             'gfal_location' : header.cvmfs_gfal_location,
             'executable' : header.executable_exe,
             'lfndir' : header.lfndir,
-            'input_folder' : header.lfn_input_dir,
-            'output_folder' : header.lfn_output_dir,
-            'warmup_folder' : header.lfn_warmup_dir,
+            'input_folder' : header.grid_input_dir,
+            'output_folder' : header.grid_output_dir,
+            'warmup_folder' : header.grid_warmup_dir,
             'lhapdf_grid' : header.lhapdf_grid_loc,
             'lhapdf_local' : header.lhapdf_loc,
             'debug' : str(header.debug_level),

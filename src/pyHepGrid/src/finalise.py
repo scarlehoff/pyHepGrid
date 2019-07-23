@@ -27,7 +27,7 @@ RECURSIVE = config.recursive_finalise
 # Set up environment
 os.environ["LFC_HOST"] = config.LFC_HOST
 os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
-os.environ["LFC_HOME"] = config.lfndir
+# os.environ["LFC_HOME"] = config.lfndir
 
 if FINALISE_ALL:
     runcards = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -88,9 +88,9 @@ def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
 
 
     if subfolder is not None:
-        __folder = os.path.join(config.lfn_output_dir, subfolder)
+        __folder = os.path.join(config.grid_output_dir, subfolder)
     else:
-        __folder = config.lfn_output_dir
+        __folder = config.grid_output_dir
     gridname = os.path.join(config.gfaldir, __folder, name)
     command = 'gfal-copy {0} {1} {2} > /dev/null 2>&1'.format(gridname, name, timeoutstr)
     
@@ -257,7 +257,7 @@ def do_finalise(*args, **kwargs):
 
     pool = mp.Pool(processes=no_processes)
 
-    pull_folder(config.lfn_output_dir, folders=tags, pool=pool)
+    pull_folder(config.grid_output_dir, folders=tags, pool=pool)
 
 
 if __name__ == "__main__":

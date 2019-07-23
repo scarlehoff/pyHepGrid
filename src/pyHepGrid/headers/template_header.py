@@ -24,9 +24,9 @@ stacksize = 50 #MB
 
 # Grid config for LFN
 lfndir         = "/grid/group/user/folder/"
-lfn_input_dir  = "input"
-lfn_output_dir = "output"
-lfn_warmup_dir = "warmup"
+grid_input_dir  = "input"
+grid_output_dir = "output"
+grid_warmup_dir = "warmup"
 runfile    = "nnlorun.py"
 
 use_gfal = False
@@ -57,6 +57,8 @@ timeout = 60
 # if using a script, ./main.py will call script.do_finalise()
 finalisation_script = None
 verbose_finalise = True
+recursive_finalise = True
+
 # Default folder for use only if finalisation script != None
 # Gives a default destination for warmup files pulled whilst run is in progress
 default_runfolder = None
