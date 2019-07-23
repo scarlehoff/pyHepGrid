@@ -591,7 +591,6 @@ class Backend(_mode):
         dictionary = {
             'gfal_location' : header.cvmfs_gfal_location,
             'executable' : header.executable_exe,
-            'lfndir' : header.lfndir,
             'input_folder' : header.grid_input_dir,
             'output_folder' : header.grid_output_dir,
             'warmup_folder' : header.grid_warmup_dir,

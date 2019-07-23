@@ -181,7 +181,7 @@ class RunArc(Backend):
             Writes XRSL file with the appropiate information and send a producrun
             number of jobs to the arc queue
         """
-        from pyHepGrid.src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, executable_exe
+        from pyHepGrid.src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lhapdf_loc, executable_exe
 
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }

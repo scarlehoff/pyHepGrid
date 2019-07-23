@@ -22,8 +22,7 @@ jobName    = "testjob"
 debug_level = 0
 stacksize = 50 #MB
 
-# Grid config for LFN
-lfndir         = "/grid/group/user/folder/"
+# Grid folder config
 grid_input_dir  = "input"
 grid_output_dir = "output"
 grid_warmup_dir = "warmup"
@@ -37,7 +36,7 @@ cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.1
 tmux_location= "tmux"
 
 # Lhapdf config
-lhapdf_grid_loc    = "location/relative/to/lfndir/lhapdf.tar.gz"
+lhapdf_grid_loc    = "location/relative/to/gfaldir/lhapdf.tar.gz"
 lhapdf_loc         = "lhapdf"
 lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
