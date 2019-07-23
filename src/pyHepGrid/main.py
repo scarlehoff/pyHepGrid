@@ -20,7 +20,7 @@ def main():
     # Checks on modes
     db = database(dbname, tables = [arctable, diractable, slurmtable,
                                     arcprodtable,slurmprodtable],
-                  fields = dbfields)
+                  fields = dbfields, logger=logger)
 
     mode = rmode[:3]
 

@@ -1,13 +1,13 @@
+import datetime
 import os
-import sys
 from pyHepGrid.src.header import logger
-
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
 import pyHepGrid.src.runmodes
+import sys
 
 counter = None
-_mode = pyHepGrid.src.runmodes.mode_selector[pyHepGrid.src.header.runmode]
+_mode = pyHepGrid.src.runmodes.mode_selector[header.runmode]
 
 
 def init_counter(args):
@@ -32,7 +32,6 @@ class Backend(_mode):
         self.stats_one_line = True
 
     def stats_print_setup(self, runcard_info, dbid=""):
-        from pyHepGrid.src.header import short_stats
         if dbid == "":
             string = ""
         else:
@@ -41,7 +40,7 @@ class Backend(_mode):
         if self.stats_one_line:
             print("{0}-{1}: ".format(dbid, runcard_info["runcard"]), end="")
             return
-        if not short_stats:
+        if not header.short_stats:
             string += "=> {0}: {1}".format(runcard_info["runcard"],
                                            runcard_info["runfolder"])
             print(string)
@@ -51,12 +50,12 @@ class Backend(_mode):
             print(string, end="")
 
     def __init__(self, act_only_on_done=False):
-        from pyHepGrid.src.header import dbname, baseSeed, logger
+        from pyHepGrid.src.header import dbname, baseSeed
         import pyHepGrid.src.dbapi
         self.overwrite_warmup = False
         self.tarw = util.TarWrap()
         self.gridw = util.GridWrap()
-        self.dbase = pyHepGrid.src.dbapi.database(dbname, logger=logger)
+        self.dbase = pyHepGrid.src.dbapi.database(dbname, logger=header.logger)
         self.table = None
         self.bSeed = baseSeed
         self.jobtype_get = {
@@ -114,6 +113,7 @@ class Backend(_mode):
         else:
             pool = Pool(threads)
         self.dbase.close()
+
         result = pool.map(function, arguments, chunksize=1)
         self.dbase.reopen()
         pool.close()
@@ -201,7 +201,6 @@ class Backend(_mode):
         """ Returns a list of DIRAC/ARC jobids
         for a given database entry
         """
-        from pyHepGrid.src.header import logger
         jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
         try:
             idout = jobid[0]['jobid']
@@ -304,8 +303,6 @@ class Backend(_mode):
         self.dbase.update_entry(self.table, db_id, field_name, status_str)
 
     def print_stats(self, done, wait, run, fail, unk, total):
-        import datetime
-        from pyHepGrid.src.header import short_stats
         total2 = done + wait + run + fail + unk
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
@@ -314,7 +311,7 @@ class Backend(_mode):
             print(string)
             return
 
-        if short_stats:
+        if header.short_stats:
             def addline(name, val, colour):
                 if val > 0:
                     return "{0}{1}: {2:4}  \033[0m".format(colour, name, val)
@@ -339,7 +336,6 @@ class Backend(_mode):
     def _do_stats_job(self, jobid_raw):
         """ version of stats job multithread ready
         """
-        import pyHepGrid.src.header as header
         if isinstance(jobid_raw, tuple):
             if jobid_raw[1] == self.cDONE or jobid_raw[1] == self.cFAIL:
                 return jobid_raw[1]
@@ -641,7 +637,6 @@ class Backend(_mode):
 
 def generic_initialise(runcard, warmup=False, production=False, grid=None,
                        overwrite_grid=False, local=False):
-    from pyHepGrid.src.header import logger
     logger.info("Initialising runcard: {0}".format(runcard))
     back = Backend()
 

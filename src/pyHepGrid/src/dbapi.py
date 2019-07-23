@@ -1,5 +1,7 @@
 import sqlite3 as dbapi
 
+
+
 class database(object):
     def __init__(self, db, tables = None, fields = None, logger=None):
         self._setup_logger(logger)
@@ -23,13 +25,13 @@ class database(object):
 
     def _setup_logger(self, logger):
         if logger is not None:
-            self.logger = logger
+            database.logger = logger
         else:
-            self.logger = type("", (), {})()
-            self.logger.info = print
-            self.logger.error = print
-            self.logger.debug = print
-            self.logger.critical = lambda : print
+            database.logger = type("", (), {})()
+            database.logger.info = print
+            database.logger.error = print
+            database.logger.debug = print
+            database.logger.critical = lambda : print
 
     def _protect_fields(self, table, fields):
         """ Make sure all the necessary fields exist in the table
@@ -39,28 +41,26 @@ class database(object):
         for field in new_fields:
             self._insert_field_in_table(table, field, "text")
 
-    def _execute_and_commit(self, query, verbose = False):
+    def _execute_and_commit(self, query):
         """ Executes a query and commits to the database """
-        if verbose:
-            self.logger.debug(query)
+        database.logger.debug("<SQL> {0}".format(query))
         c = self.db.cursor()
         try:
             c.execute(query)
         except Exception as e:
-            self.logger.critical("Executed query: {0}".format(query))
+            database.logger.critical("Executed query: {0}".format(query))
             raise e # For default case w/ no logger
         c.close()
         self.db.commit()
 
-    def _execute_and_retrieve(self, query, verbose = False):
+    def _execute_and_retrieve(self, query):
         """ Executes a query and returns the cursor """
-        if verbose:
-            self.logger.debug(query)
+        database.logger.debug("<SQL> {0}".format(query))
         c = self.db.cursor()
         try:
             c.execute(query)
         except Exception as e:
-            self.logger.critical("Executed query: {0}".format(query))
+            database.logger.critical("Executed query: {0}".format(query))
             raise e # For default case w/ no logger
         return c
 
@@ -70,13 +70,14 @@ class database(object):
         """
         head = "create table " + tablename
         tail = "("
-        self.logger.info("Creating new table: {0}".format(tablename))
-        self.logger.debug(fields)
+        database.logger.info("Creating new table: {0}".format(tablename))
+        database.logger.debug("<TABLE FIELDS> {0}".format(fields))
+
         for i in fields:
             tail += i + " text, "
         tail = tail[:-2]
         tail += ");"
-        self._execute_and_commit(head + tail, verbose = True)
+        self._execute_and_commit(head + tail)
         return 0
 
     def _is_this_table_here(self, table):
@@ -114,7 +115,7 @@ class database(object):
         query = "ALTER TABLE {0} ADD {1} {2}".format(table, field, f_type)
         self._execute_and_commit(query)
 
-    def _how_many_tables(self):
+    def _how_many_tables(self): # DW 23/7/19 This function doesn't seem to be used. Deprecated?
         """ Returns number of tables in database """
         query = "select * from sqlite_master WHERE type='table';"
         c = self._execute_and_retrieve(query)
@@ -135,7 +136,7 @@ class database(object):
         head = "insert into {0} ({1})".format(table, ", ".join(keys))
         tail = "values ('{}');".format("', '".join(data))
         query = head + " " + tail
-        self._execute_and_commit(query, verbose=True)
+        self._execute_and_commit(query)
 
     def list_data(self, table, keys, job_id = None):
         """ List fields keys for active entries in database unless job_id is provided
@@ -171,7 +172,7 @@ class database(object):
             search_queries.append("{0} like '%{1}%'".format(field, find_this))
         search_string += " OR ".join(search_queries) + ")"
         query = "select {0} from {1} {2};".format(keystr, table, search_string)
-        c = self._execute_and_retrieve(query, verbose = True)
+        c = self._execute_and_retrieve(query)
         dataList = []
         for i in c:
             tmpDic = {}
@@ -195,7 +196,7 @@ class database(object):
         query = "update " + table + " set status = \"" + newStat + "\""
         rid = " where rowid = " + rowid + " ;"
         total_query = query + rid
-        self._execute_and_commit(total_query, verbose = True)
+        self._execute_and_commit(total_query)
 
 def get_next_seed(dbname=None):
     from pyHepGrid.src.header import arctable, arcprodtable, diractable, slurmtable, slurmprodtable, dbfields, logger
@@ -204,22 +205,22 @@ def get_next_seed(dbname=None):
     db = database(dbname, tables = [arctable, arcprodtable, diractable, slurmtable, slurmprodtable],
                   fields=dbfields, logger=logger)
     db.list_disabled = True
-    alldata = db.list_data(arctable,["iseed","jobid"])
-    alldata += db.list_data(arcprodtable,["iseed","jobid"])
-    alldata += db.list_data(diractable,["iseed","jobid"])
-    slurmdata = db.list_data(slurmtable,["iseed","no_runs"])
-    slurmdata += db.list_data(slurmprodtable,["iseed","no_runs"])
+    alldata = db.list_data(arctable,["iseed", "jobid"])
+    alldata += db.list_data(arcprodtable,["iseed", "jobid"])
+    alldata += db.list_data(diractable,["iseed", "jobid"])
+    slurmdata = db.list_data(slurmtable,["iseed", "no_runs"])
+    slurmdata += db.list_data(slurmprodtable,["iseed", "no_runs"])
     ret_seed = 1
     for run in alldata:
         try:
             max_seed = int(run["iseed"])+len(run["jobid"].split())
         except TypeError as e:
             max_seed = ret_seed
-        ret_seed = max(max_seed,ret_seed)
+        ret_seed = max(max_seed, ret_seed)
     for run in slurmdata:
         try:
             max_seed = int(run["iseed"])+int(run["no_runs"])
         except TypeError as e:
             max_seed = ret_seed
-        ret_seed = max(max_seed,ret_seed)
+        ret_seed = max(max_seed, ret_seed)
     return ret_seed
