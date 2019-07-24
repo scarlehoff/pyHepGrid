@@ -5,6 +5,8 @@ import pyHepGrid.src.runArcjob as runArcJob
 import pyHepGrid.src.runDiracjob as runDiracJob
 import pyHepGrid.src.runSlurmjob as runSlurmJob
 import pyHepGrid.src.backendManagement as bm
+import pyHepGrid.src.test_nnlojob
+from pyHepGrid.src.Backend import generic_initialise
 
 def do_management(args, rcard):
     #### Management of running/finished jobs
@@ -32,15 +34,13 @@ def do_management(args, rcard):
 
 def do_test(args, rcard):
     #### Test an initialised runcard
-    from pyHepGrid.src.test_nnlojob import run_test
-    run_test(args, rcard)
+    pyHepGrid.src.test_nnlojob.run_test(args, rcard)
 
 
 def do_initialise(args, rcard):
     #### Initialisation: send stuff to Grid Storage
     mode_Warmup = (args.runArc or args.runSlurm)
     mode_Production = (args.runDirac or args.runArcProduction or args.runSlurmProduction)
-    from pyHepGrid.src.Backend import generic_initialise
     local = False
     if args.runSlurm or args.runSlurmProduction:
         local = True
@@ -70,7 +70,7 @@ def do_run(args, rcard):
             runWrapper(rcard, test=args.test)
             func_selected = True
 
-    if not runc_selected:
+    if not func_selected:
         logger.critical("Choose what do you want to run -(A/B/D/E/F)")
 
 
