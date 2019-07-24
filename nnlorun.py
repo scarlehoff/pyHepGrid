@@ -62,7 +62,7 @@ def setup():
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
     args = parse_arguments()
     debug_level = int(args.debug)
-    setup_environment(args.lfndir, args.lhapdf_local, args)
+    setup_environment(args.lhapdf_local, args)
     socket_config = None
 
     if debug_level > 1:
@@ -93,7 +93,7 @@ def setup_sockets(args, nnlojet_command, bring_status):
     return nnlojet_command, socket_config
 
 
-def setup_environment(lfndir, lhapdf_dir, options):
+def setup_environment(lhapdf_dir, options):
     # GCC 
     cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
     gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
@@ -113,7 +113,6 @@ def setup_environment(lfndir, lhapdf_dir, options):
     os.environ["LD_LIBRARY_PATH"] = "%s:%s:%s:%s:%s:%s" % (gcc_libpath, gcc_lib64path, lhapdf_lib, cvmfs_glibc, cvmfs_glibc64, old_ldpath)
     os.environ["LFC_HOST"]         = "lfc01.dur.scotgrid.ac.uk"
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
-    os.environ["LFC_HOME"]         = lfndir
     os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
     os.environ['OMP_STACKSIZE']    = "999999"
     os.environ['LHAPATH']          = lhapdf_share
@@ -158,24 +157,23 @@ def parse_arguments():
     parser.add_option("-s", "--seed", help = "Run seed for NNLOJET", default="1")
 
     # Grid configuration options
-    parser.add_option("-l", "--lfndir", help = "LFNDIR", default = default_user_lfn)
     parser.add_option("-i", "--input_folder",
-                      help = "storage  input folder, relative to --lfndir or gfaldir depending on which mode is used",
+                      help = "storage  input folder, relative to gfaldir",
                       default = "input")
     parser.add_option("-w", "--warmup_folder",
-                      help = "storage  warmup folder, relative to --lfndir or gfaldir depending on which mode is used",
+                      help = "storage  warmup folder, relative to gfaldir",
                       default = "warmup")
     parser.add_option("-o", "--output_folder", 
-                      help = "storage  output folder, relative to --lfndir or gfaldir depending on which mode is used", 
+                      help = "storage  output folder, relative to gfaldir", 
                       default = "output")
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
-    parser.add_option("--use_gfal", default="False", 
+    parser.add_option("--use_gfal", default="True", 
                       help = "Use gfal for file transfer and storage rather than the LFN")
     parser.add_option("--gfal_location", default="", 
                       help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
     # LHAPDF options
-    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir/gfaldir", 
+    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to gfaldir", 
                       default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
     parser.add_option("--use_cvmfs_lhapdf", action = "store_true", default = False)
@@ -198,19 +196,16 @@ def parse_arguments():
     (options, positional) = parser.parse_args()
 
     # Post-parsing setup/checks
-    if options.use_gfal.lower() == "true":
-        options.use_gfal = True
-        print_flush("Using GFAL for storage")
-        if os.path.exists(options.gfal_location) and options.gfal_location != "":
-            print_flush("GFAL location found: {0}".format(options.gfal_location))
-        elif options.gfal_location == "":
-            print_flush("Using environment gfal. Good luck!")
-        else:
-            print_flush("GFAL location not found!")
-            print_flush("Reverting to environment gfal commands")
-            options.gfal_location = ""
+
+    print_flush("Using GFAL for storage")
+    if os.path.exists(options.gfal_location) and options.gfal_location != "":
+        print_flush("GFAL location found: {0}".format(options.gfal_location))
+    elif options.gfal_location == "":
+        print_flush("Using environment gfal. Good luck!")
     else:
-        options.use_gfal = False
+        print_flush("GFAL location not found!")
+        print_flush("Reverting to environment gfal commands")
+        options.gfal_location = ""
 
     if options.use_cvmfs_lhapdf:
         print_flush("Using cvmfs LHAPDF at {0}".format(options.cvmfs_lhapdf_location))
@@ -306,7 +301,7 @@ def store_output(args, socketed=False, socket_config=""):
         os.system("rm -rf {0} {1}".format(args.executable, args.lhapdf_local))
     if args.Production:
         local_out = output_name(args.runcard, args.runname, args.seed)
-        output_file = os.path.join(args.output_folder, local_out)
+        output_file = os.path.join(args.output_folder, args.runname, local_out)
     elif args.Warmup:
         local_out = warmup_name(args.runcard, args.runname)
         output_file = os.path.join(args.warmup_folder, local_out)
@@ -351,7 +346,7 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
         outfile_tmp = outfile.replace(protoc, protocol)
         print_flush("Attempting Protocol {0}".format(protocol))
         for i in range(maxrange): # try max 10 times for now ;)
-            cmd = "{2}gfal-copy {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
+            cmd = "{2}gfal-copy {0} {1} -p".format(infile_tmp, outfile_tmp, args.gfal_location)
             if debug_level > 1:
                 print_flush(cmd)
             retval = syscall(cmd)

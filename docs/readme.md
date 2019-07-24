@@ -5,7 +5,7 @@
 # CONTENTS
 1)  [INITIAL SETUP](#1-initial-setup)
 2)  [NNLOJET SETUP](#2-for-nnlojet-developers-nnlojet-setup)
-3)  [LFN/GFAL SETUP](#3-lfn-setup)
+3)  [GFAL SETUP](#3-gfal-setup)
 4)  [GRID SCRIPTS SETUP (GANGALESS)](#4-grid-scripts-setup)
 5)  [PROXY SETUP](#5-proxy-setup)
 6)  [GRID SCRIPTS USAGE](#6-grid-scripts-usage)
@@ -43,7 +43,9 @@ grid outside of Durham(!)**
 - As of 20/4/2018, the minimum known compatible version of gcc with NNLOJET is
   gcc 4.9.1. Versions above this are generally ok
 
-## 3. LFN SETUP
+## 3. GFAL SETUP
+
+### Note. LFN is now unsupported!
 
 put this into your bashrc:
 ```bash
@@ -90,9 +92,7 @@ It has been tested for both production and warmup directly via ARC as well.
 It works for ARC, and you can view the files in a web browser at
 http://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/
 
-To enable, toggle `use_gfal` to `True` in your header file. This will also
-change over the `finalise.py` to use the gfal system where LFN files cannot be
-seen.
+To enable, toggle `use_gfal` to `True` in your header file. LFN support is now deprecated
 
 ## 4. GRID SCRIPTS SETUP
 
@@ -107,8 +107,8 @@ To start using `pyHepGrid` you need to do the following steps.
     folder. `runcard.py` is used to run `pyHepGrid` *not your program*. The only
     required setting in there is `dictCard`, but you can also overwrite any
     setting you have in your personal header, e.g. `BaseSeed` or `producRun`.
-4. Create folders on gfal/lfn to save your in and output. They have to match
-    `lfn_input_dir`, `lfn_output_dir` and `lfn_warmup_dir` of your header
+4. Create folders on gfal to save your in and output. They have to match
+    `grid_input_dir`, `grid_output_dir` and `grid_warmup_dir` of your header
 5. For non NNNLOJet developers: Write you own `runfile` similar to `nnlorun.py`.
     This script will be ran on each node, so it should be *self-contained* and
     *Python 2.4 compatible*. It should also be able to handle all arguments of
@@ -116,7 +116,7 @@ To start using `pyHepGrid` you need to do the following steps.
     easiest to simply copy the `parse_arguments` function from there. Most
     arguments correspond to a similar named setting from the runcard/header.
     To run on Dirac make sure you do not depend on a specific local setup, i.e.
-    download all required programs from gfal/lfn or use what is available on the
+    download all required programs from gfal or use what is available on the
     `/cvmfs/`.
 6. To install and run the scripts, run
 ```bash

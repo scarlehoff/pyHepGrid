@@ -8,7 +8,7 @@ This should be fixed in future. The main functions required are:
 init_production()
 init_warmup()
 """
-from pyHepGrid.src.header import logger, local_run_directory, lfn_warmup_dir
+from pyHepGrid.src.header import logger, local_run_directory, grid_warmup_dir
 import sys
 import os
 
@@ -62,9 +62,9 @@ class ProgramInterface(object):
     def check_for_existing_warmup(self, r, rname):
         logger.info("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
-        if self.gridw.checkForThis(checkname, lfn_warmup_dir):
-            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(lfn_warmup_dir, checkname))
-            self.gridw.delete(checkname, lfn_warmup_dir)
+        if self.gridw.checkForThis(checkname, grid_warmup_dir):
+            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(grid_warmup_dir, checkname))
+            self.gridw.delete(checkname, grid_warmup_dir)
 
     def init_local_warmups(self, provided_warmup=None, continue_warmup=False,
                            local=False):
@@ -86,10 +86,10 @@ class ProgramInterface(object):
         needs testing as it needs to be able to remove (many) things for production run
         It relies on the base seed from the src.header file to remove the output
         """
-        from pyHepGrid.src.header import lfn_output_dir, logger
+        from pyHepGrid.src.header import grid_output_dir, logger
         logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         checkname = r + "-" + rname
-        files = self.gridw.get_dir_contents(lfn_output_dir)
+        files = self.gridw.get_dir_contents(grid_output_dir)
         first = True
         if checkname in files:
             from pyHepGrid.src.header import baseSeed, producRun
@@ -100,7 +100,7 @@ class ProgramInterface(object):
                         self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output with a seed you are trying to submit (looked for {}). Do you want to remove it/them?".format(checkname))
                         logger.warning("Runcard {0} has at least one file at output".format(r))
                         first = False
-                    self.gridw.delete(filename, lfn_output_dir)
+                    self.gridw.delete(filename, grid_output_dir)
             logger.info("Output check complete")
 
     # helper functions

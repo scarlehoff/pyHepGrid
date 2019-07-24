@@ -67,8 +67,9 @@ class RunArc(Backend):
             from pyHepGrid.src.header import ce_test as ce
         else:
             from pyHepGrid.src.header import ce_base as ce
-            if ".dur.scotgrid.ac.uk" in ce:
+            if ".dur.scotgrid.ac.uk" in ce: # Randomise ce at submission time to reduce load
                 ce = random.choice(["ce1.dur.scotgrid.ac.uk","ce2.dur.scotgrid.ac.uk"])
+
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
         # Can only use direct in Durham. Otherwise fails!
         # Speeds up submission (according to Stephen)
@@ -86,6 +87,7 @@ class RunArc(Backend):
 
             ExpandedCard is an override for util.expandCard for use in auto-resubmission
         """
+        from pyHepGrid.src.header import warmupthr, jobName, warmup_base_dir
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can also include extra info
         if expandedCard is None:
@@ -112,9 +114,14 @@ class RunArc(Backend):
             else:
                 job_type = "Warmup"
 
+        # Sanity checks for test queue
+        if test and warmupthr > 2:
+            self._press_yes_to_continue("  \033[93m WARNING:\033[0m About to submit job(s) to the test queue with {0} threads each.".format(warmupthr))
+        if test and n_sockets > 2:
+            self._press_yes_to_continue("  \033[93m WARNING:\033[0m About to submit job(s) to the test queue with {0} sockets each.".format(n_sockets))
+
         self.runfolder = header.runcardDir
-        from pyHepGrid.src.header import warmupthr, jobName, warmup_base_dir
-        # loop over al .run files defined in runcard.py
+        # loop over all .run files defined in runcard.py
 
         header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         port = header.port
@@ -161,7 +168,10 @@ class RunArc(Backend):
                         'runfolder' : dCards[r],
                         'jobtype'   : job_type,
                         'status'    : "active",}
-            self.dbase.insert_data(self.table, dataDict)
+            if len(jobids) > 0:
+                self.dbase.insert_data(self.table, dataDict)
+            else:
+                header.logger.critical("No jobids returned, no database entry inserted for submission: {0} {1}".format(r, dCards[r]))
             port += 1
             if keyquit is not None:
                 raise keyquit
@@ -171,12 +181,13 @@ class RunArc(Backend):
             Writes XRSL file with the appropiate information and send a producrun
             number of jobs to the arc queue
         """
+        from pyHepGrid.src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lhapdf_loc, executable_exe
+
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }
         rncards, dCards = util.expandCard()
         self.runfolder = header.runcardDir
         job_type = "Production"
-        from pyHepGrid.src.header import baseSeed, producRun, jobName, lhapdf_grid_loc, lfndir, lhapdf_loc, executable_exe, lfn_output_dir
 
         header.logger.info("Runcards selected: {0}".format(" ".join(r for r in rncards)))
         for r in rncards:
@@ -187,6 +198,11 @@ class RunArc(Backend):
             # we cannot multiprocess the arc submission
             xrslfile = None
             keyquit = None
+
+            # Sanity check for test queue
+            if test and producRun > 5:
+                self._press_yes_to_continue("  \033[93m WARNING:\033[0m About to submit a large number ({0}) of jobs to the test queue.".format(producRun))
+
             try:
                 for seed in range(baseSeed, baseSeed + producRun):
                     arguments = self._get_prod_args(r, dCards[r], seed)
@@ -200,7 +216,7 @@ class RunArc(Backend):
                 # Run the file
                     jobid = self._run_XRSL(xrslfile, test=test)
                     joblist.append(jobid)
-            except Exception as e:
+            except Exception as interrupt:
                 print("\n")
                 header.logger.error("Submission error encountered. Inserting all successful submissions to database")
                 keyquit = interrupt
@@ -217,7 +233,10 @@ class RunArc(Backend):
                         'iseed'     : str(baseSeed),
                         'no_runs'   : str(producRun),
                         'status'    : "active",}
-            self.dbase.insert_data(self.table, dataDict)
+            if len(joblist) > 0:
+                self.dbase.insert_data(self.table, dataDict)
+            else:
+                header.logger.critical("No jobids returned, no database entry inserted for submission: {0} {1}".format(r, dCards[r]))
             if keyquit is not None:
                 raise keyquit
 

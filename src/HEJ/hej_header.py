@@ -26,12 +26,10 @@ debug_level = 16
 stacksize = 5000 # MB RAM per job smaller->higher priority # slurm only
 runmode = "HEJ"
 
-# Grid config for LFN
-lfndir         = "DUMMY" #"/grid/group/user/folder/"
 # these are also used by gfal
-lfn_input_dir  = "tst_grid/input"
-lfn_output_dir = "tst_grid/output"
-lfn_warmup_dir = lfn_input_dir # no idea what's the difference
+grid_input_dir  = "tst_grid/input"
+grid_output_dir = "tst_grid/output"
+grid_warmup_dir = lfn_input_dir # no idea what's the difference # DW warmups is the folder for warmup output, so VEGAS grids in the N12LOJET case
 
 use_gfal = True
 gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/hej/"

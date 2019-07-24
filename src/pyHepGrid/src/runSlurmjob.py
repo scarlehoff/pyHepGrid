@@ -182,7 +182,10 @@ class RunSlurm(Backend):
                         'jobtype'   : job_type,
                         'queue'     : str(runqueue),
                         'status'    : "active",}
-            self.dbase.insert_data(self.table, dataDict)
+            if len(jobids) > 0:
+                self.dbase.insert_data(self.table, dataDict)
+            else:
+                header.logger.critical("No jobids returned, no database entry inserted for submission: {0} {1}".format(r, dCards[r]))
             port += 1
 
 
@@ -227,7 +230,10 @@ class RunSlurm(Backend):
                         'iseed'     : str(baseSeed),
                         'no_runs'   : str(producRun),
                         'status'    : "active",}
-            self.dbase.insert_data(self.table, dataDict)
+            if len(jobids) > 0:
+                self.dbase.insert_data(self.table, dataDict)
+            else:
+                header.logger.critical("No jobids returned, no database entry inserted for submission: {0} {1}".format(r, dCards[r]))
 
 
 def runWrapper(runcard, test = None, expandedCard = None):

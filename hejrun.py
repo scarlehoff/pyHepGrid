@@ -69,15 +69,14 @@ def parse_arguments():
     parser.add_option("-E", "--events", help = "Number of events", default="-1")
 
     # Grid configuration options
-    parser.add_option("-l", "--lfndir", help = "LFNDIR", default = default_user_lfn)
     parser.add_option("-i", "--input_folder",
-                      help = "lfn input folder, relative to --lfndir or gfaldir depending on which mode is used",
+                      help = "lfn input folder, relative to gfaldir",
                       default = "input")
     parser.add_option("-w", "--warmup_folder",
-                      help = "lfn warmup folder, relative to --lfndir or gfaldir depending on which mode is used",
+                      help = "lfn warmup folder, relative to gfaldir",
                       default = "warmup")
     parser.add_option("-o", "--output_folder",
-                      help = "lfn output folder, relative to --lfndir or gfaldir depending on which mode is used",
+                      help = "lfn output folder, relative to gfaldir",
                       default = "output")
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
     parser.add_option("--use_gfal", default="False",
@@ -89,7 +88,7 @@ def parse_arguments():
     parser.add_option("--use_cvmfs_lhapdf", action = "store_true", default = True)
     parser.add_option("--cvmfs_lhapdf_location", default="",
                       help = "Provide a cvmfs location for LHAPDF.")
-    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to lfndir",
+    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to gfaldir",
                       default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
 
@@ -134,11 +133,10 @@ def parse_arguments():
 
     return options
 
-def set_environment(lfndir, lhapdf_dir):
+def set_environment(lhapdf_dir):
     os.system("export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages")
     os.environ["LFC_HOST"]         = "lfc01.dur.scotgrid.ac.uk"
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
-    os.environ["LFC_HOME"]         = lfndir
     os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
     os.environ['OMP_STACKSIZE']    = "999999"
     try:
@@ -344,8 +342,8 @@ if __name__ == "__main__":
     lhapdf_local = ""
     if args.use_cvmfs_lhapdf:
         lhapdf_local = args.cvmfs_lhapdf_location
+    set_environment(args.lhapdf_local)
 
-    set_environment(args.lfndir, lhapdf_local)
 
     if debug_level > -1:
         # Architecture info

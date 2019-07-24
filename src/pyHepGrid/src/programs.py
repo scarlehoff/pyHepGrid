@@ -82,17 +82,17 @@ class NNLOJET(ProgramInterface):
         be checked consecutively.
         """
 
-        from pyHepGrid.src.header import lfn_warmup_dir, logger
+        from pyHepGrid.src.header import grid_warmup_dir, logger
         gridFiles = []
         suppress_errors = False
         if check_only:
             suppress_errors = True
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
-        logger.debug("Warmup LFN name: {0}".format(outnm))
+        logger.debug("Warmup GFAL name: {0}".format(outnm))
         tmpnm = "tmp.tar.gz"
         logger.debug("local tmp tar name: {0}".format(tmpnm))
-        success = self.gridw.bring(outnm, lfn_warmup_dir, tmpnm, shell = shell, 
+        success = self.gridw.bring(outnm, grid_warmup_dir, tmpnm, shell = shell, 
                                    suppress_errors=suppress_errors)
 
         success ==  self.__check_pulled_warmup(success, tmpnm, warmup_extensions)
@@ -100,7 +100,7 @@ class NNLOJET(ProgramInterface):
 
         if not success and not check_only:
             if self._press_yes_to_continue("Grid files failed to copy. Try backups from individual sockets?") == 0:
-                backup_dir = os.path.join(lfn_warmup_dir,outnm.replace(".tar.gz",""))
+                backup_dir = os.path.join(grid_warmup_dir,outnm.replace(".tar.gz",""))
                 backups = self.gridw.get_dir_contents(backup_dir)
                 if len(backups) == 0:
                     logger.critical("No backups found. Did the warmup complete successfully?")
@@ -293,22 +293,19 @@ class NNLOJET(ProgramInterface):
             copy(os.path.join(runFol, i), os.getcwd())
             if self.overwrite_warmup:
                 checkname = self.warmup_name(i, rname)
-                if self.gridw.checkForThis(checkname, header.lfn_warmup_dir):
-                    logger.info("Warmup found in lfn:{0}!".format(header.lfn_warmup_dir))
+                if self.gridw.checkForThis(checkname, header.grid_warmup_dir):
+                    logger.info("Warmup found in GFAL:{0}!".format(header.grid_warmup_dir))
                     warmup_files = self._bring_warmup_files(i, rname, shell=True, 
                                                             multichannel=multichannel)
                     files += warmup_files
                     logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
 
             self.tarw.tarFiles(files + [i], tarfile)
-            if self.gridw.checkForThis(tarfile, "input"): # Could we cache this? Just to speed up ini
+            if self.gridw.checkForThis(tarfile, header.grid_input_dir): # Could we cache this? Just to speed up ini
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
-                self.gridw.delete(tarfile, "input")
-            if self.gridw.gfal:
-                logger.info("Sending {0} to gfal input/".format(tarfile))
-            else:
-                logger.info("Sending {0} to lfn input/".format(tarfile))
-            self.gridw.send(tarfile, "input", shell=True)
+                self.gridw.delete(tarfile, header.grid_input_dir)
+            logger.info("Sending {0} to gfal {1}/".format(tarfile, header.grid_input_dir))
+            self.gridw.send(tarfile, header.grid_input_dir, shell=True)
             if not local:
                 for j in warmupFiles:
                     os.remove(j)
@@ -409,11 +406,11 @@ class NNLOJET(ProgramInterface):
                 logger.info("Retrieving warmup file from grid")
                 warmupFiles = self._bring_warmup_files(i, rname, shell=True, multichannel=multichannel)
             self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
-            if self.gridw.checkForThis(tarfile, "input"):
+            if self.gridw.checkForThis(tarfile, header.grid_input_dir):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
-                self.gridw.delete(tarfile, "input")
-            logger.info("Sending {0} to lfn:input/".format(tarfile))
-            self.gridw.send(tarfile, "input", shell=True)
+                self.gridw.delete(tarfile, header.grid_input_dir)
+            logger.info("Sending {0} to GFAL {1}/".format(tarfile, header.grid_input_dir))
+            self.gridw.send(tarfile, header.grid_input_dir, shell=True)
             if local:
                 util.spCall(["rm", i, tarfile])
             else:
@@ -531,7 +528,7 @@ class HEJ(ProgramInterface):
         """
         import tempfile
         from pyHepGrid.src.header import runcardDir as runFol
-        from pyHepGrid.src.header import executable_exe, executable_src_dir, lfn_input_dir
+        from pyHepGrid.src.header import executable_exe, executable_src_dir, grid_input_dir
 
         if local:
             self.init_local_production(provided_warmup=provided_warmup)
@@ -587,11 +584,11 @@ class HEJ(ProgramInterface):
             # tar up & send to grid storage
             self.tarw.tarFiles(warmupFiles+runFiles, tarfile)
 
-            if self.gridw.checkForThis(tarfile, lfn_input_dir):
+            if self.gridw.checkForThis(tarfile, grid_input_dir):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
-                self.gridw.delete(tarfile, lfn_input_dir)
-            logger.info("Sending {0} to {1}".format(tarfile, lfn_input_dir))
-            self.gridw.send(tarfile, lfn_input_dir, shell=True)
+                self.gridw.delete(tarfile, grid_input_dir)
+            logger.info("Sending {0} to {1}".format(tarfile, grid_input_dir))
+            self.gridw.send(tarfile, grid_input_dir, shell=True)
 
         # clean up afterwards
         os.chdir(origdir)

@@ -1,13 +1,16 @@
+from collections import Counter
+import datetime
 import os
-import sys
+import pyHepGrid.src.dbapi
 from pyHepGrid.src.header import logger
-
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
 import pyHepGrid.src.runmodes
+import multiprocessing as mp
+import sys
 
 counter = None
-_mode = pyHepGrid.src.runmodes.mode_selector[pyHepGrid.src.header.runmode]
+_mode = pyHepGrid.src.runmodes.mode_selector[header.runmode]
 
 
 def init_counter(args):
@@ -26,37 +29,34 @@ class Backend(_mode):
 
     def output_name_array(self, runcard, rname, seeds):
         return [self.output_name(runcard, rname, seed) for seed in seeds]
-    #########################################################################
 
     def set_oneliner_output(self):
         self.stats_one_line = True
 
     def stats_print_setup(self, runcard_info, dbid=""):
-        from pyHepGrid.src.header import short_stats
         if dbid == "":
             string = ""
         else:
             string = "{0:5} ".format("[{0}]".format(dbid))
 
         if self.stats_one_line:
-            print("{0}-{1}: ".format(dbid, runcard_info["runcard"]), end="")
+            logger.plain("{0}-{1}: ".format(dbid, runcard_info["runcard"]), end="")
             return
-        if not short_stats:
+        if not header.short_stats:
             string += "=> {0}: {1}".format(runcard_info["runcard"],
                                            runcard_info["runfolder"])
-            print(string)
+            logger.plain(string)
         else:
             string += "{0:20}: {1:10} ".format(runcard_info["runcard"],
                                                runcard_info["runfolder"])
-            print(string, end="")
+            logger.plain(string, end="")
 
     def __init__(self, act_only_on_done=False):
         from pyHepGrid.src.header import dbname, baseSeed
-        import pyHepGrid.src.dbapi
         self.overwrite_warmup = False
         self.tarw = util.TarWrap()
         self.gridw = util.GridWrap()
-        self.dbase = pyHepGrid.src.dbapi.database(dbname)
+        self.dbase = pyHepGrid.src.dbapi.database(dbname, logger=header.logger)
         self.table = None
         self.bSeed = baseSeed
         self.jobtype_get = {
@@ -102,18 +102,18 @@ class Backend(_mode):
             For ARC only single thread is allow as the arc database needs
             to be locked
         """
-        from multiprocessing import Pool, Value
         # If required # calls is lower than the # threads given, use the minimum
         if arglen is None:
             arglen = n_threads
         threads = max(min(n_threads, arglen),1)
 
         if use_counter:
-            counter = Value('i', 0)
-            pool = Pool(threads, initializer=init_counter, initargs=(counter,))
+            counter = mp.Value('i', 0)
+            pool = mp.Pool(threads, initializer=init_counter, initargs=(counter,))
         else:
-            pool = Pool(threads)
+            pool = mp.Pool(threads)
         self.dbase.close()
+
         result = pool.map(function, arguments, chunksize=1)
         self.dbase.reopen()
         pool.close()
@@ -148,7 +148,6 @@ class Backend(_mode):
 
 
     def get_completion_stats(self, jobid, jobinfo, args):
-        from collections import Counter
         from pyHepGrid.src.gnuplot import do_plot
         job_outputs = self.cat_job(jobid, jobinfo, store = True)
         vals = []
@@ -168,9 +167,9 @@ class Backend(_mode):
             val_line += format_string.format(str(element[0])+"%")
             count_line += format_string.format(element[1])
         divider = "-"*len(val_line)
-        print(val_line)
-        print(divider)
-        print(count_line)
+        logger.plain(val_line)
+        logger.plain(divider)
+        logger.plain(count_line)
 
         if not args.gnuplot:
             return
@@ -201,12 +200,11 @@ class Backend(_mode):
         """ Returns a list of DIRAC/ARC jobids
         for a given database entry
         """
-        from pyHepGrid.src.header import logger
         jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
         try:
             idout = jobid[0]['jobid']
         except IndexError:
-            print("Selected job is %s out of bounds" % jobid)
+            logger.info("Selected job is %s out of bounds" % jobid)
             idt   = input("> Select id to act upon: ")
             idout = self.get_id(idt)
         jobid_list = idout.split(" ")
@@ -230,7 +228,7 @@ class Backend(_mode):
         try:
             idout = jobid[0]['date']
         except IndexError:
-            print("Selected job is %s out of bounds" % jobid)
+            logger.info("Selected job is %s out of bounds" % jobid)
             idt   = input("> Select id to act upon: ")
             idout = self.get_date(idt)
         return idout
@@ -304,8 +302,6 @@ class Backend(_mode):
         self.dbase.update_entry(self.table, db_id, field_name, status_str)
 
     def print_stats(self, done, wait, run, fail, unk, total):
-        import datetime
-        from pyHepGrid.src.header import short_stats
         total2 = done + wait + run + fail + unk
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
@@ -314,7 +310,7 @@ class Backend(_mode):
             print(string)
             return
 
-        if short_stats:
+        if header.short_stats:
             def addline(name, val, colour):
                 if val > 0:
                     return "{0}{1}: {2:4}  \033[0m".format(colour, name, val)
@@ -326,20 +322,19 @@ class Backend(_mode):
             string += addline("Running", run, '\033[94m')
             string += addline("Failed", fail, '\033[91m')
             string += "Total: {0:4}".format(total2)
-            print(string)
+            logger.plain(string)
         else:
-            print(" >> Total number of subjobs: {0:<20} {1}".format(total, time))
-            print("    >> Done:    {0}".format(done))
-            print("    >> Waiting: {0}".format(wait))
-            print("    >> Running: {0}".format(run))
-            print("    >> Failed:  {0}".format(fail))
-            print("    >> Unknown: {0}".format(unk))
-            print("    >> Sum      {0}".format(total2))
+            logger.plain(" >> Total number of subjobs: {0:<20} {1}".format(total, time))
+            logger.plain("    >> Done:    {0}".format(done))
+            logger.plain("    >> Waiting: {0}".format(wait))
+            logger.plain("    >> Running: {0}".format(run))
+            logger.plain("    >> Failed:  {0}".format(fail))
+            logger.plain("    >> Unknown: {0}".format(unk))
+            logger.plain("    >> Sum      {0}".format(total2))
 
     def _do_stats_job(self, jobid_raw):
         """ version of stats job multithread ready
         """
-        import pyHepGrid.src.header as header
         if isinstance(jobid_raw, tuple):
             if jobid_raw[1] == self.cDONE or jobid_raw[1] == self.cFAIL:
                 return jobid_raw[1]
@@ -367,7 +362,7 @@ class Backend(_mode):
         For arc jobs stdoutput will be downloaded in said folder as well
         """
         # Retrieve data from database
-        from pyHepGrid.src.header import arcbase, lfn_warmup_dir
+        from pyHepGrid.src.header import arcbase, grid_warmup_dir
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
         data      =  self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
@@ -375,38 +370,38 @@ class Backend(_mode):
         runcard   =  data["runcard"]
         jobids    =  data["jobid"].split()
         util.spCall(["mkdir", "-p", finfolder])
-        print("Retrieving ARC output into " + finfolder)
+        logger.info("Retrieving ARC output into " + finfolder)
         try:
             # Retrieve ARC standard output for every job of this run
             for jobid in jobids:
-                print(jobid)
+                logger.info(jobid)
                 cmd       =  [self.cmd_get, "-j", arcbase, jobid.strip()]
                 output    = util.getOutputCall(cmd)
                 outputfol = output.split("Results stored at: ")[1].rstrip()
                 outputfolder = outputfol.split("\n")[0]
                 if outputfolder == "" or (len(outputfolder.split(" ")) > 1):
-                    print("Running mv and rm command is not safe here")
-                    print("Found blank spaces in the output folder")
-                    print("Nothing will be moved to the warmup global folder")
+                    logger.info("Running mv and rm command is not safe here")
+                    logger.info("Found blank spaces in the output folder")
+                    logger.info("Nothing will be moved to the warmup global folder")
                 else:
                     destination = finfolder + "/" + "arc_out_" + runcard + outputfolder
                     util.spCall(["mv", outputfolder, destination])
                     #util.spCall(["rm", "-rf", outputfolder])
         except:
-            print("Couldn't find job output in the ARC server")
-            print("jobid: " + jobid)
-            print("Run arcstat to check the state of the job")
-            print("Trying to retrieve data from grid storage anyway")
+            logger.info("Couldn't find job output in the ARC server")
+            logger.info("jobid: " + jobid)
+            logger.info("Run arcstat to check the state of the job")
+            logger.info("Trying to retrieve data from grid storage anyway")
         # Retrieve warmup from the grid storage warmup folder
         wname = self.warmup_name(runcard, runfolder)
-        self.gridw.bring(wname, lfn_warmup_dir, finfolder + "/" + wname)
+        self.gridw.bring(wname, grid_warmup_dir, finfolder + "/" + wname)
 
     def _get_data_production(self, db_id):
         """ Given a database entry, retrieve its data from
         the output folder to the folder defined in said db entry
         """
-        print("You are going to download all folders corresponding to this runcard from lfn:output")
-        print("Make sure all runs are finished using the -s or -S options!")
+        logger.info("You are going to download all folders corresponding to this runcard from grid output")
+        logger.info("Make sure all runs are finished using the -s or -S options!")
         fields       = ["runfolder", "runcard", "jobid", "pathfolder", "iseed"]
         data         = self.dbase.list_data(self.table, fields, db_id)[0]
         self.rcard   = data["runcard"]
@@ -423,8 +418,8 @@ class Backend(_mode):
         while True:
             firstName = self.output_name(self.rcard, self.rfolder, initial_seed)
             finalName = self.output_name(self.rcard, self.rfolder, finalSeed)
-            print("The starting filename is {}".format(firstName))
-            print("The final filename is {}".format(finalName))
+            logger.info("The starting filename is {}".format(firstName))
+            logger.info("The final filename is {}".format(finalName))
             yn = self._press_yes_to_continue("If you are ok with this, press y", fallback = -1)
             if yn == 0:
                 break
@@ -434,8 +429,8 @@ class Backend(_mode):
             os.makedirs(self.rfolder)
         except OSError as err:
             if err.errno == 17:
-                print("Tried to create folder %s in this directory".format(self.rfolder))
-                print("to no avail. We are going to assume the directory was already there")
+                logger.info("Tried to create folder %s in this directory".format(self.rfolder))
+                logger.info("to no avail. We are going to assume the directory was already there")
                 self._press_yes_to_continue("", "Folder {} already exists".format(self.rfolder))
             else:
                 raise
@@ -459,15 +454,15 @@ class Backend(_mode):
         from pyHepGrid.src.header import finalise_no_cores as n_threads
         # Check which of the seeds actually produced some data
         all_remote = self.output_name_array(self.rcard, self.rfolder, seeds)
-        all_output = self.gridw.get_dir_contents(header.lfn_output_dir).split()
+        all_output = self.gridw.get_dir_contents(header.grid_output_dir).split()
         remote_tarfiles = list(set(all_remote) & set(all_output))
-        print("Found data for {0} of the {1} seeds.".format(len(remote_tarfiles), len(seeds)))
+        logger.info("Found data for {0} of the {1} seeds.".format(len(remote_tarfiles), len(seeds)))
 
         # Download said data
         tarfiles = self._multirun(self._do_get_data, remote_tarfiles, n_threads, use_counter = True)
         tarfiles = list(filter(None, tarfiles))
-        print("Downloaded 0 files", end ='\r')
-        print("Downloaded {0} files, extracting...".format(len(tarfiles)))
+        logger.info("Downloaded 0 files", end ='\r')
+        logger.info("Downloaded {0} files, extracting...".format(len(tarfiles)))
 
         # Extract some information from the first tarfile
         for tarfile in tarfiles:
@@ -477,7 +472,7 @@ class Backend(_mode):
         # Extract all
         dummy    =  self._multirun(self._do_extract_outputData, tarfiles, n_threads)
         os.chdir("..")
-        print("Everything saved at {0}".format(pathfolder))
+        logger.info("Everything saved at {0}".format(pathfolder))
         util.spCall(["mv", self.rfolder, pathfolder])
 
     def _do_get_data(self, filename):
@@ -486,13 +481,12 @@ class Backend(_mode):
         """
         local_name = filename.replace("output", "")
         local_file = self.rfolder + "/" + local_name
-        self.gridw.bring(filename, header.lfn_output_dir, local_file, timeout = header.timeout)
-        from os.path import isfile
-        if isfile(local_name):
+        self.gridw.bring(filename, header.grid_output_dir, local_file, timeout = header.timeout)
+        if os.path.isfile(local_name):
             global counter
             if counter:
                 counter.value += 1
-                print("Downloaded {0} files ".format(counter.value), end='\r')
+                logger.info("Downloaded {0} files ".format(counter.value), end='\r')
             return local_name
         else:
             return None
@@ -510,7 +504,7 @@ class Backend(_mode):
         """
         # It assumes log and dat folder are already there
         if not os.path.isfile(tarfile):
-            print(tarfile + " not found")
+            logger.info("{0} not found".format(tarfile))
             return -1
 
         out_dict = {".log" : "log/", ".dat" : "dat/" }
@@ -546,7 +540,7 @@ class Backend(_mode):
         """
         fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype", "iseed"]
         dictC  = self._db_list(fields, search_string)
-        print("Active runs: " + str(len(dictC)))
+        logger.plain("Active runs: " + str(len(dictC)))
 
         # Could easily be optimised
         offset = 2
@@ -556,7 +550,12 @@ class Backend(_mode):
         date_width = max(list(len(str(i['date']).split('.')[0].strip()) for i in dictC)+[10])+offset
         misc_width = 7
 
-        print("|".join(["id".center(id_width),"runcard".center(runcard_width),"runname".center(runname_width),"date".center(date_width),"misc".center(misc_width)]))
+        header = "|".join(["id".center(id_width),"runcard".center(runcard_width),
+                               "runname".center(runname_width),"date".center(date_width),
+                               "misc".center(misc_width)])
+        logger.plain(header)
+        logger.plain("-"*len(header))
+
         for i in dictC:
             rid = str(i['rowid']).center(id_width)
             ruc = str(i['runcard']).center(runcard_width)
@@ -573,7 +572,7 @@ class Backend(_mode):
                     misc += " ({0})".format(no_jobs)
             misc += self._get_computing_element(jobids)
             misc_text = misc.center(misc_width)
-            print("|".join([rid,ruc,run,dat,misc_text]))
+            logger.plain("|".join([rid,ruc,run,dat,misc_text]))
 
     def get_active_dbids(self):
         field_name = "rowid"
@@ -591,10 +590,9 @@ class Backend(_mode):
         dictionary = {
             'gfal_location' : header.cvmfs_gfal_location,
             'executable' : header.executable_exe,
-            'lfndir' : header.lfndir,
-            'input_folder' : header.lfn_input_dir,
-            'output_folder' : header.lfn_output_dir,
-            'warmup_folder' : header.lfn_warmup_dir,
+            'input_folder' : header.grid_input_dir,
+            'output_folder' : header.grid_output_dir,
+            'warmup_folder' : header.grid_warmup_dir,
             'lhapdf_grid' : header.lhapdf_grid_loc,
             'lhapdf_local' : header.lhapdf_loc,
             'debug' : str(header.debug_level),
@@ -642,7 +640,6 @@ class Backend(_mode):
 
 def generic_initialise(runcard, warmup=False, production=False, grid=None,
                        overwrite_grid=False, local=False):
-    from pyHepGrid.src.header import logger
     logger.info("Initialising runcard: {0}".format(runcard))
     back = Backend()
 

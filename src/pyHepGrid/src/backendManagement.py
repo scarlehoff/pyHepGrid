@@ -17,16 +17,20 @@ class Arc(Backend):
     cmd_stat  = "arcstat"
     cmd_renew = "arcrenew"
 
-    def __init__(self,production=False, **kwargs):
+    def __init__(self, production=False, **kwargs):
         # Might not work on python2?
         super(Arc, self).__init__(**kwargs)
         if production:
             self.table = header.arcprodtable
         else:
             self.table = header.arctable
+        self.production = production
 
     def __str__(self):
-        return "Arc"
+        retstr = "Arc"
+        if self.production:
+            retstr += " Production"
+        return retstr
 
     def update_stdout(self):
         """ retrieves stdout of all running jobs and store the current state
@@ -59,6 +63,10 @@ class Arc(Backend):
     def kill_job(self, jobids, jobinfo):
         """ kills given job """
         self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill the job!")
+
+        if len(jobids) == 0:
+            header.logger.critical("No jobids stored associated with this database entry, therefore nothing to kill.")
+            
         for jobid_set in util.batch_gen(jobids, 150): # Kill in groups of 150 for speeeed
             stripped_set = [i.strip() for i in jobid_set]
             cmd = [self.cmd_kill, "-j", header.arcbase] + stripped_set
@@ -92,19 +100,22 @@ class Arc(Backend):
         """Sometimes the std output doesn't get updated
         but we can choose to access the logs themselves"""
         output_folder = ["file:///tmp/"]
-        cmd_base =  ["globus-url-copy", "-v"]
+        cmd_base =  ["arccp", "-i"]
         cmd_str = "cat /tmp/"
         for jobid in jobids:
-            cmd = cmd_base + [jobid + "/*.log"] + output_folder
-            output = util.getOutputCall(cmd).split()
-            for text in output:
-                if ".log" in text:
-                    util.spCall((cmd_str + text).split())
+            files = util.getOutputCall(["arcls", jobid]).split()
+            logfiles = [i for i in files if i.endswith(".log")]
+            for logfile in logfiles:
+                cmd = cmd_base + [os.path.join(jobid, logfile)] + output_folder
+                output = util.getOutputCall(cmd).split()
+                for text in output:
+                    if ".log" in text:
+                        util.spCall((cmd_str + text).split())
 
     def bring_current_warmup(self, db_id):
         """ Sometimes we want to retrieve the warmup before the job finishes """
         output_folder = ["file:///tmp/"]
-        cmd_base =  ["globus-url-copy", "-v"]
+        cmd_base =  ["gfal-copy", "-v"]
         fields = ["pathfolder", "runfolder", "jobid"]
         data = self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder =  data["runfolder"]
@@ -214,6 +225,10 @@ class Dirac(Backend):
     def kill_job(self, jobids, jobinfo):
         """ kill all jobs associated with this run """
         self._press_yes_to_continue("  \033[93m WARNING:\033[0m You are about to kill all jobs for this run!")
+
+        if len(jobids) == 0:
+            header.logger.critical("No jobids stored associated with this database entry, therefore nothing to kill.")
+
         cmd = [self.cmd_kill] + jobids
         util.spCall(cmd)
 
@@ -225,9 +240,13 @@ class Slurm(Backend):
             self.table = header.slurmprodtable
         else:
             self.table = header.slurmtable
+        self.production = production
 
     def __str__(self):
-        return "Slurm"
+        retstr = "Slurm"
+        if self.production:
+            retstr += " Production"
+        return retstr
 
     def _get_data_warmup(self, db_id):
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
@@ -355,6 +374,9 @@ class Slurm(Backend):
 
     def kill_job(self,jobids, jobinfo):
         header.logger.debug(jobids, jobinfo)
+        if len(jobids) == 0:
+            header.logger.critical("No jobids stored associated with this database entry, therefore nothing to kill.")
+
         for jobid in jobids:
             util.spCall(["scancel",str(jobid)])
         # Kill the socket server if needed
