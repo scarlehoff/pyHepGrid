@@ -139,8 +139,6 @@ def set_environment(lhapdf_dir):
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
     os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
     os.environ['OMP_STACKSIZE']    = "999999"
-    # os.environ['PYTHONPATH']       = os.environ["PYTHONPATH"]+":"+os.environ["DIRAC"]+ \
-    #     "/linux_x86_64_glibc-2.12/lib/python2.6/site-packages/"
     try:
         import gfal2_util.shell
     except KeyError as e:
@@ -153,8 +151,9 @@ def set_environment(lhapdf_dir):
             +":"+args.gfal_location.replace("/bin/","/lib/")
     # HEJ environment
     os.environ['LD_LIBRARY_PATH'] = "./HEJ/lib"+":"+os.environ["LD_LIBRARY_PATH"]
+    # LHAPDF
+    os.environ['LHAPDF_DATA_PATH'] = lhapdf_dir
     return 0
-# export PYTHONPATH=$PYTHONPATH:$DIRAC/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages
 
 
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
@@ -174,9 +173,6 @@ def run_command(command):
 
 def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
     if args.use_gfal:
-        # filein = "file://$PWD/" + local_file
-        # cmd = "gfal-copy {2}/{0} {1}".format(grid_file, filein, args.gfaldir)
-        # return os.system(cmd)
         filein = os.path.join(args.gfaldir, grid_file)
         fileout = "file://$PWD/{0}".format(local_file)
         return gfal_copy(filein, fileout, args, maxrange=maxrange)
@@ -193,11 +189,6 @@ def copy_to_grid(local_file, grid_file, args, maxrange = 10):
         filein = "file://$PWD/{0}".format(local_file)
         fileout = os.path.join(args.gfaldir, grid_file)
         return gfal_copy(filein, fileout, args, maxrange=maxrange)
-
-        # filein = "f# ile://$PWD/" + local_file
-        # cmd = "gfal-copy {0} {2}/{1}".format(filein, grid_file, args.gfaldir)
-        # os.system(cmd)
-        # return 0
     else:
         filein = "file:$PWD/" + local_file
         cmd = lcg_cr + " " + fileout + " " + filein
@@ -332,26 +323,6 @@ def run_HEJ(args):
 
 ########################## main ##########################
 
-## test
-# pyHepGrid test runcards/hej_runcard.py -B
-# -B = arc production
-## run on arc
-# pyHepGrid run runcards/hej_runcard.py -B
-## send test job to arc
-# pyHepGrid run runcards/hej_runcard.py -B --test
-
-## init (uploads runcards & Sherpa to gfal)
-# pyHepGrid ini runcards/hej_runcard.py -B
-
-## get job info
-# pyHepGrid man runcards/hej_runcard.py -B
-# -s for stats
-# -p for print
-# ask the help for more
-
-## getting (known) queues
-# ./get_site_info.py
-
 if __name__ == "__main__":
 
     if sys.argv[0] and not "ENVSET" in os.environ:
@@ -368,7 +339,11 @@ if __name__ == "__main__":
     args = parse_arguments()
     debug_level = int(args.debug)
 
+    lhapdf_local = ""
+    if args.use_cvmfs_lhapdf:
+        lhapdf_local = args.cvmfs_lhapdf_location
     set_environment(args.lhapdf_local)
+
 
     if debug_level > -1:
         # Architecture info

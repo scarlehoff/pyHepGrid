@@ -32,14 +32,14 @@ grid_output_dir = "tst_grid/output"
 grid_warmup_dir = lfn_input_dir # no idea what's the difference # DW warmups is the folder for warmup output, so VEGAS grids in the N12LOJET case
 
 use_gfal = True
-gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
+gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/hej/"
 cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.17/bin/" # set to None for environmentt gfal
 
 # TMUX config
 tmux_location= "tmux"
 
 # Lhapdf config
-cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/HEJ/LHAPDF"
+cvmfs_lhapdf_location = "/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current"
 use_cvmfs_lhapdf = True
 lhapdf_grid_loc    = cvmfs_lhapdf_location # not needed with cvmfs ?
 lhapdf_loc         = "/cvmfs/pheno.egi.eu/HEJ/LHAPDF/bin/lhapdf"
