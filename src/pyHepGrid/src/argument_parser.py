@@ -5,7 +5,7 @@ import os
 
 def check_mode(rmode,args,logger):
     if len(rmode) < 3:
-        logger.critical("Mode ", rmode, " not valid")
+        logger.critical("Mode {0} not valid".format(rmode))
 
     if (rmode[:3] == "run" and not "runcard" in rmode) or rmode[:3] == "man" :
         if args.runDirac and args.runArc:
@@ -127,9 +127,7 @@ if caller_script in ("main.py", "pyHepGrid"):
 
     if arguments.args is not None:
         if len(arguments.args)%2!=0:
-            pyHepGrid.src.logger.logger.error("Not all additional arguments specified at prompt have values.")
-            import sys
-            sys.exit(-1)
+            pyHepGrid.src.logger.logger.critical("Not all additional arguments specified at prompt have values.")
         else:
             for i in range(0,len(arguments.args),2):
                 additional_arguments[arguments.args[i]]=arguments.args[i+1]

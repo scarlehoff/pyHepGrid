@@ -15,9 +15,10 @@ def management_routine(backend, args):
 
     if args.updateArc:
         if not args.runArc:
-            raise Exception("Update ARC can only be used with ARC")
+            pyHepGrid.src.header.logger.critical("Update ARC can only be used with ARC")
         backend.update_stdout()
         exit(0)
+
     if args.idjob:
         id_str = args.idjob
     else:

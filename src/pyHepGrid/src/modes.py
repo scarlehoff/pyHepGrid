@@ -1,40 +1,43 @@
 from pyHepGrid.src.header import logger
+import pyHepGrid.src.proxyUtil as proxyUtil
+import pyHepGrid.src.main_routines as mr
+import pyHepGrid.src.runArcjob as runArcJob
+import pyHepGrid.src.runDiracjob as runDiracJob
+import pyHepGrid.src.runSlurmjob as runSlurmJob
+import pyHepGrid.src.backendManagement as bm
+
+def do_management(args, rcard):
+    #### Management of running/finished jobs
+    backend_setups = {
+        "runArc": {"backend": bm.Arc, 
+                   "kwargs": {"production": False}},
+        "runArcProduction": {"backend": bm.Arc, 
+                             "kwargs": {"production": True}},
+        "runDirac": {"backend": bm.Dirac,
+                     "kwargs": {}},
+        "runSlurm": {"backend": bm.Slurm,
+                     "kwargs": {"production": False}},
+        "runSlurmProduction": {"backend":bm.Slurm, 
+                               "kwargs": {"production": True}}
+    }
+
+    for _backend in backend_setups:
+        if getattr(args, _backend):  # If mode is selected
+            backend_opt = backend_setups[_backend]
+            kwargs = backend_opt["kwargs"]
+            backend = backend_opt["backend"](act_only_on_done=args.done, **kwargs)
+            logger.info("{0}".format(backend))
+            mr.management_routine(backend, args)
 
 
-def do_management(args,rcard):
-#### Management of running/finished jobs
-    import pyHepGrid.src.main_routines as mr
-    backends = []
-    if args.runArc:
-        from pyHepGrid.src.backendManagement import Arc as backend_Arc
-        backends.append(backend_Arc(act_only_on_done = args.done))
-    if args.runArcProduction:
-        from pyHepGrid.src.backendManagement import Arc as backend_ArcProd
-        backends.append(backend_ArcProd(act_only_on_done = args.done,
-                                        production=True))
-    if args.runDirac:
-        from pyHepGrid.src.backendManagement import Dirac as backend_Dirac
-        backends.append(backend_Dirac(act_only_on_done = args.done))
-    if args.runSlurm:
-        from pyHepGrid.src.backendManagement import Slurm as backend_Slurm
-        backends.append(backend_Slurm(act_only_on_done = args.done))
-    if args.runSlurmProduction:
-        from pyHepGrid.src.backendManagement import Slurm as backend_SlurmProd
-        backends.append(backend_SlurmProd(act_only_on_done = args.done,
-                                          production=True))
-
-    for backend in backends:
-        mr.management_routine(backend, args)
-
-
-def do_test(args,rcard):
-#### Test an initialised runcard
+def do_test(args, rcard):
+    #### Test an initialised runcard
     from pyHepGrid.src.test_nnlojob import run_test
     run_test(args, rcard)
 
 
-def do_initialise(args,rcard):
-#### Initialisation: send stuff to Grid Storage
+def do_initialise(args, rcard):
+    #### Initialisation: send stuff to Grid Storage
     mode_Warmup = (args.runArc or args.runSlurm)
     mode_Production = (args.runDirac or args.runArcProduction or args.runSlurmProduction)
     from pyHepGrid.src.Backend import generic_initialise
@@ -50,25 +53,30 @@ def do_initialise(args,rcard):
         logger.critical("Choose what do you want to initialise -(A/B/D/E/F/L)")
 
 
-def do_run(args,rcard):
-#### Run: run an ARC or DIRAC job for the given runcard
-    if args.runArc:
-        from pyHepGrid.src.runArcjob import runWrapper
-    elif args.runArcProduction:
-        from pyHepGrid.src.runArcjob import runWrapperProduction as runWrapper
-    elif args.runDirac:
-        from pyHepGrid.src.runDiracjob import runWrapper
-    elif args.runSlurm:
-        from pyHepGrid.src.runSlurmjob import runWrapper
-    elif args.runSlurmProduction:
-        from pyHepGrid.src.runSlurmjob import runWrapperProduction as runWrapper
-    else:
-        raise logger.critical("Choose what do you want to run -(A/B/D/E/F)")
-    runWrapper(rcard, test=args.test)
+def do_run(args, rcard):
+    #### Run: run an ARC or DIRAC job for the given runcard
+    runfuncs = {
+        "runArc": runArcJob.runWrapper,
+        "runArcProduction": runArcJob.runWrapperProduction,
+        "runDirac": runDiracJob.runWrapper,
+        "runSlurm": runSlurmJob.runWrapper,
+        "runSlurmProduction": runSlurmJob.runWrapperProduction
+    }
+
+    func_selected = False
+    for run_function in runfuncs:
+        if getattr(args, run_function):  # If mode is selected
+            runWrapper = runfuncs[run_function]
+            runWrapper(rcard, test=args.test)
+            func_selected = True
+
+    if not runc_selected:
+        logger.critical("Choose what do you want to run -(A/B/D/E/F)")
 
 
-def do_proxy(args,rcard):
-#### Proxy management
-    import pyHepGrid.src.proxyUtil as proxyUtil
-    if args.runArc or args.runArcProduction:   proxyUtil.arcProxyWiz()
-    if args.runDirac: proxyUtil.diracProxy()
+def do_proxy(args, rcard):
+    #### Proxy management
+    if args.runArc or args.runArcProduction:   
+        proxyUtil.arcProxyWiz()
+    if args.runDirac: 
+        proxyUtil.diracProxy()

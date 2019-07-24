@@ -17,16 +17,20 @@ class Arc(Backend):
     cmd_stat  = "arcstat"
     cmd_renew = "arcrenew"
 
-    def __init__(self,production=False, **kwargs):
+    def __init__(self, production=False, **kwargs):
         # Might not work on python2?
         super(Arc, self).__init__(**kwargs)
         if production:
             self.table = header.arcprodtable
         else:
             self.table = header.arctable
+        self.production = production
 
     def __str__(self):
-        return "Arc"
+        retstr = "Arc"
+        if self.production:
+            retstr += " Production"
+        return retstr
 
     def update_stdout(self):
         """ retrieves stdout of all running jobs and store the current state
@@ -236,9 +240,13 @@ class Slurm(Backend):
             self.table = header.slurmprodtable
         else:
             self.table = header.slurmtable
+        self.production = production
 
     def __str__(self):
-        return "Slurm"
+        retstr = "Slurm"
+        if self.production:
+            retstr += " Production"
+        return retstr
 
     def _get_data_warmup(self, db_id):
         fields    =  ["runcard","runfolder", "jobid", "pathfolder"]
