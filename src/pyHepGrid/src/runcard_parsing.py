@@ -43,7 +43,7 @@ class PROGRAMruncard:
 
         #     # Safety Checks
         #     # Check channels
-            self.print("Checking channel block in {0}".format(runcard_file))
+            self.debug("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i.lower())
         self._check_pdf(grid_run, use_cvmfs=use_cvmfs, cvmfs_loc = cvmfs_loc)
@@ -69,7 +69,7 @@ class PROGRAMruncard:
         pdfs = [i for i in outbyt.decode("utf-8").split("\n") if i != ""]
         try:
             assert pdf in pdfs
-            self.print("PDF set found")
+            self.debug("PDF set found")
         except AssertionError as e:
             self.critical("PDF set {0} is not installed in local version of LHAPDF".format(pdf))
 
@@ -84,12 +84,12 @@ class PROGRAMruncard:
                     data = json.load(f)
                     try:
                         members = data[pdf]
-                        self.print("PDF set found")
+                        self.debug("PDF set found")
                     except KeyError as e:
                         self.critical("PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf))
                     try:
                         assert int(member) in members
-                        self.print("PDF member found")
+                        self.debug("PDF member found")
                     except AssertionError as e:
                         self.critical("PDF member {1} for PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf, member))
             except FileNotFoundError as e:
@@ -104,11 +104,11 @@ class PROGRAMruncard:
             if pdf not in cvmfs_pdfs:
                 self.critical("PDF set {0} is not included in cvmfs LHAPDF. Turn cvmfs PDF off and use your own one (or ask the admins nicely...".format(pdf))
             else:
-                self.print("PDF set found in cvmfs LHAPDF setup")
+                self.debug("PDF set found in cvmfs LHAPDF setup")
 
 
     def _check_pdf(self, grid_run, use_cvmfs=False, cvmfs_loc=""):
-        self.print("Checking PDF set validity...")
+        self.debug("Checking PDF set validity...")
         if grid_run:
             self.__check_grid_pdf(use_cvmfs=use_cvmfs, cvmfs_loc = cvmfs_loc)
         else:
@@ -248,7 +248,7 @@ class PROGRAMruncard:
 
         return warmup_name
 
-    def _setup_logging(self,logger):
+    def _setup_logging(self, logger):
         if logger is not None:
             self.print = logger.info
             self.info = logger.info

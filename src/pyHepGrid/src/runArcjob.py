@@ -143,7 +143,7 @@ class RunArc(Backend):
                         'count'       : str(warmupthr),
                         'countpernode': str(warmupthr),}
             xrslfile = self._write_XRSL(dictData)
-            header.logger.info(" > Path of xrsl file: {0}".format(xrslfile))
+            header.logger.debug(" > Path of xrsl file: {0}".format(xrslfile))
 
             jobids = []
             keyquit = None
@@ -212,7 +212,7 @@ class RunArc(Backend):
                                 'countpernode': str(1),}
                     xrslfile = self._write_XRSL(dictData, filename = xrslfile)
                     if(seed == baseSeed):
-                        header.logger.info(" > Path of xrsl file: {0}".format(xrslfile))
+                        header.logger.debug(" > Path of xrsl file: {0}".format(xrslfile))
                 # Run the file
                     jobid = self._run_XRSL(xrslfile, test=test)
                     joblist.append(jobid)

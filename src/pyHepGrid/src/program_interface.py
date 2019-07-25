@@ -60,7 +60,7 @@ class ProgramInterface(object):
         self.overwrite_warmup = True
 
     def check_for_existing_warmup(self, r, rname):
-        logger.info("Checking whether this runcard is already at lfn:warmup")
+        logger.debug("Checking whether this runcard is already at lfn:warmup")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, grid_warmup_dir):
             self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(grid_warmup_dir, checkname))
@@ -87,7 +87,7 @@ class ProgramInterface(object):
         It relies on the base seed from the src.header file to remove the output
         """
         from pyHepGrid.src.header import grid_output_dir, logger
-        logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
+        logger.debug("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         checkname = r + "-" + rname
         files = self.gridw.get_dir_contents(grid_output_dir)
         first = True

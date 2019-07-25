@@ -165,7 +165,7 @@ class RunSlurm(Backend):
                                               sockets=sockets, port=port,
                                               array=array, queue=queue)
             slurmfile = self._write_SLURM(arguments, self.templ)
-            header.logger.info(" > Path of slurm file: {0}".format(slurmfile))
+            header.logger.debug(" > Path of slurm file: {0}".format(slurmfile))
             jobids = []
 
             jobid, runqueue = self._run_SLURM(slurmfile, arguments, queue, test=test,
@@ -215,7 +215,7 @@ class RunSlurm(Backend):
                                                   production_threads, array=True,
                                                   queue = queue)
             slurmfile = self._write_SLURM(arguments, self.prodtempl)
-            header.logger.info("Path of slurm file: {0}".format(slurmfile))
+            header.logger.debug("Path of slurm file: {0}".format(slurmfile))
             jobids = []
             jobid, runqueue = self._run_SLURM(slurmfile, arguments, queue, test=test)
             jobids.append(jobid)

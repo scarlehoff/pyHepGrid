@@ -19,14 +19,14 @@ class NNLOJET(ProgramInterface):
 
     # Checks for the runcard
     def _check_production(self, runcard):
-        logger.info("Checking production in runcard {0}".format(runcard.name))
+        logger.debug("Checking production in runcard {0}".format(runcard.name))
         if runcard.is_warmup():
             self._press_yes_to_continue("Warmup is active in runcard")
         if not runcard.is_production():
             self._press_yes_to_continue("Production is not active in runcard")
 
     def _check_warmup(self, runcard, continue_warmup=False):
-        logger.info("Checking warmup in runcard {0}".format(runcard.name))
+        logger.debug("Checking warmup in runcard {0}".format(runcard.name))
         if not runcard.is_warmup():
             self._press_yes_to_continue("Warmup is not active in runcard")
         if continue_warmup and not runcard.is_continuation():
@@ -39,7 +39,7 @@ class NNLOJET(ProgramInterface):
         """ Check whether given runcard already has output in the local run dir (looks for log files)
         """
         import re
-        logger.info("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
+        logger.debug("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
         local_dir_name = self.get_local_dir_name(r, rname)
         files = os.listdir(local_dir_name)
         runcard = PROGRAMruncard(runcard_file=os.path.join(local_dir_name, r),
