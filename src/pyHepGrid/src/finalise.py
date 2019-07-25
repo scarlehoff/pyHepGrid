@@ -23,11 +23,12 @@ DELETE_CORRUPTED = False
 MAX_ATTEMPTS = 5
 FINALISE_ALL = True
 RECURSIVE = config.recursive_finalise
+ls_protocol = "dav"
+copy_protocol = "xroot"
 
 # Set up environment
 os.environ["LFC_HOST"] = config.LFC_HOST
 os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
-# os.environ["LFC_HOME"] = config.lfndir
 
 if FINALISE_ALL:
     runcards = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -92,6 +93,8 @@ def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
     else:
         __folder = config.grid_output_dir
     gridname = os.path.join(config.gfaldir, __folder, name)
+    gridname = ":".join([copy_protocol, gridname.split(":", 1)[-1]])
+
     command = 'gfal-copy {0} {1} {2} > /dev/null 2>&1'.format(gridname, name, timeoutstr)
     
     os.system(command)
@@ -169,8 +172,11 @@ def pull_folder(foldername, folders=[], pool=None, rtag=None):
     print("\033[94mPulling Folder: {0} \033[0m".format(foldername))
     start_time = datetime.datetime.now()
 
-    cmd = ['gfal-ls', os.path.join(config.gfaldir, foldername), "-l"]
-    
+    dirname = os.path.join(config.gfaldir, foldername)
+    dirname = ":".join([ls_protocol, dirname.split(":", 1)[-1]])
+
+    cmd = ['gfal-ls', dirname , "-l", "-t", "9999999" ]
+
     cmd_output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
     output = []
     for x in str(cmd_output).split("\n"):
