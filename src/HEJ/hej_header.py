@@ -14,7 +14,7 @@ def base_dir(folder):
 # Global Variables
 # Global Variables (default values, can be changed by runcard.py)
 # for initialisation
-runcardDir = base_dir("setup/")
+runcardDir = base_dir("Setup/")
 executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/"             # Directory for exe
 executable_exe = "HEJ/bin/HEJ"                               # Exectuable name
 warmupthr  = 0
@@ -29,7 +29,7 @@ runmode = "HEJ"
 # these are also used by gfal
 grid_input_dir  = "tst_grid/input"
 grid_output_dir = "tst_grid/output"
-grid_warmup_dir = lfn_input_dir # no idea what's the difference # DW warmups is the folder for warmup output, so VEGAS grids in the N12LOJET case
+grid_warmup_dir = grid_input_dir # not needed
 
 use_gfal = True
 gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/hej/"
@@ -83,6 +83,7 @@ dirac_platform = "EL7"
 # finalise.py-only parameters
 finalise_runcards = None
 finalise_prefix = None
+recursive_finalise = None
 
 # socket default parameters
 server_host = "url.of.the.socket.server"
