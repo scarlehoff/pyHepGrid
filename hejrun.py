@@ -342,8 +342,7 @@ if __name__ == "__main__":
     lhapdf_local = ""
     if args.use_cvmfs_lhapdf:
         lhapdf_local = args.cvmfs_lhapdf_location
-    set_environment(args.lhapdf_local)
-
+    set_environment(lhapdf_local)
 
     if debug_level > -1:
         # Architecture info
