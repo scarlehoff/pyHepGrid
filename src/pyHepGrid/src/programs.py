@@ -92,7 +92,7 @@ class NNLOJET(ProgramInterface):
         logger.debug("Warmup GFAL name: {0}".format(outnm))
         tmpnm = "tmp.tar.gz"
         logger.debug("local tmp tar name: {0}".format(tmpnm))
-        success = self.gridw.bring(outnm, grid_warmup_dir, tmpnm, shell = shell, 
+        success = self.gridw.bring(outnm, grid_warmup_dir, tmpnm, shell = shell,
                                    suppress_errors=suppress_errors)
 
         success ==  self.__check_pulled_warmup(success, tmpnm, warmup_extensions)
@@ -122,7 +122,7 @@ class NNLOJET(ProgramInterface):
         ## Now extract only the Vegas grid files and log file
         gridp = warmup_extensions
         gridp += [i+"_channel" for i in gridp]
-        extractFiles = self.tarw.extract_extensions(tmpnm, 
+        extractFiles = self.tarw.extract_extensions(tmpnm,
                                                     gridp+[".log",".txt","channels"])
         try:
             gridFiles = [i for i in extractFiles if ".log" not in i]
@@ -142,7 +142,7 @@ class NNLOJET(ProgramInterface):
             logger.critical("Grid files not found in warmup tarfile. Did the warmup complete successfully?")
         elif gridFiles == []:
             return []
-        
+
         ## Tag log file as -warmup
         newlog = logfile + "-warmup"
         os.rename(logfile, newlog)
@@ -295,7 +295,7 @@ class NNLOJET(ProgramInterface):
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.grid_warmup_dir):
                     logger.info("Warmup found in GFAL:{0}!".format(header.grid_warmup_dir))
-                    warmup_files = self._bring_warmup_files(i, rname, shell=True, 
+                    warmup_files = self._bring_warmup_files(i, rname, shell=True,
                                                             multichannel=multichannel)
                     files += warmup_files
                     logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
@@ -554,6 +554,10 @@ class HEJ(ProgramInterface):
             # print("Retrieving warmup file from grid")
             # warmupFiles = self._bring_warmup_files(i, dCards[i], shell=True)
             logger.critical("Retrieving warmup file from grid: Not implemented")
+        # setup LHAPDF
+        if header.use_cvmfs_lhapdf:
+            os.environ['LHAPDF_DATA_PATH'] = header.cvmfs_lhapdf_location
+        # create Process dir in Sherpa
         self._init_Sherpa(warmup_base,rncards)
 
         os.chdir(tmpdir)
