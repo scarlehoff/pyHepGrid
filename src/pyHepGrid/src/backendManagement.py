@@ -66,7 +66,7 @@ class Arc(Backend):
 
         if len(jobids) == 0:
             header.logger.critical("No jobids stored associated with this database entry, therefore nothing to kill.")
-            
+
         for jobid_set in util.batch_gen(jobids, 150): # Kill in groups of 150 for speeeed
             stripped_set = [i.strip() for i in jobid_set]
             cmd = [self.cmd_kill, "-j", header.arcbase] + stripped_set
