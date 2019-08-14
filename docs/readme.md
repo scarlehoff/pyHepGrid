@@ -168,7 +168,7 @@ arcrenew -a
 I've added some proxy automation scripts to the repo in
 `gangaless_resources/proxy_renewal/` To get these working, simply add your
 certificate password in to `.script2.exp` (plain text I know, so it's bad ... at
-least hide it from the word with `chmod 400`) Make sure `.proxy.sh` is set up
+least hide it from the world with `chmod 400`) Make sure `.proxy.sh` is set up
 for your user (directories should point to your gangaless resources)
 
 Run by hand to check (shouldn't need your password) Then set up `.proxy.sh` to
