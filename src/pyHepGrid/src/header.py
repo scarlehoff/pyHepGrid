@@ -91,7 +91,14 @@ for i in template_attributes:
 #### RUNCARD OVERRIDES ####
 from pyHepGrid.src.argument_parser import runcard as runcard_file
 if runcard_file:
-    runcard = importlib.import_module(runcard_file.replace(".py","").replace("/","."))
+    # Check whether the runcard does exists in the given path
+    if not os.path.isfile(runcard_file):
+        # I think this exception is wrongly written
+        raise FileNotFoundError("Runcard not found: {0}".format(runcard_file))
+    runcard_folder = "./"+os.path.dirname(runcard_file)
+    runcard_name = os.path.basename(runcard_file).replace(".py","")
+    sys.path.insert(0, runcard_folder)
+    runcard = importlib.import_module(runcard_name)
     # todo: some safety checks
     for attr_name in dir(runcard):
         if not attr_name.startswith("__") and not \
