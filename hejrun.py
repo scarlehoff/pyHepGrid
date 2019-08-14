@@ -16,6 +16,10 @@ def print_flush(string):
     print string
     sys.stdout.flush()
 
+def print_file(string):
+    f = open(LOG_FILE, "a")
+    f.write(string+"\n")
+
 #####################################################################################
 #                                                                                   #
 # Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :( #
@@ -282,7 +286,7 @@ def end_program(status, debug_level):
         os.system("ls")
     end_time = datetime.datetime.now()
     print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
-    print_flush("Final Error Code: {0}".format(status))
+    print_flush("Final return Code: {0}".format(status))
     sys.exit(status)
 
 
@@ -354,6 +358,7 @@ if __name__ == "__main__":
         os.system("env")
         os.system("voms-proxy-info --all")
 
+    setup_time = datetime.datetime.now()
     # Download components
     status = download_program(debug_level)
 
@@ -368,6 +373,8 @@ if __name__ == "__main__":
         print_flush("download failed")
         end_program(status, debug_level)
 
+    download_time = datetime.datetime.now()
+
     if "HEJFOG" in args.runname:
         status += run_HEJFOG(args)
     else:
@@ -377,10 +384,14 @@ if __name__ == "__main__":
         print_flush("FOG failed")
         end_program(status, debug_level)
 
+    fixedorder_time = datetime.datetime.now()
+
     status += run_HEJ(args)
     if status != 0:
         print_flush("HEJ failed")
         end_program(status, debug_level)
+
+    HEJ_time = datetime.datetime.now()
 
     local_out = output_name(args.runcard, args.runname, args.seed)
     output_file = args.output_folder + "/" + local_out
@@ -394,5 +405,13 @@ if __name__ == "__main__":
 
     if status == 0:
         print_flush("Copied over to grid storage!")
+
+    tarcopy_time = datetime.datetime.now()
+    print_file("setup time :       "+str(setup_time-start_time))
+    print_file("download time :    "+str(download_time-setup_time))
+    print_file("fixed order time : "+str(fixedorder_time-download_time))
+    print_file("HEJ time :         "+str(HEJ_time-fixedorder_time))
+    print_file("tar&copy time :    "+str(tarcopy_time-HEJ_time))
+    print_file("total time :       "+str(tarcopy_time-setup_time))
 
     end_program(status, debug_level)
