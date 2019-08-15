@@ -75,7 +75,7 @@ class RunArc(Backend):
         # Can only use direct in Durham. Otherwise fails!
         # Speeds up submission (according to Stephen)
         if arc_direct and ".dur.scotgrid.ac.uk" in ce:
-            cmd += " --direct "
+            cmd += " -S org.nordugrid.gridftpjob --direct "
         output = util.getOutputCall(cmd.split())
         jobid = output.split("jobid:")[-1].rstrip().strip()
         return jobid
