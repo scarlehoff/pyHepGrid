@@ -11,7 +11,8 @@ header_mappings = {"jmartinez":"pyHepGrid.headers.juan_header",
                    "qpsv27":"pyHepGrid.headers.duncan_hamilton_header",
                    "jniehues":"pyHepGrid.headers.jan_header",
                    "jwhitehead":"pyHepGrid.headers.james_header",
-                   "mheil":"HEJ.hej_header"
+                   "mheil":"HEJ.hej_header",
+                   "andersen":"HEJ.hej_header"
                    }
 
 if "phyip3" in socket.gethostname(): # Hack to get different headers for batch and grid w/ same username
@@ -37,6 +38,7 @@ runfile = "nnlorun.py"
 runmode = "NNLOJET"
 sandbox_dir = "test_sandbox"
 arc_direct = True
+split_dur_ce = True
 slurm_kill_exe = "{0}/kill_server.py".format(os.path.dirname(os.path.realpath(__file__)))
 
 # Database config
