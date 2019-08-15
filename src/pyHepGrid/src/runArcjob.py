@@ -63,11 +63,12 @@ class RunArc(Backend):
         """
         import random
         from pyHepGrid.src.header import arc_direct
+        from pyHepGrid.src.header import split_dur_ce
         if test:
             from pyHepGrid.src.header import ce_test as ce
         else:
             from pyHepGrid.src.header import ce_base as ce
-            if ".dur.scotgrid.ac.uk" in ce: # Randomise ce at submission time to reduce load
+            if split_dur_ce and ".dur.scotgrid.ac.uk" in ce: # Randomise ce at submission time to reduce load
                 ce = random.choice(["ce1.dur.scotgrid.ac.uk","ce2.dur.scotgrid.ac.uk"])
 
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
