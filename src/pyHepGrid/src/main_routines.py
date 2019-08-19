@@ -10,7 +10,7 @@ def management_routine(backend, args):
         backend.set_list_disabled()
 
     if args.get_data and pyHepGrid.src.header.finalisation_script:
-        backend.get_data(0, custom_get=finalisation_script)
+        backend.get_data(0, custom_get=pyHepGrid.src.header.finalisation_script)
         exit(0)
 
     if args.updateArc:
@@ -115,8 +115,8 @@ def management_routine(backend, args):
         if args.disableme:
             backend.disable_db_entry(db_id)
 
-        if not any([args.stats, args.info, args.infoVerbose, args.renewArc, args.printme, 
-                    args.printmelog, args.checkwarmup, args.getmewarmup, args.get_grid_stdout, 
-                    args.completion, args.get_data, args.kill_job, args.clean, args.enableme, 
+        if not any([args.stats, args.info, args.infoVerbose, args.renewArc, args.printme,
+                    args.printmelog, args.checkwarmup, args.getmewarmup, args.get_grid_stdout,
+                    args.completion, args.get_data, args.kill_job, args.clean, args.enableme,
                     args.disableme]):
             pyHepGrid.src.header.logger.plain(" ".join(i for i in jobid))
