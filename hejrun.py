@@ -281,7 +281,7 @@ def print_node_info(outputfile):
     os.system("python --version >> {0}".format(outputfile))
 
 def end_program(status, debug_level):
-    # TODO print debug infos here if status!=0
+    # print debug infos here if status!=0
     if status != 0 or debug_level > 8:
         os.system("cat "+LOG_FILE)
         os.system("ls")
