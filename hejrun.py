@@ -397,6 +397,12 @@ if __name__ == "__main__":
     local_out = output_name(args.runcard, args.runname, args.seed)
     output_file = args.output_folder + "/" + local_out
 
+    print_file("setup time:       "+str(setup_time-start_time))
+    print_file("download time:    "+str(download_time-setup_time))
+    print_file("fixed order time: "+str(fixedorder_time-download_time))
+    print_file("HEJ time:         "+str(HEJ_time-fixedorder_time))
+    print_file("total runtime:    "+str(HEJ_time-download_time))
+
     status += tar_this(local_out, "*.yoda *.log *.yml Run.dat")
 
     status += copy_to_grid(local_out, output_file, args)
@@ -408,11 +414,7 @@ if __name__ == "__main__":
         print_flush("Copied over to grid storage!")
 
     tarcopy_time = datetime.datetime.now()
-    print_file("setup time :       "+str(setup_time-start_time))
-    print_file("download time :    "+str(download_time-setup_time))
-    print_file("fixed order time : "+str(fixedorder_time-download_time))
-    print_file("HEJ time :         "+str(HEJ_time-fixedorder_time))
-    print_file("tar&copy time :    "+str(tarcopy_time-HEJ_time))
-    print_file("total time :       "+str(tarcopy_time-setup_time))
+    print_file("tar&copy time:    "+str(tarcopy_time-HEJ_time))
+    print_file("total time:       "+str(tarcopy_time-setup_time))
 
     end_program(status, debug_level)
