@@ -334,10 +334,10 @@ if __name__ == "__main__":
     # Download components
     status = download_program(debug_level)
 
-    os.system("chmod +x {0}".format(args.executable))
+    # os.system("chmod +x {0}".format(args.executable)) # uncomment for downloaded exe
 
-    if debug_level > 8:
-        os.system("ldd {0}".format(args.executable))
+    # if debug_level > 8:
+    #     os.system("ldd {0}".format(args.executable)) # uncomment for downloaded exe
 
     status += download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
 
