@@ -275,6 +275,7 @@ def print_node_info(outputfile):
     # os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
     os.system("gcc --version >> {0}".format(outputfile))
     os.system("python --version >> {0}".format(outputfile))
+    os.system("cat {0}".format(outputfile)) ## print to log
 
 def end_program(status, debug_level):
     # print debug infos here if status!=0
