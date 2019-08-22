@@ -29,7 +29,7 @@ runmode = "HEJ"
 # these are also used by gfal
 grid_input_dir  = "tst_grid/input"
 grid_output_dir = "tst_grid/output"
-grid_warmup_dir = grid_input_dir # not needed
+grid_warmup_dir = "HEJ/HEJ.tar.gz" # path of the HEJ tar on gfal (ignore the variable name)
 
 use_gfal = True
 gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/hej/"

@@ -76,7 +76,7 @@ def parse_arguments():
                       help = "lfn input folder, relative to gfaldir",
                       default = "input")
     parser.add_option("-w", "--warmup_folder",
-                      help = "lfn warmup folder, relative to gfaldir",
+                      help = "lfn file (not just the folder!) where HEJ is stored, relative to gfaldir",
                       default = "warmup")
     parser.add_option("-o", "--output_folder",
                       help = "lfn output folder, relative to gfaldir",
@@ -250,10 +250,11 @@ def tar_this(tarfile, sourcefiles):
 
 ### Download executable ###
 
-def download_program(debug_level):
-    # TODO read tar and source name from header
-    tar_name = "HEJ.tar.gz"
-    source = "HEJ/{0}".format(tar_name)
+def download_program(source, debug_level):
+    tar_name = os.path.basename(source)
+    if not tar_name.endswith("tar.gz"):
+        print_flush("{0} is not a valid path to download HEJ".format(source))
+        return 1
     stat = copy_from_grid(source, tar_name, args)
     stat += untar_file(tar_name, debug_level)
     stat += os.system("rm {0}".format(tar_name))
@@ -361,7 +362,8 @@ if __name__ == "__main__":
 
     setup_time = datetime.datetime.now()
     # Download components
-    status = download_program(debug_level)
+    # we are abusing "args.warmup_folder", which is otherwise not needed for HEJ
+    status = download_program(args.warmup_folder, debug_level)
 
     os.system("chmod +x {0}".format(args.executable))
 
