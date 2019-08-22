@@ -8,7 +8,6 @@ except KeyError as e:
 
 MAX_COPY_TRIES = 15
 PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
-LHE_FILE="SherpaLHE_fixed.lhe"
 LOG_FILE="output.log"
 
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
@@ -36,11 +35,8 @@ def output_name(runcard, rname, seed):
     out = "output-" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 
-def yoda_name(seed):
-    return "HEJ_{0}".format(seed)
-
 def config_name(rname):
-    return "{0}.yml".format(rname)
+    return "{0}.dat".format(rname)
 
 #### Override os.system with custom version that auto sets debug level on failure
 # Abusive...
@@ -67,7 +63,7 @@ def parse_arguments():
 
     # Run options
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
-    parser.add_option("-e", "--executable", help = "Executable to be run", default = "HEJ")
+    parser.add_option("-e", "--executable", help = "Executable to be run", default = "Sherpa")
     parser.add_option("-d", "--debug", help = "Debug level", default="0")
     parser.add_option("-s", "--seed", help = "Run seed", default="1")
     parser.add_option("-E", "--events", help = "Number of events", default="-1")
@@ -153,8 +149,6 @@ def set_environment(lhapdf_dir):
             +":"+args.gfal_location.replace("/bin/","/lib/python2.7/site-packages/")
         os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]\
             +":"+args.gfal_location.replace("/bin/","/lib/")
-    # HEJ environment
-    os.environ['LD_LIBRARY_PATH'] = "./HEJ/lib"+":"+os.environ["LD_LIBRARY_PATH"]
     # LHAPDF
     os.environ['LHAPDF_DATA_PATH'] = lhapdf_dir
     return 0
@@ -253,14 +247,16 @@ def tar_this(tarfile, sourcefiles):
 
 def download_program(debug):
     # TODO read tar and source name from header
-    tar_name = "HEJ.tar.gz"
-    source = "HEJ/{0}".format(tar_name)
-    stat = copy_from_grid(source, tar_name, args)
-    stat += untar_file(tar_name, debug)
-    stat += os.system("rm {0}".format(tar_name))
-    if debug_level > 2:
-        os.system("ls -l HEJ")
-    return stat
+    print_flush("using cvmfs Sherpa")
+    return 0
+    # tar_name = "Sherpa.tar.gz"
+    # source = "Sherpa/{0}".format(tar_name)
+    # stat = copy_from_grid(source, tar_name, args)
+    # stat += untar_file(tar_name, debug)
+    # stat += os.system("rm {0}".format(tar_name))
+    # if debug_level > 2:
+    #     os.system("ls -l Sherpa")
+    # return stat
 
 def download_runcard(input_folder, runcard, runname, debug_level):
     tar = warmup_name(runcard,runname)
@@ -295,36 +291,11 @@ def end_program(status, debug_level):
 ########################## Actual run commands ##########################
 
 def run_sherpa(args):
-    command = "Sherpa RSEED:={0} ANALYSIS_OUTPUT=Sherpa_{0}".format(args.seed)
+    command = "Sherpa RSEED:={0} ANALYSIS_OUTPUT=Sherpa_{0} -f {1}".format(
+        args.seed, config_name(args.runname))
     if int(args.events) > 0:
         command += " -e {0} ".format(args.events)
     status = run_command(command)
-    status += run_command("SherpaLHEF SherpaLHE.lhe {0}".format(LHE_FILE))
-    # TODO run:
-    #   unweighter (maybe)
-    return status
-
-def run_HEJFOG(args):
-    print_flush("TODO HEJFOG not implemented yet")
-    command = "HEJ/bin/HEJFOG"
-    os.system("chmod +x {0}".format(command))
-    # TODO:
-    #   parse runcard
-    #   run HEJ-FOG (with chmod)
-    return 1
-
-def run_HEJ(args):
-    config = config_name(args.runname)
-    seed = args.seed
-    status = os.system(
-        'sed -i -e "s/seed:.1/seed: {0}/g" {1}'.format(seed, config) )
-    status += os.system(
-        'sed -i -e "s/output:.HEJ/output: {0}/g" {1}'.format(
-            yoda_name(seed), config) )
-    status += os.system("chmod +x {0}".format(args.executable))
-    if status == 0:
-        status += run_command(
-            "{0} {1} {2}".format(args.executable, config, LHE_FILE) )
     return status
 
 ########################## main ##########################
@@ -364,10 +335,10 @@ if __name__ == "__main__":
     # Download components
     status = download_program(debug_level)
 
-    os.system("chmod +x {0}".format(args.executable))
+    # os.system("chmod +x {0}".format(args.executable)) # uncomment for downloaded exe
 
-    if debug_level > 8:
-        os.system("ldd {0}".format(args.executable))
+    # if debug_level > 8:
+    #     os.system("ldd {0}".format(args.executable)) # uncomment for downloaded exe
 
     status += download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
 
@@ -377,35 +348,22 @@ if __name__ == "__main__":
 
     download_time = datetime.datetime.now()
 
-    if "HEJFOG" in args.runname:
-        status += run_HEJFOG(args)
-    else:
-        status += run_sherpa(args)
+    status += run_sherpa(args)
 
     if status != 0:
-        print_flush("FOG failed")
+        print_flush("Sherpa failed")
         end_program(status, debug_level)
 
-    fixedorder_time = datetime.datetime.now()
+    run_time = datetime.datetime.now()
 
-    status += run_HEJ(args)
-    if status != 0:
-        print_flush("HEJ failed")
-        end_program(status, debug_level)
-
-    HEJ_time = datetime.datetime.now()
+    print_file("setup time:    "+str(setup_time-start_time))
+    print_file("download time: "+str(download_time-setup_time))
+    print_file("Sherpa time:   "+str(run_time-download_time))
 
     local_out = output_name(args.runcard, args.runname, args.seed)
+    status += tar_this(local_out, "*.yoda *.log *.dat")
+
     output_file = args.output_folder + "/" + local_out
-
-    print_file("setup time:       "+str(setup_time-start_time))
-    print_file("download time:    "+str(download_time-setup_time))
-    print_file("fixed order time: "+str(fixedorder_time-download_time))
-    print_file("HEJ time:         "+str(HEJ_time-fixedorder_time))
-    print_file("total runtime:    "+str(HEJ_time-download_time))
-
-    status += tar_this(local_out, "*.yoda *.log *.yml Run.dat")
-
     status += copy_to_grid(local_out, output_file, args)
 
     if debug_level > 1:
@@ -415,7 +373,7 @@ if __name__ == "__main__":
         print_flush("Copied over to grid storage!")
 
     tarcopy_time = datetime.datetime.now()
-    print_file("tar&copy time:    "+str(tarcopy_time-HEJ_time))
-    print_file("total time:       "+str(tarcopy_time-setup_time))
+    print_file("tar&copy time: "+str(tarcopy_time-run_time))
+    print_file("total time:    "+str(tarcopy_time-setup_time))
 
     end_program(status, debug_level)

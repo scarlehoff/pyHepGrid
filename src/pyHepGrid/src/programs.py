@@ -496,8 +496,16 @@ def _init_Sherpa_single(warmup_dir):
 
 class HEJ(ProgramInterface):
 
+    _RUNFILE_END = ".yml"
+    _WARMUP_FILES = ["Process", "Run.dat", "Results.db"]
+
     def _exe_fullpath(self, executable_src_dir, executable_exe):
         return os.path.join(executable_src_dir, executable_exe)
+
+    def _file_exists(self, file, logger):
+        import os.path
+        if not os.path.exists(file):
+            logger.critical("File {0} required for initialisation.".format(file))
 
     def warmup_name(self, runcard, rname):
         out = "{0}+{1}.tar.gz".format(runcard, rname)
@@ -576,17 +584,20 @@ class HEJ(ProgramInterface):
 
             # runcards
             run_dir = runFol + base_folder
-            runFiles = [dCards[i]+".yml"]
+            runFiles = [dCards[i]+self._RUNFILE_END]
             for f in runFiles:
-                os.system("cp -r "+run_dir+f+" "+tmpdir)
+                f=run_dir+f
+                self._file_exists(f,logger)
+                os.system("cp -r "+f+" "+tmpdir)
 
             # warmup files
-            warmupFiles = ["Process", "Run.dat", "Results.db"]
-            for f in warmupFiles:
-                os.system("cp -r "+warmup_base+base_folder+f+" "+tmpdir)
+            for f in self._WARMUP_FILES:
+                f=warmup_base+base_folder+f
+                self._file_exists(f,logger)
+                os.system("cp -r "+f+" "+tmpdir)
 
             # tar up & send to grid storage
-            self.tarw.tarFiles(warmupFiles+runFiles, tarfile)
+            self.tarw.tarFiles(self._WARMUP_FILES+runFiles, tarfile)
 
             if self.gridw.checkForThis(tarfile, grid_input_dir):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
@@ -597,3 +608,8 @@ class HEJ(ProgramInterface):
         # clean up afterwards
         os.chdir(origdir)
         os.system("rm -r "+tmpdir)
+
+class Sherpa(HEJ):
+
+    _RUNFILE_END = ".dat"
+    _WARMUP_FILES = ["Process", "Results.db"]

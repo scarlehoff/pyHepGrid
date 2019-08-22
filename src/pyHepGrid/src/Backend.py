@@ -10,7 +10,7 @@ import multiprocessing as mp
 import sys
 
 counter = None
-_mode = pyHepGrid.src.runmodes.mode_selector[header.runmode]
+_mode = pyHepGrid.src.runmodes.mode_selector[header.runmode.upper()]
 
 
 def init_counter(args):
