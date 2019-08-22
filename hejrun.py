@@ -58,7 +58,6 @@ def parse_arguments():
     from optparse import OptionParser
     from getpass import getuser
 
-    default_user_lfn = "/grid/pheno/{0}".format(getuser())
     default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())
     parser = OptionParser(usage = "usage: %prog [options]")
 
@@ -251,12 +250,12 @@ def tar_this(tarfile, sourcefiles):
 
 ### Download executable ###
 
-def download_program(debug):
+def download_program(debug_level):
     # TODO read tar and source name from header
     tar_name = "HEJ.tar.gz"
     source = "HEJ/{0}".format(tar_name)
     stat = copy_from_grid(source, tar_name, args)
-    stat += untar_file(tar_name, debug)
+    stat += untar_file(tar_name, debug_level)
     stat += os.system("rm {0}".format(tar_name))
     if debug_level > 2:
         os.system("ls -l HEJ")
