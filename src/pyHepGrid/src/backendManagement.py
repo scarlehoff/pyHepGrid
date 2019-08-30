@@ -81,8 +81,8 @@ class Arc(Backend):
             cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
 
-    def cat_job(self, jobids, jobinfo, print_stderr = None, store = False):
-        """ print stdandard output of a given job"""
+    def cat_job(self, jobids, jobinfo, print_stderr = None, store = False, only_failed=False):
+        """ print standard output of a given job"""
         out = []
         for jobid in jobids:
             cmd = [self.cmd_print, "-j", header.arcbase, jobid.strip()]
@@ -139,8 +139,9 @@ class Arc(Backend):
         #         cmd += ["-l"]
         #     util.spCall(cmd)
         cmd = [self.cmd_stat, "-j", header.arcbase]
-        print(header.arcbase)
         jobids = [jobid.strip() for jobid in jobids]
+        if len(jobids) == 0:
+            header.logger.critical("No jobs selected")
         cmd = cmd + jobids
         if verbose:
             cmd += ["-l"]
