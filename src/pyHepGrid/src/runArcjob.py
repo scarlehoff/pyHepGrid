@@ -57,7 +57,7 @@ class RunArc(Backend):
                     f.write(" = \"{}\")\n".format(argument_value))
         return filename
 
-    def _run_XRSL(self, filename, test = False):
+    def _run_XRSL(self, filename, test=False, include_retcode=False):
         """ Sends XRSL to the queue defined in header
         If test = True, use test queue
         """
@@ -76,12 +76,17 @@ class RunArc(Backend):
         # Speeds up submission (according to Stephen)
         if arc_direct and ".dur.scotgrid.ac.uk" in ce:
             cmd += " -S org.nordugrid.gridftpjob --direct "
-        output = util.getOutputCall(cmd.split())
-        jobid = output.split("jobid:")[-1].rstrip().strip()
-        return jobid
+        if include_retcode:
+            output = util.getOutputCall(cmd.split(), include_return_code=True)
+            jobid = output[0].split("jobid:")[-1].rstrip().strip()
+            return jobid, output[1]
+        else:
+            output = util.getOutputCall(cmd.split())
+            jobid = output.split("jobid:")[-1].rstrip().strip()
+            return jobid
 
     # Runs for ARC
-    def run_wrap_warmup(self, test = None, expandedCard = None):
+    def run_wrap_warmup(self, test=None, expandedCard=None):
         """ Wrapper function. It assumes the initialisation stage has already happend
             Writes XRSL file with the appropiate information and send one single job
             (or n_sockets jobs) to the queue
@@ -191,7 +196,9 @@ class RunArc(Backend):
             header.logger.debug(" > Path of xrsl file for seed {1}: {0}".format(xrslfile, seed))
 
         # Run the file
-        jobid = self._run_XRSL(xrslfile, test=test)
+        jobid, retcode = self._run_XRSL(xrslfile, test=test, include_retcode=True)
+        if int(retcode) != 0:
+            jobid = "None"
         jobids.append(jobid)
         return jobid
         
@@ -201,7 +208,7 @@ class RunArc(Backend):
             yield (r, dCards[r], seed, jobName, baseSeed, test, jobids)
 
 
-    def run_wrap_production(self, test = None):
+    def run_wrap_production(self, test=None):
         """ Wrapper function. It assumes the initialisation stage has already happend
             Writes XRSL file with the appropiate information and send a producrun
             number of jobs to the arc queue
@@ -255,6 +262,10 @@ class RunArc(Backend):
                         'status'    : "active",}
             if len(joblist) > 0:
                 self.dbase.insert_data(self.table, dataDict)
+                # Set jobs to failed status if no jobid returned
+                dbid =  self.get_active_dbids()[-1]
+                statuses = [self.cUNK  if i != "None" else self.cFAIL for i in joblist]
+                self._set_new_status(dbid, statuses)
             else:
                 header.logger.critical("No jobids returned, no database entry inserted for submission: {0} {1}".format(r, dCards[r]))
             if keyquit is not None:

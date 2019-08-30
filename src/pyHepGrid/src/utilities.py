@@ -51,18 +51,19 @@ def spCall(cmd, suppress_errors = False, shell=False):
         raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
         return -1
 
-def getOutputCall(cmd, suppress_errors = False):
+def getOutputCall(cmd, suppress_errors=False, include_return_code=True):
     try:
         header.logger.debug(cmd)
         if not suppress_errors:
-            outbyt, syserr = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()
-            header.logger.debug(outbyt)
-            header.logger.debug(syserr)
+            popen = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         else:
-            outbyt, syserr = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).communicate()
-            header.logger.debug(outbyt)
-            header.logger.debug(syserr)
+            popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        outbyt, syserr = popen.communicate()
+        header.logger.debug(outbyt)
+        header.logger.debug(syserr)
         outstr = outbyt.decode("utf-8")
+        if include_return_code:
+            outstr = (outstr, popen.returncode)
         return outstr
     except:
         raise Exception("Something went wrong with Popen: ", ' '.join(cmd))
