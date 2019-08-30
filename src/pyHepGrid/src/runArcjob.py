@@ -177,6 +177,30 @@ class RunArc(Backend):
             if keyquit is not None:
                 raise keyquit
 
+    def run_single_production(self, args):
+        """ Wrapper for passing to multirun, where args is a tuple of each argument required. 
+        Would be easier if multirun used starmap..."""
+        r, dcard, seed, jobName, baseSeed, test, jobids = args
+        arguments = self._get_prod_args(r, dcard, seed)
+        dictData = {'arguments'   : arguments,
+                    'jobName'     : jobName,
+                    'count'       : str(1),
+                    'countpernode': str(1),}
+        xrslfile = self._write_XRSL(dictData, filename=None)
+        if(seed == baseSeed):
+            header.logger.debug(" > Path of xrsl file for seed {1}: {0}".format(xrslfile, seed))
+
+        # Run the file
+        jobid = self._run_XRSL(xrslfile, test=test)
+        jobids.append(jobid)
+        return jobid
+        
+
+    def arg_iterator(self, r, dCards, jobName, baseSeed, producRun, test, jobids):
+        for seed in range(baseSeed, baseSeed + producRun):
+            yield (r, dCards[r], seed, jobName, baseSeed, test, jobids)
+
+
     def run_wrap_production(self, test = None):
         """ Wrapper function. It assumes the initialisation stage has already happend
             Writes XRSL file with the appropiate information and send a producrun
@@ -197,30 +221,25 @@ class RunArc(Backend):
             self.check_for_existing_output(r, dCards[r])
             # use the same unique name for all seeds since
             # we cannot multiprocess the arc submission
-            xrslfile = None
             keyquit = None
 
             # Sanity check for test queue
             if test and producRun > 5:
                 self._press_yes_to_continue("  \033[93m WARNING:\033[0m About to submit a large number ({0}) of jobs to the test queue.".format(producRun))
 
+            # use iterator for memory reasons :)
+            from multiprocessing import Manager
+            jobids = Manager().list() # Use shared memory list in case of submission failure
+            arg_sets = self.arg_iterator(r, dCards, jobName, baseSeed, producRun, test, jobids)
+
             try:
-                for seed in range(baseSeed, baseSeed + producRun):
-                    arguments = self._get_prod_args(r, dCards[r], seed)
-                    dictData = {'arguments'   : arguments,
-                                'jobName'     : jobName,
-                                'count'       : str(1),
-                                'countpernode': str(1),}
-                    xrslfile = self._write_XRSL(dictData, filename = xrslfile)
-                    if(seed == baseSeed):
-                        header.logger.debug(" > Path of xrsl file: {0}".format(xrslfile))
-                # Run the file
-                    jobid = self._run_XRSL(xrslfile, test=test)
-                    joblist.append(jobid)
-            except Exception as interrupt:
+                joblist = self._multirun(self.run_single_production, arg_sets, n_threads=min(10, producRun))
+            except (Exception, KeyboardInterrupt) as interrupt:
                 print("\n")
+                joblist = jobids
                 header.logger.error("Submission error encountered. Inserting all successful submissions to database")
                 keyquit = interrupt
+
             # Create daily path
             pathfolder = util.generatePath(warmup=False)
             # Create database entry
