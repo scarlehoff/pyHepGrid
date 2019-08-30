@@ -240,7 +240,7 @@ class RunArc(Backend):
             arg_sets = self.arg_iterator(r, dCards, jobName, baseSeed, producRun, test, jobids)
 
             try:
-                joblist = self._multirun(self.run_single_production, arg_sets, n_threads=min(10, producRun))
+                joblist = self._multirun(self.run_single_production, arg_sets, n_threads=min(header.arc_submit_threads, producRun))
             except (Exception, KeyboardInterrupt) as interrupt:
                 print("\n")
                 joblist = jobids
