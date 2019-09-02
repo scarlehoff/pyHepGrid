@@ -56,6 +56,7 @@ def management_routine(backend, args):
         jdx= idx+1
         request_fields = ["runcard", "jobtype","runfolder","iseed","no_runs"]
         alljobinfo = backend.dbase.list_data(backend.table, request_fields, db_id)
+        # raise Exception
         if len(alljobinfo)==0:
             pyHepGrid.src.header.logger.critical("Job {0} requested, which does not exist in database".format(db_id))
         jobinfo = alljobinfo[0]
@@ -69,6 +70,21 @@ def management_routine(backend, args):
         # Could we make this more generic? i.e pass function with opt args using a dictionary
         # rather than just making copies for every possibility
         # Options that keep the database entry after they are done
+        if args.filter_jobs_by_status is not None:
+            pyHepGrid.src.header.logger.warn("Applying job status filter. Please ensure you have run stats directly before this command to update job statuses.")
+            pyHepGrid.src.header.logger.info("Job status filter: {0}".format(" ".join(args.filter_jobs_by_status)))
+            args.filter_jobs_by_status = ["c"+i.upper() for i in args.filter_jobs_by_status]
+            try:
+                status_codes = [getattr(backend, i) for i in args.filter_jobs_by_status]
+            except AttributeError as e:
+                pyHepGrid.src.header.logger.critical("Invalid job status given: {0}".format(str(e).split(" ")[-1][2:-1]))
+            statuses = backend._get_old_status(db_id)
+            new_joblist = []
+            for jid, status in zip(jobid, statuses):
+                if status in status_codes:
+                    new_joblist.append(jid)
+            jobid = new_joblist
+
         if args.stats:
             backend.stats_job(db_id)
         if args.info or args.infoVerbose:

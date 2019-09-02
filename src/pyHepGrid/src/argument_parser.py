@@ -88,6 +88,7 @@ if caller_script in ("main.py", "pyHepGrid"):
     parser_info.add_argument("-p", "--printme", help = "do arccat to a given job", action = "store_true")
     parser_info.add_argument("-P", "--printmelog", help = "do arccat to the *.log files of a given job (only ARC)", action = "store_true")
     parser_info.add_argument("--error", help = "When doing arccat, print the standard error instead of std output", action = "store_true")
+    parser_info.add_argument("--filter_jobs_by_status","--filter", "-fl", help = "Select jobs with only the listed statuses. Possible values: done, wait, fail, run, unk (case insensitive). Works with info, renewproxy, print, completion, get_grid options.", default=None, nargs = "*",)
 
     # Getting Data
     parser_fin = parser.add_argument_group("finalisation options", "Retrieve or kill jobs, to be used with mode=man")
