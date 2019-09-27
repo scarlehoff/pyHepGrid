@@ -168,7 +168,7 @@ lfn    = "lfn:"
 
 
 def run_command(command):
-    command += " 1>> {0} 2>&1".format(LOG_FILE)
+    command += " 2>&1 | tee -a {0} ".format(LOG_FILE)
     print_flush(" > Executed command: {0} ({1})".format(command,
         datetime.datetime.now()))
     return os.system(command)
