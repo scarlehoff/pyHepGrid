@@ -12,7 +12,7 @@ def get_cmd_output(*args,**kwargs):
 # Global Variables (default values, can be changed by runcard.py)
 runcardDir = "/path/to/runcard/directory/" # Directory for grid runcard storage
 executable_src_dir = "/path/to/nnlojet/directory"             # Directory for NNLOJET
-executable_exe = "NNLOJET"                               # Exectuable name
+executable_exe = "NNLOJET"                               # Executable name
 runmode    = "NNLOJET"
 warmupthr  = 8
 producRun  = 100
@@ -30,7 +30,7 @@ runfile    = "nnlorun.py"
 
 use_gfal = False
 gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
-cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.17/bin/" # set to None for environmentt gfal
+cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r22p6/Linux_x86_64_glibc-2.17/bin/" # set to None for environment gfal
 
 # TMUX config
 tmux_location= "tmux"

@@ -16,7 +16,7 @@ def base_dir(folder):
 # for initialisation
 runcardDir = base_dir("Setup/")
 executable_src_dir = "/mt/home/mheil/HEJ/reversed_hej/installed/"             # Directory for exe
-executable_exe = "HEJ/bin/HEJ"                               # Exectuable name
+executable_exe = "HEJ/bin/HEJ"                               # Executable name
 warmupthr  = 0
 producRun  = 2
 baseSeed   = 1
@@ -33,7 +33,7 @@ grid_warmup_dir = "HEJ/HEJ.tar.gz" # path of the HEJ tar on gfal (ignore the var
 
 use_gfal = True
 gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/hej/"
-cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r20p16/Linux_x86_64_glibc-2.17/bin/" # set to None for environmentt gfal
+cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r22p6/Linux_x86_64_glibc-2.17/bin/" # set to None for environment gfal
 
 # TMUX config
 tmux_location= "tmux"
