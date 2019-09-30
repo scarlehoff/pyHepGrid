@@ -25,6 +25,7 @@ class Backend(_mode):
     cWAIT = 0
     cFAIL = -1
     cRUN  = 2
+    cMISS = 98
     cUNK  = 99
 
     def output_name_array(self, runcard, rname, seeds):
@@ -274,11 +275,12 @@ class Backend(_mode):
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)
         fail = status.count(self.cFAIL)
+        miss = status.count(self.cMISS)
         unk = status.count(self.cUNK)
         if do_print:
             self.stats_print_setup(runcard_info, dbid=dbid)
             total = len(jobids)
-            self.print_stats(done, wait, run, fail, unk, total)
+            self.print_stats(done, wait, run, fail, miss, unk, total)
         self._set_new_status(dbid, status)
         return done, wait, run, fail, unk
 
@@ -301,8 +303,8 @@ class Backend(_mode):
         status_str = ' '.join(map(str,status))
         self.dbase.update_entry(self.table, db_id, field_name, status_str)
 
-    def print_stats(self, done, wait, run, fail, unk, total):
-        total2 = done + wait + run + fail + unk
+    def print_stats(self, done, wait, run, fail, miss, unk, total):
+        total2 = done + wait + run + fail + unk + miss
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
         if self.stats_one_line:
@@ -321,6 +323,7 @@ class Backend(_mode):
             string += addline("Waiting", wait, '\033[93m')
             string += addline("Running", run, '\033[94m')
             string += addline("Failed", fail, '\033[91m')
+            string += addline("Missing", miss, '\033[95m')
             string += "Total: {0:4}".format(total2)
             logger.plain(string)
         else:
@@ -329,6 +332,7 @@ class Backend(_mode):
             logger.plain("    >> Waiting: {0}".format(wait))
             logger.plain("    >> Running: {0}".format(run))
             logger.plain("    >> Failed:  {0}".format(fail))
+            logger.plain("    >> Missing: {0}".format(miss))
             logger.plain("    >> Unknown: {0}".format(unk))
             logger.plain("    >> Sum      {0}".format(total2))
 

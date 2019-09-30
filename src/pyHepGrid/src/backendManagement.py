@@ -218,7 +218,7 @@ class Dirac(Backend):
             status[jobids.index(jobid)] = self.cDONE
         self.stats_print_setup(runcard_info,dbid = dbid)
         total = len(jobids)
-        self.print_stats(done, wait, run, fail, unk, total)
+        self.print_stats(done, wait, run, fail, 0, unk, total)
         self._set_new_status(dbid, status)
 
 
@@ -340,7 +340,7 @@ class Slurm(Backend):
         done = tot-fail-waiting-running
         self.stats_print_setup(runcard_info,dbid = dbid)
         total = len(jobids)
-        self.print_stats(done, waiting, running, fail, 0, tot)
+        self.print_stats(done, waiting, running, fail, 0, 0, tot)
 
 
     def cat_job(self, jobids, jobinfo, print_stderr = None, store = False):
@@ -398,7 +398,7 @@ class Slurm(Backend):
             tot += self.get_status(jobid,"all")
         done = tot-fail-waiting-running
         total = len(jobids)
-        self.print_stats(done, waiting, running, fail, 0, tot)
+        self.print_stats(done, waiting, running, fail, 0, 0, tot)
 
 
 

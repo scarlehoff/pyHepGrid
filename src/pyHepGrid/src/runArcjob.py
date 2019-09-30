@@ -183,7 +183,7 @@ class RunArc(Backend):
                 raise keyquit
 
     def run_single_production(self, args):
-        """ Wrapper for passing to multirun, where args is a tuple of each argument required. 
+        """ Wrapper for passing to multirun, where args is a tuple of each argument required.
         Would be easier if multirun used starmap..."""
         r, dcard, seed, jobName, baseSeed, test, jobids = args
         arguments = self._get_prod_args(r, dcard, seed)
@@ -201,12 +201,10 @@ class RunArc(Backend):
             jobid = "None"
         jobids.append(jobid)
         return jobid
-        
 
     def arg_iterator(self, r, dCards, jobName, baseSeed, producRun, test, jobids):
         for seed in range(baseSeed, baseSeed + producRun):
             yield (r, dCards[r], seed, jobName, baseSeed, test, jobids)
-
 
     def run_wrap_production(self, test=None):
         """ Wrapper function. It assumes the initialisation stage has already happend
@@ -264,7 +262,7 @@ class RunArc(Backend):
                 self.dbase.insert_data(self.table, dataDict)
                 # Set jobs to failed status if no jobid returned
                 dbid =  self.get_active_dbids()[-1]
-                statuses = [self.cUNK  if i != "None" else self.cFAIL for i in joblist]
+                statuses = [self.cUNK  if i != "None" else self.cMISS for i in joblist]
                 self._set_new_status(dbid, statuses)
             else:
                 header.logger.critical("No jobids returned, no database entry inserted for submission: {0} {1}".format(r, dCards[r]))
