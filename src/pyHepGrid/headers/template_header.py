@@ -71,7 +71,9 @@ short_stats = False
 ce_base = "base_computing_element.ac.uk"
 ce_test = "test_computing_element.ac.uk"
 ce_listfile = "computing_elements.txt"
-arcbase  = "/path/to/ARC/base/.arc/jobs.dat" # arc database
+arcbase = "/path/to/ARC/base/.arc/jobs.dat" # arc database
+arc_submit_threads = 10 # Threads for use in arc submission. Raising this too high /may/ result
+                        # in some job loss due to filesystem locks on arc jobs database.
 
 # DIRAC parameters
 dirac_name = "user_name_for_dirac"
