@@ -44,8 +44,9 @@ if config.timeout is not None:
 else:
     timeoutstr = ""
 
+
 def mkdir(directory):
-    os.system('mkdir {0} -p > /dev/null 2>&1'.format(directory))
+    os.makedirs(directory, exist_ok=True)
 
 
 def get_output_dir_name(runcard, rtag):

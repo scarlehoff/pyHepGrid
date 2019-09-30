@@ -15,7 +15,7 @@ from uuid import uuid4
 #
 #
 
-MAX_COPY_TRIES = 10
+MAX_COPY_TRIES = 5
 PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
 
 ###################################
@@ -272,13 +272,11 @@ class GridWrap:
     # Need to refactor post dpm gfal
 
     def send(self, tarfile, whereTo, shell=False):
-        what = ["file:///{0}/".format(os.getcwd()) + tarfile]
-        gridname = os.path.join(header.gfaldir, whereTo, tarfile)
-        cmd = ["gfal-copy", what[0], gridname]
-
+        gridfile = os.path.join(header.gfaldir, whereTo, tarfile)
+        localfile = "file://{0}/{1}".format(os.getcwd(),tarfile)
         count = 1
         while True:
-            success = spCall(cmd, shell=shell)
+            success = gfal_copy(localfile, gridfile)
             # Check whether we actually sent what we wanted to send
             if self.checkForThis(tarfile, whereTo):
                 break
