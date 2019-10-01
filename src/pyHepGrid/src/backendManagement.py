@@ -81,7 +81,7 @@ class Arc(Backend):
             cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
 
-    def cat_job(self, jobids, jobinfo, print_stderr = None, store = False, only_failed=False):
+    def cat_job(self, jobids, jobinfo, print_stderr = None, store = False):
         """ print standard output of a given job"""
         out = []
         for jobid in jobids:
@@ -179,7 +179,7 @@ class Dirac(Backend):
         output = set(util.getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
                                        '--Owner={0}'.format(header.dirac_name),
                                        '--Maximum=0', # 0 lists ALL jobs, which is nice :)
-                                         '--Date={0}'.format(date)], 
+                                         '--Date={0}'.format(date)],
                                         include_return_code=False).split("\n")[-2].split(","))
         header.logger.debug(output)
         return output
