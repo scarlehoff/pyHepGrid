@@ -340,7 +340,9 @@ class Backend(_mode):
         """ version of stats job multithread ready
         """
         if isinstance(jobid_raw, tuple):
-            if jobid_raw[1] == self.cDONE or jobid_raw[1] == self.cFAIL:
+            if (jobid_raw[1] == self.cDONE or
+                    jobid_raw[1] == self.cFAIL or
+                    jobid_raw[1] == self.cMISS):
                 return jobid_raw[1]
             else:
                 jobid = jobid_raw[0]
