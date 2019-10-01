@@ -56,7 +56,7 @@ class RunDirac(Backend):
         management system
         """
         cmd = "dirac-wms-job-submit {}".format(filename)
-        output  = util.getOutputCall(cmd.split())
+        output  = util.getOutputCall(cmd.split(), include_return_code=False)
         jobids = output.rstrip().strip().split("]")[0].split("[")[-1]
         jobids = jobids.split(", ")
         return jobids

@@ -347,7 +347,7 @@ class Backend(_mode):
         else:
             jobid = jobid_raw
         cmd = [self.cmd_stat, jobid.strip(), "-j", header.arcbase]
-        strOut = util.getOutputCall(cmd, suppress_errors=True)
+        strOut = util.getOutputCall(cmd, suppress_errors=True, include_return_code=False)
         if "Done" in strOut or "Finished" in strOut:
             return self.cDONE
         elif "Waiting" in strOut or "Queuing" in strOut:
@@ -380,7 +380,7 @@ class Backend(_mode):
             for jobid in jobids:
                 logger.info(jobid)
                 cmd       =  [self.cmd_get, "-j", arcbase, jobid.strip()]
-                output    = util.getOutputCall(cmd)
+                output    = util.getOutputCall(cmd, include_return_code=False)
                 outputfol = output.split("Results stored at: ")[1].rstrip()
                 outputfolder = outputfol.split("\n")[0]
                 if outputfolder == "" or (len(outputfolder.split(" ")) > 1):
