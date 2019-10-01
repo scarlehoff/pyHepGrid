@@ -91,7 +91,7 @@ class Arc(Backend):
             if not store:
                 util.spCall(cmd)
             else:
-                out.append(util.getOutputCall(cmd))
+                out.append(util.getOutputCall(cmd), include_return_code=False)
         if store:
             return out
 
@@ -103,11 +103,11 @@ class Arc(Backend):
         cmd_base =  ["arccp", "-i"]
         cmd_str = "cat /tmp/"
         for jobid in jobids:
-            files = util.getOutputCall(["arcls", jobid]).split()
+            files = util.getOutputCall(["arcls", jobid], include_return_code=False).split()
             logfiles = [i for i in files if i.endswith(".log")]
             for logfile in logfiles:
                 cmd = cmd_base + [os.path.join(jobid, logfile)] + output_folder
-                output = util.getOutputCall(cmd).split()
+                output = util.getOutputCall(cmd, include_return_code=False).split()
                 for text in output:
                     if ".log" in text:
                         util.spCall((cmd_str + text).split())
@@ -179,7 +179,8 @@ class Dirac(Backend):
         output = set(util.getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
                                        '--Owner={0}'.format(header.dirac_name),
                                        '--Maximum=0', # 0 lists ALL jobs, which is nice :)
-                                       '--Date={0}'.format(date)]).split("\n")[-2].split(","))
+                                         '--Date={0}'.format(date)], 
+                                        include_return_code=False).split("\n")[-2].split(","))
         header.logger.debug(output)
         return output
 
@@ -321,7 +322,8 @@ class Slurm(Backend):
 
     def get_status(self, jobid, status):
         stat = len([i for i in util.getOutputCall(["squeue", "-j{0}".format(jobid),"-r","-t",status],
-                                                  suppress_errors=True).split("\n")[1:]
+                                                  suppress_errors=True, include_return_code=False
+                                              ).split("\n")[1:]
                     if "error" not in i]) #strip header from results
         if stat >0:
             stat = stat-1
@@ -360,7 +362,8 @@ class Slurm(Backend):
                 if not store:
                     util.spCall(cmd)
                 else:
-                    output.append(util.getOutputCall(cmd,suppress_errors=True))
+                    output.append(util.getOutputCall(cmd, suppress_errors=True,
+                                                     include_return_code=False))
         else:
             stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid))
             if print_stderr:
@@ -369,7 +372,8 @@ class Slurm(Backend):
             if not store:
                 util.spCall(cmd)
             else:
-                output.append(util.getOutputCall(cmd,suppress_errors=True))
+                output.append(util.getOutputCall(cmd, suppress_errors=True,
+                                                 include_return_code=False))
         if store:
             return output
 

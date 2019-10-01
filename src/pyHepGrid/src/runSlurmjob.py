@@ -92,7 +92,7 @@ class RunSlurm(Backend):
             queuetag = ""
         cmd = "sbatch {0} {1}".format(filename, queuetag)
         header.logger.debug(cmd)
-        output = util.getOutputCall(cmd.split())
+        output = util.getOutputCall(cmd.split(), include_return_code=False)
         jobid = output.strip().split()[-1]
         return jobid, queue
 

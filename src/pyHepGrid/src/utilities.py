@@ -133,9 +133,9 @@ def batch_gen(data, batch_size):
 #
 def lhapdfIni():
     lha_conf = "lhapdf-config"
-    if getOutputCall(["which", lha_conf]) != "":
+    if getOutputCall(["which", lha_conf], include_return_code=False) != "":
         header.logger.info("Using lhapdf-config to get lhapdf directory")
-        lha_raw = getOutputCall([lha_conf, "--prefix"])
+        lha_raw = getOutputCall([lha_conf, "--prefix"], include_return_code=False)
         lha_dir = lha_raw.rstrip()
     else:
         lha_dir = header.lhapdf
@@ -316,7 +316,7 @@ class GridWrap:
     def get_dir_contents(self, directory):
         gridname = os.path.join(header.gfaldir, directory)
         cmd = ["gfal-ls", gridname]
-        output = getOutputCall(cmd)
+        output = getOutputCall(cmd, include_return_code=False)
         return output
 
     def delete_directory(self, directory):
