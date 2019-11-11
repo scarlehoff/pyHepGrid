@@ -1,22 +1,16 @@
-#runcardDir = "/custom/runcard/directory" # overwrites header
-#NNLOJETdir = "/custom/nnlojet/directory"
-print("Sourcing runcard")
+## This is header is run specific
+
+## Only mandatory option
 dictCard = { # first: -r second: -j
   # we use -r as the name and -j as the runcard
     # 'Wp2j_mw_13TeV-all': 'config_all',
     'Wp2j_HT2_13TeV-all':'config_all'
 }
 
-# events = 10
-
-## Optional values
-# sockets_active = 5
-# port = 8888
-
 ## You can overwrite any value in your header by specifying the same attribute
-## here. E.g to set the number of jobs 99999 for this runcard, you could include
+## here. E.g to set the number of jobs 1234 for this runcard, you could include
 ## the line
-# producRun = 24
+# producRun = 1234
 
 ## You can even import and use other functions here, such as the following to
 ## auto pick the CE with most cores free
@@ -28,9 +22,16 @@ dictCard = { # first: -r second: -j
 ## Automatically pick the next seed you haven't run (uses seeds stored in the
 ## database for this ;)
 
-def base_dir(folder):
-  return "/mt/home/mheil/tst_grid/{0}".format(folder)
+## Unfortunitly custom function definition do _not overwrite_ the definition in
+## your header, if you use them here make sure you define them again
+from getpass import getuser
+# def base_dir(folder):
+#   return "/mt/home/{0}/tst_grid/{1}".format(getuser(), folder)
+
+def scratch_dir(folder):
+  return "/scratch/{0}/tst_grid/{1}".format(getuser(), folder)
+
 import pyHepGrid.src.dbapi as dbapi
 baseSeed = dbapi.get_next_seed()
 ## If overwriting dbname in this runcard.py file, pass through the name here:
-baseSeed = dbapi.get_next_seed(dbname = base_dir("hej_database"))
+baseSeed = dbapi.get_next_seed(dbname = scratch_dir("hej_database"))
