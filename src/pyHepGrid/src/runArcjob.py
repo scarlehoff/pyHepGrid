@@ -6,12 +6,15 @@ import pyHepGrid.src.socket_api as sapi
 
 class RunArc(Backend):
     def __init__(self, prod=False, arcscript = None, **kwargs):
+        import os
         super(RunArc, self).__init__(**kwargs)
         if not prod:
             self.table     = header.arctable
         else:
             self.table     = header.arcprodtable
         self.arcbd     = header.arcbase
+        if not os.path.exists( os.path.dirname(self.arcbd) ):
+            os.makedirs( os.path.dirname(self.arcbd) )
         if arcscript:
             self.templ = arcscript
         else:
