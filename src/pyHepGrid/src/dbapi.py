@@ -3,9 +3,12 @@ import sqlite3 as dbapi
 
 class database(object):
     def __init__(self, db, tables = None, fields = None, logger=None):
+        import os
         self._setup_logger(logger)
         self.dbname = db
-        self.db = dbapi.connect(db, check_same_thread=True)
+        if not os.path.exists( os.path.dirname(self.dbname) ):
+            os.makedirs( os.path.dirname(self.dbname) )
+        self.db = dbapi.connect(self.dbname, check_same_thread=True)
         self.list_disabled = False
         if tables:
             # check whether table exists and create it othewise
