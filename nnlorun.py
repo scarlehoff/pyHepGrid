@@ -25,7 +25,7 @@ def print_flush(string):
 #                                                                                   #
 #####################################################################################
 
-####### FILE NAME HELPERS #######     
+####### FILE NAME HELPERS #######
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
@@ -40,7 +40,7 @@ def output_name(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
     return out
-####### END FILE NAME HELPERS #######     
+####### END FILE NAME HELPERS #######
 
 #### Override os.system with custom version that auto sets debug level on failure
 # Abusive...
@@ -94,19 +94,19 @@ def setup_sockets(args, nnlojet_command, bring_status):
 
 
 def setup_environment(lhapdf_dir, options):
-    # GCC 
+    # GCC
     cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
     gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")
     gcc_lib64path = os.path.join(cvmfs_gcc_dir, "lib64")
     gcc_PATH = os.path.join(cvmfs_gcc_dir, "bin")
-    # GLIBC 
+    # GLIBC
     cvmfs_glibc = "" # /cvmfs/dirac.egi.eu/dirac/v6r21p4/Linux_x86_64_glibc-2.17/lib"
     cvmfs_glibc64 = "" # /cvmfs/dirac.egi.eu/dirac/v6r21p4/Linux_x86_64_glibc-2.17/lib64"
     # LHAPDF
     lha_PATH = lhapdf_dir + "/bin"
     lhapdf_lib = lhapdf_dir + "/lib"
     lhapdf_share = lhapdf_dir + "/share/LHAPDF"
-    
+
     old_PATH = os.environ["PATH"]
     os.environ["PATH"] = "%s:%s:%s" % (gcc_PATH,lha_PATH,old_PATH)
     old_ldpath                    = os.environ["LD_LIBRARY_PATH"]
@@ -135,15 +135,15 @@ def teardown(*statuses):
     end_time = datetime.datetime.now()
     print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
 
-    final_state = sum(abs(i) for i in statuses)
-    print_flush("Final Error Code: {0}".format(final_state))
-    sys.exit(final_state)
+    print_flush("Final Error Code: {0}".format(statuses))
+    # fail if any status is non zero
+    sys.exit(any([status != 0 for status in statuses]))
 ####### END SETUP/TEARDOWN FUNCTIONS #######
 
 
 ####### ARGUMENT PARSING #######
 def parse_arguments():
-    default_user_gfal = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())  
+    default_user_gfal = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())
     default_user_lfn = ""
     parser = OptionParser(usage = "usage: %prog [options]")
 
@@ -163,21 +163,21 @@ def parse_arguments():
     parser.add_option("-w", "--warmup_folder",
                       help = "storage  warmup folder, relative to gfaldir",
                       default = "warmup")
-    parser.add_option("-o", "--output_folder", 
-                      help = "storage  output folder, relative to gfaldir", 
+    parser.add_option("-o", "--output_folder",
+                      help = "storage  output folder, relative to gfaldir",
                       default = "output")
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
-    parser.add_option("--use_gfal", default="True", 
+    parser.add_option("--use_gfal", default="True",
                       help = "Use gfal for file transfer and storage rather than the LFN")
-    parser.add_option("--gfal_location", default="", 
+    parser.add_option("--gfal_location", default="",
                       help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
     # LHAPDF options
-    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to gfaldir", 
+    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to gfaldir",
                       default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
     parser.add_option("--use_cvmfs_lhapdf", action = "store_true", default = False)
-    parser.add_option("--cvmfs_lhapdf_location", default="", 
+    parser.add_option("--cvmfs_lhapdf_location", default="",
                       help = "Provide a cvmfs location for LHAPDF.")
 
     # Socket options
@@ -226,7 +226,7 @@ def parse_arguments():
                 parser.error("No node can run more than 16 threads at a time!")
         if options.Sockets:
             parser.error("Probably a bad idea to run sockets in production")
-    
+
     print_flush("Arguments: {0}".format(options))
     return options
 ####### END ARGUMENT PARSING #######
@@ -389,7 +389,7 @@ def print_copy_status(args, status_copy):
 def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
     os.system("gcc --version >> {0}".format(outputfile))
-    os.system("python --version >> {0}".format(outputfile))    
+    os.system("python --version >> {0}".format(outputfile))
 ####### END PRINT FUNCTIONS #######
 
 
@@ -420,7 +420,7 @@ if __name__ == "__main__":
 
     if args.Sockets:
         try: # only the first one arriving will go through!
-            print_flush("Close Socket connection") 
+            print_flush("Close Socket connection")
             _ = socket_sync_str(args.Host, args.port, "bye!") # Be polite
         except socket.error as e:
             pass
