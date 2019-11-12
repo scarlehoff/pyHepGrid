@@ -289,8 +289,10 @@ def end_program(status, debug_level):
     end_time = datetime.datetime.now()
     print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
     print_flush("Final return Code: {0}".format(status))
-    sys.exit(status)
-
+    # make sure we return a valid return code
+    if status != 0:
+        sys.exit(1)
+    sys.exit(0)
 
 ########################## Actual run commands ##########################
 
