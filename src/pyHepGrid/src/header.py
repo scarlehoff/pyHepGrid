@@ -12,6 +12,7 @@ header_mappings = {"jmartinez":"pyHepGrid.headers.juan_header",
                    "jniehues":"pyHepGrid.headers.jan_header",
                    "jwhitehead":"pyHepGrid.headers.james_header",
                    "mheil":"HEJ.hej_header",
+                   "black":"HEJ.hej_header",
                    "andersen":"HEJ.hej_header"
                    }
 
