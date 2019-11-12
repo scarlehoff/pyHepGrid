@@ -20,7 +20,7 @@ def scratch_dir(folder):
 runcardDir = base_dir("Setup/")
 provided_warmup_dir = runcardDir
 ## local directory for exe (TODO not used yet for automatic upload)
-executable_src_dir = "/mt/home/${0}/HEJ/reversed_hej/installed/".format(getuser)
+executable_src_dir = "/mt/home/${0}/HEJ/reversed_hej/installed/".format(getuser())
 ## Executable name
 executable_exe = "HEJ/bin/HEJ"
 
