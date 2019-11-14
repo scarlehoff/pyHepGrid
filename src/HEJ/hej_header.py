@@ -66,7 +66,7 @@ lhapdf             = lhapdf_grid_loc
 ## Rivet config
 # TODO parse "use_custom_rivet" from config.yml
 use_custom_rivet = True
-grid_rivet_dir = "Wjets/Rivet/"
+grid_rivet_dir = "Wjets/Rivet/Rivet.tgz"
 
 ## Database name (database should be stored on a non-network disk)
 dbname     = scratch_dir("hej_database")

@@ -147,7 +147,6 @@ def set_environment(lhapdf_dir):
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
     os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
     os.environ['OMP_STACKSIZE']    = "999999"
-    os.environ['RIVET_ANALYSIS_PATH'] = os.getcwd()+"/Rivet/"
     try:
         import gfal2_util.shell
     except KeyError as e:
@@ -282,12 +281,13 @@ def download_runcard(input_folder, runcard, runname, debug_level):
     return os.system("rm {0}".format(tar))+stat
 
 def download_rivet(rivet_folder, debug_level):
-    tar = "RivetAnalyses.tar.gz"
-    print_flush("downloading "+rivet_folder+tar)
-    stat = copy_from_grid(rivet_folder+tar, "", args)
+    tar = os.path.basename(rivet_folder)
+    print_flush("downloading "+rivet_folder)
+    stat = copy_from_grid(rivet_folder, "", args)
     stat += untar_file(tar, debug_level)
-
-    return os.system("rm {0}".format("RivetAnalyses.tar.gz"))+stat
+    rivet_dir = os.path.basename(os.path.splitext(rivet_folder)[0])
+    os.environ['RIVET_ANALYSIS_PATH'] = os.getcwd()+"/"+rivet_dir
+    return os.system("rm {0}".format(tar))+stat
 
 ### Misc ###
 
@@ -356,8 +356,6 @@ if __name__ == "__main__":
         os.execvp("bash", ["bash", "-c",
             "source " + env + " && exec python " + sys.argv[0] + ' "${@}"',
             "--"] + sys.argv[1:])
-
-    os.environ["RIVET_ANALYSIS_PATH"] = os.environ["PWD"]+"/Rivet/"
 
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
