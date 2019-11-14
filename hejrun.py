@@ -96,8 +96,8 @@ def parse_arguments():
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
 
     # # Rivet options
-    parser.add_option("--use_custom_rivet", action = "store_true", default = True)
-    parser.add_option("--rivet_folder", default="Wjets/Rivet/",
+    parser.add_option("--use_custom_rivet", action = "store_true", default = False)
+    parser.add_option("--rivet_folder", default="Wjets/Rivet/Rivet.tgz",
                           help = "Provide the location of RivetAnalyses tarball.")
 
     # Socket options
