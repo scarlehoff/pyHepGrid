@@ -63,6 +63,11 @@ lhapdf_ignore_dirs = [] # Don't tar up all of LHAPDF if you don't want to
 lhapdf_central_scale_only = True # Only tar up central [0000.dat] PDF sets
 lhapdf             = lhapdf_grid_loc
 
+## Rivet config
+# TODO parse "use_custom_rivet" from config.yml
+use_custom_rivet = True
+grid_rivet_dir = "Wjets/Rivet/"
+
 ## Database name (database should be stored on a non-network disk)
 dbname     = scratch_dir("hej_database")
 
