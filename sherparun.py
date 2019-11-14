@@ -92,6 +92,11 @@ def parse_arguments():
                       default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
 
+    # # Rivet options
+    parser.add_option("--use_custom_rivet", action = "store_true", default = True)
+    parser.add_option("--rivet_folder", default="Wjets/Rivet/",
+                          help = "Provide the location of RivetAnalyses tarball.")
+
     # Socket options
     parser.add_option("-S", "--Sockets", help = "Activate socketed run", action = "store_true", default = False)
     parser.add_option("-p", "--port", help = "Port to connect the sockets to", default = "8888")
@@ -139,6 +144,7 @@ def set_environment(lhapdf_dir):
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
     os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
     os.environ['OMP_STACKSIZE']    = "999999"
+    os.environ['RIVET_ANALYSIS_PATH'] = os.getcwd()+"/Rivet/"
     try:
         import gfal2_util.shell
     except KeyError as e:
@@ -265,9 +271,16 @@ def download_runcard(input_folder, runcard, runname, debug_level):
     stat = copy_from_grid(input_folder+"/"+tar, tar, args)
     stat += untar_file(tar, debug_level)
     # TODO download:
-    #   rivet analysis
     #   Scale setters
     return os.system("rm {0}".format(tar))+stat
+
+def download_rivet(rivet_folder, debug_level):
+    tar = "RivetAnalyses.tar.gz"
+    print_flush("downloading "+rivet_folder+tar)
+    stat = copy_from_grid(rivet_folder+tar, "", args)
+    stat += untar_file(tar, debug_level)
+
+    return os.system("rm {0}".format("RivetAnalyses.tar.gz"))+stat
 
 ### Misc ###
 
@@ -313,6 +326,8 @@ if __name__ == "__main__":
             "source " + env + " && exec python " + sys.argv[0] + ' "${@}"',
             "--"] + sys.argv[1:])
 
+    os.environ["RIVET_ANALYSIS_PATH"] = os.environ["PWD"]+"/Rivet/"
+
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
@@ -344,6 +359,9 @@ if __name__ == "__main__":
     #     os.system("ldd {0}".format(args.executable)) # uncomment for downloaded exe
 
     status += download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
+
+    if args.use_custom_rivet:
+        status += download_rivet(args.rivet_folder, debug_level)
 
     if status != 0:
         print_flush("download failed")
