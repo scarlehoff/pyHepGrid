@@ -44,6 +44,10 @@ lhapdf             = "/path/to/lhapdf"
 use_cvmfs_lhapdf = False
 cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/lhapdf/6.1.6"
 
+## Rivet config
+use_custom_rivet = False
+grid_rivet_dir = "dummy"
+
 # SQLite Database Parameters
 dbname     = "/path/to/sqlite/database/for/storage.dat"
 provided_warmup_dir = None
