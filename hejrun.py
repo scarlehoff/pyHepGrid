@@ -7,7 +7,7 @@ except KeyError as e:
     pass
 
 MAX_COPY_TRIES = 15
-PROTOCOLS = ["srm", "gsiftp", "root", "xroot", "xrootd"]
+PROTOCOLS = ["xroot", "gsiftp", "root", "xrootd", "srm"]
 LHE_FILE="SherpaLHE_fixed.lhe"
 LOG_FILE="output.log"
 
@@ -223,7 +223,7 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
         outfile_tmp = outfile.replace(protoc, protocol)
         print_flush("Attempting Protocol {0}".format(protocol))
         for i in range(maxrange): # try max 10 times for now ;)
-            cmd = "{2}gfal-copy --checksum-mode both --abort-on-failure -f {0} {1}".format(
+            cmd = "{2}gfal-copy -f {0} {1}".format(
                 infile_tmp, outfile_tmp, args.gfal_location)
             if debug_level > 1:
                 print_flush(cmd)
@@ -233,6 +233,7 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             # if copying to the grid and it has failed, remove before trying again
             if retval != 0 and "file" not in outfile and not args.Sockets:
                 os.system("gfal-rm {0}".format(outfile_tmp))
+                os.system("sleep 0.5s")
     return 9999999
 
 #### TAR ####
@@ -278,7 +279,6 @@ def download_runcard(input_folder, runcard, runname, debug_level):
 
 def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
-    # os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
     os.system("gcc --version >> {0}".format(outputfile))
     os.system("python --version >> {0}".format(outputfile))
     os.system("cat {0}".format(outputfile)) ## print to log
