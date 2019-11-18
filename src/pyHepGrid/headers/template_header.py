@@ -46,7 +46,7 @@ cvmfs_lhapdf_location = "/cvmfs/pheno.egi.eu/lhapdf/6.1.6"
 
 ## Rivet config
 use_custom_rivet = False
-grid_rivet_dir = "dummy"
+grid_rivet_dir = None
 
 # SQLite Database Parameters
 dbname     = "/path/to/sqlite/database/for/storage.dat"
