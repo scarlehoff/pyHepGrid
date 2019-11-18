@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import subprocess
 import datetime
 import socket
 from optparse import OptionParser
@@ -339,23 +340,51 @@ def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY_TRIES):
 
 
 def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
+    timeout_secs = 10
+    timeout = datetime.timedelta(minutes=timeout_secs)
+
     print_flush("Copying {0} to {1}".format(infile, outfile))
     protoc = args.gfaldir.split(":")[0]
     for protocol in PROTOCOLS: # cycle through available protocols until one works.
         infile_tmp = infile.replace(protoc, protocol)
         outfile_tmp = outfile.replace(protoc, protocol)
         print_flush("Attempting Protocol {0}".format(protocol))
+        outfile_dir = os.path.dirname(outfile_tmp)
+        outfile_fn = os.path.basename(outfile_tmp)
+        lscmd = "{gfal_loc}gfal-ls {dir}".format(dir=outfile_dir, gfal_loc=args.gfal_location)
+        
         for i in range(maxrange): # try max 10 times for now ;)
+            p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()
+            wait_until = datetime.datetime.now() + timeout
+            while outfile_fn in p and datetime.datetime.now() < wait_until:
+                print_flush("Target file {of} already exists.  Removing now.".format(of=outfile_tmp))
+                rmcmd = "gfal-rm {0}".format(outfile_tmp)
+                os.system(rmcmd)
+                if debug_level > 1:
+                    print_flush(rmcmd)
+                p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()
+                if debug_level > 1:
+                    print_flush("File still present? {TF}".format(TF=(outfile_fn in p)))
+
             cmd = "{2}gfal-copy {0} {1} -p".format(infile_tmp, outfile_tmp, args.gfal_location)
             if debug_level > 1:
                 print_flush(cmd)
             retval = syscall(cmd)
-            if retval == 0:
+            p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()
+            # if compatibiility with python versions < 2.7 is still required, need the following
+#            p = subprocess.Popen(cmd2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+#            out, err = p.communicate()
+            if retval == 0 and outfile_fn in p:
                 return retval
-            # if copying to the grid and it has failed, remove before trying again
-            if retval != 0 and "file" not in outfile and not args.Sockets:
-                os.system("gfal-rm {0}".format(outfile_tmp))
-    return 9999999
+            elif retval == 0 and outfile_fn not in p:
+                print_flush("Copy command succeeded, but failed to copy file.  Retrying.")
+                retval += 1
+            elif retval != 0 and outfile_fn in p:
+                print_flush("Copy command reported errors, but file was copied.  Proceeding.")
+                return 0
+            else:
+                print_flush("Copy command failed.  Retrying.")    
+    return 9999
 ####### END COPY UTILITIES #######
 
 
