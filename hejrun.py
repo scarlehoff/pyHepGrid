@@ -95,6 +95,11 @@ def parse_arguments():
                       default = "util/lhapdf.tar.gz")
     parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
 
+    # # Rivet options
+    parser.add_option("--use_custom_rivet", action = "store_true", default = False)
+    parser.add_option("--rivet_folder", default="Wjets/Rivet/Rivet.tgz",
+                          help = "Provide the location of RivetAnalyses tarball.")
+
     # Socket options
     parser.add_option("-S", "--Sockets", help = "Activate socketed run", action = "store_true", default = False)
     parser.add_option("-p", "--port", help = "Port to connect the sockets to", default = "8888")
@@ -270,9 +275,18 @@ def download_runcard(input_folder, runcard, runname, debug_level):
     print_flush("downloading "+input_folder+"/"+tar)
     stat = copy_from_grid(input_folder+"/"+tar, tar, args)
     stat += untar_file(tar, debug_level)
+
     # TODO download:
-    #   rivet analysis
     #   Scale setters
+    return os.system("rm {0}".format(tar))+stat
+
+def download_rivet(rivet_folder, debug_level):
+    tar = os.path.basename(rivet_folder)
+    print_flush("downloading "+rivet_folder)
+    stat = copy_from_grid(rivet_folder, "", args)
+    stat += untar_file(tar, debug_level)
+    rivet_dir = os.path.basename(os.path.splitext(rivet_folder)[0])
+    os.environ['RIVET_ANALYSIS_PATH'] = os.getcwd()+"/"+rivet_dir
     return os.system("rm {0}".format(tar))+stat
 
 ### Misc ###
@@ -375,6 +389,9 @@ if __name__ == "__main__":
         os.system("ldd {0}".format(args.executable))
 
     status += download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
+
+    if args.use_custom_rivet:
+        status += download_rivet(args.rivet_folder, debug_level)
 
     if status != 0:
         print_flush("download failed")

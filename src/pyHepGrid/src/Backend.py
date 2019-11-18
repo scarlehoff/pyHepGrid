@@ -610,6 +610,10 @@ class Backend(_mode):
             dictionary.update({
             "use_cvmfs_lhapdf":header.use_cvmfs_lhapdf,
             "cvmfs_lhapdf_location":header.cvmfs_lhapdf_location})
+        if header.use_custom_rivet:
+            dictionary.update({
+                "use_custom_rivet":header.use_custom_rivet,
+                "rivet_folder":header.grid_rivet_dir})
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):
