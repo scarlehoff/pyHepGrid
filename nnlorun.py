@@ -180,6 +180,11 @@ def parse_arguments():
     parser.add_option("--cvmfs_lhapdf_location", default="",
                       help = "Provide a cvmfs location for LHAPDF.")
 
+    # Rivet options (not used)
+    parser.add_option("--use_custom_rivet", action = "store_true", default = False)
+    parser.add_option("--rivet_folder", default="Dummy",
+                          help = "Provide the location of RivetAnalyses tarball.")
+
     # Socket options
     parser.add_option("-S", "--Sockets", help = "Activate socketed run", action = "store_true", default = False)
     parser.add_option("-p", "--port", help = "Port to connect the sockets to", default = "8888")
