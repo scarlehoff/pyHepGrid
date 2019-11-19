@@ -346,7 +346,7 @@ def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY_TRIES):
 
 def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     timeout_secs = 10
-    timeout = datetime.timedelta(minutes=timeout_secs)
+    timeout = datetime.timedelta(seconds=timeout_secs)
 
     print_flush("Copying {0} to {1}".format(infile, outfile))
     protoc = args.gfaldir.split(":")[0]
