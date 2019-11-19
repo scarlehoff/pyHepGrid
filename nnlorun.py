@@ -401,7 +401,6 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             # if compatibiility with python versions < 2.7 is still required, need something like the following instead
 #            p = subprocess.Popen(cmd2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 #            out, err = p.communicate()
-            retval = 1
             if retval == 0 and outfile_fn in p:
                 return retval
             elif retval == 0 and outfile_fn not in p:
