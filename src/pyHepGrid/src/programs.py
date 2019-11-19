@@ -421,10 +421,9 @@ class NNLOJET(ProgramInterface):
     def _get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         exclude_patterns = [".txt", ".log"]
-        print(warmup_extensions)
+        matchname_case = matchname
+        matchname = matchname.lower()
         if os.path.isdir(provided_warmup):
-            matchname_case = matchname
-            matchname = matchname.lower()
             matches = []
             potential_files = os.listdir(provided_warmup)
             for potfile in potential_files:

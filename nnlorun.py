@@ -52,7 +52,7 @@ def do_shell(*args):
     if retval != 0:
         debug_level = 9999
         print_flush("Error in {0}. Raising debug level to 9999".format(*args))
-    return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok
+    return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok (but with caution: in bash they're mod 256.)
 os.system = do_shell
 ####### END MISC ABUSIVE SETUP #######
 
@@ -136,9 +136,10 @@ def teardown(*statuses):
     end_time = datetime.datetime.now()
     print_flush("End time: {0}".format(end_time.strftime("%d-%m-%Y %H:%M:%S")))
 
-    print_flush("Final Error Code: {0}".format(statuses))
+    ec = int(any(status != 0 for status in statuses))
+    print_flush("Final Error Code: {0}".format(ec))
     # fail if any status is non zero
-    sys.exit(any([status != 0 for status in statuses]))
+    sys.exit(ec)
 ####### END SETUP/TEARDOWN FUNCTIONS #######
 
 
@@ -347,48 +348,74 @@ def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY_TRIES):
 def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     timeout_secs = 10
     timeout = datetime.timedelta(seconds=timeout_secs)
+    hash = "MD5"
+    protoc = args.gfaldir.split(":")[0]
+# gfal-sum only returns expected hash for subset of protocols (gsiftp, srm).  Hardcode gsiftp for now.
+    infile_hash_addr = infile.replace(protoc, "gsiftp") 
+    outfile_hash_addr = outfile.replace(protoc, "gsiftp")
+    hashcmd = "{gfal_loc}gfal-sum {{file}} {checksum}".format(gfal_loc=args.gfal_location, checksum=hash)
+    infile_hash = subprocess.check_output(hashcmd.format(file=infile_hash_addr), shell=True, universal_newlines=True).split()[1]
 
     print_flush("Copying {0} to {1}".format(infile, outfile))
-    protoc = args.gfaldir.split(":")[0]
     for protocol in PROTOCOLS: # cycle through available protocols until one works.
         infile_tmp = infile.replace(protoc, protocol)
         outfile_tmp = outfile.replace(protoc, protocol)
+
         print_flush("Attempting Protocol {0}".format(protocol))
         outfile_dir = os.path.dirname(outfile_tmp)
         outfile_fn = os.path.basename(outfile_tmp)
-        lscmd = "{gfal_loc}gfal-ls {dir}".format(dir=outfile_dir, gfal_loc=args.gfal_location)
+        lscmd = "{gfal_loc}gfal-ls {f}".format(f=outfile_hash_addr, gfal_loc=args.gfal_location)
         
         for i in range(maxrange): # try max 10 times for now ;)
-            p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()
-            wait_until = datetime.datetime.now() + timeout
-            while outfile_fn in p and datetime.datetime.now() < wait_until:
-                print_flush("Target file {of} already exists.  Removing now.".format(of=outfile_tmp))
-                rmcmd = "gfal-rm {0}".format(outfile_tmp)
-                os.system(rmcmd)
+            try:
                 if debug_level > 1:
-                    print_flush(rmcmd)
-                p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()
+                    print_flush(lscmd)
+                p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()[0]
+
+                wait_until = datetime.datetime.now() + timeout
+                while outfile_fn in p and datetime.datetime.now() < wait_until:
+                    print_flush("Target file {of} already exists.  Removing now.".format(of=outfile_tmp))
+                    rmcmd = "gfal-rm {0}".format(outfile_tmp)
+                    os.system(rmcmd)
+                    if debug_level > 1:
+                        print_flush(rmcmd)
+                    p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()
+                    if debug_level > 1:
+                        print_flush("File still present? {TF}".format(TF=(outfile_fn in p)))
+
+            # don't let an error in list or remove command disrupt things
+            except subprocess.CalledProcessError as e:
                 if debug_level > 1:
-                    print_flush("File still present? {TF}".format(TF=(outfile_fn in p)))
+                    if hasattr(e, 'message'):
+                        print_flush(e.message)
+                    else:
+                        print_flush(e)   
 
             cmd = "{2}gfal-copy {0} {1} -p".format(infile_tmp, outfile_tmp, args.gfal_location)
             if debug_level > 1:
                 print_flush(cmd)
             retval = syscall(cmd)
-            p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()
-            # if compatibiility with python versions < 2.7 is still required, need the following
+            if debug_level > 1:
+                print_flush(lscmd)
+            p = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()[0]
+            # if compatibiility with python versions < 2.7 is still required, need something like the following instead
 #            p = subprocess.Popen(cmd2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 #            out, err = p.communicate()
+            retval = 1
             if retval == 0 and outfile_fn in p:
                 return retval
             elif retval == 0 and outfile_fn not in p:
-                print_flush("Copy command succeeded, but failed to copy file.  Retrying.")
+                print_flush("Copy command succeeded, but failed to copy file. Retrying.")
                 retval += 1
             elif retval != 0 and outfile_fn in p:
-                print_flush("Copy command reported errors, but file was copied.  Proceeding.")
-                return 0
+                outfile_hash = subprocess.check_output(hashcmd.format(file=outfile_hash_addr), shell=True, universal_newlines=True).split()[1]
+                if infile_hash == outfile_hash:
+                    print_flush("Copy command reported errors, but file was copied and checksums match. Proceeding.")
+                    return 0
+                else:
+                    print_flush("Copy command reported errors and the transferred file was corrupted. Retrying.")
             else:
-                print_flush("Copy command failed.  Retrying.")    
+                print_flush("Copy command failed. Retrying.")
     return 9999
 ####### END COPY UTILITIES #######
 
