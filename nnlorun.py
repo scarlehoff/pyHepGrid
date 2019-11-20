@@ -11,7 +11,7 @@ from getpass import getuser
 
 RUN_CMD = "OMP_NUM_THREADS={0} ./{1} -run {2}"
 MAX_COPY_TRIES = 15
-PROTOCOLS = ["xroot", "gsiftp", "srm", "root", "xrootd"]
+PROTOCOLS = ["gsiftp", "xroot", "srm"]
 
 ####### MISC ABUSIVE SETUP #######
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
