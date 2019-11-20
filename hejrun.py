@@ -7,7 +7,7 @@ except KeyError as e:
     pass
 
 MAX_COPY_TRIES = 15
-PROTOCOLS = ["xroot", "gsiftp", "root", "xrootd", "srm"]
+PROTOCOLS = ["xroot", "gsiftp", "srm", "root", "xrootd"]
 LHE_FILE="SherpaLHE_fixed.lhe"
 LOG_FILE="output.log"
 

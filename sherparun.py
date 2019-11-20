@@ -7,7 +7,7 @@ except KeyError as e:
     pass
 
 MAX_COPY_TRIES = 15
-PROTOCOLS = ["xroot", "gsiftp", "root", "xrootd", "srm"]
+PROTOCOLS = ["xroot", "gsiftp", "srm", "root", "xrootd"]
 LOG_FILE="output.log"
 
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
