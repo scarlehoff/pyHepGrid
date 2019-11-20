@@ -10,6 +10,7 @@ import subprocess
 from sys import version_info
 import tarfile
 from uuid import uuid4
+from random import randint
 #
 # Misc. Utilities
 #
@@ -344,7 +345,7 @@ def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES):
             if retval != 0 and "file:" not in outfile:
                 os.system("gfal-rm {0}".format(outfile_tmp))
             # give the server a bit of time
-            sleep(1)
+            os.system("sleep {0}s").format(randint(3,60))
     header.logger.error("Copy failed.")
     return 9999999
 

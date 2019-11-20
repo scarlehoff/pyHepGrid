@@ -5,6 +5,7 @@ import datetime
 import socket
 from optparse import OptionParser
 from getpass import getuser
+from random import randint
 
 # NOTE: Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :(
 # Hopefully after the shutdown we can rely on python 2.6/7 but that is TBC
@@ -360,6 +361,7 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             # if copying to the grid and it has failed, remove before trying again
             if retval != 0 and "file" not in outfile and not args.Sockets:
                 os.system("gfal-rm {0}".format(outfile_tmp))
+                os.system("sleep {0}s").format(randint(3,60))
     return 9999999
 ####### END COPY UTILITIES #######
 

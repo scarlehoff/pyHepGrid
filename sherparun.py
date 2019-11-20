@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os, sys, datetime
+from random import randint
 try:
     dirac = os.environ["DIRAC"]
     sys.path.append("{0}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages".format(dirac))
@@ -231,7 +232,7 @@ def gfal_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             # if copying to the grid and it has failed, remove before trying again
             if retval != 0 and "file" not in outfile and not args.Sockets:
                 os.system("gfal-rm {0}".format(outfile_tmp))
-                os.system("sleep 0.5s")
+                os.system("sleep {0}s").format(randint(3,60))
     return 9999999
 
 #### TAR ####
