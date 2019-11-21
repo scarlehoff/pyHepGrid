@@ -48,7 +48,6 @@ else:
 def mkdir(directory):
     os.makedirs(directory, exist_ok=True)
 
-
 def get_output_dir_name(runcard, rtag):
     basedir = config.production_base_dir
     subdir = "{0}{1}".format(config.finalise_prefix, runcard)

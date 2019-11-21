@@ -11,6 +11,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from pyHepGrid.src.header import production_base_dir as rootdir
 import pyHepGrid.src.gnuplot
 
+partdirs = [ "LO", "V", "R", "VV", "RV", "RRa", "RRb" ]
+
 def get_time_hrs(f):
     for line in f.readlines():
         if "Elapsed" in str(line):
@@ -142,9 +144,18 @@ def get_dirs():
     dirs = []
     for thing in os.listdir(rootdir):
         fullpath = os.path.join(rootdir,thing)
-        if os.path.isdir(fullpath):
+        if thing in partdirs and os.path.isdir(fullpath):
+            for subthing in os.listdir(fullpath):
+                fullsubpath = os.path.join(fullpath,subthing)
+                if search_matches_path(args, fullsubpath):
+                    logpath = "{}/log".format(fullsubpath)
+                    if os.path.isdir(logpath):
+                        dirs.append(logpath)
+        elif os.path.isdir(fullpath):
             if search_matches_path(args, fullpath):
-                dirs.append(fullpath+"/log")
+                logpath = "{}/log".format(fullpath)
+                if os.path.isdir(logpath):
+                    dirs.append(logpath)                    
     return dirs
 
 if __name__ == "__main__":

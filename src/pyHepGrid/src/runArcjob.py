@@ -159,31 +159,35 @@ class RunArc(Backend):
             try:
                 for i_socket in range(n_sockets):
                     # Run the file
-                    jobids.append(self._run_XRSL(xrslfile, test=test))
+                    jobid, retcode = (self._run_XRSL(xrslfile, test=test, include_retcode=True))
+                    if int(retcode) != 0:
+                        jobid = "None"
+                        jobids.append(jobid)
             except Exception as interrupt:
                 print("\n")
                 header.logger.error("Submission error encountered. Inserting all successful submissions to database")
                 keyquit = interrupt
             # Create daily path
-            if warmup_base_dir is not None:
-                pathfolder = util.generatePath(warmup=True)
-            else:
-                pathfolder = "None"
-            # Create database entry
-            dataDict = {'jobid'     : ' '.join(jobids),
-                        'date'      : str(datetime.now()),
-                        'pathfolder': pathfolder,
-                        'runcard'   : r,
-                        'runfolder' : dCards[r],
-                        'jobtype'   : job_type,
-                        'status'    : "active",}
-            if len(jobids) > 0:
-                self.dbase.insert_data(self.table, dataDict)
-            else:
-                header.logger.critical("No jobids returned, no database entry inserted for submission: {0} {1}".format(r, dCards[r]))
-            port += 1
-            if keyquit is not None:
-                raise keyquit
+            finally:
+                if warmup_base_dir is not None:
+                    pathfolder = util.generatePath(warmup=True)
+                else:
+                    pathfolder = "None"
+                # Create database entry
+                dataDict = {'jobid'     : ' '.join(jobids),
+                            'date'      : str(datetime.now()),
+                            'pathfolder': pathfolder,
+                            'runcard'   : r,
+                            'runfolder' : dCards[r],
+                            'jobtype'   : job_type,
+                            'status'    : "active",}
+                if len(jobids) > 0:
+                    self.dbase.insert_data(self.table, dataDict)
+                else:
+                    header.logger.critical("No jobids returned, no database entry inserted for submission: {0} {1}".format(r, dCards[r]))
+                port += 1
+                if keyquit is not None:
+                    raise keyquit
 
     def run_single_production(self, args):
         """ Wrapper for passing to multirun, where args is a tuple of each argument required.

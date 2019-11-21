@@ -5,7 +5,7 @@ import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
 from pyHepGrid.src.runcard_parsing import PROGRAMruncard, warmup_extensions
 from pyHepGrid.src.program_interface import ProgramInterface
-
+from difflib import SequenceMatcher
 
 class NNLOJET(ProgramInterface):
     # IMPORTANT: NAMING FUNCTIONS SHOULD BE THE SAME IN RUNFILE
@@ -421,6 +421,8 @@ class NNLOJET(ProgramInterface):
     def _get_local_warmup_name(self, matchname, provided_warmup):
         from shutil import copy
         exclude_patterns = [".txt", ".log"]
+        matchname_case = matchname
+        matchname = matchname.lower()
         if os.path.isdir(provided_warmup):
             matches = []
             potential_files = os.listdir(provided_warmup)
@@ -431,19 +433,75 @@ class NNLOJET(ProgramInterface):
             if len(matches) > 1:
                 logger.critical("Multiple warmup matches found in {1}: {0}".format(" ".join(i for i in matches), provided_warmup))
             elif len(matches) ==0 :
-                logger.critical("No warmup matches found in {0}.".format(provided_warmup))
+                logger.info("No warmup matches found in {0}; looking for files with similar names to {1}:".format(provided_warmup,matchname_case))
+                match = None
+                potmatches = sorted(potential_files, key=lambda x: SequenceMatcher(None, x, matchname_case).ratio(), reverse=True)
+                print(potmatches)
+                if matchname_case.split(".")[-1] in warmup_extensions:
+                    potmatches = [p for p in potmatches if p.lower().endswith("."+matchname_case.split(".")[-1].lower())]
+                for pot in [p for p in potmatches if ((SequenceMatcher(None, p, matchname_case).ratio() > 0.5) and not ( any([p.endswith(ext) for ext in exclude_patterns]) ) )]:
+                    yn = input("Partial warmup match found: do you want to use {0}? (y/n) ".format(pot)).lower()
+                    if yn.startswith("y"):
+                        match = os.path.join(provided_warmup,pot)
+                        break
+                if not match:
+                    logger.info("No warmup matches found in directory {0}.  Searching subdirectories:".format(provided_warmup))
+                    potmatches = []
+                    for path, subdirs, files in os.walk(provided_warmup):
+                        for name in files:
+                            if SequenceMatcher(None, name, matchname_case).ratio() > 0.5:
+                                potmatches.append([path,name])
+                    if matchname_case.split(".")[-1] in warmup_extensions:
+                        potmatches = [p for p in potmatches if p[1].lower().endswith("."+matchname_case.split(".")[-1].lower())]
+                
+                    potmatches = sorted(potmatches, key=lambda x: SequenceMatcher(None, x[1], matchname_case).ratio())
+                    potmatches = [ os.path.join(p[0],p[1]) for p in potmatches ]
+
+                    for pot in [p for p in potmatches if ((SequenceMatcher(None, p, matchname).ratio() > 0.5) and not ( any([p.endswith(ext) for ext in exclude_patterns]) ) )]:
+                        yn = input("Partial warmup match found: do you want to use {0}? (y/n) ".format(pot)).lower()
+                        if yn.startswith("y"):
+                            match = os.path.join(provided_warmup,pot)
+                            break
+                if not match:
+                    logger.critical("No partial matches found; best match was {0}.".format(potmatches[0]))
             else:
                 match = os.path.join(provided_warmup, matches[0])
         else:
             match = provided_warmup
         logger.info("Using warmup {0}".format(match))
-        if not match in os.listdir(sys.path[0]):
+        if SequenceMatcher(None, os.path.basename(match), matchname_case).ratio() <= 1:
+            if "."+matchname_case.split(".")[-1] in warmup_extensions:
+                copy(match,matchname_case)
+                print(matchname_case)
+                match = matchname_case
+            else:
+                logger.info("Unable to predict expected NNLOJET warmup file name.")
+                suff = input("Expect filename to begin {0}, with unknown extension.  Please enter expected file extension, or 'n' to provide your own filename.".format(matchname_case))
+                if suff in warmup_extensions:
+                    copy(match,matchname_case+"."+suff)
+                    match = matchname_case+"."+suff
+                else:
+                    fn = input("Please enter the filename NNLOJET will expect the warmup to have:")
+                    copy(match,fn)
+                    match = fn
             local_match = False
-            copy(match, os.path.basename(match))
-            match = os.path.basename(match)
         else:
-            local_match = True
+            print(SequenceMatcher(None, os.path.basename(match), matchname_case).ratio())
+            print(sys.path[0])
+            if not match in os.listdir(sys.path[0]):
+                local_match = False
+                copy(match,os.path.basename(match))
+                match = os.path.basename(match)
+            else:
+                local_match = True
         return match, local_match
+        # if not match in os.listdir(sys.path[0]):
+        #     local_match = False
+        #     copy(match, os.path.basename(match))
+        #     match = os.path.basename(match)
+        # else:
+        #     local_match = True
+        # return match, local_match
 
     def check_warmup_files(self, db_id, rcard, resubmit=False):
         """ Provides stats on whether a warmup file exists for a given run and optionally

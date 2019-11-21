@@ -20,7 +20,7 @@ def scratch_dir(folder):
 runcardDir = base_dir("Setup/")
 provided_warmup_dir = runcardDir
 ## local directory for exe (TODO not used yet for automatic upload)
-executable_src_dir = "/mt/home/${0}/HEJ/reversed_hej/installed/".format(getuser())
+executable_src_dir = "/mt/home/{0}/HEJ/reversed_hej/installed/".format(getuser())
 ## Executable name
 executable_exe = "HEJ/bin/HEJ"
 
@@ -47,7 +47,7 @@ warmup_base_dir = ""
 production_base_dir = "/ResultsRunGrids"
 
 use_gfal = True
-gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/hej/"
+gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}/".format(getuser())
 # set to None for environment gfal
 # relies on "pro" symlink
 cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/pro/Linux_x86_64_glibc-2.17/bin/"
