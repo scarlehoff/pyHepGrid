@@ -198,10 +198,9 @@ def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY_TRIES):
 
 
 def remove_file(filepath, args, tries=5, protocol=None):
-    filename = os.path.basename(filepath)
     if protocol:
-        for prot in PROTOCOLS:
-            filepath.replace(prot, protocol)
+        prot = args.gfaldir.split(":")[0]
+        filepath.replace(prot, protocol)
     rmcmd = "{gfal_loc}gfal-rm {f}".format(f=filepath, gfal_loc=args.gfal_location)
 
     file_present = test_file_presence(filepath, args)
@@ -232,10 +231,10 @@ def remove_file(filepath, args, tries=5, protocol=None):
 
 
 def test_file_presence(filepath, args, protocol=None):
-    filename = os.path.basename(filepath)
     if protocol:
-        for prot in PROTOCOLS:
-            filepath.replace(prot, protocol)
+        prot = args.gfaldir.split(":")[0]
+        filepath.replace(prot, protocol)
+    filename = os.path.basename(filepath)
     lscmd = "{gfal_loc}gfal-ls {file}".format(gfal_loc=args.gfal_location, file=filepath)
     if debug_level > 1:
         print_flush(lscmd)
@@ -252,11 +251,11 @@ def test_file_presence(filepath, args, protocol=None):
     return (filename in filelist)
 
 
-def get_hash(filename, args, algo="MD5", protocol=None):
+def get_hash(filepath, args, algo="MD5", protocol=None):
     if protocol:
-        for prot in PROTOCOLS:
-            filename.replace(prot, protocol)
-    hashcmd = "{gfal_loc}gfal-sum {file} {checksum}".format(gfal_loc=args.gfal_location, file=filename, checksum=algo)
+        prot = args.gfaldir.split(":")[0]
+        filepath.replace(prot, protocol)
+    hashcmd = "{gfal_loc}gfal-sum {file} {checksum}".format(gfal_loc=args.gfal_location, file=filepath, checksum=algo)
     if debug_level > 1:
         print_flush(hashcmd)
     try:
