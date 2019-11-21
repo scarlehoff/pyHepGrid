@@ -184,6 +184,7 @@ def run_command(command):
         datetime.datetime.now()))
     return os.system(command)
 
+
 ####### COPY UTILITIES #######
 def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
     filein = os.path.join(args.gfaldir, grid_file)
@@ -200,7 +201,7 @@ def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY_TRIES):
 def remove_file(filepath, args, tries=5, protocol=None):
     if protocol:
         prot = args.gfaldir.split(":")[0]
-        filepath.replace(prot, protocol)
+        filepath.replace(prot, protocol, 1)
     rmcmd = "{gfal_loc}gfal-rm {f}".format(f=filepath, gfal_loc=args.gfal_location)
 
     file_present = test_file_presence(filepath, args)
@@ -233,7 +234,7 @@ def remove_file(filepath, args, tries=5, protocol=None):
 def test_file_presence(filepath, args, protocol=None):
     if protocol:
         prot = args.gfaldir.split(":")[0]
-        filepath.replace(prot, protocol)
+        filepath.replace(prot, protocol, 1)
     filename = os.path.basename(filepath)
     lscmd = "{gfal_loc}gfal-ls {file}".format(gfal_loc=args.gfal_location, file=filepath)
     if debug_level > 1:
@@ -254,7 +255,7 @@ def test_file_presence(filepath, args, protocol=None):
 def get_hash(filepath, args, algo="MD5", protocol=None):
     if protocol:
         prot = args.gfaldir.split(":")[0]
-        filepath.replace(prot, protocol)
+        filepath.replace(prot, protocol, 1)
     hashcmd = "{gfal_loc}gfal-sum {file} {checksum}".format(gfal_loc=args.gfal_location, file=filepath, checksum=algo)
     if debug_level > 1:
         print_flush(hashcmd)
@@ -277,8 +278,8 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
 
     print_flush("Copying {0} to {1}".format(infile, outfile))
     for j, protocol in enumerate(PROTOCOLS): # cycle through available protocols until one works.
-        infile_tmp = infile.replace(protoc, protocol)
-        outfile_tmp = outfile.replace(protoc, protocol)
+        infile_tmp = infile.replace(protoc, protocol, 1)
+        outfile_tmp = outfile.replace(protoc, protocol, 1)
 
         print_flush("Attempting Protocol {0}".format(protocol))
         outfile_dir = os.path.dirname(outfile_tmp)
