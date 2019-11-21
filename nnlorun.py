@@ -21,12 +21,6 @@ def print_flush(string):
     print(string)
     sys.stdout.flush()
 
-#####################################################################################
-#                                                                                   #
-# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :( #
-#                                                                                   #
-#####################################################################################
-
 ####### FILE NAME HELPERS #######
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py

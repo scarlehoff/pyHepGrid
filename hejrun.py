@@ -18,18 +18,12 @@ LOG_FILE="output.log"
 
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
 def print_flush(string):
-    print string
+    print(string)
     sys.stdout.flush()
 
 def print_file(string):
     f = open(LOG_FILE, "a")
     f.write(string+"\n")
-
-#####################################################################################
-#                                                                                   #
-# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :( #
-#                                                                                   #
-#####################################################################################
 
 # This function must always be the same as the one in program.py
 def warmup_name(runcard, rname):
