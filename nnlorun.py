@@ -420,15 +420,17 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     infile_hash = get_hash(infile, args, protocol="gsiftp")
 
     print_flush("Copying {0} to {1}".format(infile, outfile))
-    for j, protocol in enumerate(PROTOCOLS): # cycle through available protocols until one works.
-        infile_tmp = infile.replace(protoc, protocol, 1)
-        outfile_tmp = outfile.replace(protoc, protocol, 1)
+    for i in range(maxrange):
+        print_flush("Attempting copy try {0}".format(i+1))
 
-        print_flush("Attempting Protocol {0}".format(protocol))
-        outfile_dir = os.path.dirname(outfile_tmp)
-        outfile_fn = os.path.basename(outfile_tmp)
+        for j, protocol in enumerate(PROTOCOLS): # cycle through available protocols until one works.
+            infile_tmp = infile.replace(protoc, protocol, 1)
+            outfile_tmp = outfile.replace(protoc, protocol, 1)
 
-        for i in range(maxrange): # try max 10 times for now ;)
+            print_flush("Attempting Protocol {0}".format(protocol))
+            outfile_dir = os.path.dirname(outfile_tmp)
+            outfile_fn = os.path.basename(outfile_tmp)
+
             cmd = "{2}gfal-copy -f -p {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
             if debug_level > 1:
                 print_flush(cmd)

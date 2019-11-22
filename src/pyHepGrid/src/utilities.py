@@ -330,11 +330,12 @@ class GridWrap:
 def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES):
     header.logger.info("Copying {0} to {1}".format(infile, outfile))
     protoc = header.gfaldir.split(":")[0]
-    for protocol in PROTOCOLS: # cycle through available protocols until one works.
-        infile_tmp = infile.replace(protoc, protocol)
-        outfile_tmp = outfile.replace(protoc, protocol)
-        header.logger.debug("Attempting Protocol {0}".format(protocol))
-        for i in range(maxrange): # try max 10 times for now ;)
+    for i in range(maxrange):
+        print_flush("Attempting copy try {0}".format(i+1))
+        for protocol in PROTOCOLS: # cycle through available protocols until one works.
+            infile_tmp = infile.replace(protoc, protocol)
+            outfile_tmp = outfile.replace(protoc, protocol)
+            header.logger.debug("Attempting Protocol {0}".format(protocol))
             cmd = "gfal-copy {0} {1}".format(infile_tmp, outfile_tmp)
             retval = spCall([cmd], shell=True)
             if retval == 0:
