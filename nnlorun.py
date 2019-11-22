@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import os
 import sys
 import subprocess
@@ -20,12 +21,6 @@ PROTOCOLS = ["xroot", "gsiftp", "srm"]
 def print_flush(string):
     print(string)
     sys.stdout.flush()
-
-#####################################################################################
-#                                                                                   #
-# Try to keep this all python2.4 compatible. It may fail at some nodes otherwise :( #
-#                                                                                   #
-#####################################################################################
 
 ####### FILE NAME HELPERS #######
 def warmup_name(runcard, rname):
@@ -373,7 +368,7 @@ def remove_file(filepath, args, tries=5, protocol=None):
             if hasattr(e, 'message'):
                 print_flush(e.message)
             else:
-                print_flush(e)   
+                print_flush(e)
         return 1
 
     return 0
@@ -395,7 +390,7 @@ def test_file_presence(filepath, args, protocol=None):
             if hasattr(e, 'message'):
                 print_flush(e.message)
             else:
-                print_flush(e)   
+                print_flush(e)
         return None
     return (filename in filelist)
 
@@ -414,7 +409,7 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
             if hasattr(e, 'message'):
                 print_flush(e.message)
             else:
-                print_flush(e)   
+                print_flush(e)
         return None
     return hash
 
@@ -432,7 +427,7 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
         print_flush("Attempting Protocol {0}".format(protocol))
         outfile_dir = os.path.dirname(outfile_tmp)
         outfile_fn = os.path.basename(outfile_tmp)
-        
+
         for i in range(maxrange): # try max 10 times for now ;)
             cmd = "{2}gfal-copy -f -p {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
             if debug_level > 1:
@@ -457,7 +452,7 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             else:
                 print_flush("Copy command failed. Retrying.")
             # sleep time scales steeply with failed attempts (min wait 1s, max wait ~10 mins)
-            sleep((i+1)*(j+1)**2) 
+            sleep((i+1)*(j+1)**2)
 
     # Copy failed to complete successfully; attemt to clean up corrupted files if present.
     # Only make it this far if file absent, or present and corrupted.
