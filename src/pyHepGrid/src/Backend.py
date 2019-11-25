@@ -614,6 +614,8 @@ class Backend(_mode):
             dictionary.update({
                 "use_custom_rivet":header.use_custom_rivet,
                 "rivet_folder":header.grid_rivet_dir})
+        if header.copy_log:
+            dictionary["copy_log"] = header.copy_log
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):
