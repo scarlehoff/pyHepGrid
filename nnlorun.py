@@ -381,6 +381,9 @@ def remove_file(filepath, args, tries=5, protocol=None):
 
     # don't crash if gfal-rm throws an error
     except subprocess.CalledProcessError as e:
+        if args.copy_log:
+            print_file("Gfal-rm failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
+            print_file("   > Command issued: {cmd}".format(cmd=rmcmd), logfile=COPY_LOG)
         if debug_level > 1:
             if hasattr(e, 'message'):
                 print_flush(e.message)
@@ -403,6 +406,9 @@ def test_file_presence(filepath, args, protocol=None):
         # In principle, empty if file doesn't exist, so unnecessary to check contents.  Test to be robust against unexpected output.
         filelist = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()[0]
     except subprocess.CalledProcessError as e:
+        if args.copy_log:
+            print_file("Gfal-ls failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
+            print_file("   > Command issued: {cmd}".format(cmd=lscmd), logfile=COPY_LOG)
         if debug_level > 1:
             if hasattr(e, 'message'):
                 print_flush(e.message)
@@ -422,6 +428,9 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
     try:
         hash = subprocess.check_output(hashcmd, shell=True, universal_newlines=True).split()[1]
     except subprocess.CalledProcessError as e:
+        if args.copy_log:
+            print_file("Gfal-sum failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
+            print_file("   > Command issued: {cmd}".format(cmd=hashcmd), logfile=COPY_LOG)
         if debug_level > 1:
             if hasattr(e, 'message'):
                 print_flush(e.message)
@@ -469,12 +478,12 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
                     print_flush("Copy command reported errors and the transferred file was corrupted. Retrying.")
             else:
                 print_flush("Copy command failed. Retrying.")
-            # sleep time scales steeply with failed attempts (min wait 1s, max wait ~10 mins)
             if args.copy_log:
                 print_file("Copy failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
                 print_file("   > Command issued: {cmd}".format(cmd=cmd), logfile=COPY_LOG)
                 print_file("   > Returned error code: {ec}".format(ec=retval), logfile=COPY_LOG)
                 print_file("   > File now present: {fp}".format(fp=file_present), logfile=COPY_LOG)
+            # sleep time scales steeply with failed attempts (min wait 1s, max wait ~2 mins)
             sleep((i+1)*(j+1)**2)
 
     # Copy failed to complete successfully; attemt to clean up corrupted files if present.
