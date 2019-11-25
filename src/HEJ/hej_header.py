@@ -31,6 +31,7 @@ baseSeed   = 1
 events     = 123
 jobName    = "HEJ"
 debug_level = 16
+copy_log   = False
 stacksize = 5000 # MB RAM per job smaller->higher priority (slurm only)
 runmode = "HEJ"
 
