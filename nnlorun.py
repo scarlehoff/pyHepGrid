@@ -15,6 +15,8 @@ from getpass import getuser
 RUN_CMD = "OMP_NUM_THREADS={0} ./{1} -run {2}"
 MAX_COPY_TRIES = 15
 PROTOCOLS = ["xroot", "gsiftp", "srm"]
+LOG_FILE = "run.log"
+COPY_LOG = "copies.log"
 
 ####### MISC ABUSIVE SETUP #######
 #### Override print with custom version that always flushes to stdout so we have up-to-date logs
@@ -22,22 +24,31 @@ def print_flush(string):
     print(string)
     sys.stdout.flush()
 
+
+def print_file(string, logfile=LOG_FILE):
+    with open(logfile, "a") as f:
+        f.write(string+"\n")
+
+
 ####### FILE NAME HELPERS #######
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
     return out
 
+
 def warmup_name_ns(runcard, rname, socket_no):
     # Save socketed run output with as well just in case one fails
     out = "output{0}-warm-socket_{2}-{1}.tar.gz".format(runcard, rname, socket_no)
     return out
+
 
 def output_name(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
     return out
 ####### END FILE NAME HELPERS #######
+
 
 #### Override os.system with custom version that auto sets debug level on failure
 # Abusive...
@@ -59,6 +70,7 @@ def setup():
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
     args = parse_arguments()
     debug_level = int(args.debug)
+    copy_log = args.copy_log
     setup_environment(args.lhapdf_local, args)
     socket_config = None
 
@@ -69,6 +81,10 @@ def setup():
         syscall("lsb_release -a")
         os.system("env")
         os.system("voms-proxy-info --all")
+
+    if copy_log:
+        # initialise with node name
+        os.system("hostname >> {0}".format(COPY_LOG))
 
     return args, debug_level, socket_config
 
@@ -152,6 +168,7 @@ def parse_arguments():
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
     parser.add_option("-e", "--executable", help = "Executable to be run", default = "NNLOJET")
     parser.add_option("-d", "--debug", help = "Debug level", default="0")
+    parser.add_option("--copy_log", help = "Write copy log file.", action="store_true", default=False)
     parser.add_option("-s", "--seed", help = "Run seed for NNLOJET", default="1")
 
     # Grid configuration options
@@ -443,7 +460,6 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
                 return retval
             elif retval == 0 and not file_present:
                 print_flush("Copy command succeeded, but failed to copy file. Retrying.")
-                retval += 1
             elif retval != 0 and file_present:
                 outfile_hash = get_hash(outfile, args, protocol="gsiftp")
                 if infile_hash == outfile_hash:
@@ -454,6 +470,11 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             else:
                 print_flush("Copy command failed. Retrying.")
             # sleep time scales steeply with failed attempts (min wait 1s, max wait ~10 mins)
+            if args.copy_log:
+                print_file("Copy failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
+                print_file("   > Command issued: {cmd}".format(cmd=cmd), logfile=COPY_LOG)
+                print_file("   > Returned error code: {ec}".format(ec=retval), logfile=COPY_LOG)
+                print_file("   > File now present: {fp}".format(fp=file_present), logfile=COPY_LOG)
             sleep((i+1)*(j+1)**2)
 
     # Copy failed to complete successfully; attemt to clean up corrupted files if present.
@@ -495,6 +516,8 @@ def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
     os.system("gcc --version >> {0}".format(outputfile))
     os.system("python --version >> {0}".format(outputfile))
+    os.system("python3 --version >> {0}".format(outputfile))
+    os.system("gfal-copy --version >> {0}".format(outputfile))
 ####### END PRINT FUNCTIONS #######
 
 

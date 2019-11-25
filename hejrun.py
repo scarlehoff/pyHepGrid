@@ -22,9 +22,9 @@ def print_flush(string):
     print(string)
     sys.stdout.flush()
 
-def print_file(string):
-    f = open(LOG_FILE, "a")
-    f.write(string+"\n")
+def print_file(string, logfile=LOG_FILE):
+    with open(logfile, "a") as f:
+        f.write(string+"\n")
 
 # This function must always be the same as the one in program.py
 def warmup_name(runcard, rname):

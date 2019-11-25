@@ -20,6 +20,7 @@ baseSeed   = 100
 events     = 100
 jobName    = "testjob"
 debug_level = 0
+copy_log   = False
 stacksize = 50 #MB
 
 # Grid folder config
