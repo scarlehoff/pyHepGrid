@@ -235,30 +235,41 @@ def remove_file(filepath, args, tries=5, protocol=None):
     return 0
 
 
-def test_file_presence(filepath, args, protocol=None):
+def test_file_presence(filepath_in, args, protocol=None):
     if protocol:
-        prot = args.gfaldir.split(":")[0]
-        filepath = filepath.replace(prot, protocol, 1)
-    filename = os.path.basename(filepath)
-    lscmd = "{gfal_loc}gfal-ls -t {timeout} {file}".format(
-        gfal_loc=args.gfal_location, file=filepath, timeout=GFAL_TIMEOUT)
-    if debug_level > 1:
-        print_flush(lscmd)
-    try:
-        # In principle, empty if file doesn't exist, so unnecessary to check contents.  Test to be robust against unexpected output.
-        filelist = subprocess.check_output(lscmd,
-            shell=True, universal_newlines=True).splitlines()[0]
-    except subprocess.CalledProcessError as e:
-        if args.copy_log:
-            print_file("Gfal-ls failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
-            print_file("   > Command issued: {cmd}".format(cmd=lscmd), logfile=COPY_LOG)
+        all_protocols = [ protocol ] + list(set(PROTOCOLS) - {protocol})
+    else:
+        all_protocols = [ None ]
+    filepath = filepath_in
+
+    for loop_prot in all_protocols:
+        if loop_prot:
+            prot = args.gfaldir.split(":")[0]
+            filepath = filepath_in.replace(prot, loop_prot, 1)
+
+        filename = os.path.basename(filepath)
+        lscmd = "{gfal_loc}gfal-ls -t {timeout} {file}".format(
+            gfal_loc=args.gfal_location, file=filepath, timeout=GFAL_TIMEOUT)
         if debug_level > 1:
-            if hasattr(e, 'message'):
-                print_flush(e.message)
-            else:
-                print_flush(e)
-        return None
-    return (filename in filelist)
+            print_flush(lscmd)
+        try:
+            # In principle, empty if file doesn't exist, so unnecessary to check contents.  Test to be robust against unexpected output.
+            filelist = subprocess.check_output(lscmd,
+                shell=True, universal_newlines=True).splitlines()[0]
+            return (filename in filelist)
+        except subprocess.CalledProcessError as e:
+            if args.copy_log:
+                print_file("Gfal-ls failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
+                print_file("   > Command issued: {cmd}".format(cmd=lscmd), logfile=COPY_LOG)
+            if debug_level > 1:
+                if hasattr(e, 'message'):
+                    print_flush(e.message)
+                else:
+                    print_flush(e)
+
+    if debug_level > 1:
+        print_file("Gfal-ls failed for all protocols.")
+    return False
 
 
 def get_hash(filepath, args, algo="MD5", protocol=None):
