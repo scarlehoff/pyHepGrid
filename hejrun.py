@@ -13,6 +13,7 @@ except KeyError as e:
     pass
 
 MAX_COPY_TRIES = 15
+GFAL_TIMEOUT = 300
 PROTOCOLS = ["xroot", "gsiftp", "srm"]
 LHE_FILE="SherpaLHE_fixed.lhe"
 LOG_FILE="output.log"
@@ -239,12 +240,14 @@ def test_file_presence(filepath, args, protocol=None):
         prot = args.gfaldir.split(":")[0]
         filepath = filepath.replace(prot, protocol, 1)
     filename = os.path.basename(filepath)
-    lscmd = "{gfal_loc}gfal-ls {file}".format(gfal_loc=args.gfal_location, file=filepath)
+    lscmd = "{gfal_loc}gfal-ls -t {timeout} {file}".format(
+        gfal_loc=args.gfal_location, file=filepath, timeout=GFAL_TIMEOUT)
     if debug_level > 1:
         print_flush(lscmd)
     try:
         # In principle, empty if file doesn't exist, so unnecessary to check contents.  Test to be robust against unexpected output.
-        filelist = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()[0]
+        filelist = subprocess.check_output(lscmd,
+            shell=True, universal_newlines=True).splitlines()[0]
     except subprocess.CalledProcessError as e:
         if args.copy_log:
             print_file("Gfal-ls failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
@@ -262,7 +265,8 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
     if protocol:
         prot = args.gfaldir.split(":")[0]
         filepath = filepath.replace(prot, protocol, 1)
-    hashcmd = "{gfal_loc}gfal-sum {file} {checksum}".format(gfal_loc=args.gfal_location, file=filepath, checksum=algo)
+    hashcmd = "{gfal_loc}gfal-sum -t {timeout} {file} {checksum}".format(
+        gfal_loc=args.gfal_location, file=filepath, checksum=algo, timeout=GFAL_TIMEOUT)
     if debug_level > 1:
         print_flush(hashcmd)
     try:
