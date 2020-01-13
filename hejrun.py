@@ -280,6 +280,8 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
                 print_flush(e.message)
             else:
                 print_flush(e)
+        if protocol == "gsiftp": # try again when gsiftp is down
+            return get_hash(filepath, args, algo=algo, protocol="srm")
         return None
     return hash
 
