@@ -289,7 +289,8 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     for i in range(maxrange):
         print_flush("Attempting copy try {0}".format(i+1))
 
-        for j, protocol in enumerate(PROTOCOLS): # cycle through available protocols until one works.
+        # cycle through available protocols until one works.
+        for j, protocol in enumerate(PROTOCOLS):
             infile_tmp = infile.replace(protoc, protocol, 1)
             outfile_tmp = outfile.replace(protoc, protocol, 1)
 
@@ -310,12 +311,23 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             elif retval == 0 and not file_present:
                 print_flush("Copy command succeeded, but failed to copy file. Retrying.")
             elif retval != 0 and file_present:
+                if not infile_hash:
+                    print_flush("Copy reported error, but file present & can not"
+                        "compute original file hash. Proceeding.")
+                    return 0
+
                 outfile_hash = get_hash(outfile, args, protocol="gsiftp")
-                if infile_hash == outfile_hash:
-                    print_flush("Copy command reported errors, but file was copied and checksums match. Proceeding.")
+                if not outfile_hash:
+                    print_flush("Copy reported error, but file present & can not"
+                        "compute copied file hash. Proceeding.")
+                    return 0
+                elif infile_hash == outfile_hash:
+                    print_flush("Copy command reported errors, but file was "
+                        "copied and checksums match. Proceeding.")
                     return 0
                 else:
-                    print_flush("Copy command reported errors and the transferred file was corrupted. Retrying.")
+                    print_flush("Copy command reported errors and the "
+                        "transferred file was corrupted. Retrying.")
             else:
                 print_flush("Copy command failed. Retrying.")
             if args.copy_log:
