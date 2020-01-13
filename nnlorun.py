@@ -14,6 +14,7 @@ from getpass import getuser
 
 RUN_CMD = "OMP_NUM_THREADS={0} ./{1} -run {2}"
 MAX_COPY_TRIES = 15
+GFAL_TIMEOUT = 300
 PROTOCOLS = ["xroot", "gsiftp", "srm"]
 LOG_FILE = "run.log"
 COPY_LOG = "copies.log"
@@ -394,35 +395,49 @@ def remove_file(filepath, args, tries=5, protocol=None):
     return 0
 
 
-def test_file_presence(filepath, args, protocol=None):
+def test_file_presence(filepath_in, args, protocol=None):
     if protocol:
-        prot = args.gfaldir.split(":")[0]
-        filepath = filepath.replace(prot, protocol, 1)
-    filename = os.path.basename(filepath)
-    lscmd = "{gfal_loc}gfal-ls {file}".format(gfal_loc=args.gfal_location, file=filepath)
-    if debug_level > 1:
-        print_flush(lscmd)
-    try:
-        # In principle, empty if file doesn't exist, so unnecessary to check contents.  Test to be robust against unexpected output.
-        filelist = subprocess.check_output(lscmd, shell=True, universal_newlines=True).splitlines()[0]
-    except subprocess.CalledProcessError as e:
-        if args.copy_log:
-            print_file("Gfal-ls failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
-            print_file("   > Command issued: {cmd}".format(cmd=lscmd), logfile=COPY_LOG)
+        all_protocols = [ protocol ] + list(set(PROTOCOLS) - {protocol})
+    else:
+        all_protocols = [ None ]
+    filepath = filepath_in
+
+    for loop_prot in all_protocols:
+        if loop_prot:
+            prot = args.gfaldir.split(":")[0]
+            filepath = filepath_in.replace(prot, loop_prot, 1)
+
+        filename = os.path.basename(filepath)
+        lscmd = "{gfal_loc}gfal-ls -t {timeout} {file}".format(
+            gfal_loc=args.gfal_location, file=filepath, timeout=GFAL_TIMEOUT)
         if debug_level > 1:
-            if hasattr(e, 'message'):
-                print_flush(e.message)
-            else:
-                print_flush(e)
-        return None
-    return (filename in filelist)
+            print_flush(lscmd)
+        try:
+            # In principle, empty if file doesn't exist, so unnecessary to check contents.  Test to be robust against unexpected output.
+            filelist = subprocess.check_output(lscmd,
+                shell=True, universal_newlines=True).splitlines()[0]
+            return (filename in filelist)
+        except subprocess.CalledProcessError as e:
+            if args.copy_log:
+                print_file("Gfal-ls failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
+                print_file("   > Command issued: {cmd}".format(cmd=lscmd), logfile=COPY_LOG)
+            if debug_level > 1:
+                if hasattr(e, 'message'):
+                    print_flush(e.message)
+                else:
+                    print_flush(e)
+
+    if debug_level > 1:
+        print_file("Gfal-ls failed for all protocols.")
+    return False
 
 
 def get_hash(filepath, args, algo="MD5", protocol=None):
     if protocol:
         prot = args.gfaldir.split(":")[0]
         filepath = filepath.replace(prot, protocol, 1)
-    hashcmd = "{gfal_loc}gfal-sum {file} {checksum}".format(gfal_loc=args.gfal_location, file=filepath, checksum=algo)
+    hashcmd = "{gfal_loc}gfal-sum -t {timeout} {file} {checksum}".format(
+        gfal_loc=args.gfal_location, file=filepath, checksum=algo, timeout=GFAL_TIMEOUT)
     if debug_level > 1:
         print_flush(hashcmd)
     try:
@@ -436,6 +451,8 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
                 print_flush(e.message)
             else:
                 print_flush(e)
+        if protocol == "gsiftp": # try again when gsiftp is down
+            return get_hash(filepath, args, algo=algo, protocol="srm")
         return None
     return hash
 
@@ -449,7 +466,8 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     for i in range(maxrange):
         print_flush("Attempting copy try {0}".format(i+1))
 
-        for j, protocol in enumerate(PROTOCOLS): # cycle through available protocols until one works.
+        # cycle through available protocols until one works.
+        for j, protocol in enumerate(PROTOCOLS):
             infile_tmp = infile.replace(protoc, protocol, 1)
             outfile_tmp = outfile.replace(protoc, protocol, 1)
 
@@ -470,12 +488,23 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             elif retval == 0 and not file_present:
                 print_flush("Copy command succeeded, but failed to copy file. Retrying.")
             elif retval != 0 and file_present:
+                if not infile_hash:
+                    print_flush("Copy reported error, but file present & can not"
+                        "compute original file hash. Proceeding.")
+                    return 0
+
                 outfile_hash = get_hash(outfile, args, protocol="gsiftp")
-                if infile_hash == outfile_hash:
-                    print_flush("Copy command reported errors, but file was copied and checksums match. Proceeding.")
+                if not outfile_hash:
+                    print_flush("Copy reported error, but file present & can not"
+                        "compute copied file hash. Proceeding.")
+                    return 0
+                elif infile_hash == outfile_hash:
+                    print_flush("Copy command reported errors, but file was "
+                        "copied and checksums match. Proceeding.")
                     return 0
                 else:
-                    print_flush("Copy command reported errors and the transferred file was corrupted. Retrying.")
+                    print_flush("Copy command reported errors and the "
+                        "transferred file was corrupted. Retrying.")
             else:
                 print_flush("Copy command failed. Retrying.")
             if args.copy_log:
@@ -488,7 +517,10 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
 
     # Copy failed to complete successfully; attemt to clean up corrupted files if present.
     # Only make it this far if file absent, or present and corrupted.
-    remove_file(outfile, args, protocol="gsiftp")
+    for protocol in PROTOCOLS:
+        if remove_file(outfile, args, protocol=protocol) == 0:
+            break
+
 
     return 9999
 ####### END COPY UTILITIES #######
