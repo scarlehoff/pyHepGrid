@@ -346,7 +346,10 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
 
     # Copy failed to complete successfully; attemt to clean up corrupted files if present.
     # Only make it this far if file absent, or present and corrupted.
-    remove_file(outfile, args, protocol="gsiftp")
+    for protocol in PROTOCOLS:
+        if remove_file(outfile, args, protocol=protocol) == 0:
+            break
+
 
     return 9999
 ####### END COPY UTILITIES #######
