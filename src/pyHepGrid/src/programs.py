@@ -671,3 +671,27 @@ class Sherpa(HEJ):
 
     _RUNFILE_END = ".dat"
     _WARMUP_FILES = ["Process", "Results.db"]
+
+class N3FIT(ProgramInterface):
+    """ Program interface for the n3fit fitting code """
+
+    def init_warmup(self, *args, **kwargs):
+        raise NotImplementedError("N3FIT does not implement any warmup mode")
+
+    def init_production(self, provided_warmup = None, continue_warmup = False, local = False):
+        """ Initialize production (single mode) """
+        rncards, dCards = util.expandCard()
+        # TODO add all classes of checks here for God's sake
+        logger.info("This program does not need init yet")
+
+    def check_for_existing_output_local(self, runcard, runfolder, base_rep, n_reps):
+        """ Checks whether the given runcard already has the selected
+        replicas done.
+        For now miserably fail if that's indeed the case
+        """
+        from pyHepGrid.src.header import local_run_directory
+        local_dir_name = f"{local_run_directory}/{runfolder}/nnfit"
+        # TODO check only for the replicas that were requested
+
+
+
