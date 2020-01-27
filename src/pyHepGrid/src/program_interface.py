@@ -14,6 +14,10 @@ import os
 
 
 class ProgramInterface(object):
+    # Add the possibility of massaging a list of arguments
+    def include_arguments(self, argument_dict):
+        return argument_dict
+
     # Checks for the grid storage system
     def get_grid_from_stdout(self, jobid, jobinfo):
         logger.critical("{0} not implemented".format(sys._getframe().f_code.co_name))

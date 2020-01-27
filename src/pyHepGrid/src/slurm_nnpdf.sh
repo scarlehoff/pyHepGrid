@@ -4,7 +4,7 @@
 #SBATCH --error {stderrfile}
 #SBATCH --array=1-{producRun}
 #SBATCH --job-name={jobName}
-#SBATCH --mem-per-cpu 800
+#SBATCH --mem-per-cpu {memsize}
 #SBATCH -c {threads}
 {exclude_list}
 {partition}

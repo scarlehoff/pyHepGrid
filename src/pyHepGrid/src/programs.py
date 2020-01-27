@@ -707,7 +707,6 @@ class N3FIT(ProgramInterface):
             copy(runcard_path, running_folder)
         logger.info("run initialized")
 
-
     def check_for_existing_output_local(self, runcard, runfolder, base_rep, n_reps):
         """ Checks whether the given runcard already has the selected
         replicas done.
@@ -716,9 +715,41 @@ class N3FIT(ProgramInterface):
         from pyHepGrid.src.header import local_run_directory
         running_folder = self.get_local_dir_name(runcard, runfolder)
         replica_folder = self.replica_folder(running_folder, runname = runfolder)
-        import ipdb
-        ipdb.set_trace()
-        # TODO check only for the replicas that were requested
+        # Use fitinfo file as a proxy for the replica
+        fitinfo = replica_folder + "/replica_{0}/" + runfolder + ".fitinfo"
+        for i in range(base_rep, base_rep + n_reps):
+            if util.checkIfThere(fitinfo.format(i)):
+                # Fail without piety
+                raise ValueError("There are replicas in the range considered")
 
-
-
+    def include_arguments(self, current_arguments):
+        """ Capture the arguments for slurm and a few custom ones """
+        # Get the number of threads
+        number_threads = current_arguments.get('threads', 1)
+        # Check whether the runcard is Global or DIS
+        runcard = current_arguments['runcard']
+        runfolder = current_arguments['runcard_dir']
+        runcard_path = f"{runfolder}/{runcard}"
+        import yaml
+        with open(runcard_path, 'r') as f:
+            rdata = yaml.load(f)
+        experiments = rdata['experiments']
+        mem_req = {
+                'dis' : 4e3,
+                'had' : 16e3
+                }
+        mode = 'dis'
+        # If any of the datasets include 'LHC' 'ATLAS' or 'CMS' move to hadronic mode
+        for exp in experiments:
+            datasets = exp['datasets']
+            for d in datasets:
+                dname = d['dataset']
+                if 'ATLAS' in dname or 'LHC' in dname or 'CMS' in dname:
+                    logger.info("Hadronic datasets found, setting hadronic mode")
+                    mode = 'had'
+                    break
+            if mode == 'had':
+                break
+        memory_per_thread = int(mem_req[mode]/number_threads)
+        current_arguments['memsize'] = memory_per_thread
+        return current_arguments
