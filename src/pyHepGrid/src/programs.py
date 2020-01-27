@@ -678,11 +678,35 @@ class N3FIT(ProgramInterface):
     def init_warmup(self, *args, **kwargs):
         raise NotImplementedError("N3FIT does not implement any warmup mode")
 
-    def init_production(self, provided_warmup = None, continue_warmup = False, local = False):
+    def replica_folder(self, local_folder, runname = None):
+        if runname is None:
+            rep_folder = f"{local_folder}/nnfit"
+        else:
+            rep_folder = f"{local_folder}/{runname}/nnfit"
+        return rep_folder
+
+    def init_production(self, provided_warmup = None, continue_warmup = False, local = True):
         """ Initialize production (single mode) """
-        rncards, dCards = util.expandCard()
-        # TODO add all classes of checks here for God's sake
-        logger.info("This program does not need init yet")
+        if not local:
+            raise NotImplementedError("N3FIT is only implemented for local running")
+        _, expanded_card = util.expandCard()
+        for runcard, runfolder in expanded_card.items():
+            running_folder = self.get_local_dir_name(runcard, runfolder)
+            stdout_folder = f"{running_folder}/stdout"
+            # Create the folder in which the stuff will be run, and its stdout
+            if not util.checkIfThere(stdout_folder):
+                os.makedirs(stdout_folder)
+            # Now create also the replica folder to avoid future clashes
+            rep_folder = self.replica_folder(running_folder, runname = runfolder)
+            if not util.checkIfThere(rep_folder):
+                os.makedirs(rep_folder)
+            # And finally copy the runcard
+            from pyHepGrid.src.header import runcardDir
+            runcard_path = f"{runcardDir}/{runcard}"
+            from shutil import copy
+            copy(runcard_path, running_folder)
+        logger.info("run initialized")
+
 
     def check_for_existing_output_local(self, runcard, runfolder, base_rep, n_reps):
         """ Checks whether the given runcard already has the selected
@@ -690,7 +714,10 @@ class N3FIT(ProgramInterface):
         For now miserably fail if that's indeed the case
         """
         from pyHepGrid.src.header import local_run_directory
-        local_dir_name = f"{local_run_directory}/{runfolder}/nnfit"
+        running_folder = self.get_local_dir_name(runcard, runfolder)
+        replica_folder = self.replica_folder(running_folder, runname = runfolder)
+        import ipdb
+        ipdb.set_trace()
         # TODO check only for the replicas that were requested
 
 
