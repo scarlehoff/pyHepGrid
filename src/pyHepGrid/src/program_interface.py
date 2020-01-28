@@ -17,6 +17,12 @@ class ProgramInterface(object):
     # Add the possibility of massaging a list of arguments
     def include_arguments(self, argument_dict):
         return argument_dict
+    # Add production arguments (by default, defer to generic include_arguments)
+    def include_production_arguments(self, argument_dict):
+        return self.include_arguments(argument_dict)
+    # Add warmup arguments (by default, defer to generic include_arguments)
+    def include_warmup_arguments(self, argument_dict):
+        return self.include_arguments(argument_dict)
 
     # Checks for the grid storage system
     def get_grid_from_stdout(self, jobid, jobinfo):
