@@ -219,8 +219,6 @@ class RunSlurm(Backend):
             slurmfile = self._write_SLURM(arguments, self.prodtempl)
             header.logger.debug("Path of slurm file: {0}".format(slurmfile))
             jobids = []
-            import ipdb
-            ipdb.set_trace()
             jobid, runqueue = self._run_SLURM(slurmfile, arguments, queue, test=test)
             jobids.append(jobid)
             # Create database entry
