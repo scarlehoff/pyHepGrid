@@ -630,7 +630,9 @@ class Backend(_mode):
         base_string = self._make_base_argstring(runcard, runtag)
         production_dict = {'Production': None,
                         'seed': seed }
-
+        # Pass the current production arguments to the program interface
+        # and let it add new arguments
+        production_dict = super().include_production_arguments(production_dict)
         production_str = self._format_args(production_dict)
         return base_string + production_str
 
@@ -645,6 +647,10 @@ class Backend(_mode):
             warmup_dict['port'] = port
             warmup_dict['Host'] = header.server_host
             warmup_dict['Sockets'] = None
+
+        # Pass the current warmup arguments to the program interface
+        # and let it add new arguments
+        warmup_dict = super().include_warmup_arguments(warmup_dict)
 
         warmup_str = self._format_args(warmup_dict)
         return base_string + warmup_str
