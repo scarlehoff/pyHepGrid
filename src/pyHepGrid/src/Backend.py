@@ -1,6 +1,7 @@
 from collections import Counter
 import datetime
 import os
+import importlib
 import pyHepGrid.src.dbapi
 from pyHepGrid.src.header import logger
 import pyHepGrid.src.utilities as util
@@ -10,7 +11,13 @@ import multiprocessing as mp
 import sys
 
 counter = None
-_mode = pyHepGrid.src.runmodes.mode_selector[header.runmode.upper()]
+
+if header.runmode.upper() in pyHepGrid.src.runmodes.mode_selector:
+    _mode = pyHepGrid.src.runmodes.mode_selector[header.runmode.upper()]
+else:
+    package, module = header.runmode.rsplit('.', 1)
+    _mode = getattr(importlib.import_module(package), module)
+    logger.info(f"Overriding run mode to {_mode}")
 
 
 def init_counter(args):
