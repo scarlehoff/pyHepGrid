@@ -160,9 +160,11 @@ you can also change some local background behaviour through `runmodes`. A
 warmup-files, dependencies, etc.) with `gfal` before submitting jobs.
 
 If you want to implement your own `runmode` write a *program* class as a
-subclass of the [`ProgramInterface`](../src/pyHepGrid/src/program_interface.py)
-and register it in the [`mode_selector`](../src/pyHepGrid/src/runmodes.py). As
-always, to get started it is easiest to look at existing `runmodes`/programs in
+subclass of the [`ProgramInterface`](../src/pyHepGrid/src/program_interface.py).
+You can then load your program as a `runmode` in your `runcard.py`, e.g. you
+could specify `runmode="pyHepGrid.src.programs.HEJ"` to explicitly load HEJ (the
+shorter `runmode=HEJ` is just an alias). As always, to get started it is easiest
+to look at existing `runmodes`/programs in
 [`programs.py`](../src/pyHepGrid/src/programs.py). Dependent on your setup you
 might not need to implement all functions. For example to use the initialisation
 in production mode you only need to implement the `init_production` function.
