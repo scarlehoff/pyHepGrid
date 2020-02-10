@@ -45,7 +45,7 @@ grid outside of Durham(!)**
 
 ## 3. GFAL SETUP
 
-### Note. LFN is now unsupported!
+### Note: LFN is now unsupported! It got replaced by `gfal`.
 
 put this into your bashrc:
 ```bash
@@ -109,7 +109,7 @@ To start using `pyHepGrid` you need to do the following steps.
     setting you have in your personal header, e.g. `BaseSeed` or `producRun`.
 4. Create folders on gfal to save your in and output. They have to match
     `grid_input_dir`, `grid_output_dir` and `grid_warmup_dir` of your header
-5. For non NNNLOJet developers: Write you own `runfile` similar to `nnlorun.py`.
+5. If you use you own program: Write you own `runfile` similar to `nnlorun.py`.
     This script will be ran on each node, so it should be *self-contained* and
     *Python 2.4 compatible*. It should also be able to handle all arguments of
     the `nnnnlorun.py`, even if they are not used in the script itself. It is
@@ -123,19 +123,21 @@ To start using `pyHepGrid` you need to do the following steps.
 python3 setup.py install --user
 python3 setup.py develop --user
 ```
-(Include the `--prefix` option and add to a location contained in `$PYTHONPATH` 
-if you want to install it elsewhere). `--user` is used on the gridui as we don't 
+(Include the `--prefix` option and add to a location contained in `$PYTHONPATH`
+if you want to install it elsewhere). `--user` is used on the gridui as we don't
 have access to the python3 installation - if you have your own install, feel free
-to drop it. 
-We currently need to be in develop mode given the way that the header system works - 
+to drop it.
+We currently need to be in develop mode given the way that the header system works -
 the plan is for this to change at some point.
 
-Alternatively: if you wish to run pyHepGrid from within a Conda environment, install the scripts by moving to the directory containing setup.py and running:
+Alternatively: if you wish to run pyHepGrid from within a Conda environment,
+install the scripts by moving to the directory containing setup.py and running:
 ```bash
 conda install conda-build
 conda develop .
 ```
-If prompted to install any dependencies required by conda-build in step (1), type 'Y' to proceed.
+If prompted to install any dependencies required by conda-build in step (1),
+type 'Y' to proceed.
 
 
 After this you should be able to run `pyHepGrid test runcards/your_runcard.py
@@ -145,6 +147,40 @@ without sourcing your `~/.bashrc`. If this works fine you can try submitting to
 the arc  test queue with `pyHepGrid run runcards/your_runcard.py -B --test`. The
 test queue highly limited in resources. **Only submit a few short jobs to it**
 (<10).
+
+### 4.1. Further customisations (advanced usage)
+
+Beside the header and runcard setup, `pyHepGrid` has two big *attack points* for
+customisations. First and foremost the `runfile` which is run on each grid node.
+This is similar to other grid-scripts that you might have used before. However
+you can also change some local background behaviour through `runmodes`. A
+`runmode` is *program* specific, e.g. there is a `runmode` `"NNLOJET"` and
+`"HEJ"`. The behaviour of `pyHepGrid ini` is completely controlled by a
+`runmode`. You could set it up to upload some common files (runcards,
+warmup-files, dependencies, etc.) with `gfal` before submitting jobs.
+
+If you want to implement your own `runmode` write a *program* class as a
+subclass of the [`ProgramInterface`](../src/pyHepGrid/src/program_interface.py).
+You can then load your program as a `runmode` in your `runcard.py`, e.g. you
+could specify `runmode="pyHepGrid.src.programs.HEJ"` to explicitly load HEJ (the
+shorter `runmode=HEJ` is just an alias). As always, to get started it is easiest
+to look at existing `runmodes`/programs in
+[`programs.py`](../src/pyHepGrid/src/programs.py). Dependent on your setup you
+might not need to implement all functions. For example to use the initialisation
+in production mode you only need to implement the `init_production` function.
+
+You can also use your custom program class to pass non-standard arguments to
+your `runfile` by overwriting the `include_arguments`,
+`include_production_arguments` or `include_warmup_arguments`functions. You can
+add, change or even delete entries as you want (the latter is not advised). The
+output of `include_agruments` is directly passed to your `runfile` as a
+command-line argument of the form `--key value` for Arc and Dirac, or replaces
+the corresponding arguments in the `slurm_template`.
+
+> `pyHepGrid` will and can not sanitise your setup and it is your responsibility
+to ensure your code runs as intended. As a general advice try to reuse code
+shipped with `pyHepGrid` where possible, since this should be tested to some
+expend.
 
 ## 5. PROXY SETUP
 

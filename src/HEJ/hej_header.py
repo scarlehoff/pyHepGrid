@@ -1,5 +1,6 @@
 import subprocess as sp
 from getpass import getuser
+import os
 
 ##################################################
 #                Helper Functions                #
@@ -36,7 +37,7 @@ stacksize = 5000 # MB RAM per job smaller->higher priority (slurm only)
 runmode = "HEJ"
 
 ## actual file to run
-runfile    = "hejrun.py"
+runfile    = os.path.dirname(os.path.realpath(__file__+"/../.."))+"/hejrun.py"
 
 ## grid storage (gfal) options
 grid_input_dir  = "tst_grid/input"

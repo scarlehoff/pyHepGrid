@@ -79,6 +79,8 @@ class RunSlurm(Backend):
         else:
             args["stdoutfile"]=self.get_stdout_dir_name(args["runcard_dir"])+"slurm-%j.out"
         args = self.__do_common_args(args, threads, queue)
+        # Add arguments coming from the parent interface
+        args = super().include_arguments(args)
         return args
 
     def _run_SLURM(self, filename, args, queue, test=False, socket=None, n_sockets=1):
