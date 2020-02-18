@@ -21,7 +21,7 @@ no_processes = config.finalise_no_cores
 verbose = config.verbose_finalise
 DELETE_CORRUPTED = False
 MAX_ATTEMPTS = 5
-FINALISE_ALL = True
+FINALISE_ALL = False
 RECURSIVE = config.recursive_finalise
 ls_protocol = "dav"
 copy_protocol = "xroot"
@@ -35,8 +35,8 @@ if FINALISE_ALL:
     sys.path.append(runcards)
     rc = importlib.import_module(config.finalise_runcards.replace("/","."))
 else:
-    sys.path.append(os.path.dirname(os.path.expanduser(sys.argv[1])))
-    rc = importlib.import_module(os.path.basename(sys.argv[1].replace(".py","")))
+    sys.path.append(os.path.dirname(os.path.expanduser(sys.argv[2])))
+    rc = importlib.import_module(os.path.basename(sys.argv[2].replace(".py","")))
 
 
 if config.timeout is not None:
@@ -70,6 +70,8 @@ def createdirs(currentdir, runcard, rtag):
     mkdir(logdir)
     nodedir = os.path.join(logdir, 'node_info')
     mkdir(nodedir)
+    copylogdir = os.path.join(logdir, 'copylog')
+    mkdir(copylogdir)
     logcheck = set([logseed_regex.search(i).group(1) for i
                     in get_PROGRAM_logfiles(logdir)])
     return logcheck, targetdir
@@ -96,7 +98,6 @@ def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
     gridname = ":".join([copy_protocol, gridname.split(":", 1)[-1]])
 
     command = 'gfal-copy {0} {1} {2} > /dev/null 2>&1'.format(gridname, name, timeoutstr)
-    
     os.system(command)
 
     corrupted = True
@@ -106,9 +107,12 @@ def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
                 if t.name.endswith(".dat"):
                     tfile.extract(t,path="../")
                     corrupted = False
-                elif t.name.endswith(".log") and "node_info" not in t.name:
+                elif t.name.endswith(".log") and "node_info" not in t.name and "copies." not in t.name:
                     tfile.extract(t,"../log/")
                     corrupted = False
+                elif t.name.endswith(".log") and "copies." in t.name:
+                    tfile.extract(t,"../log/copylog/")
+                    os.rename(f"../log/copylog/{t.name}", f"../log/copylog/copies_{seed}.log")
                 elif t.name.endswith(".log") and "node_info"in t.name:
                     tfile.extract(t,"../log/node_info/")
                     os.rename("../log/node_info/"+t.name,
@@ -176,14 +180,12 @@ def pull_folder(foldername, folders=[], pool=None, rtag=None):
     dirname = ":".join([ls_protocol, dirname.split(":", 1)[-1]])
 
     cmd = ['gfal-ls', dirname , "-l", "-t", "9999999" ]
-
     cmd_output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
     output = []
     for x in str(cmd_output).split("\n"):
         line = x.split()
         if len(line)>0:
             output.append(line)
-
     currentdir = os.getcwd()
 
     output_files = set([x[-1] for x in output if x[0][0] != "d"])
@@ -255,7 +257,7 @@ def pull_folder(foldername, folders=[], pool=None, rtag=None):
 def do_finalise(*args, **kwargs):
     tags = set()
     for i in rc.dictCard:
-        tags = tags.union(set(rc.dictCard[i]))
+        tags.add(rc.dictCard[i])
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     os.chdir(dname)
