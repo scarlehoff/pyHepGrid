@@ -1,6 +1,7 @@
 from collections import Counter
 import datetime
 import os
+import importlib
 import pyHepGrid.src.dbapi
 from pyHepGrid.src.header import logger
 import pyHepGrid.src.utilities as util
@@ -10,7 +11,13 @@ import multiprocessing as mp
 import sys
 
 counter = None
-_mode = pyHepGrid.src.runmodes.mode_selector[header.runmode.upper()]
+
+if header.runmode.upper() in pyHepGrid.src.runmodes.mode_selector:
+    _mode = pyHepGrid.src.runmodes.mode_selector[header.runmode.upper()]
+else:
+    package, module = header.runmode.rsplit('.', 1)
+    _mode = getattr(importlib.import_module(package), module)
+    logger.info(f"Overriding run mode to {_mode}")
 
 
 def init_counter(args):
@@ -630,7 +637,9 @@ class Backend(_mode):
         base_string = self._make_base_argstring(runcard, runtag)
         production_dict = {'Production': None,
                         'seed': seed }
-
+        # Pass the current production arguments to the program interface
+        # and let it add new arguments
+        production_dict = super().include_production_arguments(production_dict)
         production_str = self._format_args(production_dict)
         return base_string + production_str
 
@@ -645,6 +654,10 @@ class Backend(_mode):
             warmup_dict['port'] = port
             warmup_dict['Host'] = header.server_host
             warmup_dict['Sockets'] = None
+
+        # Pass the current warmup arguments to the program interface
+        # and let it add new arguments
+        warmup_dict = super().include_warmup_arguments(warmup_dict)
 
         warmup_str = self._format_args(warmup_dict)
         return base_string + warmup_str

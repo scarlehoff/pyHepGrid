@@ -15,7 +15,7 @@ except KeyError as e:
 MAX_COPY_TRIES = 15
 GFAL_TIMEOUT = 300
 PROTOCOLS = ["xroot", "gsiftp", "dav"]
-LHE_FILE="SherpaLHE_fixed.lhe"
+LHE_FILE="SherpaLHE.lhe"
 LOG_FILE="output.log"
 COPY_LOG = "copies.log"
 
@@ -444,7 +444,6 @@ def run_sherpa(args):
     if int(args.events) > 0:
         command += " -e {0} ".format(args.events)
     status = run_command(command)
-    status += run_command("SherpaLHEF SherpaLHE.lhe {0}".format(LHE_FILE))
     # TODO run:
     #   unweighter (maybe)
     return status

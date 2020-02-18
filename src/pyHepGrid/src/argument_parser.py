@@ -116,8 +116,11 @@ if caller_script in ("main.py", "pyHepGrid"):
 
 
     arguments = parser.parse_args()
-    arguments.runcard = os.path.relpath(arguments.runcard, os.getcwd())
-    runcard = arguments.runcard
+    if arguments.runcard:
+        arguments.runcard = os.path.relpath(arguments.runcard, os.getcwd())
+        runcard = arguments.runcard
+    else:
+        runcard = None
     override_ce_base = arguments.most_free_cores
     additional_arguments = {}
 

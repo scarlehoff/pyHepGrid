@@ -13,7 +13,8 @@ header_mappings = {"jmartinez":"pyHepGrid.headers.juan_header",
                    "jwhitehead":"pyHepGrid.headers.james_header",
                    "mheil":"HEJ.hej_header",
                    "black":"HEJ.hej_header",
-                   "andersen":"HEJ.hej_header"
+                   "andersen":"HEJ.hej_header",
+                   "cruzmartinez":"pyHepGrid.headers.cruzmartinez",
                    }
 
 if "phyip3" in socket.gethostname(): # Hack to get different headers for batch and grid w/ same username
@@ -49,6 +50,8 @@ diractable = "diracjobs"
 slurmtable = "slurmjobs"
 slurmprodtable = "slurmjobs"
 dbfields   = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder', 'status', 'jobtype', 'iseed', 'sub_status', "queue", "no_runs"]
+slurm_template = "slurm_template.sh"
+slurm_template_production = "slurm_template_production.sh"
 
 # DW This should be a hard link so socketed runs can be sent from other folders/locations
 socket_exe = "{0}/socket_server.py".format(os.path.dirname(os.path.realpath(__file__))) # Eventually will need to point towards where the sockets are
@@ -207,10 +210,10 @@ DIRACSCRIPTDEFAULT = [
 if DIRAC_BANNED_SITES is not None:
     DIRACSCRIPTDEFAULT.append("BannedSites = {{\"{0}\"}};".format("\",\"".join(DIRAC_BANNED_SITES)))
 
-_slurmfilename = os.path.join(os.path.dirname(os.path.realpath(__file__)),"slurm_template.sh")
+_slurmfilename = os.path.join(os.path.dirname(os.path.realpath(__file__)),slurm_template)
 with open(_slurmfilename) as template_file:
     SLURMSCRIPTDEFAULT = template_file.read()
 
-_slurmfilename_production = os.path.join(os.path.dirname(os.path.realpath(__file__)),"slurm_template_production.sh")
+_slurmfilename_production = os.path.join(os.path.dirname(os.path.realpath(__file__)),slurm_template_production)
 with open(_slurmfilename_production) as template_file:
     SLURMSCRIPTDEFAULT_PRODUCTION = template_file.read()

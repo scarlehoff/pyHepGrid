@@ -73,9 +73,8 @@ def management_routine(backend, args):
         if args.filter_jobs_by_status is not None:
             pyHepGrid.src.header.logger.warn("Applying job status filter. Please ensure you have run stats directly before this command to update job statuses.")
             pyHepGrid.src.header.logger.info("Job status filter: {0}".format(" ".join(args.filter_jobs_by_status)))
-            args.filter_jobs_by_status = ["c"+i.upper() for i in args.filter_jobs_by_status]
             try:
-                status_codes = [getattr(backend, i) for i in args.filter_jobs_by_status]
+                status_codes = [getattr(backend, "c"+i.upper() ) for i in args.filter_jobs_by_status]
             except AttributeError as e:
                 pyHepGrid.src.header.logger.critical("Invalid job status given: {0}".format(str(e).split(" ")[-1][2:-1]))
             statuses = backend._get_old_status(db_id)

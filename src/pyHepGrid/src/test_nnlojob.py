@@ -12,7 +12,8 @@ def setup():
     except FileNotFoundError as e:
         pass
     os.mkdir(header.sandbox_dir)
-    shutil.copyfile(header.runfile, os.path.join(header.sandbox_dir,header.runfile))
+    shutil.copyfile(header.runfile, os.path.join(header.sandbox_dir,
+        os.path.basename(header.runfile)))
     os.chdir(header.sandbox_dir)
     path_to_orig = os.path.relpath(oldpath,os.getcwd())
     header.dbname = os.path.join(path_to_orig,header.dbname)
@@ -44,5 +45,6 @@ def run_test(args, runcard):
 
     for r in rncards:
         nnlojob_args = testWrapper(r, dCards).replace("\"","").split()
-        util.spCall(["chmod","+x",header.runfile])
-        util.spCall(["./{0}".format(header.runfile)] + nnlojob_args)
+        runfile = os.path.basename(header.runfile)
+        util.spCall(["chmod","+x",runfile])
+        util.spCall(["./{0}".format(runfile)] + nnlojob_args)

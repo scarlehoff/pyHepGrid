@@ -86,8 +86,8 @@ def unique_filename():
     except:
         return unique_name
 
-def checkIfThere(dirPath, file):
-    if not os.path.exists(os.path.join(dirPath, file)):
+def checkIfThere(dirPath, filename = ''):
+    if not os.path.exists(os.path.join(dirPath, filename)):
         return False
     else:
         return True

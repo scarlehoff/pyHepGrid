@@ -671,3 +671,85 @@ class Sherpa(HEJ):
 
     _RUNFILE_END = ".dat"
     _WARMUP_FILES = ["Process", "Results.db"]
+
+class N3FIT(ProgramInterface):
+    """ Program interface for the n3fit fitting code """
+
+    def init_warmup(self, *args, **kwargs):
+        raise NotImplementedError("N3FIT does not implement any warmup mode")
+
+    def replica_folder(self, local_folder, runname = None):
+        if runname is None:
+            rep_folder = f"{local_folder}/nnfit"
+        else:
+            rep_folder = f"{local_folder}/{runname}/nnfit"
+        return rep_folder
+
+    def init_production(self, provided_warmup = None, continue_warmup = False, local = True):
+        """ Initialize production (single mode) """
+        if not local:
+            raise NotImplementedError("N3FIT is only implemented for local running")
+        _, expanded_card = util.expandCard()
+        for runcard, runfolder in expanded_card.items():
+            running_folder = self.get_local_dir_name(runcard, runfolder)
+            stdout_folder = f"{running_folder}/stdout"
+            # Create the folder in which the stuff will be run, and its stdout
+            if not util.checkIfThere(stdout_folder):
+                os.makedirs(stdout_folder)
+            # Now create also the replica folder to avoid future clashes
+            rep_folder = self.replica_folder(running_folder, runname = runfolder)
+            if not util.checkIfThere(rep_folder):
+                os.makedirs(rep_folder)
+            # And finally copy the runcard
+            from pyHepGrid.src.header import runcardDir
+            runcard_path = f"{runcardDir}/{runcard}"
+            from shutil import copy
+            copy(runcard_path, running_folder)
+        logger.info("run initialized")
+
+    def check_for_existing_output_local(self, runcard, runfolder, base_rep, n_reps):
+        """ Checks whether the given runcard already has the selected
+        replicas done.
+        For now miserably fail if that's indeed the case
+        """
+        from pyHepGrid.src.header import local_run_directory
+        running_folder = self.get_local_dir_name(runcard, runfolder)
+        replica_folder = self.replica_folder(running_folder, runname = runfolder)
+        # Use fitinfo file as a proxy for the replica
+        fitinfo = replica_folder + "/replica_{0}/" + runfolder + ".fitinfo"
+        for i in range(base_rep, base_rep + n_reps):
+            if util.checkIfThere(fitinfo.format(i)):
+                # Fail without piety
+                raise ValueError("There are replicas in the range considered")
+
+    def include_arguments(self, current_arguments):
+        """ Capture the arguments for slurm and a few custom ones """
+        # Get the number of threads
+        number_threads = current_arguments.get('threads', 1)
+        # Check whether the runcard is Global or DIS
+        runcard = current_arguments['runcard']
+        runfolder = current_arguments['runcard_dir']
+        runcard_path = f"{runfolder}/{runcard}"
+        import yaml
+        with open(runcard_path, 'r') as f:
+            rdata = yaml.load(f)
+        experiments = rdata['experiments']
+        mem_req = {
+                'dis' : 4e3,
+                'had' : 16e3
+                }
+        mode = 'dis'
+        # If any of the datasets include 'LHC' 'ATLAS' or 'CMS' move to hadronic mode
+        for exp in experiments:
+            datasets = exp['datasets']
+            for d in datasets:
+                dname = d['dataset']
+                if 'ATLAS' in dname or 'LHC' in dname or 'CMS' in dname:
+                    logger.info("Hadronic datasets found, setting hadronic mode")
+                    mode = 'had'
+                    break
+            if mode == 'had':
+                break
+        memory_per_thread = int(mem_req[mode]/number_threads)
+        current_arguments['memsize'] = memory_per_thread
+        return current_arguments
