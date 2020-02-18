@@ -14,7 +14,7 @@ except KeyError as e:
 
 MAX_COPY_TRIES = 15
 GFAL_TIMEOUT = 300
-PROTOCOLS = ["xroot", "gsiftp", "srm"]
+PROTOCOLS = ["xroot", "gsiftp", "dav"]
 LOG_FILE="output.log"
 COPY_LOG = "copies.log"
 
@@ -283,14 +283,14 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
             else:
                 print_flush(e)
         if protocol == "gsiftp": # try again when gsiftp is down
-            return get_hash(filepath, args, algo=algo, protocol="srm")
+            return get_hash(filepath, args, algo=algo, protocol="dav")
         return None
     return hash
 
 
 def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     protoc = args.gfaldir.split(":")[0]
-    # gfal-sum only returns expected hash for subset of protocols (gsiftp, srm).  Hardcode gsiftp for now.
+    # gfal-sum only returns expected hash for subset of protocols (gsiftp, srm, dav, davs).  Hardcode gsiftp for now.
     infile_hash = get_hash(infile, args, protocol="gsiftp")
 
     print_flush("Copying {0} to {1}".format(infile, outfile))

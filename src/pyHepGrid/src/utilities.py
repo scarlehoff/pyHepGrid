@@ -16,7 +16,7 @@ from uuid import uuid4
 #
 
 MAX_COPY_TRIES = 5
-PROTOCOLS = ["xroot", "gsiftp", "srm"]
+PROTOCOLS = ["xroot", "gsiftp", "dav"]
 
 ###################################
 def pythonVersion():
