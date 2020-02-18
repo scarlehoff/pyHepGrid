@@ -381,7 +381,7 @@ all seems to work ok with python 2.6.6
 
 ## 11. MONITORING WEBSITES
 ### DURHAM ARC MONITORING WEBSITE
-https://grafana.dur.scotgrid.ac.uk/dashboard/db/uki-scotgrid-durham-grid-queues?refresh=15s&orgId=1
+https://grafana.mon.dur.scotgrid.ac.uk/d/LNUGi5yWk/general-grid
 
 ### DIRAC MONITORING WEBSITE
 https://dirac.gridpp.ac.uk:8443/DIRAC/
