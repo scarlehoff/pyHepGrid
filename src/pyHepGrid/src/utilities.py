@@ -292,7 +292,7 @@ class GridWrap:
             count +=1
         return success
 
-    def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False):
+    def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False, force=False):
         gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
         destpath = "file://$PWD/{0}".format(whereTo)
         success = gfal_copy(gridname, destpath)
@@ -327,15 +327,21 @@ class GridWrap:
         return spCall(self.delete_dir + [directory])
 
 
-def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES):
+def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES, force=False):
     header.logger.info("Copying {0} to {1}".format(infile, outfile))
     protoc = header.gfaldir.split(":")[0]
+    if force:
+        forcestr = "-f"
+    else:
+        forcestr = ""
     for i in range(maxrange):
         for protocol in PROTOCOLS: # cycle through available protocols until one works.
             infile_tmp = infile.replace(protoc, protocol)
             outfile_tmp = outfile.replace(protoc, protocol)
             header.logger.debug("Attempting Protocol {0}".format(protocol))
-            cmd = "gfal-copy {0} {1}".format(infile_tmp, outfile_tmp)
+            cmd = "gfal-copy {f} {inf} {outf}".format(f=forcestr,
+                                                      inf=infile_tmp,
+                                                      outf=outfile_tmp)
             retval = spCall([cmd], shell=True)
             if retval == 0:
                 return retval
