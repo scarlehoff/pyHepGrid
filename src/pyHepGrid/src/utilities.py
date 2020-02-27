@@ -303,7 +303,7 @@ class GridWrap:
         cmd = ["gfal-rm", gridname]
         return spCall(cmd)
 
-    def delete_dir(self, dirname, whereFrom):
+    def delete_directory(self, dirname, whereFrom):
         if not dirname.endswith("/"):
             dirname += "/"
         gridname = os.path.join(header.gfaldir, whereFrom, dirname)
@@ -325,13 +325,6 @@ class GridWrap:
         cmd = ["gfal-ls", gridname]
         output = getOutputCall(cmd, include_return_code=False)
         return output
-
-    def delete_directory(self, directory):
-        # Get contents and delete them one by one (there is no recursive for this that I could find)
-        files = self.get_dir_contents(directory).split()
-        for filename in files:
-            self.delete(filename, directory)
-        return spCall(self.delete_dir + [directory])
 
 
 def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES, force=False):

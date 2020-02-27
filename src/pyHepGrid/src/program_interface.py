@@ -86,7 +86,7 @@ class ProgramInterface(object):
         checkname = self.warmup_sockets_dirname(r, rname)
         if self.gridw.checkForThis(checkname, grid_warmup_dir):
             self._press_yes_to_continue("Prior socketed warmup backups {1} exist at gfal:~/{0}.  Do you want to remove the directory and its contents?".format(grid_warmup_dir, checkname))
-            self.gridw.delete_dir(checkname, grid_warmup_dir)
+            self.gridw.delete_directory(checkname, grid_warmup_dir)
         else:
             logger.info("None found.")
 
