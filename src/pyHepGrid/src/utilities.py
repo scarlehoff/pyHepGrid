@@ -295,7 +295,7 @@ class GridWrap:
     def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False, force=False):
         gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
         destpath = "file://$PWD/{0}".format(whereTo)
-        success = gfal_copy(gridname, destpath)
+        success = gfal_copy(gridname, destpath, force=force)
         return os.path.isfile(whereTo)
 
     def delete(self, tarfile, whereFrom):
