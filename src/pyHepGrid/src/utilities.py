@@ -303,6 +303,13 @@ class GridWrap:
         cmd = ["gfal-rm", gridname]
         return spCall(cmd)
 
+    def delete_dir(self, dirname, whereFrom):
+        if not dirname.endswith("/"):
+            dirname += "/"
+        gridname = os.path.join(header.gfaldir, whereFrom, dirname)
+        cmd = ["gfal-rm", gridname, "--recursive"]
+        return spCall(cmd)        
+
     def checkForThis(self, filename, where):
         gridname = os.path.join(header.gfaldir, where)
         cmd = ["gfal-ls", gridname]

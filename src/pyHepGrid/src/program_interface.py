@@ -52,6 +52,10 @@ class ProgramInterface(object):
         out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
         return out
 
+    def warmup_sockets_dirname(self, runcard, rname):
+        out = "output{0}-warm-{1}".format(runcard, rname)
+        return out
+
     def output_name(self, runcard, rname, seed):
         out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
         return out
@@ -70,11 +74,21 @@ class ProgramInterface(object):
         self.overwrite_warmup = True
 
     def check_for_existing_warmup(self, r, rname):
-        logger.debug("Checking whether this runcard is already at lfn:warmup")
+        logger.info("Checking for prior warmup output which this warmup run will overwrite...")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, grid_warmup_dir):
-            self._press_yes_to_continue("File {1} already exists at lfn:{0}, do you want to remove it?".format(grid_warmup_dir, checkname))
+            self._press_yes_to_continue("Prior warmup output file {1} already exists at gfal:~/{0}.  Do you want to remove it?".format(grid_warmup_dir, checkname))
             self.gridw.delete(checkname, grid_warmup_dir)
+        else:
+            logger.info("None found.")
+
+        logger.info("Checking for prior socket warmup backups which this warmup run will overwrite...")
+        checkname = self.warmup_sockets_dirname(r, rname)
+        if self.gridw.checkForThis(checkname, grid_warmup_dir):
+            self._press_yes_to_continue("Prior socketed warmup backups {1} exist at gfal:~/{0}.  Do you want to remove the directory and its contents?".format(grid_warmup_dir, checkname))
+            self.gridw.delete_dir(checkname, grid_warmup_dir)
+        else:
+            logger.info("None found.")
 
     def init_local_warmups(self, provided_warmup=None, continue_warmup=False,
                            local=False):
