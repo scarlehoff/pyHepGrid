@@ -292,16 +292,23 @@ class GridWrap:
             count +=1
         return success
 
-    def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False):
+    def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False, force=False):
         gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
         destpath = "file://$PWD/{0}".format(whereTo)
-        success = gfal_copy(gridname, destpath)
+        success = gfal_copy(gridname, destpath, force=force)
         return os.path.isfile(whereTo)
 
     def delete(self, tarfile, whereFrom):
         gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
         cmd = ["gfal-rm", gridname]
         return spCall(cmd)
+
+    def delete_directory(self, dirname, whereFrom):
+        if not dirname.endswith("/"):
+            dirname += "/"
+        gridname = os.path.join(header.gfaldir, whereFrom, dirname)
+        cmd = ["gfal-rm", gridname, "--recursive"]
+        return spCall(cmd)        
 
     def checkForThis(self, filename, where):
         gridname = os.path.join(header.gfaldir, where)
@@ -319,23 +326,22 @@ class GridWrap:
         output = getOutputCall(cmd, include_return_code=False)
         return output
 
-    def delete_directory(self, directory):
-        # Get contents and delete them one by one (there is no recursive for this that I could find)
-        files = self.get_dir_contents(directory).split()
-        for filename in files:
-            self.delete(filename, directory)
-        return spCall(self.delete_dir + [directory])
 
-
-def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES):
+def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES, force=False):
     header.logger.info("Copying {0} to {1}".format(infile, outfile))
     protoc = header.gfaldir.split(":")[0]
+    if force:
+        forcestr = "-f"
+    else:
+        forcestr = ""
     for i in range(maxrange):
         for protocol in PROTOCOLS: # cycle through available protocols until one works.
             infile_tmp = infile.replace(protoc, protocol)
             outfile_tmp = outfile.replace(protoc, protocol)
             header.logger.debug("Attempting Protocol {0}".format(protocol))
-            cmd = "gfal-copy {0} {1}".format(infile_tmp, outfile_tmp)
+            cmd = "gfal-copy {f} {inf} {outf}".format(f=forcestr,
+                                                      inf=infile_tmp,
+                                                      outf=outfile_tmp)
             retval = spCall([cmd], shell=True)
             if retval == 0:
                 return retval

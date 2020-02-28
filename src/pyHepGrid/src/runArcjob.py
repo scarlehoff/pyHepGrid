@@ -162,7 +162,7 @@ class RunArc(Backend):
                     jobid, retcode = (self._run_XRSL(xrslfile, test=test, include_retcode=True))
                     if int(retcode) != 0:
                         jobid = "None"
-                        jobids.append(jobid)
+                    jobids.append(jobid)
             except Exception as interrupt:
                 print("\n")
                 header.logger.error("Submission error encountered. Inserting all successful submissions to database")

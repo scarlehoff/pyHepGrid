@@ -103,7 +103,7 @@ def setup_sockets(args, nnlojet_command, bring_status):
         print_flush("Timeout'd by socket server")
         sys.exit(0)
     print_flush("Connected to socket server")
-    nnlojet_command += " -port {0} -host {1} {2}".format(port, host,  socket_config)
+    nnlojet_command += " -port {0} -host {1} {2}".format(port, host, socket_config)
     return nnlojet_command, socket_config
 
 
@@ -332,14 +332,19 @@ def store_output(args, socketed=False, socket_config=""):
         os.system("ls")
 
     if socketed:
-        status_copy = copy_to_grid(local_out, output_file, args, maxrange=1)
-        # copy a second time with socket # as a backup to a subfolder in case of main failure
-        # Don't want to retry main copy as multiple instances will be trying to copy there at the same time
-        socket_no = socket_config.split()[-1].strip()
-        subfolder = os.path.splitext(os.path.basename(output_file))[0].replace(".tar", "")
-        backup_name = warmup_name_ns(args.runcard, args.runname, socket_no)
-        backup_fullpath = os.path.join(args.warmup_folder, subfolder, backup_name)
-        status_copy += copy_to_grid(local_out, backup_fullpath, args)
+        # Avoid conflicting simultaneous copies and resulting error messages:
+        # - first node attempts copy to warmup_name(...);
+        # - other nodes attempt copy to warmup_name_ns(...) as backup.
+        # Still results in large redundancy.
+
+        socket_no = int(socket_config.split()[-1].strip())
+        if socket_no == 1:
+            status_copy = copy_to_grid(local_out, output_file, args)
+        else:
+            subfolder = os.path.splitext(os.path.basename(output_file))[0].replace(".tar", "")
+            backup_name = warmup_name_ns(args.runcard, args.runname, socket_no)
+            backup_fullpath = os.path.join(args.warmup_folder, subfolder, backup_name)
+            status_copy = copy_to_grid(local_out, backup_fullpath, args)
     else:
         status_copy = copy_to_grid(local_out, output_file, args)
     return status_copy, tar_status
