@@ -271,7 +271,7 @@ class GridWrap:
     # Defaults
     # Need to refactor post dpm gfal
 
-    def send(self, tarfile, whereTo, shell=False):
+    def send(self, tarfile, whereTo):
         gridfile = os.path.join(header.gfaldir, whereTo, tarfile)
         localfile = "file://{0}/{1}".format(os.getcwd(),tarfile)
         count = 1
@@ -292,7 +292,7 @@ class GridWrap:
             count +=1
         return success
 
-    def bring(self, tarfile, whereFrom, whereTo, shell=False, timeout = None, suppress_errors=False, force=False):
+    def bring(self, tarfile, whereFrom, whereTo, force=False):
         gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
         destpath = "file://$PWD/{0}".format(whereTo)
         success = gfal_copy(gridname, destpath, force=force)
@@ -308,7 +308,7 @@ class GridWrap:
             dirname += "/"
         gridname = os.path.join(header.gfaldir, whereFrom, dirname)
         cmd = ["gfal-rm", gridname, "--recursive"]
-        return spCall(cmd)        
+        return spCall(cmd)
 
     def checkForThis(self, filename, where):
         gridname = os.path.join(header.gfaldir, where)
