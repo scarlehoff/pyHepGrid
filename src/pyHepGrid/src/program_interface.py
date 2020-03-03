@@ -70,6 +70,9 @@ class ProgramInterface(object):
     def get_stdout_dir_name(self, run_dir):
         return os.path.join(run_dir, "stdout/")
 
+    def _exe_fullpath(self, executable_src_dir, executable_exe):
+        return os.path.join(executable_src_dir, executable_exe)
+
     def set_overwrite_warmup(self):
         self.overwrite_warmup = True
 
@@ -128,6 +131,11 @@ class ProgramInterface(object):
             logger.info("Output check complete")
 
     # helper functions
+    def _file_exists(self, file, logger):
+        import os.path
+        if not os.path.exists(file):
+            logger.critical("File {0} required for initialisation.".format(file))
+
     def _press_yes_to_continue(self, msg, error=None, fallback=None):
         """ Press y to continue
             or n to exit the program

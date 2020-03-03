@@ -8,6 +8,10 @@ from pyHepGrid.src.program_interface import ProgramInterface
 
 
 class ProgramClass(ProgramInterface):
+
+    # list of 'warmup' (resource) files to include in tarball
+    _WARMUP_FILES = []
+
     def init_production(self, provided_warmup=None, continue_warmup=False,
                         local=False):
         """
@@ -31,6 +35,21 @@ class ProgramClass(ProgramInterface):
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
+
+        # if provided warmup is a relative path, ensure we have the full path
+        # before we change to the tmp directory
+        if provided_warmup:
+            if provided_warmup[0] != "/":
+                provided_warmup = "{0}/{1}".format(origdir, provided_warmup)
+
+        if provided_warmup:
+            warmup_base = provided_warmup
+        elif header.provided_warmup_dir:
+            warmup_base = header.provided_warmup_dir
+        else:
+            # print("Retrieving warmup file from grid")
+            # warmupFiles = self._bring_warmup_files(i, dCards[i], shell=True)
+            logger.critical("Retrieving warmup file from grid: Not implemented")
 
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))

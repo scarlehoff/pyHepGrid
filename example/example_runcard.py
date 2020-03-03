@@ -4,12 +4,12 @@ dictCard = {
             "dummy_folder" : "config",
 }
 # for the example, keep everything in 'example' folder.
-exampleDir = os.path.realpath(__file__)
+exampleDir = os.path.dirname(os.path.realpath(__file__)) + "/"
 
 ## Run Variables
 
 # run-specific variables (overrides header.py variables)
-runcardDir = os.path.realpath(__file__)
+runcardDir = exampleDir
 # number of concurrent jobs to submit
 producRun = 5
 # ARC jobname to appear in squeue output
