@@ -26,26 +26,32 @@ class ProgramInterface(object):
 
     # Checks for the grid storage system
     def get_grid_from_stdout(self, jobid, jobinfo):
-        logger.critical("{0} not implemented".format(sys._getframe().f_code.co_name))
+        raise NotImplementedError("{0} not implemented for {1}".format(
+                sys._getframe().f_code.co_name,self.__class__.__bases__[0]))
 
     # Initialisation functions
     def init_single_local_warmup(self, runcard, tag, continue_warmup=False,
                                  provided_warmup=False):
-        logger.critical("{0} not implemented".format(sys._getframe().f_code.co_name))
+        raise NotImplementedError("{0} not implemented for {1}".format(
+                sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
 
     def init_single_local_production(self, runcard, tag, provided_warmup=False):
-        logger.critical("{0} not implemented".format(sys._getframe().f_code.co_name))
+        raise NotImplementedError("{0} not implemented for {1}".format(
+                sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
 
     def init_warmup(self, provided_warmup=None,
                     continue_warmup=False, local=False):
-        logger.critical("{0} not implemented".format(sys._getframe().f_code.co_name))
+        raise NotImplementedError("{0} not implemented for {1}".format(
+                sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
 
     def init_production(self, provided_warmup=None,
                         continue_warmup=False, local=False):
-        logger.critical("{0} not implemented".format(sys._getframe().f_code.co_name))
+        raise NotImplementedError("{0} not implemented for {1}".format(
+                sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
 
     def check_warmup_files(self, db_id, rcard, resubmit=False):
-        logger.critical("{0} not implemented".format(sys._getframe().f_code.co_name))
+        raise NotImplementedError("{0} not implemented for {1}".format(
+                sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
 
     # A couple of defaults
     def warmup_name(self, runcard, rname):
