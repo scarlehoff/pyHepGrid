@@ -58,8 +58,8 @@ def parse_arguments():
     default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())
     parser = OptionParser(usage = "usage: %prog [options]")
 
-    parser.add_option("-r","--runcard", help = "Runcard to be run")
-    parser.add_option("-j", "--runname", help = "Runname")
+    parser.add_option("-r","--runcard", help = "Run setup name")
+    parser.add_option("-j", "--runname", help = "Config to run")
 
     # Run options
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
@@ -436,9 +436,9 @@ def end_program(status, debug_level):
 def run_example(args):
     status = os.system("chmod +x {0}".format(args.executable))
     if status == 0:
-        status += run_command("{executable} {runcard} {outfile}".format(
+        status += run_command("./{executable} {runcard} {outfile}".format(
                             executable=args.executable,
-                            runcard=args.runcard,
+                            runcard=args.runname,
                             outfile="{0}.out".format(args.seed)))
     return status
 
@@ -520,7 +520,7 @@ if __name__ == "__main__":
     print_file("download time:    "+str(download_time-setup_time))
     print_file("total runtime:    "+str(run_time-download_time))
 
-    status += tar_this(local_out, "*.log *.out {rc}".format(rc=args.runcard))
+    status += tar_this(local_out, "*.log *.out {rc}".format(rc=args.runname))
 
     status += copy_to_grid(local_out, output_file, args)
 
