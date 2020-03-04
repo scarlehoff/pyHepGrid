@@ -63,7 +63,7 @@ def parse_arguments():
 
     # Run options
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
-    parser.add_option("-e", "--executable", help = "Executable to be run", default = "HEJ")
+    parser.add_option("-e", "--executable", help = "Executable to be run", default = "default_executable")
     parser.add_option("-d", "--debug", help = "Debug level", default="0")
     parser.add_option("--copy_log", help = "Write copy log file.", action="store_true", default=False)
     parser.add_option("-s", "--seed", help = "Run seed", default="1")
@@ -165,14 +165,7 @@ def set_environment(lhapdf_dir):
     os.environ['LHAPDF_DATA_PATH'] = lhapdf_dir
     return 0
 
-
-gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
-lcg_cp = "lcg-cp"
-lcg_cr = "lcg-cr --vo pheno -l"
-lfn    = "lfn:"
-
 # Define some utilites
-
 
 def run_command(command):
     "catch output in LOG_FILE"

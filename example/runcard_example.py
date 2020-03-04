@@ -1,6 +1,7 @@
 import os
 print("Sourcing runcard")
 dictCard = {
+            # folder       :   config file / runcard
             "dummy_folder" : "config",
 }
 # for the example, keep everything in 'example' folder.
@@ -39,7 +40,7 @@ runfile    = exampleDir+"/simplerun.py"
 
 # path to your executable: src_dir/exe
 executable_src_dir = exampleDir
-executable_exe = "executbale_example.sh"
+executable_exe = "executable_example.sh"
 
 grid_input_dir  = "example/input"
 grid_output_dir = "example/output"
