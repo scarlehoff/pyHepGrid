@@ -72,7 +72,7 @@ class NNLOJET(ProgramInterface):
         return success
 
 
-    def _bring_warmup_files(self, runcard, rname, shell=False,
+    def _bring_warmup_files(self, runcard, rname,
                             check_only=False, multichannel=False):
         """ Download the warmup file for a run to local directory
         extracts Vegas grid and log file and returns a list with their names
@@ -84,16 +84,12 @@ class NNLOJET(ProgramInterface):
 
         from pyHepGrid.src.header import grid_warmup_dir, logger
         gridFiles = []
-        suppress_errors = False
-        if check_only:
-            suppress_errors = True
         ## First bring the warmup .tar.gz
         outnm = self.warmup_name(runcard, rname)
         logger.debug("Warmup GFAL name: {0}".format(outnm))
         tmpnm = "tmp.tar.gz"
         logger.debug("local tmp tar name: {0}".format(tmpnm))
-        success = self.gridw.bring(outnm, grid_warmup_dir, tmpnm, shell = shell,
-                                   suppress_errors=suppress_errors)
+        success = self.gridw.bring(outnm, grid_warmup_dir, tmpnm)
 
         success ==  self.__check_pulled_warmup(success, tmpnm, warmup_extensions)
 
@@ -108,7 +104,7 @@ class NNLOJET(ProgramInterface):
                     backup_files = backups.split()
                     for idx, backup in enumerate(backup_files):
                         logger.info("Attempting backup {1} [{0}]".format(idx+1, backup))
-                        success = self.gridw.bring(backup, backup_dir, tmpnm, shell = shell, force=True)
+                        success = self.gridw.bring(backup, backup_dir, tmpnm, force=True)
 
                         success ==  self.__check_pulled_warmup(success, tmpnm, warmup_extensions)
                         if success:
@@ -295,7 +291,7 @@ class NNLOJET(ProgramInterface):
                 checkname = self.warmup_name(i, rname)
                 if self.gridw.checkForThis(checkname, header.grid_warmup_dir):
                     logger.info("Warmup found in GFAL:{0}!".format(header.grid_warmup_dir))
-                    warmup_files = self._bring_warmup_files(i, rname, shell=True,
+                    warmup_files = self._bring_warmup_files(i, rname,
                                                             multichannel=multichannel)
                     files += warmup_files
                     logger.info("Warmup files found: {0}".format(" ".join(i for i in warmup_files)))
@@ -305,7 +301,7 @@ class NNLOJET(ProgramInterface):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
                 self.gridw.delete(tarfile, header.grid_input_dir)
             logger.info("Sending {0} to gfal {1}/".format(tarfile, header.grid_input_dir))
-            self.gridw.send(tarfile, header.grid_input_dir, shell=True)
+            self.gridw.send(tarfile, header.grid_input_dir)
             if not local:
                 for j in warmupFiles:
                     os.remove(j)
@@ -404,13 +400,13 @@ class NNLOJET(ProgramInterface):
                 warmupFiles = [match]
             else:
                 logger.info("Retrieving warmup file from grid")
-                warmupFiles = self._bring_warmup_files(i, rname, shell=True, multichannel=multichannel)
+                warmupFiles = self._bring_warmup_files(i, rname, multichannel=multichannel)
             self.tarw.tarFiles(files + [i] + warmupFiles, tarfile)
             if self.gridw.checkForThis(tarfile, header.grid_input_dir):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
                 self.gridw.delete(tarfile, header.grid_input_dir)
             logger.info("Sending {0} to GFAL {1}/".format(tarfile, header.grid_input_dir))
-            self.gridw.send(tarfile, header.grid_input_dir, shell=True)
+            self.gridw.send(tarfile, header.grid_input_dir)
             if local:
                 util.spCall(["rm", i, tarfile])
             else:
@@ -453,7 +449,7 @@ class NNLOJET(ProgramInterface):
                                 potmatches.append([path,name])
                     if matchname_case.split(".")[-1] in warmup_extensions:
                         potmatches = [p for p in potmatches if p[1].lower().endswith("."+matchname_case.split(".")[-1].lower())]
-                
+
                     potmatches = sorted(potmatches, key=lambda x: SequenceMatcher(None, x[1], matchname_case).ratio())
                     potmatches = [ os.path.join(p[0],p[1]) for p in potmatches ]
 
@@ -522,8 +518,7 @@ class NNLOJET(ProgramInterface):
         runcard = runcard_info["runcard"]
         rname = runcard_info["runfolder"]
         try:
-            warmup_files = self._bring_warmup_files(runcard, rname,
-                                                    check_only=True, shell=True)
+            warmup_files = self._bring_warmup_files(runcard, rname, check_only=True)
             if warmup_files == []:
                 status = "\033[93mMissing\033[0m"
             else:
@@ -618,7 +613,7 @@ class HEJ(ProgramInterface):
             warmup_base = header.provided_warmup_dir
         else:
             # print("Retrieving warmup file from grid")
-            # warmupFiles = self._bring_warmup_files(i, dCards[i], shell=True)
+            # warmupFiles = self._bring_warmup_files(i, dCards[i])
             logger.critical("Retrieving warmup file from grid: Not implemented")
         # setup LHAPDF
         if header.use_cvmfs_lhapdf:
@@ -661,7 +656,7 @@ class HEJ(ProgramInterface):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
                 self.gridw.delete(tarfile, grid_input_dir)
             logger.info("Sending {0} to {1}".format(tarfile, grid_input_dir))
-            self.gridw.send(tarfile, grid_input_dir, shell=True)
+            self.gridw.send(tarfile, grid_input_dir)
 
         # clean up afterwards
         os.chdir(origdir)
