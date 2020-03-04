@@ -552,14 +552,6 @@ class HEJ(ProgramInterface):
     _RUNFILE_END = ".yml"
     _WARMUP_FILES = ["Process", "Run.dat", "Results.db"]
 
-    def _exe_fullpath(self, executable_src_dir, executable_exe):
-        return os.path.join(executable_src_dir, executable_exe)
-
-    def _file_exists(self, file, logger):
-        import os.path
-        if not os.path.exists(file):
-            logger.critical("File {0} required for initialisation.".format(file))
-
     def warmup_name(self, runcard, rname):
         out = "{0}+{1}.tar.gz".format(runcard, rname)
         return out
