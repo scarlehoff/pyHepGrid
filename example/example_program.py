@@ -30,7 +30,7 @@ class ProgramClass(ProgramInterface):
             self.init_local_production(provided_warmup=provided_warmup)
             return
 
-        rncards, dCards = util.expandCard()
+        runFolders, dCards = util.expandCard()
         path_to_exe_full = self._exe_fullpath(executable_src_dir, executable_exe)
 
         origdir = os.path.abspath(os.getcwd())
@@ -58,25 +58,25 @@ class ProgramClass(ProgramInterface):
         #     logger.critical("Could not find executable at {0}".format(path_to_exe_full))
         # copy(path_to_exe_full, os.getcwd())
         # files = [executable_exe]
-        for idx, i in enumerate(rncards):
+        for idx, runName in enumerate(runFolders):
             local = False
 
-            tarfile = i + "+" + dCards[i] + ".tar.gz"
-            base_folder = i.split("-")[0] + "/"
-            logger.info("Initialising {0} to {1} [{2}/{3}]".format(i, tarfile, idx + 1, len(rncards)))
+            tarfile = runName + "+" + dCards[runName] + ".tar.gz"
+            base_folder = runName.split("-")[0] + "/"
+            logger.info("Initialising {0} to {1} [{2}/{3}]".format(runName, tarfile, idx + 1, len(runFolders)))
 
             # runcards
-            run_dir = runFol + base_folder
-            runFiles = dCards[i].split("+")
+            run_dir = os.path.join(runFol,base_folder)
+            runFiles = dCards[runName].split("+")
             print(runFiles)
             for f in runFiles:
-                f = run_dir + f
+                f = os.path.join(run_dir,f)
                 self._file_exists(f, logger)
                 os.system("cp -r " + f + " " + tmpdir)
 
             # warmup files
             for f in self._WARMUP_FILES:
-                f = warmup_base + base_folder + f
+                f = os.path.join(warmup_base,base_folder,f)
                 self._file_exists(f, logger)
                 os.system("cp -r " + f + " " + tmpdir)
 

@@ -628,16 +628,16 @@ class HEJ(ProgramInterface):
             logger.info("Initialising {0} to {1} [{2}/{3}]".format(i, tarfile, idx+1, len(rncards)))
 
             # runcards
-            run_dir = runFol + base_folder
+            run_dir = os.path.join(runFol,base_folder)
             runFiles = [dCards[i]+self._RUNFILE_END]
             for f in runFiles:
-                f=run_dir+f
+                f = os.path.join(run_dir,f)
                 self._file_exists(f,logger)
                 os.system("cp -r "+f+" "+tmpdir)
 
             # warmup files
             for f in self._WARMUP_FILES:
-                f=warmup_base+base_folder+f
+                f = os.path.join(warmup_base,base_folder,f)
                 self._file_exists(f,logger)
                 os.system("cp -r "+f+" "+tmpdir)
 

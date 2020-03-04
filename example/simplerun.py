@@ -493,6 +493,7 @@ if __name__ == "__main__":
     # Download executable:
     if not args.executable_location:
         # if path to executable not provided, exit with error.
+        print_flush("Executable location not specified")
         end_program(status=1, debug_level=99999)
 
     status = download_program(args.executable_location, debug_level)

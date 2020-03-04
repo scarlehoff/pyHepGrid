@@ -4,7 +4,7 @@ dictCard = {
             "dummy_folder" : "config",
 }
 # for the example, keep everything in 'example' folder.
-exampleDir = os.path.dirname(os.path.realpath(__file__)) + "/"
+exampleDir = os.path.dirname(os.path.realpath(__file__))
 
 ## Run Variables
 
@@ -52,4 +52,3 @@ dirac_name = "your.username"
 
 # custom post-run local download (and processing) script
 # finalisation_script = "path/to/your/script.py"
-
