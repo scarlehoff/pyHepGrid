@@ -31,14 +31,15 @@ baseSeed = dbapi.get_next_seed(dbname=dbname) + 1
 
 ## Project-level Variables
 
-# Your custom subclass of ProgramInterface class in program_interface.py
-runmode = "example_program.ProgramClass"
+# Your custom subclass of `ProgramInterface` class in "src/pyHepGrid/src/program_interface.py"
+# import should be relative to this runcard
+runmode = "backend_example.ExampleProgram"
 
 runfile    = exampleDir+"/simplerun.py"
 
 # path to your executable: src_dir/exe
 executable_src_dir = exampleDir
-executable_exe = "examplerun.sh"
+executable_exe = "executbale_example.sh"
 
 grid_input_dir  = "example/input"
 grid_output_dir = "example/output"
@@ -52,7 +53,7 @@ grid_executable = "example/executable.tar.gz"
 ## User Variables
 
 # your DIRAC username: only needed if you run on DIRAC.
-dirac_name = "your.username"
+# dirac_name = "your.username"
 
 # custom post-run local download (and processing) script
 # finalisation_script = "path/to/your/script.py"

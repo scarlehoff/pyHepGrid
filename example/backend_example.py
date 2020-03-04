@@ -7,7 +7,7 @@ from pyHepGrid.src.header import logger
 from pyHepGrid.src.program_interface import ProgramInterface
 
 
-class ProgramClass(ProgramInterface):
+class ExampleProgram(ProgramInterface):
 
     # list of 'warmup' (resource) files to include in tarball
     _WARMUP_FILES = []
