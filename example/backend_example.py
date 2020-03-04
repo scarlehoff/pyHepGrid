@@ -8,6 +8,10 @@ from pyHepGrid.src.program_interface import ProgramInterface
 
 
 class ExampleProgram(ProgramInterface):
+    # For this simple example we only implement the "Production" mode for
+    # Arc/Dirac, if you need anything else please implement the corresponding
+    # function(s) from the `ProgramInterface`
+
 
     # list of 'warmup' (resource) files to include in tarball
     _WARMUP_FILES = []
