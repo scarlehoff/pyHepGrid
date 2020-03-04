@@ -47,28 +47,39 @@ class ProgramClass(ProgramInterface):
         elif header.provided_warmup_dir:
             warmup_base = header.provided_warmup_dir
         else:
-            # print("Retrieving warmup file from grid")
-            # warmupFiles = self._bring_warmup_files(i, dCards[i], shell=True)
             logger.critical("Retrieving warmup file from grid: Not implemented")
 
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
-        # if not os.path.isfile(path_to_exe_full):
-        #     logger.critical("Could not find executable at {0}".format(path_to_exe_full))
-        # copy(path_to_exe_full, os.getcwd())
-        # files = [executable_exe]
+        if not os.path.isfile(path_to_exe_full):
+            logger.critical("Could not find executable at {0}".format(path_to_exe_full))
+        else:
+            tar_name = os.path.basename(header.grid_executable)
+            grid_exe_dir = os.path.dirname(header.grid_executable)
+            exe_name = header.executable_exe
+            os.system("cp -r " + path_to_exe_full + " " + exe_name)
+            upload_exe = True
+            if self.gridw.checkForThis(tar_name, grid_exe_dir):
+                if not self._press_yes_to_continue("Old executable found. Do you want to remove it?", fallback=1):
+                    logger.info("Removing old version of {0} from Grid Storage".format(tar_name))
+                    self.gridw.delete(tar_name, grid_exe_dir)
+                else:
+                    upload_exe = False
+            if upload_exe:
+                self.tarw.tarFiles([exe_name], tar_name)
+                self.gridw.send(tar_name, grid_exe_dir)
+
         for idx, runName in enumerate(runFolders):
             local = False
 
             tarfile = runName + "+" + dCards[runName] + ".tar.gz"
-            base_folder = runName.split("-")[0] + "/"
+            base_folder = runName.split("-")[0]
             logger.info("Initialising {0} to {1} [{2}/{3}]".format(runName, tarfile, idx + 1, len(runFolders)))
 
             # runcards
             run_dir = os.path.join(runFol,base_folder)
             runFiles = dCards[runName].split("+")
-            print(runFiles)
             for f in runFiles:
                 f = os.path.join(run_dir,f)
                 self._file_exists(f, logger)
@@ -87,8 +98,13 @@ class ProgramClass(ProgramInterface):
                 logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
                 self.gridw.delete(tarfile, grid_input_dir)
             logger.info("Sending {0} to {1}".format(tarfile, grid_input_dir))
-            self.gridw.send(tarfile, grid_input_dir, shell=True)
+            self.gridw.send(tarfile, grid_input_dir)
 
         # clean up afterwards
         os.chdir(origdir)
         os.system("rm -r " + tmpdir)
+
+    def include_arguments(self, argument_dict):
+        # Pass custom argument to run script
+        argument_dict["executable_location"] = header.grid_executable
+        return argument_dict

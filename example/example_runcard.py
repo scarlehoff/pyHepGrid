@@ -34,6 +34,8 @@ baseSeed = dbapi.get_next_seed(dbname=dbname) + 1
 # Your custom subclass of ProgramInterface class in program_interface.py
 runmode = "example_program.ProgramClass"
 
+runfile    = exampleDir+"/simplerun.py"
+
 # path to your executable: src_dir/exe
 executable_src_dir = exampleDir
 executable_exe = "examplerun.sh"
@@ -44,6 +46,8 @@ grid_output_dir = "example/output"
 
 provided_warmup_dir = runcardDir
 
+# Path to executable on gfal (non-standard/custom setting)
+grid_executable = "example/executable.tar.gz"
 
 ## User Variables
 

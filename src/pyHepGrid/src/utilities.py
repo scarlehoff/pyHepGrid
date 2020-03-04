@@ -3,13 +3,14 @@ import collections
 from datetime import datetime
 import json
 import os
-import pyHepGrid.src.header as header
 import re
 import shutil
 import subprocess
 from sys import version_info
 import tarfile
 from uuid import uuid4
+
+import pyHepGrid.src.header as header
 #
 # Misc. Utilities
 #
@@ -210,7 +211,9 @@ class TarWrap:
         with tarfile.open(output_name, "w:gz") as output_tar:
             output_tar.add(inputDir)
 
-    def tarFiles(self, inputList, output_name):
+    def tarFiles(self, inputList: list, output_name):
+        if not isinstance(inputList, list):
+            raise TypeError("List of files to tar should be a \"list\".")
         with tarfile.open(output_name, "w:gz") as output_tar:
             for infile in inputList:
                 output_tar.add(infile)

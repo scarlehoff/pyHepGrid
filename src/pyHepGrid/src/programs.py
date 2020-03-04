@@ -588,7 +588,6 @@ class HEJ(ProgramInterface):
             return
 
         rncards, dCards = util.expandCard()
-        path_to_exe_full = self._exe_fullpath(executable_src_dir, executable_exe)
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
@@ -616,15 +615,11 @@ class HEJ(ProgramInterface):
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
-        # if not os.path.isfile(path_to_exe_full):
-        #     logger.critical("Could not find executable at {0}".format(path_to_exe_full))
-        # copy(path_to_exe_full, os.getcwd())
-        # files = [executable_exe]
         for idx, i in enumerate(rncards):
             local = False
 
             tarfile = i +"+"+ dCards[i] + ".tar.gz"
-            base_folder = i.split("-")[0] + "/"
+            base_folder = i.split("-")[0]
             logger.info("Initialising {0} to {1} [{2}/{3}]".format(i, tarfile, idx+1, len(rncards)))
 
             # runcards
