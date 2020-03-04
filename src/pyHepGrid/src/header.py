@@ -1,11 +1,13 @@
-import pyHepGrid.headers.template_header as template
 import sys, os
 from types import ModuleType
 import getpass
 import importlib
+import socket
+
+import pyHepGrid.headers.template_header as template
 import pyHepGrid.extras.get_site_info as get_site_info
 import pyHepGrid.src.logger as logmod
-import socket
+
 header_mappings = {"jmartinez":"pyHepGrid.headers.juan_header",
                    "dwalker":"pyHepGrid.headers.duncan_header",
                    "qpsv27":"pyHepGrid.headers.duncan_hamilton_header",
@@ -178,27 +180,24 @@ if arcbase is None and os.path.basename(os.path.realpath(sys.argv[0]))=="main.py
 # if nothing is used, the end system will decide what the maximum is
 #
 
+# Default Arc Warmup
 ARCSCRIPTDEFAULT = ["&",
-        "(executable   = \"{0}\")".format(runfile),
+        "(executable   = \"a{0}\")".format(os.path.basename(runfile)),
         "(outputFiles  = (\"outfile.out\" \"\") )",
         "(stdout       = \"stdout\")",
         "(stderr       = \"stderr\")",
         "(gmlog        = \"testjob.log\")",
         "(memory       = \"100\")",
+        "(inputFiles   = (\"a{file}\" \"{path}\"))".format(file=os.path.basename(runfile),path=runfile),
         ]
 
-ARCSCRIPTDEFAULTPRODUCTION = ["&",
-        "(executable   = \"{0}\")".format(runfile),
-        "(outputFiles  = (\"outfile.out\" \"\") )",
-        "(stdout       = \"stdout\")",
-        "(stderr       = \"stderr\")",
-        "(gmlog        = \"testjob.log\")",
-        "(memory       = \"100\")",
-        ]
+# Default Arc Production
+ARCSCRIPTDEFAULTPRODUCTION = ARCSCRIPTDEFAULT
 
+# Default Dirac
 DIRACSCRIPTDEFAULT = [
     "JobName    = \"{0}\";".format(jobName),
-    "Executable = \"{0}\";".format(runfile),
+    "Executable = \"{0}\";".format(os.path.basename(runfile)),
     "StdOutput  = \"StdOut\";",
     "StdError   = \"StdErr\";",
     "InputSandbox  = {{\"{0}\"}};".format(runfile),
