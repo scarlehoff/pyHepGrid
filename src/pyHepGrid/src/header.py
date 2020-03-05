@@ -182,13 +182,13 @@ if arcbase is None and os.path.basename(os.path.realpath(sys.argv[0]))=="main.py
 
 # Default Arc Warmup
 ARCSCRIPTDEFAULT = ["&",
-        "(executable   = \"a{0}\")".format(os.path.basename(runfile)),
+        "(executable   = \"{0}\")".format(os.path.basename(runfile)),
         "(outputFiles  = (\"outfile.out\" \"\") )",
         "(stdout       = \"stdout\")",
         "(stderr       = \"stderr\")",
         "(gmlog        = \"testjob.log\")",
         "(memory       = \"100\")",
-        "(inputFiles   = (\"a{file}\" \"{path}\"))".format(file=os.path.basename(runfile),path=runfile),
+        "(inputFiles   = (\"{file}\" \"{path}\"))".format(file=os.path.basename(runfile),path=runfile),
         ]
 
 # Default Arc Production

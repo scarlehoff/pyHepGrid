@@ -420,7 +420,7 @@ def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
     os.system("gcc --version >> {0}".format(outputfile))
     os.system("python --version >> {0}".format(outputfile))
-    os.system("python3 --version >> {0}".format(outputfile))
+    os.system("(python3 --version || echo no python3) >> {0}".format(outputfile))
     os.system("gfal-copy --version >> {0}".format(outputfile))
     os.system("cat {0}".format(outputfile)) ## print to log
 
