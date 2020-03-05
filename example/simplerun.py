@@ -15,7 +15,6 @@ except KeyError as e:
 MAX_COPY_TRIES = 15
 GFAL_TIMEOUT = 300
 PROTOCOLS = ["xroot", "gsiftp", "dav"]
-LHE_FILE="SherpaLHE.lhe"
 LOG_FILE="output.log"
 COPY_LOG = "copies.log"
 
@@ -40,12 +39,6 @@ def output_name(runcard, rname, seed):
     out = "output-" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 
-def yoda_name(seed):
-    return "HEJ_{0}".format(seed)
-
-def config_name(rname):
-    return "{0}.yml".format(rname)
-
 #### Override os.system with custom version that auto sets debug level on failure
 # Abusive...
 syscall = os.system
@@ -65,16 +58,20 @@ def parse_arguments():
     default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())
     parser = OptionParser(usage = "usage: %prog [options]")
 
-    parser.add_option("-r","--runcard", help = "Runcard to be run")
-    parser.add_option("-j", "--runname", help = "Runname")
+    parser.add_option("-r","--runcard", help = "Run setup name")
+    parser.add_option("-j", "--runname", help = "Config to run")
 
     # Run options
     parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
-    parser.add_option("-e", "--executable", help = "Executable to be run", default = "HEJ")
+    parser.add_option("-e", "--executable", help = "Executable to be run", default = "default_executable")
     parser.add_option("-d", "--debug", help = "Debug level", default="0")
     parser.add_option("--copy_log", help = "Write copy log file.", action="store_true", default=False)
     parser.add_option("-s", "--seed", help = "Run seed", default="1")
     parser.add_option("-E", "--events", help = "Number of events", default="-1")
+
+    # example of a custom simplerun.py variable
+    parser.add_option("--executable_location", default="",
+                      help="GFAL path to executable tarball, relative to gfaldir.")
 
     # Grid configuration options
     parser.add_option("-i", "--input_folder",
@@ -168,14 +165,7 @@ def set_environment(lhapdf_dir):
     os.environ['LHAPDF_DATA_PATH'] = lhapdf_dir
     return 0
 
-
-gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
-lcg_cp = "lcg-cp"
-lcg_cr = "lcg-cr --vo pheno -l"
-lfn    = "lfn:"
-
 # Define some utilites
-
 
 def run_command(command):
     "catch output in LOG_FILE"
@@ -400,9 +390,6 @@ def download_runcard(input_folder, runcard, runname, debug_level):
     print_flush("downloading "+input_folder+"/"+tar)
     stat = copy_from_grid(input_folder+"/"+tar, tar, args)
     stat += untar_file(tar, debug_level)
-
-    # TODO download:
-    #   Scale setters
     return os.system("rm {0}".format(tar))+stat
 
 def download_rivet(rivet_folder, debug_level):
@@ -439,50 +426,35 @@ def end_program(status, debug_level):
 
 ########################## Actual run commands ##########################
 
-def run_sherpa(args):
-    command = "Sherpa RSEED:={0} ANALYSIS_OUTPUT=Sherpa_{0}".format(args.seed)
-    if int(args.events) > 0:
-        command += " -e {0} ".format(args.events)
-    status = run_command(command)
-    # TODO run:
-    #   unweighter (maybe)
-    return status
-
-def run_HEJFOG(args):
-    print_flush("TODO HEJFOG not implemented yet")
-    command = "HEJ/bin/HEJFOG"
-    os.system("chmod +x {0}".format(command))
-    # TODO:
-    #   parse runcard
-    #   run HEJ-FOG (with chmod)
-    return 1
-
-def run_HEJ(args):
-    config = config_name(args.runname)
-    seed = args.seed
-    status = os.system(
-        'sed -i -e "s/seed:.1/seed: {0}/g" {1}'.format(seed, config) )
-    status += os.system(
-        'sed -i -e "s/output:.HEJ/output: {0}/g" {1}'.format(
-            yoda_name(seed), config) )
-    status += os.system("chmod +x {0}".format(args.executable))
+def run_example(args):
+    status = os.system("chmod +x {0}".format(args.executable))
     if status == 0:
-        status += run_command(
-            "{0} {1} {2}".format(args.executable, config, LHE_FILE) )
+        status += run_command("./{executable} {runcard} {outfile}".format(
+                            executable=args.executable,
+                            runcard=args.runname,
+                            outfile="{0}.out".format(args.seed)))
     return status
+
 
 ########################## main ##########################
 
 if __name__ == "__main__":
 
+    # HEJ environment not needed for example;
+    # provides template for environment variable sourcing.
     if sys.argv[0] and not "ENVSET" in os.environ:
         print_flush("Setting environment")
         os.environ["ENVSET"]="ENVSET"
         env = "/cvmfs/pheno.egi.eu/HEJ/HEJ_env.sh"
+
+        # os.execvp *replaces* the current process with that initiated:
+        # in this case, a new python instance running simplerun.py, but
+        # with the specified BASH environment sourced.
         os.execvp("bash", ["bash", "-c",
             "source " + env + " && exec python " + sys.argv[0] + ' "${@}"',
             "--"] + sys.argv[1:])
 
+    # Generic startup:
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
@@ -490,10 +462,10 @@ if __name__ == "__main__":
     debug_level = int(args.debug)
     copy_log = args.copy_log
 
-    lhapdf_local = ""
-    if args.use_cvmfs_lhapdf:
-        lhapdf_local = args.cvmfs_lhapdf_location
-    set_environment(lhapdf_local)
+    # lhapdf_local = ""
+    # if args.use_cvmfs_lhapdf:
+    #     lhapdf_local = args.cvmfs_lhapdf_location
+    # set_environment(lhapdf_local)
 
     if debug_level > -1:
         # Architecture info
@@ -510,19 +482,15 @@ if __name__ == "__main__":
         os.system("voms-proxy-info --all")
 
     setup_time = datetime.datetime.now()
-    # Download components
-    # we are abusing "args.warmup_folder", which is otherwise not needed for HEJ
-    status = download_program(args.warmup_folder, debug_level)
 
-    os.system("chmod +x {0}".format(args.executable))
+    # Download executable:
+    if not args.executable_location:
+        # if path to executable not provided, exit with error.
+        print_flush("Executable location not specified")
+        end_program(status=1, debug_level=99999)
 
-    if debug_level > 8:
-        os.system("ldd {0}".format(args.executable))
-
+    status = download_program(args.executable_location, debug_level)
     status += download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
-
-    if args.use_custom_rivet:
-        status += download_rivet(args.rivet_folder, debug_level)
 
     if status != 0:
         print_flush("download failed")
@@ -530,34 +498,22 @@ if __name__ == "__main__":
 
     download_time = datetime.datetime.now()
 
-    if "HEJFOG" in args.runname:
-        status += run_HEJFOG(args)
-    else:
-        status += run_sherpa(args)
+    status += run_example(args)
 
     if status != 0:
-        print_flush("FOG failed")
+        print_flush("Executable failed")
         end_program(status, debug_level)
 
-    fixedorder_time = datetime.datetime.now()
-
-    status += run_HEJ(args)
-    if status != 0:
-        print_flush("HEJ failed")
-        end_program(status, debug_level)
-
-    HEJ_time = datetime.datetime.now()
+    run_time = datetime.datetime.now()
 
     local_out = output_name(args.runcard, args.runname, args.seed)
     output_file = args.output_folder + "/" + local_out
 
     print_file("setup time:       "+str(setup_time-start_time))
     print_file("download time:    "+str(download_time-setup_time))
-    print_file("fixed order time: "+str(fixedorder_time-download_time))
-    print_file("HEJ time:         "+str(HEJ_time-fixedorder_time))
-    print_file("total runtime:    "+str(HEJ_time-download_time))
+    print_file("total runtime:    "+str(run_time-download_time))
 
-    status += tar_this(local_out, "*.yoda *.log *.yml Run.dat")
+    status += tar_this(local_out, "*.log *.out {rc}".format(rc=args.runname))
 
     status += copy_to_grid(local_out, output_file, args)
 
@@ -568,7 +524,7 @@ if __name__ == "__main__":
         print_flush("Copied over to grid storage!")
 
     tarcopy_time = datetime.datetime.now()
-    print_file("tar&copy time:    "+str(tarcopy_time-HEJ_time))
+    print_file("tar&copy time:    "+str(tarcopy_time-run_time))
     print_file("total time:       "+str(tarcopy_time-setup_time))
 
     end_program(status, debug_level)

@@ -552,14 +552,6 @@ class HEJ(ProgramInterface):
     _RUNFILE_END = ".yml"
     _WARMUP_FILES = ["Process", "Run.dat", "Results.db"]
 
-    def _exe_fullpath(self, executable_src_dir, executable_exe):
-        return os.path.join(executable_src_dir, executable_exe)
-
-    def _file_exists(self, file, logger):
-        import os.path
-        if not os.path.exists(file):
-            logger.critical("File {0} required for initialisation.".format(file))
-
     def warmup_name(self, runcard, rname):
         out = "{0}+{1}.tar.gz".format(runcard, rname)
         return out
@@ -596,7 +588,6 @@ class HEJ(ProgramInterface):
             return
 
         rncards, dCards = util.expandCard()
-        path_to_exe_full = self._exe_fullpath(executable_src_dir, executable_exe)
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
@@ -624,28 +615,24 @@ class HEJ(ProgramInterface):
         os.chdir(tmpdir)
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
-        # if not os.path.isfile(path_to_exe_full):
-        #     logger.critical("Could not find executable at {0}".format(path_to_exe_full))
-        # copy(path_to_exe_full, os.getcwd())
-        # files = [executable_exe]
         for idx, i in enumerate(rncards):
             local = False
 
             tarfile = i +"+"+ dCards[i] + ".tar.gz"
-            base_folder = i.split("-")[0] + "/"
+            base_folder = i.split("-")[0]
             logger.info("Initialising {0} to {1} [{2}/{3}]".format(i, tarfile, idx+1, len(rncards)))
 
             # runcards
-            run_dir = runFol + base_folder
+            run_dir = os.path.join(runFol,base_folder)
             runFiles = [dCards[i]+self._RUNFILE_END]
             for f in runFiles:
-                f=run_dir+f
+                f = os.path.join(run_dir,f)
                 self._file_exists(f,logger)
                 os.system("cp -r "+f+" "+tmpdir)
 
             # warmup files
             for f in self._WARMUP_FILES:
-                f=warmup_base+base_folder+f
+                f = os.path.join(warmup_base,base_folder,f)
                 self._file_exists(f,logger)
                 os.system("cp -r "+f+" "+tmpdir)
 

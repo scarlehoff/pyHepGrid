@@ -11,5 +11,6 @@ runjobs
 finalise
 *.pyc
 test_sandbox/*
+*/test_sandbox/*
 build/*
 dist/*

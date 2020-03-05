@@ -1,4 +1,5 @@
 import subprocess as sp
+from getpass import getuser
 
 ##################################################
 #                Helper Functions                #
@@ -30,8 +31,8 @@ grid_warmup_dir = "warmup"
 runfile    = "nnlorun.py"
 
 use_gfal = False
-gfaldir = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/dwalker/"
-cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/v6r22p6/Linux_x86_64_glibc-2.17/bin/" # set to None for environment gfal
+gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}/".format(getuser())
+cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/pro/Linux_x86_64_glibc-2.17/bin/"
 
 # TMUX config
 tmux_location= "tmux"
