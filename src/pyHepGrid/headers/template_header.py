@@ -71,11 +71,11 @@ default_runfolder = None
 warmup_base_dir = "/WarmupsRunGrids"
 production_base_dir = "/ResultsRunGrids"
 
-short_stats = False
+short_stats = True
 
 # ARC parameters
-ce_base = "base_computing_element.ac.uk"
-ce_test = "test_computing_element.ac.uk"
+ce_base = "ce2.dur.scotgrid.ac.uk"
+ce_test = "ce-test.dur.scotgrid.ac.uk"
 ce_listfile = "computing_elements.txt"
 arcbase = "/path/to/ARC/base/.arc/jobs.dat" # arc database
 arc_submit_threads = 10 # Threads for use in arc submission. Raising this too high /may/ result
