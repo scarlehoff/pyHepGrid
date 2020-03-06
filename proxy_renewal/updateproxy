@@ -1,3 +1,0 @@
-source ~/.bashrc
-arcproxy -S pheno -N -c validityPeriod=24h -c vomsACvalidityPeriod=24h
-proxyinfo

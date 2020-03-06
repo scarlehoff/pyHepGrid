@@ -20,8 +20,8 @@
 
 ## INITIAL SETUP
 
-Follow certificate setup as per Jeppe's tutorial @
-https://www.ippp.dur.ac.uk/~andersen/GridTutorial/gridtutorial.html
+Follow certificate setup as per [Jeppe's
+tutorial](https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html)
 
 Make a careful note of passwords (can get confusing). Don't use passwords used
 elsewhere in case you want to automate proxy renewal (like me and Juan)
@@ -151,17 +151,32 @@ arcsync -c ce1.dur.scotgrid.ac.uk
 arcrenew -a
 ```
 
+There is also a method to create a long proxy for one week describes in
+[Jeppe's grid tutorial](https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html).
+
 ### Automated (set & forget)
 
-I've added some proxy automation scripts to the repo in
-`gangaless_resources/proxy_renewal/` To get these working, simply add your
-certificate password in to `.script2.exp` (plain text I know, so it's bad ... at
-least hide it from the world with `chmod 400`) Make sure `.proxy.sh` is set up
-for your user (directories should point to your gangaless resources)
+In [`proxy_renewal/`](../proxy_renewal/) are some simple scripts to
+automatically update your proxy. To get these working, create a file
+```bash
+nano ~/.password/arcpw
+chmod 400 ~/.password/arcpw
+```
+and enter your password. Make sure you that your `~/.password/arcpw` is hidden,
+i.e. `ls -l ~/.password/arcpw` should show `-rw-------` otherwise other users
+could read your password. Afterwards add
+```bash
+export CERT_PW_LOCATION=~/.password/arcpw
+export PATH=/path/to/pyHepGrid/proxy_renewal:${PATH}
+```
+to your `~/.bashrc` and source it. Afterwards you should be able to run
+`newproxy` to get a new 24 hour proxy without typing your password, you can
+check the proxy time with `arcproxy -I`.
 
-Run by hand to check (shouldn't need your password) Then set up `.proxy.sh` to
-run as a [cron job](https://crontab.guru/) at least once per day (I suggest 2x
-in case of failure)
+`syncjobs` will update the certificate on all your queuing and running jobs. Set
+it to run as a [cron job](https://crontab.guru/) at least once per day (even
+better suggest twice, in case of failure), such that no jobs will ever be
+stopped do to an invalid certificate.
 
 ## GRID SCRIPTS USAGE
 

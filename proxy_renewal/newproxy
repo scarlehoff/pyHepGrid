@@ -1,0 +1,4 @@
+#!/bin/bash
+source ~/.bashrc # assuming CERT_PW_LOCATION is set in ~/.bashrc
+arcproxy -S pheno -c validityPeriod=24h -c vomsACvalidityPeriod=24h -p key=file:${CERT_PW_LOCATION}
+arcproxy -I
