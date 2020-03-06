@@ -75,17 +75,15 @@ def parse_arguments():
 
     # Grid configuration options
     parser.add_option("-i", "--input_folder",
-                      help = "lfn input folder, relative to gfaldir",
+                      help = "gfal input folder, relative to gfaldir",
                       default = "input")
     parser.add_option("-w", "--warmup_folder",
-                      help = "lfn file (not just the folder!) where HEJ is stored, relative to gfaldir",
+                      help = "gfal file (not just the folder!) where HEJ is stored, relative to gfaldir",
                       default = "warmup")
     parser.add_option("-o", "--output_folder",
-                      help = "lfn output folder, relative to gfaldir",
+                      help = "gfal output folder, relative to gfaldir",
                       default = "output")
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
-    parser.add_option("--use_gfal", default="False",
-                      help = "Use gfal for file transfer and storage rather than the LFN")
     parser.add_option("--gfal_location", default="",
                       help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
@@ -116,12 +114,6 @@ def parse_arguments():
 
     (options, positional) = parser.parse_args()
 
-
-    if options.use_gfal.lower() == "true":
-        options.use_gfal = True
-        print("Using GFAL for storage")
-    else:
-        options.use_gfal = False
 
     if not options.runcard or not options.runname:
         parser.error("Runcard and runname must be provided")

@@ -610,7 +610,6 @@ class Backend(_mode):
             'lhapdf_local' : header.lhapdf_loc,
             'debug' : str(header.debug_level),
             'gfaldir': header.gfaldir,
-            'use_gfal' : str(header.use_gfal),
             'events' : str(header.events)
         }
         if header.use_cvmfs_lhapdf:

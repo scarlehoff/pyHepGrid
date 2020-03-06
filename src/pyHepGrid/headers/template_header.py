@@ -30,7 +30,6 @@ grid_output_dir = "output"
 grid_warmup_dir = "warmup"
 runfile    = "nnlorun.py"
 
-use_gfal = False
 gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}/".format(getuser())
 cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/pro/Linux_x86_64_glibc-2.17/bin/"
 

@@ -130,7 +130,10 @@ class ProgramInterface(object):
                 filename = self.output_name(r, rname, seed)
                 if filename in files:
                     if first:
-                        self._press_yes_to_continue("It seems this runcard already has at least one file at lfn:output with a seed you are trying to submit (looked for {}). Do you want to remove it/them?".format(checkname))
+                        self._press_yes_to_continue(
+                            "It seems this runcard already has at least one file at gfal"+\
+                            ":output with a seed you are trying to submit (looked for {}).".format(checkname))+\
+                            "\nDo you want to remove it/them?"
                         logger.warning("Runcard {0} has at least one file at output".format(r))
                         first = False
                     self.gridw.delete(filename, grid_output_dir)
