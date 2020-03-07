@@ -55,22 +55,22 @@ class ProgramInterface(object):
 
     # A couple of defaults
     def warmup_name(self, runcard, rname):
-        out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
+        out = F"output{runcard}-warm-{rname}.tar.gz"
         return out
 
     def warmup_sockets_dirname(self, runcard, rname):
-        out = "output{0}-warm-{1}".format(runcard, rname)
+        out = F"output{runcard}-warm-{rname}"
         return out
 
     def output_name(self, runcard, rname, seed):
-        out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
+        out = F"output{runcard}-{rname}-{seed}.tar.gz"
         return out
 
     def get_local_dir_name(self, runcard, tag):
         # Suitable defaults
-        runname = "{0}-{1}".format(runcard, tag)
+        runname = F"{runcard}-{tag}"
         dir_name = os.path.join(local_run_directory, runname)
-        logger.info("Run directory: {0}".format(dir_name))
+        logger.info(F"Run directory: {dir_name}")
         return dir_name
 
     def get_stdout_dir_name(self, run_dir):
@@ -86,7 +86,8 @@ class ProgramInterface(object):
         logger.info("Checking for prior warmup output which this warmup run will overwrite...")
         checkname = self.warmup_name(r, rname)
         if self.gridw.checkForThis(checkname, grid_warmup_dir):
-            self._press_yes_to_continue("Prior warmup output file {1} already exists at gfal:~/{0}.  Do you want to remove it?".format(grid_warmup_dir, checkname))
+            self._press_yes_to_continue(F"Prior warmup output file {checkname} already exists at gfal:~/{grid_warmup_dir}."
+                                        "Do you want to remove it?")
             self.gridw.delete(checkname, grid_warmup_dir)
         else:
             logger.info("None found.")
@@ -94,7 +95,8 @@ class ProgramInterface(object):
         logger.info("Checking for prior socket warmup backups which this warmup run will overwrite...")
         checkname = self.warmup_sockets_dirname(r, rname)
         if self.gridw.checkForThis(checkname, grid_warmup_dir):
-            self._press_yes_to_continue("Prior socketed warmup backups {1} exist at gfal:~/{0}.  Do you want to remove the directory and its contents?".format(grid_warmup_dir, checkname))
+            self._press_yes_to_continue(F"Prior socketed warmup backups {checkname} exist at gfal:~/{grid_warmup_dir}.  "
+                                        "Do you want to remove the directory and its contents?")
             self.gridw.delete_directory(checkname, grid_warmup_dir)
         else:
             logger.info("None found.")
@@ -120,7 +122,7 @@ class ProgramInterface(object):
         It relies on the base seed from the src.header file to remove the output
         """
         from pyHepGrid.src.header import grid_output_dir, logger
-        logger.debug("Checking whether runcard {0} has output for seeds that you are trying to submit...".format(rname))
+        logger.debug(F"Checking whether runcard {rname} has output for seeds that you are trying to submit...")
         checkname = r + "-" + rname
         files = self.gridw.get_dir_contents(grid_output_dir)
         first = True
@@ -131,10 +133,10 @@ class ProgramInterface(object):
                 if filename in files:
                     if first:
                         self._press_yes_to_continue(
-                            "It seems this runcard already has at least one file at gfal"+\
-                            ":output with a seed you are trying to submit (looked for {}).".format(checkname))+\
-                            "\nDo you want to remove it/them?"
-                        logger.warning("Runcard {0} has at least one file at output".format(r))
+                            "This runcard already has at least one output file at gfal:output "
+                            F"with a seed you are trying to submit (looked for '{checkname}')."
+                            "\nIf you continue, it will be removed now.")
+                        logger.warning(F"Runcard {r} has at least one file at output")
                         first = False
                     self.gridw.delete(filename, grid_output_dir)
             logger.info("Output check complete")
@@ -146,14 +148,15 @@ class ProgramInterface(object):
             logger.critical("File {0} required for initialisation.".format(file))
 
     def _press_yes_to_continue(self, msg, error=None, fallback=None):
-        """ Press y to continue
-            or n to exit the program
+        """
+        Press 'y' to continue, or 'n' to either return "fallback" (if set),
+        or exit the program with error code -1 (if not).
         """
         if self.assume_yes:
             return 0
         if msg is not None:
             print(msg)
-        yn = input("Do you want to continue (y/n) ").lower()
+        yn = input("Do you want to continue? (y/n) ").lower()
         if yn.startswith("y"):
             return 0
         else:
