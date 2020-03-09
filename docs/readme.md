@@ -3,30 +3,30 @@
 (Incomplete, and always will be. The grid is a mysterious thing...)
 
 # CONTENTS
-1)  [INITIAL SETUP](#1-initial-setup)
-2)  [NNLOJET SETUP](#2-for-nnlojet-developers-nnlojet-setup)
-3)  [GFAL SETUP](#3-gfal-setup)
-4)  [GRID SCRIPTS SETUP (GANGALESS)](#4-grid-scripts-setup)
-5)  [PROXY SETUP](#5-proxy-setup)
-6)  [GRID SCRIPTS USAGE](#6-grid-scripts-usage)
-7)  [FINALISING RESULTS](#7-finalising-results)
-8)  [NORMAL WORKFLOW](#8-normal-workflow)
-9)  [RUNCARD.PY FILES DETAILS](#9-runcardpy-files-details)
-10) [DIRAC](#10-dirac)
-11) [MONITORING WEBSITES](#11-monitoring-websites)
-12) [GRID STORAGE MANAGEMENT](#12-grid-storage-management)
-13) [DISTRIBUTED WARMUP](#13-distributed-warmup)
-14) [HAMILTON QUEUES](#14-hamilton-queues)
+1)  [INITIAL SETUP](#initial-setup)
+2)  [NNLOJET SETUP](#for-nnlojet-developers-nnlojet-setup)
+3)  [GFAL SETUP](#gfal-setup)
+4)  [GRID SCRIPTS SETUP (GANGALESS)](#grid-scripts-setup)
+5)  [PROXY SETUP](#proxy-setup)
+6)  [GRID SCRIPTS USAGE](#grid-scripts-usage)
+7)  [FINALISING RESULTS](#finalising-results)
+8)  [NORMAL WORKFLOW](#normal-workflow)
+9)  [RUNCARD.PY FILES DETAILS](#runcardpy-files-details)
+10) [DIRAC](#dirac)
+11) [MONITORING WEBSITES](#monitoring-websites)
+12) [GRID STORAGE MANAGEMENT](#grid-storage-management)
+13) [DISTRIBUTED WARMUP](#distributed-warmup)
+14) [HAMILTON QUEUES](#hamilton-queues)
 
-## 1. INITIAL SETUP
+## INITIAL SETUP
 
-Follow certificate setup as per Jeppe's tutorial @
-https://www.ippp.dur.ac.uk/~andersen/GridTutorial/gridtutorial.html
+Follow certificate setup as per [Jeppe's
+tutorial](https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html)
 
 Make a careful note of passwords (can get confusing). Don't use passwords used
 elsewhere in case you want to automate proxy renewal (like me and Juan)
 
-## 2. (for nnlojet developers) NNLOJET SETUP
+## (for nnlojet developers) NNLOJET SETUP
 
 As usual - pull the NNLOJET repository, update to modules and `make -jXX`
 
@@ -43,58 +43,7 @@ grid outside of Durham(!)**
 - As of 20/4/2018, the minimum known compatible version of gcc with NNLOJET is
   gcc 4.9.1. Versions above this are generally ok
 
-## 3. GFAL SETUP
-
-### Note: LFN is now unsupported! It got replaced by `gfal`.
-
-put this into your bashrc:
-```bash
-export CC=gcc
-export XX=g++
-export LCG_CATALOG_TYPE="lfc"
-export LFC_HOME=/grid/pheno/<LFN_NAME>
-export LFC_HOST="lfc01.dur.scotgrid.ac.uk"
-source /opt/rh/devtoolset-4/enable              # Default gcc is version 4 and this DOES NOT WORK!
-```
-
-then `source ~/.bashrc`
-
-create lfndir
-```bash
-lfc-mkdir /grid/pheno/<LFN_NAME>
-
-lfc-mkdir input
-lfc-mkdir output
-lfc-mkdir warmup
-```
-
-should be able to see the following using `lfc-ls`
-```
-input
-output
-warmup
-```
-
-generate more directories in analogy. A nice wrapper is included as described in
-the [GRID STORAGE MANAGEMENT](#12-grid-storage-management) section later on.
-
-To use GFAL instead, one needs to perform the above setup, except using
-```bash
-gfal-mkdir gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/<directoryname>
-```
-
-The folder setup that the GFAL setup uses should be the same as for LFN, so you
-will need an input, output and warmup folder as normal
-
-GFAL should be much more stable and quick than the LFN, and has been testsed with DIRAC.
-It has been tested for both production and warmup directly via ARC as well.
-
-It works for ARC, and you can view the files in a web browser at
-http://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/
-
-To enable, toggle `use_gfal` to `True` in your header file. LFN support is now deprecated
-
-## 4. GRID SCRIPTS SETUP
+## GRID SCRIPTS SETUP
 
 To start using `pyHepGrid` you need to do the following steps.
 
@@ -148,7 +97,7 @@ the arc  test queue with `pyHepGrid run runcards/your_runcard.py -B --test`. The
 test queue highly limited in resources. **Only submit a few short jobs to it**
 (<10).
 
-### 4.1. Further customisations (advanced usage)
+### Further customisations (advanced usage)
 
 Beside the header and runcard setup, `pyHepGrid` has two big *attack points* for
 customisations. First and foremost the `runfile` which is run on each grid node.
@@ -185,7 +134,7 @@ to ensure your code runs as intended. As a general advice try to reuse code
 shipped with `pyHepGrid` where possible, since this should be tested to some
 expend.
 
-## 5. PROXY SETUP
+## PROXY SETUP
 
 By default, jobs will fail if the proxy ends before they finish running, so it's
 a good idea to keep them synced with new proxies as you need:
@@ -202,19 +151,34 @@ arcsync -c ce1.dur.scotgrid.ac.uk
 arcrenew -a
 ```
 
+There is also a method to create a long proxy for one week describes in
+[Jeppe's grid tutorial](https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html).
+
 ### Automated (set & forget)
 
-I've added some proxy automation scripts to the repo in
-`gangaless_resources/proxy_renewal/` To get these working, simply add your
-certificate password in to `.script2.exp` (plain text I know, so it's bad ... at
-least hide it from the world with `chmod 400`) Make sure `.proxy.sh` is set up
-for your user (directories should point to your gangaless resources)
+In [`proxy_renewal/`](../proxy_renewal/) are some simple scripts to
+automatically update your proxy. To get these working, create a file
+```bash
+nano ~/.password/arcpw
+chmod 400 ~/.password/arcpw
+```
+and enter your password. Make sure you that your `~/.password/arcpw` is hidden,
+i.e. `ls -l ~/.password/arcpw` should show `-rw-------` otherwise other users
+could read your password. Afterwards add
+```bash
+export CERT_PW_LOCATION=~/.password/arcpw
+export PATH=/path/to/pyHepGrid/proxy_renewal:${PATH}
+```
+to your `~/.bashrc` and source it. Afterwards you should be able to run
+`newproxy` to get a new 24 hour proxy without typing your password, you can
+check the proxy time with `arcproxy -I`.
 
-Run by hand to check (shouldn't need your password) Then set up `.proxy.sh` to
-run as a [cron job](https://crontab.guru/) at least once per day (I suggest 2x
-in case of failure)
+`syncjobs` will update the certificate on all your queuing and running jobs. Set
+it to run as a [cron job](https://crontab.guru/) at least once per day (even
+better suggest twice, in case of failure), such that no jobs will ever be
+stopped do to an invalid certificate.
 
-## 6. GRID SCRIPTS USAGE
+## GRID SCRIPTS USAGE
 
 1. initialise libraries [LHAPDF,(OPENLOOPS?)]
 ```bash
@@ -259,7 +223,7 @@ files from grid storage (NNNNLOJET exe, runcard (warmups)). It then runs
 NNNNNLOJET in the appropriate mode, before tarring up output files and sending
 them back to the grid storage.
 
-## 7. FINALISING RESULTS
+## FINALISING RESULTS
 The process of pulling the production results from grid storage to the gridui
 
 You have a choice of setups for this (or you can implement your own)
@@ -316,7 +280,7 @@ find for them from the grid storage. The output will be stored in
 runs, and the prefix as set in `finalise_prefix`. Corrupted data in the grid
 storage will be deleted.
 
-## 8. NORMAL WORKFLOW
+## NORMAL WORKFLOW
 
 0. Make sure you have a working proxy
 1. initialise warmup runcard
@@ -326,7 +290,7 @@ storage will be deleted.
 5. run production runcard as many times as you like w/ different seeds
 6. pull down the results (finalisation)
 
-## 9. RUNCARD.PY FILES DETAILS
+## RUNCARD.PY FILES DETAILS
 
 - Include a dictionary of all of the runcards you want to
   submit/initialise/manage, along with an identification tag that you can use for
@@ -344,7 +308,7 @@ storage will be deleted.
 - You can even link/import functions to e.g dynamically find the best submission
   location
 
-## 10. DIRAC
+## DIRAC
 
 Installing Dirac is quite easy nowadays! This information comes directly from
 https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac. Running all commands will
@@ -382,7 +346,7 @@ Instead of sourcing the dirac `bashrc` as above, you can alternatively add
 `$DIRAC_FOLDER/scripts/` to your `PATH` variable directly in your `.bashrc`. It
 all seems to work ok with python 2.6.6
 
-## 11. MONITORING WEBSITES
+## MONITORING WEBSITES
 ### DURHAM ARC MONITORING WEBSITE
 https://grafana.mon.dur.scotgrid.ac.uk/d/LNUGi5yWk/general-grid
 
@@ -394,7 +358,7 @@ https://dirac.gridpp.ac.uk:8443/DIRAC/
 ./get_site_info.py
 ```
 
-## 12. GRID STORAGE MANAGEMENT
+## GRID STORAGE MANAGEMENT
 I've written a wrapper to the gfal commands in order to simplify manual navigation of
 the DPM filesystems.
 
@@ -409,7 +373,7 @@ Usage:
 
 More info is given in the help text (`dpm_manager -h`)
 
-## 13. DISTRIBUTED WARMUP
+## DISTRIBUTED WARMUP
 ***to clean up***
 
 - compile NNLOJET with `sockets=true` to enable distribution
@@ -441,7 +405,7 @@ More info is given in the help text (`dpm_manager -h`)
 - The server must set up on the same gridui as defined in the header parameter
   `server_host`. Otherwise the jobs will never be found by the running job.
 
-## 14. HAMILTON QUEUES
+## HAMILTON QUEUES
 
 - There are multiple queues I suggest using on the HAMILTON cluster:
     - par6.q

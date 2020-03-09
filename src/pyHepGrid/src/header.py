@@ -17,9 +17,11 @@ header_mappings = {"jmartinez":"pyHepGrid.headers.juan_header",
                    "black":"HEJ.hej_header",
                    "andersen":"HEJ.hej_header",
                    "cruzmartinez":"pyHepGrid.headers.cruzmartinez",
+                   "default": "pyHepGrid.headers.template_header",
                    }
 
-if "phyip3" in socket.gethostname(): # Hack to get different headers for batch and grid w/ same username
+# Hack to get different headers for batch and grid w/ same username
+if "phyip3" in socket.gethostname():
     header_mappings["dwalker"]="headers.duncan_batch_header"
 
 try:
@@ -27,7 +29,8 @@ try:
 except AttributeError as e:
     logger = logmod.setup_logger("INFO")
 grid_username = getpass.getuser()
-head = importlib.import_module(header_mappings[grid_username])
+head = importlib.import_module(header_mappings.get(grid_username,
+                                                   header_mappings["default"]))
 
 logger.info("Using header file {0}.py".format(head.__name__))
 

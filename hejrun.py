@@ -78,17 +78,15 @@ def parse_arguments():
 
     # Grid configuration options
     parser.add_option("-i", "--input_folder",
-                      help = "lfn input folder, relative to gfaldir",
+                      help = "gfal input folder, relative to gfaldir",
                       default = "input")
     parser.add_option("-w", "--warmup_folder",
-                      help = "lfn file (not just the folder!) where HEJ is stored, relative to gfaldir",
+                      help = "gfal file (not just the folder!) where HEJ is stored, relative to gfaldir",
                       default = "warmup")
     parser.add_option("-o", "--output_folder",
-                      help = "lfn output folder, relative to gfaldir",
+                      help = "gfal output folder, relative to gfaldir",
                       default = "output")
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
-    parser.add_option("--use_gfal", default="False",
-                      help = "Use gfal for file transfer and storage rather than the LFN")
     parser.add_option("--gfal_location", default="",
                       help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
@@ -118,13 +116,6 @@ def parse_arguments():
     parser.add_option("--pedantic", help = "Enable various checks", action = "store_true", default = False)
 
     (options, positional) = parser.parse_args()
-
-
-    if options.use_gfal.lower() == "true":
-        options.use_gfal = True
-        print("Using GFAL for storage")
-    else:
-        options.use_gfal = False
 
     if not options.runcard or not options.runname:
         parser.error("Runcard and runname must be provided")
@@ -168,14 +159,11 @@ def set_environment(lhapdf_dir):
     os.environ['LHAPDF_DATA_PATH'] = lhapdf_dir
     return 0
 
-
 gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
 lcg_cp = "lcg-cp"
 lcg_cr = "lcg-cr --vo pheno -l"
-lfn    = "lfn:"
 
 # Define some utilites
-
 
 def run_command(command):
     "catch output in LOG_FILE"
@@ -184,7 +172,6 @@ def run_command(command):
     print_flush(" > Executed command: {0} ({1})".format(command,
         datetime.datetime.now()))
     return os.system(command)
-
 
 ####### COPY UTILITIES #######
 def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):

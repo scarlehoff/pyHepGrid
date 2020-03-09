@@ -48,7 +48,6 @@ grid_warmup_dir = "HEJ/HEJ.tar.gz"
 warmup_base_dir = ""
 production_base_dir = "/ResultsRunGrids"
 
-use_gfal = True
 gfaldir = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}/".format(getuser())
 # set to None for environment gfal
 # relies on "pro" symlink

@@ -91,10 +91,9 @@ class Arc(Backend):
             if not store:
                 util.spCall(cmd)
             else:
-                out.append(util.getOutputCall(cmd), include_return_code=False)
+                out.append(util.getOutputCall(cmd, include_return_code=False))
         if store:
             return out
-
 
     def cat_log_job(self, jobids, jobinfo):
         """Sometimes the std output doesn't get updated
@@ -176,11 +175,12 @@ class Dirac(Backend):
         return 0
 
     def get_status(self, status, date):
-        output = set(util.getOutputCall(['dirac-wms-select-jobs','--Status={0}'.format(status),
-                                       '--Owner={0}'.format(header.dirac_name),
-                                       '--Maximum=0', # 0 lists ALL jobs, which is nice :)
-                                         '--Date={0}'.format(date)],
-                                        include_return_code=False).split("\n")[-2].split(","))
+        output = set(util.getOutputCall(['dirac-wms-select-jobs',
+                                         F'--Status={status}',
+                                         F'--Owner={header.dirac_name}',
+                                         '--Maximum=0', # 0 lists ALL jobs, which is nice :)
+                                         F'--Date={date}'],
+                                         include_return_code=False).split("\n")[-2].split(","))
         header.logger.debug(output)
         return output
 
@@ -309,7 +309,7 @@ class Slurm(Backend):
         cat_logs = []
         for log_file in log_files:
             for seed in seeds_to_print:
-                if ".s{0}.".format(seed) in log_file:
+                if F".s{seed}." in log_file:
                     cat_logs.append(log_file)
                     seeds_to_print.remove(seed)
                     break
@@ -321,7 +321,7 @@ class Slurm(Backend):
 
 
     def get_status(self, jobid, status):
-        stat = len([i for i in util.getOutputCall(["squeue", "-j{0}".format(jobid),"-r","-t",status],
+        stat = len([i for i in util.getOutputCall(["squeue", F"-j{jobid}","-r","-t",status],
                                                   suppress_errors=True, include_return_code=False
                                               ).split("\n")[1:]
                     if "error" not in i]) #strip header from results
@@ -365,7 +365,7 @@ class Slurm(Backend):
                     output.append(util.getOutputCall(cmd, suppress_errors=True,
                                                      include_return_code=False))
         else:
-            stdoutfile=os.path.join(dir_name,"slurm-{0}.out".format(jobid))
+            stdoutfile=os.path.join(dir_name,F"slurm-{jobid}.out")
             if print_stderr:
                 stdoutfile = stdoutfile.replace(".out",".err")
             cmd = ["cat", stdoutfile]

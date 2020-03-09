@@ -23,7 +23,7 @@ dbname = F"{exampleDir}/ARCdb_example.dat"
 
 
 # user-specific global variables (could go in user's header)
-copylog = True
+copy_log = True
 
 # automatically pick next unused seed
 import pyHepGrid.src.dbapi as dbapi

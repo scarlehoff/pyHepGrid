@@ -1,3 +1,10 @@
-arcsync -c ce1.dur.scotgrid.ac.uk
-arcsync -c ce2.dur.scotgrid.ac.uk
-arcrenew -a &>/dev/null
+#!/bin/bash
+source ~/.bashrc
+newproxy # assumes this is in your PATH
+
+for i in {arc-ce0{1..4}.gridpp.rl.ac.uk,svr0{09,10,11,19}.gla.scotgrid.ac.uk,ce{1..4}.dur.scotgrid.ac.uk};
+do
+  arcsync -f -c $i -j ~/jobs.xml > /dev/null;
+done
+
+(nohup arcrenew -a -j ~/jobs.xml >& ~/renew.res && rm ~/jobs.xml &)

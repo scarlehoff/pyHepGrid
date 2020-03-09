@@ -94,7 +94,7 @@ def setup_sockets(args, nnlojet_command, bring_status):
     host = args.Host
     port = args.port
     if bring_status != 0:
-        print_flush("Not able to bring data from LFN, removing myself from the pool")
+        print_flush("Not able to bring data from gfal, removing myself from the pool")
         socket_sync_str(host, port, handshake = "oupsities")
         sys.exit(-95)
     print_flush("Sockets are active, trying to connect to {0}:{1}".format(host,port))
@@ -159,7 +159,6 @@ def teardown(*statuses):
 ####### ARGUMENT PARSING #######
 def parse_arguments():
     default_user_gfal = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())
-    default_user_lfn = ""
     parser = OptionParser(usage = "usage: %prog [options]")
 
     parser.add_option("-r","--runcard", help = "Runcard to be run")
@@ -183,8 +182,6 @@ def parse_arguments():
                       help = "storage  output folder, relative to gfaldir",
                       default = "output")
     parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
-    parser.add_option("--use_gfal", default="True",
-                      help = "Use gfal for file transfer and storage rather than the LFN")
     parser.add_option("--gfal_location", default="",
                       help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
 
