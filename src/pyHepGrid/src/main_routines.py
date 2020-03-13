@@ -27,8 +27,11 @@ def management_routine(backend, args):
 
     id_list_raw = str(id_str).split(",")
     id_list = []
-    if len(id_list_raw) == 1 and id_list_raw[0].lower() == "all":
-        id_list_raw = backend.get_active_dbids()
+    active_ids = backend.get_active_dbids()
+    if len(id_list_raw) == 1 and (id_list_raw[0].lower() == "all"
+                                  or id_list_raw[0] == "-"
+                                  or id_list_raw[0] == ":"):
+        id_list_raw = active_ids
 
     # Expand out id ranges using delimiters
     for id_selected in id_list_raw:
@@ -37,11 +40,15 @@ def management_routine(backend, args):
             if range_delimiter in id_selected:
                 added = True
                 id_limits = id_selected.split(range_delimiter)
+                # Extend unspecified ranges (e.g. "10-" -> 10-end)
+                if id_limits[0] == "":
+                    id_limits[0] = min(int(id_limits[1]),int(active_ids[0]))
+                if id_limits[1] == "":
+                    id_limits[1] = max(int(id_limits[0]),int(active_ids[-1]))
                 for id_int in range(int(id_limits[0]), int(id_limits[1]) + 1):
                     id_list.append(str(id_int))
         if not added:
             id_list.append(id_selected)
-
     no_ids = len(id_list)
 
     if args.get_grid_stdout:
