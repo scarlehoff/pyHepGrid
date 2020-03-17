@@ -581,7 +581,7 @@ class HEJ(ProgramInterface):
         """
         import tempfile
         from pyHepGrid.src.header import runcardDir as runFol
-        from pyHepGrid.src.header import executable_exe, executable_src_dir, grid_input_dir
+        from pyHepGrid.src.header import grid_input_dir
 
         if local:
             self.init_local_production(provided_warmup=provided_warmup)
@@ -694,7 +694,6 @@ class N3FIT(ProgramInterface):
         replicas done.
         For now miserably fail if that's indeed the case
         """
-        from pyHepGrid.src.header import local_run_directory
         running_folder = self.get_local_dir_name(runcard, runfolder)
         replica_folder = self.replica_folder(running_folder, runname = runfolder)
         # Use fitinfo file as a proxy for the replica
