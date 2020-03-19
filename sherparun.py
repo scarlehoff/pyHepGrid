@@ -8,106 +8,145 @@ from time import sleep
 
 try:
     dirac = os.environ["DIRAC"]
-    sys.path.append("{0}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages".format(dirac))
+    sys.path.append(
+        "{0}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages".format(dirac))
 except KeyError as e:
     pass
 
 MAX_COPY_TRIES = 15
 GFAL_TIMEOUT = 300
 PROTOCOLS = ["xroot", "gsiftp", "dav"]
-LOG_FILE="output.log"
+LOG_FILE = "output.log"
 COPY_LOG = "copies.log"
 
-#### Override print with custom version that always flushes to stdout so we have up-to-date logs
+
 def print_flush(string):
+    """
+    Override print with custom version that always flushes to stdout so we have
+    up-to-date logs
+    """
     print(string)
     sys.stdout.flush()
+
 
 def print_file(string, logfile=LOG_FILE):
     with open(logfile, "a") as f:
         f.write(string+"\n")
 
 # This function must always be the same as the one in program.py
+
+
 def warmup_name(runcard, rname):
     out = runcard + "+" + rname + ".tar.gz"
     return out
 
 # This function must always be the same as the one in program.py
+
+
 def output_name(runcard, rname, seed):
     out = "output-" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
 
+
 def config_name(rname):
     return "{0}.dat".format(rname)
 
-#### Override os.system with custom version that auto sets debug level on failure
+
+# Override os.system with custom version that auto sets debug level on failure
 # Abusive...
 syscall = os.system
+
+
 def do_shell(*args):
     global debug_level
     retval = syscall(*args)
     if retval != 0:
         debug_level = 9999
         print_flush("Error in {0}. Raising debug level to 9999".format(*args))
-    return abs(retval) # All non zero error codes will be +ve - can add all to determine whether job is ok
+    # All non zero error codes will be +ve - can add all to
+ determine whether
+    # job is ok
+    return abs(retval)
+
+
 os.system = do_shell
+
 
 def parse_arguments():
     from optparse import OptionParser
     from getpass import getuser
 
-    default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(getuser())
-    parser = OptionParser(usage = "usage: %prog [options]")
+    default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(
+        getuser())
+    parser = OptionParser(usage="usage: %prog [options]")
 
-    parser.add_option("-r","--runcard", help = "Runcard to be run")
-    parser.add_option("-j", "--runname", help = "Runname")
+    parser.add_option("-r", "--runcard", help="Runcard to be run")
+    parser.add_option("-j", "--runname", help="Runname")
 
     # Run options
-    parser.add_option("-t", "--threads", help = "Number of thread for OMP", default = "1")
-    parser.add_option("-e", "--executable", help = "Executable to be run", default = "Sherpa")
-    parser.add_option("-d", "--debug", help = "Debug level", default="0")
-    parser.add_option("--copy_log", help = "Write copy log file.", action="store_true", default=False)
-    parser.add_option("-s", "--seed", help = "Run seed", default="1")
-    parser.add_option("-E", "--events", help = "Number of events", default="-1")
+    parser.add_option("-t", "--threads",
+                      help="Number of thread for OMP", default="1")
+    parser.add_option("-e", "--executable",
+                      help="Executable to be run", default="Sherpa")
+    parser.add_option("-d", "--debug", help="Debug level", default="0")
+    parser.add_option("--copy_log", help="Write copy log file.",
+                      action="store_true", default=False)
+    parser.add_option("-s", "--seed", help="Run seed", default="1")
+    parser.add_option("-E", "--events", help="Number of events", default="-1")
 
     # Grid configuration options
-    parser.add_option("-i", "--input_folder",
-                      help = "gfal input folder, relative to gfaldir",
-                      default = "input")
-    parser.add_option("-w", "--warmup_folder",
-                      help = "gfal warmup folder, relative to gfaldir",
-                      default = "warmup")
-    parser.add_option("-o", "--output_folder",
-                      help = "gfal output folder, relative to gfaldir",
-                      default = "output")
-    parser.add_option("-g", "--gfaldir", help = "gfaldir", default = default_user_gfal)
-    parser.add_option("--gfal_location", default="",
-                      help = "Provide a specific location for gfal executables [intended for cvmfs locations]. Default is the environment gfal.")
+    parser.add_option(
+        "-i", "--input_folder",
+        help="gfal input folder, relative to gfaldir", default="input")
+    parser.add_option(
+        "-w", "--warmup_folder",
+        help="gfal file (not just the folder!) where HEJ is stored, relative "
+        "to gfaldir",
+        default="warmup")
+    parser.add_option(
+        "-o", "--output_folder",
+        help="gfal output folder, relative to gfaldir", default="output")
+    parser.add_option("-g", "--gfaldir", help="gfaldir",
+                      default=default_user_gfal)
+    parser.add_option(
+        "--gfal_location", default="",
+        help="Provide a specific location for gfal executables [intended for "
+        "cvmfs locations]. Default is the environment gfal.")
 
     # LHAPDF options
-    parser.add_option("--use_cvmfs_lhapdf", action = "store_true", default = True)
-    parser.add_option("--cvmfs_lhapdf_location", default="",
-                      help = "Provide a cvmfs location for LHAPDF.")
-    parser.add_option("--lhapdf_grid", help = "absolute value of lhapdf location or relative to gfaldir",
-                      default = "util/lhapdf.tar.gz")
-    parser.add_option("--lhapdf_local", help = "name of LHAPDF folder local to the sandbox", default = "lhapdf")
+    parser.add_option("--use_cvmfs_lhapdf", action="store_true", default=True)
+    parser.add_option(
+        "--cvmfs_lhapdf_location", default="",
+        help="Provide a cvmfs location for LHAPDF.")
+    parser.add_option(
+        "--lhapdf_grid", help="absolute value of lhapdf location or relative to"
+        " gfaldir",
+        default="util/lhapdf.tar.gz")
+    parser.add_option(
+        "--lhapdf_local", help="name of LHAPDF folder local to the sandbox",
+        default="lhapdf")
 
-    # # Rivet options
-    parser.add_option("--use_custom_rivet", action = "store_true", default = False)
+    # Rivet options
+    parser.add_option("--use_custom_rivet", action="store_true", default=False)
     parser.add_option("--rivet_folder", default="Wjets/Rivet/Rivet.tgz",
-                          help = "Provide the location of RivetAnalyses tarball.")
+                      help="Provide the location of RivetAnalyses tarball.")
 
     # Socket options
-    parser.add_option("-S", "--Sockets", help = "Activate socketed run", action = "store_true", default = False)
-    parser.add_option("-p", "--port", help = "Port to connect the sockets to", default = "8888")
-    parser.add_option("-H", "--Host", help = "Host to connect the sockets to",
-                      default = "gridui1.dur.scotgrid.ac.uk")
+    parser.add_option("-S", "--Sockets", help="Activate socketed run",
+                      action="store_true", default=False)
+    parser.add_option(
+        "-p", "--port", help="Port to connect the sockets to", default="8888")
+    parser.add_option("-H", "--Host", help="Host to connect the sockets to",
+                      default="gridui1.dur.scotgrid.ac.uk")
 
     # Mark the run as production or warmup
-    parser.add_option("-P", "--Production", help = "Production run", action = "store_true", default = False)
-    parser.add_option("-W", "--Warmup", help = "Warmup run", action = "store_true", default = False)
+    parser.add_option("-P", "--Production", help="Production run",
+                      action="store_true", default=False)
+    parser.add_option("-W", "--Warmup", help="Warmup run",
+                      action="store_true", default=False)
 
-    parser.add_option("--pedantic", help = "Enable various checks", action = "store_true", default = False)
+    parser.add_option("--pedantic", help="Enable various checks",
+                      action="store_true", default=False)
 
     (options, positional) = parser.parse_args()
 
@@ -115,7 +154,8 @@ def parse_arguments():
         parser.error("Runcard and runname must be provided")
 
     if options.Production == options.Warmup:
-        parser.error("You need to enable one and only one of production and warmup")
+        parser.error(
+            "You need to enable one and only one of production and warmup")
 
     # Pedantic checks
     if options.Production:
@@ -131,40 +171,40 @@ def parse_arguments():
 
     return options
 
+
 def set_environment(lhapdf_dir):
-    os.system("export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages")
-    os.environ["LFC_HOST"]         = "lfc01.dur.scotgrid.ac.uk"
+    os.system(
+        "export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib"
+        "/python2.6/site-packages")
+    os.environ["LFC_HOST"] = "lfc01.dur.scotgrid.ac.uk"
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
     os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
-    os.environ['OMP_STACKSIZE']    = "999999"
+    os.environ['OMP_STACKSIZE'] = "999999"
     try:
         import gfal2_util.shell
     except KeyError as e:
         pass
     except ImportError as e:
-        # If gfal can't be imported then the site packages need to be added to the python path because ? :(
+        # If gfal can't be imported then the site packages need to be added to
+        # the python path because ? :(
         os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"]\
-            +":"+args.gfal_location.replace("/bin/","/lib/python2.7/site-packages/")
+            + ":" + \
+            args.gfal_location.replace("/bin/", "/lib/python2.7/site-packages/")
         os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]\
-            +":"+args.gfal_location.replace("/bin/","/lib/")
+            + ":"+args.gfal_location.replace("/bin/", "/lib/")
     # LHAPDF
     os.environ['LHAPDF_DATA_PATH'] = lhapdf_dir
     return 0
 
 
-gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/mheil/"
-lcg_cp = "lcg-cp"
-lcg_cr = "lcg-cr --vo pheno -l"
-
 # Define some utilites
-
-
 def run_command(command):
     """run command & catch output in LOG_FILE"""
     # Avoid overwriting of the status code for piping to tee
-    command = 'bash  -o pipefail -c "{0}  2>&1 | tee -a {1}"'.format(command, LOG_FILE)
-    print_flush(" > Executed command: {0} ({1})".format(command,
-        datetime.datetime.now()))
+    command = 'bash  -o pipefail -c "{0}  2>&1 | tee -a {1}"'.format(
+        command, LOG_FILE)
+    print_flush(" > Executed command: {0} ({1})".format(
+        command, datetime.datetime.now()))
     return os.system(command)
 
 
@@ -185,7 +225,8 @@ def remove_file(filepath, args, tries=5, protocol=None):
     if protocol:
         prot = args.gfaldir.split(":")[0]
         filepath = filepath.replace(prot, protocol, 1)
-    rmcmd = "{gfal_loc}gfal-rm {f}".format(f=filepath, gfal_loc=args.gfal_location)
+    rmcmd = "{gfal_loc}gfal-rm {f}".format(f=filepath,
+                                           gfal_loc=args.gfal_location)
 
     file_present = test_file_presence(filepath, args)
     tried = 0
@@ -205,8 +246,11 @@ def remove_file(filepath, args, tries=5, protocol=None):
     # don't crash if gfal-rm throws an error
     except subprocess.CalledProcessError as e:
         if args.copy_log:
-            print_file("Gfal-rm failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
-            print_file("   > Command issued: {cmd}".format(cmd=rmcmd), logfile=COPY_LOG)
+            print_file(
+                "Gfal-rm failed at {t}.".format(t=datetime.datetime.now()),
+                logfile=COPY_LOG)
+            print_file("   > Command issued: {cmd}".format(
+                cmd=rmcmd), logfile=COPY_LOG)
         if debug_level > 1:
             if hasattr(e, 'message'):
                 print_flush(e.message)
@@ -219,9 +263,9 @@ def remove_file(filepath, args, tries=5, protocol=None):
 
 def test_file_presence(filepath_in, args, protocol=None):
     if protocol:
-        all_protocols = [ protocol ] + list(set(PROTOCOLS) - {protocol})
+        all_protocols = [protocol] + list(set(PROTOCOLS) - {protocol})
     else:
-        all_protocols = [ None ]
+        all_protocols = [None]
     filepath = filepath_in
 
     for loop_prot in all_protocols:
@@ -235,14 +279,18 @@ def test_file_presence(filepath_in, args, protocol=None):
         if debug_level > 1:
             print_flush(lscmd)
         try:
-            # In principle, empty if file doesn't exist, so unnecessary to check contents.  Test to be robust against unexpected output.
-            filelist = subprocess.check_output(lscmd,
-                shell=True, universal_newlines=True).splitlines()[0]
+            # In principle, empty if file doesn't exist, so unnecessary to check
+            # contents. Test to be robust against unexpected output.
+            filelist = subprocess.check_output(
+                lscmd, shell=True, universal_newlines=True).splitlines()[0]
             return (filename in filelist)
         except subprocess.CalledProcessError as e:
             if args.copy_log:
-                print_file("Gfal-ls failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
-                print_file("   > Command issued: {cmd}".format(cmd=lscmd), logfile=COPY_LOG)
+                print_file(
+                    "Gfal-ls failed at {t}.".format(t=datetime.datetime.now()),
+                    logfile=COPY_LOG)
+                print_file("   > Command issued: {cmd}".format(
+                    cmd=lscmd), logfile=COPY_LOG)
             if debug_level > 1:
                 if hasattr(e, 'message'):
                     print_flush(e.message)
@@ -259,21 +307,26 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
         prot = args.gfaldir.split(":")[0]
         filepath = filepath.replace(prot, protocol, 1)
     hashcmd = "{gfal_loc}gfal-sum -t {timeout} {file} {checksum}".format(
-        gfal_loc=args.gfal_location, file=filepath, checksum=algo, timeout=GFAL_TIMEOUT)
+        gfal_loc=args.gfal_location, file=filepath, checksum=algo,
+        timeout=GFAL_TIMEOUT)
     if debug_level > 1:
         print_flush(hashcmd)
     try:
-        hash = subprocess.check_output(hashcmd, shell=True, universal_newlines=True).split()[1]
+        hash = subprocess.check_output(
+            hashcmd, shell=True, universal_newlines=True).split()[1]
     except subprocess.CalledProcessError as e:
         if args.copy_log:
-            print_file("Gfal-sum failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
-            print_file("   > Command issued: {cmd}".format(cmd=hashcmd), logfile=COPY_LOG)
+            print_file(
+                "Gfal-sum failed at {t}.".format(t=datetime.datetime.now()),
+                logfile=COPY_LOG)
+            print_file("   > Command issued: {cmd}".format(
+                cmd=hashcmd), logfile=COPY_LOG)
         if debug_level > 1:
             if hasattr(e, 'message'):
                 print_flush(e.message)
             else:
                 print_flush(e)
-        if protocol == "gsiftp": # try again when gsiftp is down
+        if protocol == "gsiftp":  # try again when gsiftp is down
             return get_hash(filepath, args, algo=algo, protocol="dav")
         return None
     return hash
@@ -281,7 +334,8 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
 
 def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
     protoc = args.gfaldir.split(":")[0]
-    # gfal-sum only returns expected hash for subset of protocols (gsiftp, srm, dav, davs).  Hardcode gsiftp for now.
+    # gfal-sum only returns expected hash for subset of protocols (gsiftp, srm,
+    # dav, davs). Hardcode gsiftp for now.
     infile_hash = get_hash(infile, args, protocol="gsiftp")
 
     print_flush("Copying {0} to {1}".format(infile, outfile))
@@ -297,59 +351,68 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             outfile_dir = os.path.dirname(outfile_tmp)
             outfile_fn = os.path.basename(outfile_tmp)
 
-            cmd = "{2}gfal-copy -f -p {0} {1}".format(infile_tmp, outfile_tmp, args.gfal_location)
+            cmd = "{2}gfal-copy -f -p {0} {1}".format(
+                infile_tmp, outfile_tmp, args.gfal_location)
             if debug_level > 1:
                 print_flush(cmd)
             retval = syscall(cmd)
             file_present = test_file_presence(outfile, args, protocol="gsiftp")
-            # if compatibiility with python versions < 2.7 is still required, need something like the following instead
-#            p = subprocess.Popen(cmd2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-#            out, err = p.communicate()
+            # if compatibiility with python versions < 2.7 is still required,
+            # need something like the following instead
+            # p = subprocess.Popen(cmd2, stdout=subprocess.PIPE,
+            #     stderr=subprocess.PIPE, shell=True)
+            # out, err = p.communicate()
             if retval == 0 and file_present:
                 return retval
             elif retval == 0 and not file_present:
-                print_flush("Copy command succeeded, but failed to copy file. Retrying.")
+                print_flush(
+                    "Copy command succeeded, but failed to copy file. "
+                    "Retrying.")
             elif retval != 0 and file_present:
                 if not infile_hash:
-                    print_flush("Copy reported error, but file present & can not"
-                        "compute original file hash. Proceeding.")
+                    print_flush("Copy reported error, but file present & can "
+                                "not compute original file hash. Proceeding.")
                     return 0
 
                 outfile_hash = get_hash(outfile, args, protocol="gsiftp")
                 if not outfile_hash:
-                    print_flush("Copy reported error, but file present & can not"
-                        "compute copied file hash. Proceeding.")
+                    print_flush("Copy reported error, but file present & can "
+                                "not compute copied file hash. Proceeding.")
                     return 0
                 elif infile_hash == outfile_hash:
                     print_flush("Copy command reported errors, but file was "
-                        "copied and checksums match. Proceeding.")
+                                "copied and checksums match. Proceeding.")
                     return 0
                 else:
                     print_flush("Copy command reported errors and the "
-                        "transferred file was corrupted. Retrying.")
+                                "transferred file was corrupted. Retrying.")
             else:
                 print_flush("Copy command failed. Retrying.")
             if args.copy_log:
-                print_file("Copy failed at {t}.".format(t=datetime.datetime.now()), logfile=COPY_LOG)
-                print_file("   > Command issued: {cmd}".format(cmd=cmd), logfile=COPY_LOG)
-                print_file("   > Returned error code: {ec}".format(ec=retval), logfile=COPY_LOG)
-                print_file("   > File now present: {fp}".format(fp=file_present), logfile=COPY_LOG)
-            # sleep time scales steeply with failed attempts (min wait 1s, max wait ~2 mins)
+                print_file("Copy failed at {t}.".format(
+                    t=datetime.datetime.now()), logfile=COPY_LOG)
+                print_file("   > Command issued: {cmd}".format(
+                    cmd=cmd), logfile=COPY_LOG)
+                print_file("   > Returned error code: {ec}".format(
+                    ec=retval), logfile=COPY_LOG)
+                print_file("   > File now present: {fp}".format(
+                    fp=file_present), logfile=COPY_LOG)
+            # sleep time scales steeply with failed attempts (min wait 1s, max
+            # wait ~2 mins)
             sleep((i+1)*(j+1)**2)
 
-    # Copy failed to complete successfully; attemt to clean up corrupted files if present.
-    # Only make it this far if file absent, or present and corrupted.
+    # Copy failed to complete successfully; attemt to clean up corrupted files
+    # if present. Only make it this far if file absent, or present and
+    # corrupted.
     for protocol in PROTOCOLS:
         if remove_file(outfile, args, protocol=protocol) == 0:
             break
-
 
     return 9999
 ####### END COPY UTILITIES #######
 
 
 #### TAR ####
-
 def untar_file(local_file, debug):
     if debug_level > 16:
         cmd = "tar zxfv {0}".format(local_file)
@@ -357,14 +420,15 @@ def untar_file(local_file, debug):
         cmd = "tar zxf " + local_file
     return os.system(cmd)
 
+
 def tar_this(tarfile, sourcefiles):
     cmd = "tar -cvzf " + tarfile + " " + sourcefiles
     stat = os.system(cmd)
     os.system("ls")
     return stat
 
-### Download executable ###
 
+### Download executable ###
 def download_program(debug):
     # TODO read tar and source name from header
     print_flush("using cvmfs Sherpa")
@@ -378,14 +442,16 @@ def download_program(debug):
     #     os.system("ls -l Sherpa")
     # return stat
 
+
 def download_runcard(input_folder, runcard, runname, debug_level):
-    tar = warmup_name(runcard,runname)
+    tar = warmup_name(runcard, runname)
     print_flush("downloading "+input_folder+"/"+tar)
     stat = copy_from_grid(input_folder+"/"+tar, tar, args)
     stat += untar_file(tar, debug_level)
     # TODO download:
     #   Scale setters
     return os.system("rm {0}".format(tar))+stat
+
 
 def download_rivet(rivet_folder, debug_level):
     tar = os.path.basename(rivet_folder)
@@ -396,8 +462,8 @@ def download_rivet(rivet_folder, debug_level):
     os.environ['RIVET_ANALYSIS_PATH'] = os.getcwd()+"/"+rivet_dir
     return os.system("rm {0}".format(tar))+stat
 
-### Misc ###
 
+### Misc ###
 def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
     # os.system("cat /proc/cpuinfo >> {0}".format(outputfile))
@@ -405,7 +471,8 @@ def print_node_info(outputfile):
     os.system("python --version >> {0}".format(outputfile))
     os.system("python3 --version >> {0}".format(outputfile))
     os.system("gfal-copy --version >> {0}".format(outputfile))
-    os.system("cat {0}".format(outputfile)) ## print to log
+    os.system("cat {0}".format(outputfile))  # print to log
+
 
 def end_program(status, debug_level):
     # print debug infos here if status!=0
@@ -420,8 +487,8 @@ def end_program(status, debug_level):
         sys.exit(1)
     sys.exit(0)
 
-########################## Actual run commands ##########################
 
+########################## Actual run commands ##########################
 def run_sherpa(args):
     command = "Sherpa RSEED:={0} ANALYSIS_OUTPUT=Sherpa_{0} -f {1}".format(
         args.seed, config_name(args.runname))
@@ -430,20 +497,22 @@ def run_sherpa(args):
     status = run_command(command)
     return status
 
-########################## main ##########################
 
+########################## main ##########################
 if __name__ == "__main__":
 
     if sys.argv[0] and not "ENVSET" in os.environ:
         print_flush("Setting environment")
-        os.environ["ENVSET"]="ENVSET"
+        os.environ["ENVSET"] = "ENVSET"
         env = "/cvmfs/pheno.egi.eu/HEJ/HEJ_env.sh"
         os.execvp("bash", ["bash", "-c",
-            "source " + env + " && exec python " + sys.argv[0] + ' "${@}"',
-            "--"] + sys.argv[1:])
+                           "source " + env + " && exec python " +
+                           sys.argv[0] + ' "${@}"',
+                           "--"] + sys.argv[1:])
 
     start_time = datetime.datetime.now()
-    print_flush("Start time: {0}".format(start_time.strftime("%d-%m-%Y %H:%M:%S")))
+    print_flush("Start time: {0}".format(
+        start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
     args = parse_arguments()
     debug_level = int(args.debug)
@@ -472,12 +541,15 @@ if __name__ == "__main__":
     # Download components
     status = download_program(debug_level)
 
-    # os.system("chmod +x {0}".format(args.executable)) # uncomment for downloaded exe
+    # uncomment for downloaded exe
+    # os.system("chmod +x {0}".format(args.executable))
 
+    # uncomment for downloaded exe
     # if debug_level > 8:
-    #     os.system("ldd {0}".format(args.executable)) # uncomment for downloaded exe
+    #     os.system("ldd {0}".format(args.executable))
 
-    status += download_runcard(args.input_folder, args.runcard, args.runname, debug_level)
+    status += download_runcard(args.input_folder,
+                               args.runcard, args.runname, debug_level)
 
     if args.use_custom_rivet:
         status += download_rivet(args.rivet_folder, debug_level)

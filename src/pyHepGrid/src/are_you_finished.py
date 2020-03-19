@@ -23,4 +23,4 @@ if __name__ == "__main__":
     if out.decode() == "die":
         sys.exit(-1)
     else:
-        sys.exit(-1) # better safe than sorry?
+        sys.exit(-1)  # better safe than sorry?

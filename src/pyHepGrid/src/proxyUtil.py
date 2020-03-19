@@ -2,20 +2,24 @@
 # Utilities to deal with ARC and Dirac proxys
 #
 
-def arcProxy(validity, password = None):
+
+def arcProxy(validity, password=None):
     from subprocess import call
     cmdbase = ["arcproxy"]
-    args    = ["-S", "pheno", "-c", "validityPeriod="+validity, "-c","vomsACvalidityPeriod="+validity]
+    args = ["-S", "pheno", "-c", "validityPeriod=" +
+            validity, "-c", "vomsACvalidityPeriod="+validity]
     if password:
         pass
     call(cmdbase + args)
     return 0
 
+
 def arcProxyWiz():
     err = arcProxy("24h")
     return 0
 
-def diracProxy(password = None):
+
+def diracProxy(password=None):
     from subprocess import call
     call(["which", "dirac-proxy-init"])
     cmdb = ["dirac-proxy-init", "-g", "pheno_user", "-M"]
