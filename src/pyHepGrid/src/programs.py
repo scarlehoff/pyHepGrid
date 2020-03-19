@@ -484,14 +484,14 @@ class NNLOJET(ProgramInterface):
         else:
             print(SequenceMatcher(None, os.path.basename(match), matchname_case).ratio())
             print(sys.path[0])
-            if not match in os.listdir(sys.path[0]):
+            if match not in os.listdir(sys.path[0]):
                 local_match = False
                 copy(match,os.path.basename(match))
                 match = os.path.basename(match)
             else:
                 local_match = True
         return match, local_match
-        # if not match in os.listdir(sys.path[0]):
+        # if match not in os.listdir(sys.path[0]):
         #     local_match = False
         #     copy(match, os.path.basename(match))
         #     match = os.path.basename(match)

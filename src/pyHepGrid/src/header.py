@@ -185,14 +185,14 @@ if arcbase is None and os.path.basename(os.path.realpath(sys.argv[0]))=="main.py
 
 # Default Arc Warmup
 ARCSCRIPTDEFAULT = ['&',
-        '(executable   = "{0}")'.format(os.path.basename(runfile)),
-        '(outputFiles  = ("outfile.out" "") )',
-        '(stdout       = "stdout")',
-        '(stderr       = "stderr")',
-        '(gmlog        = "testjob.log")',
-        '(memory       = "100")',
-        '(inputFiles   = ("{file}" "{path}"))'.format(file=os.path.basename(runfile),path=runfile),
-        ]
+    '(executable   = "{0}")'.format(os.path.basename(runfile)),
+    '(outputFiles  = ("outfile.out" "") )',
+    '(stdout       = "stdout")',
+    '(stderr       = "stderr")',
+    '(gmlog        = "testjob.log")',
+    '(memory       = "100")',
+    '(inputFiles   = ("{file}" "{path}"))'.format(file=os.path.basename(runfile),path=runfile),
+]
 
 # Default Arc Production
 ARCSCRIPTDEFAULTPRODUCTION = ARCSCRIPTDEFAULT
@@ -206,7 +206,7 @@ DIRACSCRIPTDEFAULT = [
     'InputSandbox  = {{"{0}"}};'.format(runfile),
     'OutputSandbox = {"StdOut","StdErr"};',
     'Platform = "{0}";'.format(dirac_platform)
-        ]
+]
 
 # If Dirac banned sites are specified, include them in JDL
 if DIRAC_BANNED_SITES is not None:

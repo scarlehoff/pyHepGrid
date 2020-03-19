@@ -9,7 +9,7 @@ def check_mode(rmode,args,logger):
 
     if (rmode[:3] == "run" and not "runcard" in rmode) or rmode[:3] == "man" :
         if args.runDirac and args.runArc:
-            if not args.idjob == "all":
+            if args.idjob != "all":
                 logger.critical("Please choose only Dirac (-D), Arc (-A), Arc Production Mode (-B), Slurm Warmup mode (-E) or Slurm production mode (-F) (unless using -j all)")
         if not args.runDirac and not args.runArc and not args.runArcProduction and \
            not args.runSlurm and not args.runSlurmProduction:
