@@ -160,7 +160,7 @@ def set_environment(lhapdf_dir):
 # Define some utilites
 
 def run_command(command):
-    "catch output in LOG_FILE"
+    """run command & catch output in LOG_FILE"""
     # Avoid overwriting of the status code for piping to tee
     command = 'bash  -o pipefail -c "{0}  2>&1 | tee -a {1}"'.format(command, LOG_FILE)
     print_flush(" > Executed command: {0} ({1})".format(command,

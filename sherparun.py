@@ -160,7 +160,9 @@ lcg_cr = "lcg-cr --vo pheno -l"
 
 
 def run_command(command):
-    command += " 1>> {0} 2>&1".format(LOG_FILE)
+    """run command & catch output in LOG_FILE"""
+    # Avoid overwriting of the status code for piping to tee
+    command = 'bash  -o pipefail -c "{0}  2>&1 | tee -a {1}"'.format(command, LOG_FILE)
     print_flush(" > Executed command: {0} ({1})".format(command,
         datetime.datetime.now()))
     return os.system(command)
