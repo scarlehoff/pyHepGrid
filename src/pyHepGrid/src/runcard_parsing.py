@@ -4,7 +4,7 @@ import pyHepGrid.src.utilities as util
 ############
 # In order to read new stuff from the fixed part just add here
 valid_channels = ["rr","rv","vv","r","v","lo"]
-warmup_extensions =  [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb", 
+warmup_extensions =  [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb",
                       ".V", ".R", ".LO", ".RV", ".VV", ".RR"]
 
 valid_channels = ["rr","rv","vv","r","v","lo","rra","rrb"]
@@ -22,7 +22,7 @@ class PROGRAMruncard:
     the inbuilt print function [set up controlled by _setup_logging()]
     """
 
-    def __init__(self, runcard_file = None, runcard_class = None, 
+    def __init__(self, runcard_file = None, runcard_class = None,
                  blocks = {"channels":[], "process":{}, "run":{}, "misc":{}},
                  logger=None, grid_run = True, use_cvmfs=False, cvmfs_loc = ""):
 
@@ -51,7 +51,7 @@ class PROGRAMruncard:
 
     def __repr__(self):
         return str(self.runcard_dict)
-        
+
 
     def parse_pdf_entry(self):
         """TODO rewrite with regexp for niceness"""
@@ -76,7 +76,7 @@ class PROGRAMruncard:
 
     def __check_grid_pdf(self, use_cvmfs=False, cvmfs_loc=""):
         import json
-        infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo") 
+        infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo")
         pdf, member = self.parse_pdf_entry()
         if not use_cvmfs:
             try:
@@ -135,7 +135,7 @@ class PROGRAMruncard:
             try:
                 int(element) # numeric channel
             except ValueError as e:
-                if not element in valid_channels:
+                if element not in valid_channels:
                     self.error("{0} is not a valid channel in your PROGRAM runcard.".format(element.upper()))
                     sys.exit(-1)
 
@@ -174,7 +174,7 @@ class PROGRAMruncard:
                     elif "=" in splitline[1:]:
                         blocks["misc"][splitline[1].lower()] = splitline[3]
         rc_dict[block_name] = block_content
-        self.debug("{0:<15}: {1:<20} {2}".format(block_name, str(rc_dict[block_name]), 
+        self.debug("{0:<15}: {1:<20} {2}".format(block_name, str(rc_dict[block_name]),
                                                  os.path.basename(self.runcard_file)))
 
     def _parse_runcard_from_file(self, filename):

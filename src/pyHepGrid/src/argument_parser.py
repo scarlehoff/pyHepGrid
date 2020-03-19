@@ -7,7 +7,7 @@ def check_mode(rmode,args,logger):
     if len(rmode) < 3:
         logger.critical("Mode {0} not valid".format(rmode))
 
-    if (rmode[:3] == "run" and not "runcard" in rmode) or rmode[:3] == "man" :
+    if (rmode[:3] == "run" and "runcard" not in rmode) or rmode[:3] == "man" :
         if args.runDirac and args.runArc:
             if args.idjob != "all":
                 logger.critical("Please choose only Dirac (-D), Arc (-A), Arc Production Mode (-B), Slurm Warmup mode (-E) or Slurm production mode (-F) (unless using -j all)")
