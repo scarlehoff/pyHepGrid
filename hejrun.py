@@ -78,8 +78,8 @@ def parse_arguments():
     from optparse import OptionParser
     from getpass import getuser
 
-    default_user_gfal = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(
-        getuser())
+    default_user_gfal = ("gsiftp://se01.dur.scotgrid.ac.uk/dpm/" +
+                         "dur.scotgrid.ac.uk/home/pheno/{0}").format(getuser())
     parser = OptionParser(usage="usage: %prog [options]")
 
     parser.add_option("-r", "--runcard", help="Runcard to be run")
@@ -213,7 +213,23 @@ def run_command(command):
     return os.system(command)
 
 
-####### COPY UTILITIES #######
+# ------------------------- TAR UTILITIES -------------------------
+def untar_file(local_file, debug_level):
+    if debug_level > 16:
+        cmd = "tar zxfv {0}".format(local_file)
+    else:
+        cmd = "tar zxf " + local_file
+    return os.system(cmd)
+
+
+def tar_this(tarfile, sourcefiles):
+    cmd = "tar -cvzf " + tarfile + " " + sourcefiles
+    stat = os.system(cmd)
+    os.system("ls")
+    return stat
+
+
+# ------------------------- COPY UTILITIES -------------------------
 def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
     filein = os.path.join(args.gfaldir, grid_file)
     fileout = "file://$PWD/{0}".format(local_file)
@@ -414,26 +430,9 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             break
 
     return 9999
-####### END COPY UTILITIES #######
 
 
-#### TAR ####
-def untar_file(local_file, debug):
-    if debug_level > 16:
-        cmd = "tar zxfv {0}".format(local_file)
-    else:
-        cmd = "tar zxf " + local_file
-    return os.system(cmd)
-
-
-def tar_this(tarfile, sourcefiles):
-    cmd = "tar -cvzf " + tarfile + " " + sourcefiles
-    stat = os.system(cmd)
-    os.system("ls")
-    return stat
-
-
-### Download executable ###
+# ------------------------- Download executable -------------------------
 def download_program(source, debug_level):
     tar_name = os.path.basename(source)
     if not tar_name.endswith("tar.gz"):
@@ -468,7 +467,7 @@ def download_rivet(rivet_folder, debug_level):
     return os.system("rm {0}".format(tar))+stat
 
 
-### Misc ###
+# ------------------------- Misc -------------------------
 def print_node_info(outputfile):
     os.system("hostname >> {0}".format(outputfile))
     os.system("gcc --version >> {0}".format(outputfile))
@@ -493,7 +492,7 @@ def end_program(status, debug_level):
     sys.exit(0)
 
 
-########################## Actual run commands ##########################
+# ------------------------- Actual run commands -------------------------
 def run_sherpa(args):
     command = "Sherpa RSEED:={0} ANALYSIS_OUTPUT=Sherpa_{0}".format(args.seed)
     if int(args.events) > 0:
@@ -529,10 +528,10 @@ def run_HEJ(args):
     return status
 
 
-########################## main ##########################
+# ------------------------- MAIN -------------------------
 if __name__ == "__main__":
 
-    if sys.argv[0] and not "ENVSET" in os.environ:
+    if sys.argv[0] and "ENVSET" not in os.environ:
         print_flush("Setting environment")
         os.environ["ENVSET"] = "ENVSET"
         env = "/cvmfs/pheno.egi.eu/HEJ/HEJ_env.sh"

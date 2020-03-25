@@ -1,5 +1,5 @@
 # runcardDir = "/custom/runcard/directory" # overwrites header
-#NNLOJETdir = "/custom/nnlojet/directory"
+# NNLOJETdir = "/custom/nnlojet/directory"
 print("Sourcing runcard")
 dictCard = {
     # 'LO.run':'DM_LO',

@@ -2,7 +2,7 @@ import logging
 import sys
 import os
 
-############################### README ###############################
+# ------------------------- README -------------------------
 # Use:
 # For all print/error/warning statements:
 #   import logger from pyHepGrid.src.header

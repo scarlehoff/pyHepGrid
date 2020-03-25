@@ -94,7 +94,7 @@ class Generic_Socket:
             info = socket.gethostbyaddr(host_addr)
             hostname = info[0]
             return hostname
-        except:  # Assume your failure
+        except BaseException:  # Assume your failure
             return host_addr
 
     def close(self):
@@ -155,7 +155,7 @@ class Vegas_Socket(Generic_Socket):
                 return -1
             elif data.decode() == "bye!":
                 return -99  # Exit code
-        except:
+        except BaseException:
             pass
         return int.from_bytes(data, byteorder="little")
 
@@ -341,13 +341,13 @@ def do_server(args, log):
                     log.info("Starting timer for {0} secs".format(
                         int(args.wait)))
                     signal.alarm(int(args.wait))
-            except:
+            except BaseException:
                 break
             greetings = new_client.receive_str()
 
             if greetings == "greetings":
                 # nnlorun.py sends the word "greetins" at the start
-                #print("ARC.py captured")
+                # print("ARC.py captured")
                 clients.append(new_client)
             elif greetings == "oupsities":
                 n_clients_max -= 1

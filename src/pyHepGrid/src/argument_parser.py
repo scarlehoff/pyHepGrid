@@ -25,7 +25,7 @@ def check_mode(rmode, args, logger):
 
 try:
     caller_script = os.path.basename(os.path.realpath(__main__.__file__))
-except:
+except BaseException:
     caller_script = "None"
 
 if caller_script in ("main.py", "pyHepGrid"):
@@ -89,8 +89,8 @@ if caller_script in ("main.py", "pyHepGrid"):
     parser_ini.add_argument("-cw", "--continue_warmup",
                             help="Continue a previous warmup",
                             action="store_true")
-   # LHAPDF initialisation
 
+    # LHAPDF initialisation
     class LHAPDF_initAction(argparse.Action):
         def __init__(self, nargs=0, **kw):
             super().__init__(nargs=nargs, **kw)

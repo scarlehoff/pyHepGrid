@@ -36,7 +36,7 @@ head = importlib.import_module(header_mappings.get(grid_username,
 
 logger.info("Using header file {0}.py".format(head.__name__))
 
-############ General header #################
+# ------------------------- General header -------------------------
 # This should not be changed unless you really know what you are doing!
 # Grid config
 
@@ -70,7 +70,7 @@ socket_exe = "{0}/socket_server.py".format(
     os.path.dirname(os.path.realpath(__file__)))
 sockets_active = 1  # 1 socket == no sockets
 
-############ COPY NAMESPACE FROM MY_HEADER #############
+# --------------------- COPY NAMESPACE FROM MY_HEADER ---------------------
 # Only slightly abusive...
 this_file = sys.modules[__name__]
 
@@ -114,7 +114,7 @@ for i in template_attributes:
                     "functionality may be broken otherwise.")
         sys.exit(1)
 
-#### RUNCARD OVERRIDES ####
+# ------------------------- RUNCARD OVERRIDES -------------------------
 if runcard_file:
     # Check whether the runcard does exists in the given path
     if not os.path.isfile(runcard_file):
@@ -148,8 +148,7 @@ try:
 except ImportError as e:
     pass
 
-#### CMD LINE ARG OVERRIDES ####
-
+# ------------------------- CMD LINE ARG OVERRIDES -------------------------
 try:
     from pyHepGrid.src.argument_parser import additional_arguments
     for attr_name in additional_arguments:
@@ -172,10 +171,11 @@ try:
                     attr_value = ast.literal_eval(attr_value)
                 else:
                     attrtype = type(getattr(this_file, attr_name))
-                    if attrtype is type(dict()):
+                    # TODO clean this up
+                    if attrtype is type(dict()):  # noqa E721
                         import ast
                         attr_value = ast.literal_eval(attr_value)
-                    elif attrtype is not type(None):
+                    elif attrtype is not type(None):  # noqa E721
                         # Casts the value to the type of the value found already
                         # in the header. If not found or the type is None,
                         # defaults to a string.

@@ -118,8 +118,9 @@ def print_short_output(directory, times, skip_count, total_runs):
     directory = directory.split(
         "/")[-2].replace("results_", "").split(".run-")[0]
     hr = " hrs"
-    print("{4:55} {0:<5.2f} +/- {1:<5.2f} {2}   {5:<5.2f} {2} [{3} runs]".format(
-        mean, stdev, hr, len(times), directory, tot))
+    print(
+        "{4:55} {0:<5.2f} +/- {1:<5.2f} {2}   {5:<5.2f} {2} [{3} runs]".format(
+            mean, stdev, hr, len(times), directory, tot))
 
 
 def do_search(args, path):
@@ -172,26 +173,32 @@ def get_dirs():
 
 
 if __name__ == "__main__":
-    parser = ap.ArgumentParser(
-        description="Generate timing information from a directory of log files.")
+    parser = ap.ArgumentParser(description="Generate timing information from a "
+                                           "directory of log files.")
     parser.add_argument('directories', metavar='dir',
                         help='Directories to search.',
                         nargs="*")
     parser.add_argument('--runcard', '-rc',
                         help='runcard.py file to use.')
     parser.add_argument('--verbose', '-v',
-                        help='Outputs a much longer summary.', action="store_true")
+                        help='Outputs a much longer summary.',
+                        action="store_true")
     parser.add_argument('--search', '-f', '-s',
-                        help='search for specific string(s) in runcard dir.', nargs='+')
+                        help='search for specific string(s) in runcard dir.',
+                        nargs='+')
     parser.add_argument('--reject', '-r',
-                        help='reject specific string(s) in runcard dir.', nargs='+')
+                        help='reject specific string(s) in runcard dir.',
+                        nargs='+')
     parser.add_argument('--case_insensitive', '-i',
-                        help='case insensitive search/reject.', action='store_true')
-    parser.add_argument(
-        '--histogram', '-hs', help='histogram output for verbose mode', action='store_true')
+                        help='case insensitive search/reject.',
+                        action='store_true')
+    parser.add_argument('--histogram', '-hs',
+                        help='histogram output for verbose mode',
+                        action='store_true')
 
     args = parser.parse_args()
-    #args.directories = [os.path.join(rootdir, i, "log") for i in args.directories]
+    # args.directories = [os.path.join(rootdir, i, "log")
+    #                       for i in args.directories]
     args.directories = get_dirs()
 
     if args.runcard is not None:

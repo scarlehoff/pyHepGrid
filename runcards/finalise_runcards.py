@@ -4,7 +4,7 @@ import importlib
 from collections import defaultdict
 from fnmatch import fnmatch
 
-#runcards = ["CMS_8TeV_StandardCuts"]
+# runcards = ["CMS_8TeV_StandardCuts"]
 # Auto select all runcards
 
 runcard_basedir = os.path.dirname(os.path.abspath(__file__))

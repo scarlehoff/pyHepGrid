@@ -1,7 +1,9 @@
 import sys
 import os
 import pyHepGrid.src.utilities as util
-############
+
+
+# --------------------------------------------------
 # In order to read new stuff from the fixed part just add here
 valid_channels = ["rr", "rv", "vv", "r", "v", "lo"]
 warmup_extensions = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb",
@@ -127,7 +129,7 @@ class PROGRAMruncard:
         for i in numeric_ids:
             try:
                 float(self.runcard_dict[runcard_linecode[i]])
-            except:
+            except BaseException:
                 self.critical("Line {0} [{1}] should be numeric type. "
                               "Value is instead {2}.".format(
                                   i, runcard_linecode[i],
@@ -190,7 +192,7 @@ class PROGRAMruncard:
         self.debug("{0:<15}: {1:<20} {2}".format(block_name,
                                                  str(rc_dict[block_name]),
                                                  os.path.basename(
-                                                    self.runcard_file)))
+                                                     self.runcard_file)))
 
     def _parse_runcard_from_file(self, filename):
         f = open(filename, 'r', encoding="utf-8")

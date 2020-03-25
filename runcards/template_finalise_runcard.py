@@ -5,7 +5,7 @@ import importlib
 runcard_files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 runcards = [rc.replace(".py", "") for rc in runcard_files if rc.endswith(".py")
             # Or you can hard code them here...
-            #runcards = ["triple_differential"]
+            # runcards = ["triple_differential"]
             and "template" not in rc and "finalise" not in rc]
 
 

@@ -68,8 +68,10 @@ class RuncardStats():
 
     print_string = "{0:<{runcard}} | {1:<{no_files}} | {2:<{modified_time}}"
     tag_flag = False
-    column_names = {"runcard": "Runcard Name", "tag": "Tag",  # Identifies attr names with column titles
-                    "no_files": "No. files", "modified_time": "Last Modified"}  # Currently unused
+    # Identifies attr names with column titles
+    column_names = {"runcard": "Runcard Name", "tag": "Tag",
+                    # Currently unused
+                    "no_files": "No. files", "modified_time": "Last Modified"}
     pads = {"runcard": 5, "tag": 5, "no_files": 9, "modified_time": 20}
 
     def print_format(*args):
@@ -95,10 +97,12 @@ class RuncardStats():
         except IndexError as e:
             self.tag = " - "
         self.modified_time = time.strftime('%Y-%m-%d %H:%M:%S',
-                                           time.localtime(os.path.getmtime(self.logpath)))
+                                           time.localtime(
+                                                os.path.getmtime(self.logpath)))
         self.args = parseargs
         if self.args.tag:
-            RuncardStats.print_string = "{0:<{runcard}} | {1:<{tag}} | {2:<{no_files}} | {3:<{modified_time}}"
+            RuncardStats.print_string = "{0:<{runcard}} | {1:<{tag}} | " +\
+                                        "{2:<{no_files}} | {3:<{modified_time}}"
             RuncardStats.tag_flag = True
         self.adjust_column_widths()
 
@@ -134,11 +138,14 @@ def parser_setup():
     parser.add_argument('--modtime', '-m',
                         help='sort by modification time.', action='store_true')
     parser.add_argument('--case_insensitive', '-i',
-                        help='case insensitive search/reject.', action='store_true')
+                        help='case insensitive search/reject.',
+                        action='store_true')
     parser.add_argument('--search', '-f', '-s',
-                        help='search for specific string(s) in runcard dir.', nargs='+')
+                        help='search for specific string(s) in runcard dir.',
+                        nargs='+')
     parser.add_argument('--reject', '-r',
-                        help='reject specific string(s) in runcard dir.', nargs='+')
+                        help='reject specific string(s) in runcard dir.',
+                        nargs='+')
     parser.add_argument('--total', '-tot',
                         help='include total # of results', action="store_true")
     args = parser.parse_args()

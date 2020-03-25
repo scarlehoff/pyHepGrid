@@ -314,7 +314,7 @@ class Backend(_mode):
             else:
                 outlst = [int(i) for i in status_str.split()]
                 return outlst
-        except:
+        except BaseException:
             return None
 
     def _set_new_status(self, db_id, status):
@@ -415,8 +415,8 @@ class Backend(_mode):
                     destination = finfolder + "/" + "arc_out_" + runcard + \
                         outputfolder
                     util.spCall(["mv", outputfolder, destination])
-                    #util.spCall(["rm", "-rf", outputfolder])
-        except:
+                    # util.spCall(["rm", "-rf", outputfolder])
+        except BaseException:
             logger.info("Couldn't find job output in the ARC server")
             logger.info("jobid: " + jobid)
             logger.info("Run arcstat to check the state of the job")
@@ -476,7 +476,7 @@ class Backend(_mode):
         try:
             os.makedirs("log")
             os.makedirs("dat")
-        except:  # todo: macho... this is like mkdir -p :P
+        except BaseException:  # todo: macho... this is like mkdir -p :P
             pass
         seeds = range(initial_seed, finalSeed)
         # If we are only act on a subrange of jobids (ie, the ones which are

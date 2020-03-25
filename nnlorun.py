@@ -20,7 +20,9 @@ PROTOCOLS = ["xroot", "gsiftp", "dav"]
 LOG_FILE = "run.log"
 COPY_LOG = "copies.log"
 
-####### MISC ABUSIVE SETUP #######
+# ------------------------- MISC ABUSIVE SETUP -------------------------
+
+
 def print_flush(string):
     """
     Override print with custom version that always flushes to stdout so we have
@@ -35,7 +37,7 @@ def print_file(string, logfile=LOG_FILE):
         f.write(string+"\n")
 
 
-####### FILE NAME HELPERS #######
+# ------------------------- FILE NAME HELPERS -------------------------
 def warmup_name(runcard, rname):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-warm-{1}.tar.gz".format(runcard, rname)
@@ -53,7 +55,6 @@ def output_name(runcard, rname, seed):
     # This function must always be the same as the one in Backend.py
     out = "output{0}-{1}-{2}.tar.gz".format(runcard, rname, seed)
     return out
-####### END FILE NAME HELPERS #######
 
 
 # Override os.system with custom version that auto sets debug level on failure
@@ -73,10 +74,10 @@ def do_shell(*args):
 
 
 os.system = do_shell
-####### END MISC ABUSIVE SETUP #######
+# ------------------------- END MISC ABUSIVE SETUP -------------------------
 
 
-####### SETUP/TEARDOWN FUNCTIONS #######
+# ------------------------- SETUP/TEARDOWN FUNCTIONS -------------------------
 def setup():
     start_time = datetime.datetime.now()
     print_flush("Start time: {0}".format(
@@ -177,13 +178,11 @@ def teardown(*statuses):
     print_flush("Final Error Code: {0}".format(ec))
     # fail if any status is non zero
     sys.exit(ec)
-####### END SETUP/TEARDOWN FUNCTIONS #######
 
 
-####### ARGUMENT PARSING #######
 def parse_arguments():
-    default_user_gfal = "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/pheno/{0}".format(
-        getuser())
+    default_user_gfal = ("gsiftp://se01.dur.scotgrid.ac.uk/dpm/" +
+                         "dur.scotgrid.ac.uk/home/pheno/{0}").format(getuser())
     parser = OptionParser(usage="usage: %prog [options]")
 
     parser.add_option("-r", "--runcard", help="Runcard to be run")
@@ -293,10 +292,9 @@ def parse_arguments():
 
     print_flush("Arguments: {0}".format(options))
     return options
-####### END ARGUMENT PARSING #######
 
 
-####### TAR UTILITIES #######
+# ------------------------- TAR UTILITIES -------------------------
 def untar_file(local_file, debug_level):
     if debug_level > 2:
         cmd = "tar zxfv {0}".format(local_file)
@@ -309,10 +307,9 @@ def tar_this(tarfile, sourcefiles):
     cmd = "tar -czf {0} {1}".format(tarfile, sourcefiles)
     stat = os.system(cmd)
     return stat
-####### END TAR UTILITIES #######
 
 
-####### SOCKET HELPERS #######
+# ------------------------- SOCKET HELPERS -------------------------
 def socket_sync_str(host, port, handshake="greetings"):
     # Blocking call, it will receive a str of the form
     # -sockets {0} -ns {1}
@@ -320,10 +317,9 @@ def socket_sync_str(host, port, handshake="greetings"):
     sid.connect((host, int(port)))
     sid.send(handshake)
     return sid.recv(32)
-####### END SOCKET HELPERS #######
 
 
-####### COPY WRAPPER FUNCTIONS #######
+# ------------------------- COPY WRAPPER FUNCTIONS -------------------------
 def bring_files(args):
     bring_status = 0
     if not args.use_cvmfs_lhapdf:
@@ -394,10 +390,9 @@ def store_output(args, socketed=False, socket_config=""):
     else:
         status_copy = copy_to_grid(local_out, output_file, args)
     return status_copy, tar_status
-####### END COPY WRAPPER FUNCTIONS #######
 
 
-####### COPY UTILITIES #######
+# ------------------------- COPY UTILITIES -------------------------
 def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
     filein = os.path.join(args.gfaldir, grid_file)
     fileout = "file://$PWD/{0}".format(local_file)
@@ -598,10 +593,9 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             break
 
     return 9999
-####### END COPY UTILITIES #######
 
 
-####### RUN FUNCTIONS #######
+# ------------------------- RUN FUNCTIONS-------------------------
 def run_executable(nnlojet_command):
     print_flush(" > Executing command: {0}".format(nnlojet_command))
     # Run command
@@ -612,10 +606,9 @@ def run_executable(nnlojet_command):
         print_flush("Something went wrong")
         debug_level = 9999
     return status_nnlojet
-####### END RUN FUNCTIONS #######
 
 
-####### PRINT FUNCTIONS #######
+# ------------------------- PRINT FUNCTIONS -------------------------
 def print_copy_status(args, status_copy):
     if status_copy == 0:
         print_flush("Copied over to grid storage!")
@@ -637,12 +630,9 @@ def print_node_info(outputfile):
     os.system(
         "(python3 --version || echo no python3) >> {0}".format(outputfile))
     os.system("gfal-copy --version >> {0}".format(outputfile))
-####### END PRINT FUNCTIONS #######
 
 
-####################
-###     MAIN     ###
-####################
+# ------------------------- MAIN -------------------------
 if __name__ == "__main__":
     args, debug_level, socket_config = setup()
     bring_status = bring_files(args)

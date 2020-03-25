@@ -35,7 +35,8 @@ runfile = "nnlorun.py"
 
 gfaldir = ("xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/"
            "pheno/{0}/").format(getuser())
-cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/pro/Linux_x86_64_glibc-2.17/bin/"
+cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/pro/" +\
+                      "Linux_x86_64_glibc-2.17/bin/"
 
 # TMUX config
 tmux_location = "tmux"

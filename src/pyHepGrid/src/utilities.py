@@ -11,39 +11,26 @@ import tarfile
 from uuid import uuid4
 
 import pyHepGrid.src.header as header
-#
-# Misc. Utilities
-#
-#
-
+# ------------------------- Misc. Utilities -------------------------
 MAX_COPY_TRIES = 5
 PROTOCOLS = ["xroot", "gsiftp", "dav"]
-
-###################################
 
 
 def pythonVersion():
     try:
         return version_info.major
-    except:
+    except BaseException:
         return 2
-##################################
-
-#
-# Runcard parser
-#
 
 
+# ------------------------- Runcard parser -------------------------
 def expandCard(dummy=None):
     dictCard = header.dictCard
     rcards = dictCard.keys()
     return rcards, dictCard
 
-#
-# Subprocess Wrappers
-#
 
-
+# ------------------------- Subprocess Wrappers -------------------------
 def spCall(cmd, suppress_errors=False, shell=False):
     if shell:
         cmd = [" ".join(cmd)]
@@ -55,7 +42,7 @@ def spCall(cmd, suppress_errors=False, shell=False):
             return subprocess.call(cmd, stderr=subprocess.DEVNULL,
                                    stdout=subprocess.DEVNULL, shell=shell)
         return 0
-    except:
+    except BaseException:
         raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
         return -1
 
@@ -75,15 +62,12 @@ def getOutputCall(cmd, suppress_errors=False, include_return_code=True):
         if include_return_code:
             outstr = (outstr, popen.returncode)
         return outstr
-    except:
+    except BaseException:
         raise Exception("Something went wrong with Popen: ", ' '.join(cmd))
         return -1
 
-#
-# Fileystem Wrappers
-#
 
-
+# ------------------------- Fileystem Wrappers -------------------------
 def unique_filename():
     """ Create a unique filename in /tmp/
     if possible, otherwise create file in current directory
@@ -95,7 +79,7 @@ def unique_filename():
         f = open(filename, 'w')
         f.close()
         return filename
-    except:
+    except BaseException:
         return unique_name
 
 
@@ -136,20 +120,14 @@ def sanitiseGeneratedPath(dailyPath, rname):
     finalPlacement = os.path.join(dailyPath, finalname)
     return finalPlacement
 
-#
-# Miscellaneous helpers
-#
 
-
+# ------------------------- Miscellaneous helpers -------------------------
 def batch_gen(data, batch_size):
     for i in range(0, len(data), batch_size):
         yield data[i:i+batch_size]
 
-#
-# Library initialisation
-#
 
-
+# ------------------------- Library initialisation -------------------------
 def lhapdfIni():
     lha_conf = "lhapdf-config"
     if getOutputCall(["which", lha_conf], include_return_code=False) != "":
@@ -227,11 +205,8 @@ def lhapdfIni():
     shutil.rmtree(lhapdf)
     os.remove(lhapdf_gridname)
 
-#
-# Tar wrappers
-#
 
-
+# ------------------------- Tar wrappers -------------------------
 class TarWrap:
 
     def tarDir(self, inputDir, output_name):
@@ -294,11 +269,8 @@ class TarWrap:
                     matches.append(t.name)
         return matches
 
-#
-# GridUtilities
-#
 
-
+# ------------------------- Grid Utilities -------------------------
 class GridWrap:
     # Defaults
     # Need to refactor post dpm gfal

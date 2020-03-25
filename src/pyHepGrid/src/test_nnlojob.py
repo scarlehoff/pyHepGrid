@@ -32,7 +32,8 @@ def run_test(args, runcard):
     elif args.runSlurm:
         from pyHepGrid.src.runSlurmjob import testWrapper
     elif args.runSlurmProduction:
-        from pyHepGrid.src.runSlurmjob import testWrapperProduction as testWrapper
+        from pyHepGrid.src.runSlurmjob import testWrapperProduction \
+            as testWrapper
     else:
         raise Exception("Choose what you want to test -(A/B/D/E/F)")
 
