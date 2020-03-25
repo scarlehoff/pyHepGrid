@@ -33,16 +33,14 @@ def print_file(string, logfile=LOG_FILE):
     with open(logfile, "a") as f:
         f.write(string+"\n")
 
+
 # This function must always be the same as the one in program.py
-
-
 def warmup_name(runcard, rname):
     out = runcard + "+" + rname + ".tar.gz"
     return out
 
+
 # This function must always be the same as the one in program.py
-
-
 def output_name(runcard, rname, seed):
     out = "output-" + runcard + "-" + rname + "-" + seed + ".tar.gz"
     return out
@@ -63,8 +61,7 @@ def do_shell(*args):
     if retval != 0:
         debug_level = 9999
         print_flush("Error in {0}. Raising debug level to 9999".format(*args))
-    # All non zero error codes will be +ve - can add all to
- determine whether
+    # All non zero error codes will be +ve - can add all to determine whether
     # job is ok
     return abs(retval)
 

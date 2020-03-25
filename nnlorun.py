@@ -21,12 +21,11 @@ LOG_FILE = "run.log"
 COPY_LOG = "copies.log"
 
 ####### MISC ABUSIVE SETUP #######
-# Override print with custom version that always flushes
-to stdout so we have
-# up-to-date logs
-
-
 def print_flush(string):
+    """
+    Override print with custom version that always flushes to stdout so we have
+    up-to-date logs
+    """
     print(string)
     sys.stdout.flush()
 
