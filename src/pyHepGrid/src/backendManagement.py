@@ -41,17 +41,17 @@ class Arc(Backend):
         dictC = self._db_list(fields)
         for job in dictC:
             # Retrieve data from database
-            jobid = str(job['jobid'])
-            rfold = str(job['runfolder'])
-            pfold = str(job['pathfolder']) + "/" + rfold
+            jobid = str(job["jobid"])
+            rfold = str(job["runfolder"])
+            pfold = str(job["pathfolder"]) + "/" + rfold
             flnam = pfold + "/stdout"
             # Create target folder if it doesn't exist
             if not os.path.exists(pfold):
                 os.makedirs(pfold)
-            cmd = self.cmd_print + ' ' + jobid.strip()
+            cmd = self.cmd_print + " " + jobid.strip()
             # It seems script is the only right way to save data with arc
-            stripcm = ['script', '-c', cmd, '-a', 'tmpscript.txt']
-            mvcmd = ['mv', 'tmpscript.txt', flnam]
+            stripcm = ["script", "-c", cmd, "-a", "tmpscript.txt"]
+            mvcmd = ["mv", "tmpscript.txt", flnam]
             util.spCall(stripcm)
             util.spCall(mvcmd)
 
@@ -64,26 +64,28 @@ class Arc(Backend):
     def kill_job(self, jobids, jobinfo):
         """ kills given job """
         self._press_yes_to_continue(
-            "  \033[93m WARNING:\033[0m You are about to kill the job!")
+            "  \033[93m WARNING:\033[0m You are about to kill the job!"
+        )
 
         if len(jobids) == 0:
             header.logger.critical(
                 "No jobids stored associated with this database entry, "
-                "therefore nothing to kill.")
+                "therefore nothing to kill."
+            )
 
         # Kill in groups of 150 for speeeed
         for jobid_set in util.batch_gen(jobids, 150):
             stripped_set = [i.strip() for i in jobid_set]
             cmd = [self.cmd_kill, "-j", header.arcbase] + stripped_set
-            header.logger.debug(
-                "job_kill batch length:{0}".format(len(stripped_set)))
+            header.logger.debug("job_kill batch length:{0}".format(len(stripped_set)))
             util.spCall(cmd)
 
     def clean_job(self, jobids):
         """ remove the sandbox of a given job (including its stdout!) from
         the arc storage """
         self._press_yes_to_continue(
-            "  \033[93m WARNING:\033[0m You are about to clean the job!")
+            "  \033[93m WARNING:\033[0m You are about to clean the job!"
+        )
         for jobid in jobids:
             cmd = [self.cmd_clean, "-j", header.arcbase, jobid.strip()]
             util.spCall(cmd)
@@ -110,12 +112,12 @@ class Arc(Backend):
         cmd_str = "cat /tmp/"
         for jobid in jobids:
             files = util.getOutputCall(
-                ["arcls", jobid], include_return_code=False).split()
+                ["arcls", jobid], include_return_code=False
+            ).split()
             logfiles = [i for i in files if i.endswith(".log")]
             for logfile in logfiles:
                 cmd = cmd_base + [os.path.join(jobid, logfile)] + output_folder
-                output = util.getOutputCall(
-                    cmd, include_return_code=False).split()
+                output = util.getOutputCall(cmd, include_return_code=False).split()
                 for text in output:
                     if ".log" in text:
                         util.spCall((cmd_str + text).split())
@@ -185,13 +187,20 @@ class Dirac(Backend):
         return 0
 
     def get_status(self, status, date):
-        output = set(util.getOutputCall(
-            ['dirac-wms-select-jobs',
-             F'--Status={status}',
-             F'--Owner={header.dirac_name}',
-             '--Maximum=0',  # 0 lists ALL jobs, which is nice :)
-             F'--Date={date}'],
-            include_return_code=False).split("\n")[-2].split(","))
+        output = set(
+            util.getOutputCall(
+                [
+                    "dirac-wms-select-jobs",
+                    f"--Status={status}",
+                    f"--Owner={header.dirac_name}",
+                    "--Maximum=0",  # 0 lists ALL jobs, which is nice :)
+                    f"--Date={date}",
+                ],
+                include_return_code=False,
+            )
+            .split("\n")[-2]
+            .split(",")
+        )
         header.logger.debug(output)
         return output
 
@@ -210,11 +219,11 @@ class Dirac(Backend):
         date = runcard_info["date"].split()[0]
         jobids_set = set(jobids)
         # Get all jobs in each state
-        waiting_jobs = self.get_status('Waiting', date)
-        done_jobs = self.get_status('Done', date)
-        running_jobs = self.get_status('Running', date)
-        fail_jobs = self.get_status('Failed', date)
-        unk_jobs = self.get_status('Unknown', date)
+        waiting_jobs = self.get_status("Waiting", date)
+        done_jobs = self.get_status("Done", date)
+        running_jobs = self.get_status("Running", date)
+        fail_jobs = self.get_status("Failed", date)
+        unk_jobs = self.get_status("Unknown", date)
         failed_jobs_set = jobids_set & fail_jobs
         done_jobs_set = jobids_set & done_jobs
         # Count how many jobs we have in each state
@@ -224,7 +233,7 @@ class Dirac(Backend):
         run = len(jobids_set & running_jobs)
         unk = len(jobids_set & unk_jobs)
         # Save done and failed jobs to the database
-        status = len(jobids)*[0]
+        status = len(jobids) * [0]
         for jobid in failed_jobs_set:
             status[jobids.index(jobid)] = self.cFAIL
         for jobid in done_jobs_set:
@@ -237,13 +246,14 @@ class Dirac(Backend):
     def kill_job(self, jobids, jobinfo):
         """ kill all jobs associated with this run """
         self._press_yes_to_continue(
-            "  \033[93m WARNING:\033[0m You are about to kill all jobs for "
-            "this run!")
+            "  \033[93m WARNING:\033[0m You are about to kill all jobs for " "this run!"
+        )
 
         if len(jobids) == 0:
             header.logger.critical(
                 "No jobids stored associated with this database entry, "
-                "therefore nothing to kill.")
+                "therefore nothing to kill."
+            )
 
         cmd = [self.cmd_kill] + jobids
         util.spCall(cmd)
@@ -268,12 +278,11 @@ class Slurm(Backend):
     def _get_data_warmup(self, db_id):
         fields = ["runcard", "runfolder", "jobid", "pathfolder"]
         data = self.dbase.list_data(self.table, fields, db_id)[0]
-        warmup_output_dir = self.get_local_dir_name(
-            data["runcard"], data["runfolder"])
-        warmup_extensions = (".RRa", ".RRb", ".vRa",
-                             ".vRb", ".vBa", ".vBb", ".log")
-        warmup_files = [i for i in os.listdir(
-            warmup_output_dir) if i.endswith(warmup_extensions)]
+        warmup_output_dir = self.get_local_dir_name(data["runcard"], data["runfolder"])
+        warmup_extensions = (".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb", ".log")
+        warmup_files = [
+            i for i in os.listdir(warmup_output_dir) if i.endswith(warmup_extensions)
+        ]
         header.logger.info("Found files: {0}".format(", ".join(warmup_files)))
         warmup_dir = os.path.join(header.warmup_base_dir, data["runfolder"])
         os.makedirs(warmup_dir, exist_ok=True)
@@ -287,14 +296,12 @@ class Slurm(Backend):
         fields = ["runcard", "runfolder", "jobid", "pathfolder"]
         data = self.dbase.list_data(self.table, fields, db_id)[0]
         production_output_dir = self.get_local_dir_name(
-            data["runcard"], data["runfolder"])
-        dat_files = [i for i in os.listdir(production_output_dir)
-                     if i.endswith(".dat")]
-        log_files = [i for i in os.listdir(production_output_dir)
-                     if i.endswith(".log")]
+            data["runcard"], data["runfolder"]
+        )
+        dat_files = [i for i in os.listdir(production_output_dir) if i.endswith(".dat")]
+        log_files = [i for i in os.listdir(production_output_dir) if i.endswith(".log")]
         header.logger.info(dat_files, data["pathfolder"])
-        production_dir = os.path.join(
-            header.production_base_dir, data["runfolder"])
+        production_dir = os.path.join(header.production_base_dir, data["runfolder"])
         os.makedirs(production_dir, exist_ok=True)
         results_folder = production_dir
         os.makedirs(results_folder, exist_ok=True)
@@ -312,24 +319,31 @@ class Slurm(Backend):
     def cat_log_job(self, jobids, jobinfo, *args, **kwargs):
         import re
         import glob
-        run_dir = self.get_local_dir_name(
-            jobinfo["runcard"], jobinfo["runfolder"])
+
+        run_dir = self.get_local_dir_name(jobinfo["runcard"], jobinfo["runfolder"])
         log_files = [i for i in os.listdir(run_dir) if i.endswith(".log")]
 
         if jobinfo["iseed"] is None:
             jobinfo["iseed"] = 1
-        expected_seeds = set(range(int(jobinfo["iseed"]), int(
-            jobinfo["iseed"])+int(jobinfo["no_runs"])))
+        expected_seeds = set(
+            range(
+                int(jobinfo["iseed"]), int(jobinfo["iseed"]) + int(jobinfo["no_runs"])
+            )
+        )
 
         logseed_regex = re.compile(r".s([0-9]+)\.[^\.]+$")
-        logseeds_in_dir = set([int(logseed_regex.search(i).group(1)) for i
-                               in glob.glob('{0}/*.log'.format(run_dir))])
-        seeds_to_print = (logseeds_in_dir.union(expected_seeds))
+        logseeds_in_dir = set(
+            [
+                int(logseed_regex.search(i).group(1))
+                for i in glob.glob("{0}/*.log".format(run_dir))
+            ]
+        )
+        seeds_to_print = logseeds_in_dir.union(expected_seeds)
 
         cat_logs = []
         for log_file in log_files:
             for seed in seeds_to_print:
-                if F".s{seed}." in log_file:
+                if f".s{seed}." in log_file:
                     cat_logs.append(log_file)
                     seeds_to_print.remove(seed)
                     break
@@ -340,13 +354,18 @@ class Slurm(Backend):
 
     def get_status(self, jobid, status):
         stat = len(
-            [i for i in util.getOutputCall(
-                ["squeue", F"-j{jobid}", "-r", "-t", status],
-                suppress_errors=True, include_return_code=False
-            ).split("\n")[1:]
-                if "error" not in i])  # strip header from results
+            [
+                i
+                for i in util.getOutputCall(
+                    ["squeue", f"-j{jobid}", "-r", "-t", status],
+                    suppress_errors=True,
+                    include_return_code=False,
+                ).split("\n")[1:]
+                if "error" not in i
+            ]
+        )  # strip header from results
         if stat > 0:
-            stat = stat-1
+            stat = stat - 1
         return stat
 
     def stats_job(self, dbid):
@@ -357,41 +376,49 @@ class Slurm(Backend):
         for jobid in jobids:
             running += self.get_status(jobid, "R")
             waiting += self.get_status(jobid, "PD")
-            fail += self.get_status(jobid, "F")+self.get_status(jobid, "CA")
+            fail += self.get_status(jobid, "F") + self.get_status(jobid, "CA")
             tot += self.get_status(jobid, "all")
-        done = tot-fail-waiting-running
+        done = tot - fail - waiting - running
         self.stats_print_setup(runcard_info, dbid=dbid)
         self.print_stats(done, waiting, running, fail, 0, 0, tot)
 
     def cat_job(self, jobids, jobinfo, print_stderr=None, store=False):
         """ print standard output of a given job"""
-        dir_name = self.get_stdout_dir_name(self.get_local_dir_name(
-            jobinfo["runcard"], jobinfo["runfolder"]))
+        dir_name = self.get_stdout_dir_name(
+            self.get_local_dir_name(jobinfo["runcard"], jobinfo["runfolder"])
+        )
         # jobids = length 1 for SLURM jobs - just take the only element here
         jobid = jobids[0]
         output = []
         if jobinfo["jobtype"] == "Production" or "Socket" in jobinfo["jobtype"]:
-            for subjobno in range(1, int(jobinfo["no_runs"])+1):
+            for subjobno in range(1, int(jobinfo["no_runs"]) + 1):
                 stdoutfile = os.path.join(
-                    dir_name, "slurm-{0}_{1}.out".format(jobid, subjobno))
+                    dir_name, "slurm-{0}_{1}.out".format(jobid, subjobno)
+                )
                 if print_stderr:
                     stdoutfile = stdoutfile.replace(".out", ".err")
                 cmd = ["cat", stdoutfile]
                 if not store:
                     util.spCall(cmd)
                 else:
-                    output.append(util.getOutputCall(cmd, suppress_errors=True,
-                                                     include_return_code=False))
+                    output.append(
+                        util.getOutputCall(
+                            cmd, suppress_errors=True, include_return_code=False
+                        )
+                    )
         else:
-            stdoutfile = os.path.join(dir_name, F"slurm-{jobid}.out")
+            stdoutfile = os.path.join(dir_name, f"slurm-{jobid}.out")
             if print_stderr:
                 stdoutfile = stdoutfile.replace(".out", ".err")
             cmd = ["cat", stdoutfile]
             if not store:
                 util.spCall(cmd)
             else:
-                output.append(util.getOutputCall(cmd, suppress_errors=True,
-                                                 include_return_code=False))
+                output.append(
+                    util.getOutputCall(
+                        cmd, suppress_errors=True, include_return_code=False
+                    )
+                )
         if store:
             return output
 
@@ -400,7 +427,8 @@ class Slurm(Backend):
         if len(jobids) == 0:
             header.logger.critical(
                 "No jobids stored associated with this database entry, "
-                "therefore nothing to kill.")
+                "therefore nothing to kill."
+            )
 
         for jobid in jobids:
             util.spCall(["scancel", str(jobid)])
@@ -420,14 +448,15 @@ class Slurm(Backend):
         for jobid in jobids:
             running += self.get_status(jobid, "R")
             waiting += self.get_status(jobid, "PD")
-            fail += self.get_status(jobid, "F")+self.get_status(jobid, "CA")
+            fail += self.get_status(jobid, "F") + self.get_status(jobid, "CA")
             tot += self.get_status(jobid, "all")
-        done = tot-fail-waiting-running
+        done = tot - fail - waiting - running
         self.print_stats(done, waiting, running, fail, 0, 0, tot)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from sys import version_info
+
     print("Test for pyHepGrid.src.backendManagement.py")
     print("Running with: Python ", version_info.major)
     print("This test needs to be ran at gridui")

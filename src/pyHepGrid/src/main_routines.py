@@ -1,4 +1,5 @@
 import pyHepGrid.src.header
+
 """Routines to be used by main.py"""
 
 
@@ -16,8 +17,7 @@ def management_routine(backend, args):
 
     if args.updateArc:
         if not args.runArc:
-            pyHepGrid.src.header.logger.critical(
-                "Update ARC can only be used with ARC")
+            pyHepGrid.src.header.logger.critical("Update ARC can only be used with ARC")
         backend.update_stdout()
         exit(0)
 
@@ -30,9 +30,11 @@ def management_routine(backend, args):
     id_list_raw = str(id_str).split(",")
     id_list = []
     active_ids = backend.get_active_dbids()
-    if len(id_list_raw) == 1 and (id_list_raw[0].lower() == "all"
-                                  or id_list_raw[0] == "-"
-                                  or id_list_raw[0] == ":"):
+    if len(id_list_raw) == 1 and (
+        id_list_raw[0].lower() == "all"
+        or id_list_raw[0] == "-"
+        or id_list_raw[0] == ":"
+    ):
         id_list_raw = active_ids
 
     # Expand out id ranges using delimiters
@@ -56,25 +58,25 @@ def management_routine(backend, args):
     if args.get_grid_stdout:
         if not args.runArc:
             pyHepGrid.src.header.logger.critical(
-                "Getting grid output from stdout only a valid mode for Arc "
-                "warmups")
+                "Getting grid output from stdout only a valid mode for Arc " "warmups"
+            )
 
     for idx, db_id in enumerate(id_list):
         # Setup for printing/function args
-        jdx = idx+1
+        jdx = idx + 1
         request_fields = ["runcard", "jobtype", "runfolder", "iseed", "no_runs"]
-        alljobinfo = backend.dbase.list_data(
-            backend.table, request_fields, db_id)
+        alljobinfo = backend.dbase.list_data(backend.table, request_fields, db_id)
         # raise Exception
         if len(alljobinfo) == 0:
             pyHepGrid.src.header.logger.critical(
-                "Job {0} requested, which does not exist in database".format(
-                    db_id))
+                "Job {0} requested, which does not exist in database".format(db_id)
+            )
         jobinfo = alljobinfo[0]
         jobname = "{0} ({1})".format(jobinfo["runcard"], jobinfo["jobtype"])
         jobid = backend.get_id(db_id)  # a list
-        printstr = "{0} for job" + \
-            " {0}: {3:20} [{1}/{2}]".format(db_id, jdx, no_ids, jobname)
+        printstr = "{0} for job" + " {0}: {3:20} [{1}/{2}]".format(
+            db_id, jdx, no_ids, jobname
+        )
 
         if args.simple_string:
             backend.set_oneliner_output()
@@ -86,17 +88,20 @@ def management_routine(backend, args):
         if args.filter_jobs_by_status is not None:
             pyHepGrid.src.header.logger.warn(
                 "Applying job status filter. Please ensure you have run stats "
-                "directly before this command to update job statuses.")
+                "directly before this command to update job statuses."
+            )
             pyHepGrid.src.header.logger.info(
-                "Job status filter: {0}".format(
-                    " ".join(args.filter_jobs_by_status)))
+                "Job status filter: {0}".format(" ".join(args.filter_jobs_by_status))
+            )
             try:
-                status_codes = [getattr(backend, "c"+i.upper())
-                                for i in args.filter_jobs_by_status]
+                status_codes = [
+                    getattr(backend, "c" + i.upper())
+                    for i in args.filter_jobs_by_status
+                ]
             except AttributeError as e:
                 pyHepGrid.src.header.logger.critical(
-                    "Invalid job status given: {0}".format(
-                        str(e).split(" ")[-1][2:-1]))
+                    "Invalid job status given: {0}".format(str(e).split(" ")[-1][2:-1])
+                )
             statuses = backend._get_old_status(db_id)
             new_joblist = []
             for jid, status in zip(jobid, statuses):
@@ -107,28 +112,25 @@ def management_routine(backend, args):
         if args.stats:
             backend.stats_job(db_id)
         if args.info or args.infoVerbose:
-            pyHepGrid.src.header.logger.info(
-                printstr.format("Retrieving information"))
+            pyHepGrid.src.header.logger.info(printstr.format("Retrieving information"))
             backend.status_job(jobid, args.infoVerbose)
         if args.renewArc:
             pyHepGrid.src.header.logger.info(printstr.format("Renewing proxy"))
             backend.renew_proxy(jobid)
         if args.printme:
-            pyHepGrid.src.header.logger.info(
-                printstr.format("Printing information"))
+            pyHepGrid.src.header.logger.info(printstr.format("Printing information"))
             backend.cat_job(jobid, jobinfo, print_stderr=args.error)
             # As our % complete sometimes has a carriage return :P
             pyHepGrid.src.header.logger.info("\n")
         if args.printmelog:
             pyHepGrid.src.header.logger.info(
-                printstr.format("Printing information from logfile"))
+                printstr.format("Printing information from logfile")
+            )
             backend.cat_log_job(jobid, jobinfo)
         if args.checkwarmup:
-            backend.check_warmup_files(
-                db_id, args.runcard, resubmit=args.resubmit)
+            backend.check_warmup_files(db_id, args.runcard, resubmit=args.resubmit)
         if args.getmewarmup:
-            pyHepGrid.src.header.logger.info(
-                printstr.format("Retrieving warmup"))
+            pyHepGrid.src.header.logger.info(printstr.format("Retrieving warmup"))
             backend.bring_current_warmup(db_id)
         if args.get_grid_stdout:
             backend.get_grid_from_stdout(jobid, jobinfo)
@@ -157,9 +159,23 @@ def management_routine(backend, args):
         if args.disableme:
             backend.disable_db_entry(db_id)
 
-        if not any([args.stats, args.info, args.infoVerbose, args.renewArc,
-                    args.printme, args.printmelog, args.checkwarmup,
-                    args.getmewarmup, args.get_grid_stdout, args.completion,
-                    args.get_data, args.kill_job, args.clean, args.enableme,
-                    args.disableme]):
+        if not any(
+            [
+                args.stats,
+                args.info,
+                args.infoVerbose,
+                args.renewArc,
+                args.printme,
+                args.printmelog,
+                args.checkwarmup,
+                args.getmewarmup,
+                args.get_grid_stdout,
+                args.completion,
+                args.get_data,
+                args.kill_job,
+                args.clean,
+                args.enableme,
+                args.disableme,
+            ]
+        ):
             pyHepGrid.src.header.logger.plain(" ".join(i for i in jobid))

@@ -14,8 +14,7 @@ class ExampleProgram(ProgramInterface):
     # list of 'warmup' (resource) files to include in tarball
     _WARMUP_FILES = []
 
-    def init_production(self, provided_warmup=None, continue_warmup=False,
-                        local=False):
+    def init_production(self, provided_warmup=None, continue_warmup=False, local=False):
         """
         Initialises a production run. If a warmup file is provided
         retrieval step is skipped/
@@ -26,16 +25,18 @@ class ExampleProgram(ProgramInterface):
         """
         import tempfile
         from pyHepGrid.src.header import runcardDir as runFol
-        from pyHepGrid.src.header import executable_exe, executable_src_dir, \
-            grid_input_dir
+        from pyHepGrid.src.header import (
+            executable_exe,
+            executable_src_dir,
+            grid_input_dir,
+        )
 
         if local:
             self.init_local_production(provided_warmup=provided_warmup)
             return
 
         runFolders, dCards = util.expandCard()
-        path_to_exe_full = self._exe_fullpath(
-            executable_src_dir, executable_exe)
+        path_to_exe_full = self._exe_fullpath(executable_src_dir, executable_exe)
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
@@ -57,8 +58,7 @@ class ExampleProgram(ProgramInterface):
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
         if not os.path.isfile(path_to_exe_full):
-            logger.critical(
-                "Could not find executable at {0}".format(path_to_exe_full))
+            logger.critical("Could not find executable at {0}".format(path_to_exe_full))
         else:
             tar_name = os.path.basename(header.grid_executable)
             grid_exe_dir = os.path.dirname(header.grid_executable)
@@ -67,10 +67,9 @@ class ExampleProgram(ProgramInterface):
             upload_exe = True
             if self.gridw.checkForThis(tar_name, grid_exe_dir):
                 if not self._press_yes_to_continue(
-                        "Old executable found. Do you want to remove it?",
-                        fallback=1):
-                    logger.info(
-                        F"Removing old version of {tar_name} from Grid Storage")
+                    "Old executable found. Do you want to remove it?", fallback=1
+                ):
+                    logger.info(f"Removing old version of {tar_name} from Grid Storage")
                     self.gridw.delete(tar_name, grid_exe_dir)
                 else:
                     upload_exe = False
@@ -85,7 +84,9 @@ class ExampleProgram(ProgramInterface):
             base_folder = runName.split("-")[0]
             logger.info(
                 "Initialising {0} to {1} [{2}/{3}]".format(
-                    runName, tarfile, idx + 1, len(runFolders)))
+                    runName, tarfile, idx + 1, len(runFolders)
+                )
+            )
 
             # runcards
             run_dir = os.path.join(runFol, base_folder)
@@ -106,8 +107,8 @@ class ExampleProgram(ProgramInterface):
 
             if self.gridw.checkForThis(tarfile, grid_input_dir):
                 logger.info(
-                    "Removing old version of {0} from Grid Storage".format(
-                        tarfile))
+                    "Removing old version of {0} from Grid Storage".format(tarfile)
+                )
                 self.gridw.delete(tarfile, grid_input_dir)
             logger.info("Sending {0} to {1}".format(tarfile, grid_input_dir))
             self.gridw.send(tarfile, grid_input_dir)

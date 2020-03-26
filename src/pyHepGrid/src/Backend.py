@@ -15,7 +15,7 @@ counter = None
 if header.runmode.upper() in pyHepGrid.src.runmodes.mode_selector:
     _mode = pyHepGrid.src.runmodes.mode_selector[header.runmode.upper()]
 else:
-    package, module = header.runmode.rsplit('.', 1)
+    package, module = header.runmode.rsplit(".", 1)
     _mode = getattr(importlib.import_module(package), module)
     logger.info(f"Overriding run mode to {_mode}")
 
@@ -28,6 +28,7 @@ def init_counter(args):
 class Backend(_mode):
     """ Abstract class
     """
+
     cDONE = 1
     cWAIT = 0
     cFAIL = -1
@@ -48,20 +49,22 @@ class Backend(_mode):
             string = "{0:5} ".format("[{0}]".format(dbid))
 
         if self.stats_one_line:
-            logger.plain(
-                "{0}-{1}: ".format(dbid, runcard_info["runcard"]), end="")
+            logger.plain("{0}-{1}: ".format(dbid, runcard_info["runcard"]), end="")
             return
         if not header.short_stats:
-            string += "=> {0}: {1}".format(runcard_info["runcard"],
-                                           runcard_info["runfolder"])
+            string += "=> {0}: {1}".format(
+                runcard_info["runcard"], runcard_info["runfolder"]
+            )
             logger.plain(string)
         else:
-            string += "{0:20}: {1:10} ".format(runcard_info["runcard"],
-                                               runcard_info["runfolder"])
+            string += "{0:20}: {1:10} ".format(
+                runcard_info["runcard"], runcard_info["runfolder"]
+            )
             logger.plain(string, end="")
 
     def __init__(self, act_only_on_done=False):
         from pyHepGrid.src.header import dbname, baseSeed
+
         self.overwrite_warmup = False
         self.tarw = util.TarWrap()
         self.gridw = util.GridWrap()
@@ -69,9 +72,9 @@ class Backend(_mode):
         self.table = None
         self.bSeed = baseSeed
         self.jobtype_get = {
-            'P': self._get_data_production,
-            'W': self._get_data_warmup,
-            'S': self._get_data_warmup
+            "P": self._get_data_production,
+            "W": self._get_data_warmup,
+            "S": self._get_data_warmup,
         }
         self.assume_yes = False
         self.act_only_on_done = act_only_on_done
@@ -93,8 +96,9 @@ class Backend(_mode):
         if search_fields is None:
             search_fields = ["runcard", "runfolder", "jobtype"]
         if search_string:
-            return self.dbase.find_and_list(self.table, fields,
-                                            search_fields, search_string)
+            return self.dbase.find_and_list(
+                self.table, fields, search_fields, search_string
+            )
         else:
             return self.dbase.list_data(self.table, fields)
 
@@ -104,14 +108,21 @@ class Backend(_mode):
         on if it is not Durham. Since there is no pattern? let's assume anything
         relevant happens before .ac.uk _and_ after the first.
         """
-        comp_element = id_example.split('.ac.uk')[0]
+        comp_element = id_example.split(".ac.uk")[0]
         if "dur" not in comp_element and "." in comp_element:
-            return " at {}".format(comp_element.split('.', 1)[1])
+            return " at {}".format(comp_element.split(".", 1)[1])
         else:
             return ""
 
-    def _multirun(self, function, arguments, n_threads=15,
-                  arglen=None, use_counter=False, timeout=False):
+    def _multirun(
+        self,
+        function,
+        arguments,
+        n_threads=15,
+        arglen=None,
+        use_counter=False,
+        timeout=False,
+    ):
         """ Wrapper for multiprocessing
             For ARC only single thread is allow as the arc database needs
             to be locked
@@ -122,9 +133,8 @@ class Backend(_mode):
         threads = max(min(n_threads, arglen), 1)
 
         if use_counter:
-            counter = mp.Value('i', 0)
-            pool = mp.Pool(threads, initializer=init_counter,
-                           initargs=(counter,))
+            counter = mp.Value("i", 0)
+            pool = mp.Pool(threads, initializer=init_counter, initargs=(counter,))
         else:
             pool = mp.Pool(threads)
         self.dbase.close()
@@ -138,14 +148,12 @@ class Backend(_mode):
     def _check_id_type(self, db_id):
         """ Checks whether a job is production/warmup/socketed
         """
-        production = 'P'
-        socketed_warmup = 'S'
-        warmup = 'W'
-        jobtype = self.dbase.list_data(
-            self.table, ["jobtype"], db_id)[0]["jobtype"]
+        production = "P"
+        socketed_warmup = "S"
+        warmup = "W"
+        jobtype = self.dbase.list_data(self.table, ["jobtype"], db_id)[0]["jobtype"]
         if not jobtype:  # legacy suport (database returns None)
-            idout = self.dbase.list_data(
-                self.table, ["jobid"], db_id)[0]["jobid"]
+            idout = self.dbase.list_data(self.table, ["jobid"], db_id)[0]["jobid"]
             if len(idout.split(" ")) > 1:
                 return production
             else:
@@ -157,8 +165,7 @@ class Backend(_mode):
         elif "Socket" in jobtype:
             return socketed_warmup
         else:
-            idout = self.dbase.list_data(
-                self.table, ["jobid"], db_id)[0]["jobid"]
+            idout = self.dbase.list_data(self.table, ["jobid"], db_id)[0]["jobid"]
             if len(idout.split(" ")) > 1:
                 return production
             else:
@@ -166,27 +173,27 @@ class Backend(_mode):
 
     def get_completion_stats(self, jobid, jobinfo, args):
         from pyHepGrid.src.gnuplot import do_plot
+
         job_outputs = self.cat_job(jobid, jobinfo, store=True)
         vals = []
         for job_stdout in job_outputs:
             for line in reversed(job_stdout.split("\n")):
                 if "Current progress" in line and ".uk" not in line:
-                    vals.append(
-                        int(line.split("\r")[-1].split()[-1].strip()[:-1]))
+                    vals.append(int(line.split("\r")[-1].split()[-1].strip()[:-1]))
                     break
                 elif "Commencing" in line:
                     vals.append(0)
                     break
         histogram = sorted(
-            list(zip(Counter(vals).keys(), Counter(vals).values())),
-            key=lambda x: x[0])
+            list(zip(Counter(vals).keys(), Counter(vals).values())), key=lambda x: x[0]
+        )
         format_string = "| {0:<4}"
         val_line = "{0:<13}".format("% Completion")
         count_line = "{0:<13}".format("# Jobs")
         for element in histogram:
-            val_line += format_string.format(str(element[0])+"%")
+            val_line += format_string.format(str(element[0]) + "%")
             count_line += format_string.format(element[1])
-        divider = "-"*len(val_line)
+        divider = "-" * len(val_line)
         logger.plain(val_line)
         logger.plain(divider)
         logger.plain(count_line)
@@ -208,9 +215,13 @@ class Backend(_mode):
                 newvals.append(i)
                 newcounts.append(0)
 
-        do_plot(newvals, newcounts,
-                title="Completion % Histogram (Unnormalised)",
-                xlabel="% Completion", ylabel="No. of jobs")
+        do_plot(
+            newvals,
+            newcounts,
+            title="Completion % Histogram (Unnormalised)",
+            xlabel="% Completion",
+            ylabel="No. of jobs",
+        )
 
     # External functions for database management
 
@@ -220,7 +231,7 @@ class Backend(_mode):
         """
         jobid = self.dbase.list_data(self.table, ["jobid"], db_id)
         try:
-            idout = jobid[0]['jobid']
+            idout = jobid[0]["jobid"]
         except IndexError:
             logger.info("Selected job is %s out of bounds" % jobid)
             idt = input("> Select id to act upon: ")
@@ -237,7 +248,8 @@ class Backend(_mode):
             else:
                 logger.critical(
                     "In order to act only on 'done' jobs you need to have that "
-                    "info in the db!")
+                    "info in the db!"
+                )
         else:
             return jobid_list
 
@@ -246,7 +258,7 @@ class Backend(_mode):
         """
         jobid = self.dbase.list_data(self.table, ["date"], db_id)
         try:
-            idout = jobid[0]['date']
+            idout = jobid[0]["date"]
         except IndexError:
             logger.info("Selected job is %s out of bounds" % jobid)
             idt = input("> Select id to act upon: ")
@@ -287,8 +299,9 @@ class Backend(_mode):
         runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
 
         n_threads = header.finalise_no_cores
-        status = self._multirun(self._do_stats_job, jobids_lst,
-                                n_threads, arglen=arglen)
+        status = self._multirun(
+            self._do_stats_job, jobids_lst, n_threads, arglen=arglen
+        )
         done = status.count(self.cDONE)
         wait = status.count(self.cWAIT)
         run = status.count(self.cRUN)
@@ -317,7 +330,7 @@ class Backend(_mode):
 
     def _set_new_status(self, db_id, status):
         field_name = "sub_status"
-        status_str = ' '.join(map(str, status))
+        status_str = " ".join(map(str, status))
         self.dbase.update_entry(self.table, db_id, field_name, status_str)
 
     def print_stats(self, done, wait, run, fail, miss, unk, total):
@@ -330,22 +343,22 @@ class Backend(_mode):
             return
 
         if header.short_stats:
+
             def addline(name, val, colour):
                 if val > 0:
                     return "{0}{1}: {2:4}  \033[0m".format(colour, name, val)
                 else:
                     return "{0}: {1:4}  ".format(name, val)
 
-            string = addline("Done", done, '\033[92m')
-            string += addline("Waiting", wait, '\033[93m')
-            string += addline("Running", run, '\033[94m')
-            string += addline("Failed", fail, '\033[91m')
-            string += addline("Missing", miss, '\033[95m')
+            string = addline("Done", done, "\033[92m")
+            string += addline("Waiting", wait, "\033[93m")
+            string += addline("Running", run, "\033[94m")
+            string += addline("Failed", fail, "\033[91m")
+            string += addline("Missing", miss, "\033[95m")
             string += "Total: {0:4}".format(total2)
             logger.plain(string)
         else:
-            logger.plain(
-                " >> Total number of subjobs: {0:<20} {1}".format(total, time))
+            logger.plain(" >> Total number of subjobs: {0:<20} {1}".format(total, time))
             logger.plain("    >> Done:    {0}".format(done))
             logger.plain("    >> Waiting: {0}".format(wait))
             logger.plain("    >> Running: {0}".format(run))
@@ -358,9 +371,11 @@ class Backend(_mode):
         """ version of stats job multithread ready
         """
         if isinstance(jobid_raw, tuple):
-            if (jobid_raw[1] == self.cDONE or
-                    jobid_raw[1] == self.cFAIL or
-                    jobid_raw[1] == self.cMISS):
+            if (
+                jobid_raw[1] == self.cDONE
+                or jobid_raw[1] == self.cFAIL
+                or jobid_raw[1] == self.cMISS
+            ):
                 return jobid_raw[1]
             else:
                 jobid = jobid_raw[0]
@@ -368,7 +383,8 @@ class Backend(_mode):
             jobid = jobid_raw
         cmd = [self.cmd_stat, jobid.strip(), "-j", header.arcbase]
         strOut = util.getOutputCall(
-            cmd, suppress_errors=True, include_return_code=False)
+            cmd, suppress_errors=True, include_return_code=False
+        )
         if "Done" in strOut or "Finished" in strOut:
             return self.cDONE
         elif "Waiting" in strOut or "Queuing" in strOut:
@@ -388,6 +404,7 @@ class Backend(_mode):
         """
         # Retrieve data from database
         from pyHepGrid.src.header import arcbase, grid_warmup_dir
+
         fields = ["runcard", "runfolder", "jobid", "pathfolder"]
         data = self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder = data["runfolder"]
@@ -407,11 +424,9 @@ class Backend(_mode):
                 if outputfolder == "" or (len(outputfolder.split(" ")) > 1):
                     logger.info("Running mv and rm command is not safe here")
                     logger.info("Found blank spaces in the output folder")
-                    logger.info(
-                        "Nothing will be moved to the warmup global folder")
+                    logger.info("Nothing will be moved to the warmup global folder")
                 else:
-                    destination = finfolder + "/" + "arc_out_" + runcard + \
-                        outputfolder
+                    destination = finfolder + "/" + "arc_out_" + runcard + outputfolder
                     util.spCall(["mv", outputfolder, destination])
                     # util.spCall(["rm", "-rf", outputfolder])
         except BaseException:
@@ -429,9 +444,9 @@ class Backend(_mode):
         """
         logger.info(
             "You are going to download all folders corresponding to this "
-            "runcard from grid output")
-        logger.info(
-            "Make sure all runs are finished using the -s or -S options!")
+            "runcard from grid output"
+        )
+        logger.info("Make sure all runs are finished using the -s or -S options!")
         fields = ["runfolder", "runcard", "jobid", "pathfolder", "iseed"]
         data = self.dbase.list_data(self.table, fields, db_id)[0]
         self.rcard = data["runcard"]
@@ -451,23 +466,24 @@ class Backend(_mode):
             logger.info("The starting filename is {}".format(firstName))
             logger.info("The final filename is {}".format(finalName))
             yn = self._press_yes_to_continue(
-                "If you are ok with this, press y", fallback=-1)
+                "If you are ok with this, press y", fallback=-1
+            )
             if yn == 0:
                 break
-            initial_seed = int(
-                input("Please, introduce the starting seed (ex: 400): "))
-            finalSeed = int(
-                input("Please, introduce the final seed (ex: 460): "))
+            initial_seed = int(input("Please, introduce the starting seed (ex: 400): "))
+            finalSeed = int(input("Please, introduce the final seed (ex: 460): "))
         try:
             os.makedirs(self.rfolder)
         except OSError as err:
             if err.errno == 17:
                 logger.info(
-                    F"Tried to create folder {self.rfolder} in this directory."
+                    f"Tried to create folder {self.rfolder} in this directory."
                     "To no avail, we are going to assume the directory was "
-                    "already there")
+                    "already there"
+                )
                 self._press_yes_to_continue(
-                    "", "Folder {} already exists".format(self.rfolder))
+                    "", "Folder {} already exists".format(self.rfolder)
+                )
             else:
                 raise
         os.chdir(self.rfolder)
@@ -489,18 +505,23 @@ class Backend(_mode):
             seeds = new_seed
 
         from pyHepGrid.src.header import finalise_no_cores as n_threads
+
         # Check which of the seeds actually produced some data
         all_remote = self.output_name_array(self.rcard, self.rfolder, seeds)
         all_output = self.gridw.get_dir_contents(header.grid_output_dir).split()
         remote_tarfiles = list(set(all_remote) & set(all_output))
-        logger.info("Found data for {0} of the {1} seeds.".format(
-            len(remote_tarfiles), len(seeds)))
+        logger.info(
+            "Found data for {0} of the {1} seeds.".format(
+                len(remote_tarfiles), len(seeds)
+            )
+        )
 
         # Download said data
         tarfiles = self._multirun(
-            self._do_get_data, remote_tarfiles, n_threads, use_counter=True)
+            self._do_get_data, remote_tarfiles, n_threads, use_counter=True
+        )
         tarfiles = list(filter(None, tarfiles))
-        logger.info("Downloaded 0 files", end='\r')
+        logger.info("Downloaded 0 files", end="\r")
         logger.info("Downloaded {0} files, extracting...".format(len(tarfiles)))
 
         # Extract some information from the first tarfile
@@ -520,14 +541,14 @@ class Backend(_mode):
         """
         local_name = filename.replace("output", "")
         local_file = self.rfolder + "/" + local_name
-        self.gridw.bring(filename, header.grid_output_dir,
-                         local_file, timeout=header.timeout)
+        self.gridw.bring(
+            filename, header.grid_output_dir, local_file, timeout=header.timeout
+        )
         if os.path.isfile(local_name):
             global counter
             if counter:
                 counter.value += 1
-                logger.info("Downloaded {0} files ".format(
-                    counter.value), end='\r')
+                logger.info("Downloaded {0} files ".format(counter.value), end="\r")
             return local_name
         else:
             return None
@@ -536,8 +557,7 @@ class Backend(_mode):
         """
         Extracts runcard and warmup from a tarfile.
         """
-        extensions = ["run", "vRa", "vRb", "vBa",
-                      "vBb", "RRa", "RRb", "log-warmup"]
+        extensions = ["run", "vRa", "vRb", "vBa", "vBb", "RRa", "RRb", "log-warmup"]
         return self.tarw.extract_extensions(tarfile, extensions)
 
     def _do_extract_outputData(self, tarfile):
@@ -565,9 +585,11 @@ class Backend(_mode):
         """
         if custom_get:
             import importlib
+
             sys.path.append(os.path.dirname(os.path.expanduser(custom_get)))
             finalise_mod = importlib.import_module(
-                os.path.basename(custom_get.replace(".py", "")))
+                os.path.basename(custom_get.replace(".py", ""))
+            )
             finalise_mod.do_finalise()
         else:
             # Check whether we are in a production or a warmup run before
@@ -581,39 +603,45 @@ class Backend(_mode):
         those runs matching the search_string in runcard or runfolder will
         apear
         """
-        fields = ["rowid", "jobid", "runcard",
-                  "runfolder", "date", "jobtype", "iseed"]
+        fields = ["rowid", "jobid", "runcard", "runfolder", "date", "jobtype", "iseed"]
         dictC = self._db_list(fields, search_string)
         logger.plain("Active runs: " + str(len(dictC)))
 
         # Could easily be optimised
         offset = 2
-        id_width = max(list(len(str(i["rowid"])) for i in dictC)+[2])+offset
-        runcard_width = max(list(len(i["runcard"].strip())
-                                 for i in dictC)+[7])+offset
-        runname_width = max(list(len(i["runfolder"].strip())
-                                 for i in dictC)+[7])+offset
-        date_width = max(
-            list(len(str(i['date']).split('.')[0].strip())
-                 for i in dictC)+[10])+offset
+        id_width = max(list(len(str(i["rowid"])) for i in dictC) + [2]) + offset
+        runcard_width = (
+            max(list(len(i["runcard"].strip()) for i in dictC) + [7]) + offset
+        )
+        runname_width = (
+            max(list(len(i["runfolder"].strip()) for i in dictC) + [7]) + offset
+        )
+        date_width = (
+            max(list(len(str(i["date"]).split(".")[0].strip()) for i in dictC) + [10])
+            + offset
+        )
         misc_width = 7
 
-        header = "|".join(["id".center(id_width),
-                           "runcard".center(runcard_width),
-                           "runname".center(
-                               runname_width), "date".center(date_width),
-                           "misc".center(misc_width)])
+        header = "|".join(
+            [
+                "id".center(id_width),
+                "runcard".center(runcard_width),
+                "runname".center(runname_width),
+                "date".center(date_width),
+                "misc".center(misc_width),
+            ]
+        )
         logger.plain(header)
-        logger.plain("-"*len(header))
+        logger.plain("-" * len(header))
 
         for i in dictC:
-            rid = str(i['rowid']).center(id_width)
-            ruc = str(i['runcard']).center(runcard_width)
-            run = str(i['runfolder']).center(runname_width)
-            dat = str(i['date']).split('.')[0].center(date_width)
-            misc = str(" "+i['jobtype'])
-            jobids = str(i['jobid'])
-            initial_seed = str(i['iseed'])
+            rid = str(i["rowid"]).center(id_width)
+            ruc = str(i["runcard"]).center(runcard_width)
+            run = str(i["runfolder"]).center(runname_width)
+            dat = str(i["date"]).split(".")[0].center(date_width)
+            misc = str(" " + i["jobtype"])
+            jobids = str(i["jobid"])
+            initial_seed = str(i["iseed"])
             no_jobs = len(jobids.split(" "))
             if no_jobs > 1:
                 if initial_seed and initial_seed != "None":
@@ -633,64 +661,71 @@ class Backend(_mode):
         return all_ids
 
     def _format_args(self, *args, **kwargs):
-        raise Exception("Any children classes of pyHepGrid.src.Backend.py "
-                        "should override this method")
+        raise Exception(
+            "Any children classes of pyHepGrid.src.Backend.py "
+            "should override this method"
+        )
 
     def _get_default_args(self):
         # Defaults arguments that can always go in
         dictionary = {
-            'gfal_location': header.cvmfs_gfal_location,
-            'executable': header.executable_exe,
-            'input_folder': header.grid_input_dir,
-            'output_folder': header.grid_output_dir,
-            'warmup_folder': header.grid_warmup_dir,
-            'lhapdf_grid': header.lhapdf_grid_loc,
-            'lhapdf_local': header.lhapdf_loc,
-            'debug': str(header.debug_level),
-            'gfaldir': header.gfaldir,
-            'events': str(header.events)
+            "gfal_location": header.cvmfs_gfal_location,
+            "executable": header.executable_exe,
+            "input_folder": header.grid_input_dir,
+            "output_folder": header.grid_output_dir,
+            "warmup_folder": header.grid_warmup_dir,
+            "lhapdf_grid": header.lhapdf_grid_loc,
+            "lhapdf_local": header.lhapdf_loc,
+            "debug": str(header.debug_level),
+            "gfaldir": header.gfaldir,
+            "events": str(header.events),
         }
         if header.use_cvmfs_lhapdf:
-            dictionary.update({
-                "use_cvmfs_lhapdf": header.use_cvmfs_lhapdf,
-                "cvmfs_lhapdf_location": header.cvmfs_lhapdf_location})
+            dictionary.update(
+                {
+                    "use_cvmfs_lhapdf": header.use_cvmfs_lhapdf,
+                    "cvmfs_lhapdf_location": header.cvmfs_lhapdf_location,
+                }
+            )
         if header.use_custom_rivet:
-            dictionary.update({
-                "use_custom_rivet": header.use_custom_rivet,
-                "rivet_folder": header.grid_rivet_dir})
+            dictionary.update(
+                {
+                    "use_custom_rivet": header.use_custom_rivet,
+                    "rivet_folder": header.grid_rivet_dir,
+                }
+            )
         if header.copy_log:
             dictionary["copy_log"] = header.copy_log
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):
         dictionary = self._get_default_args()
-        dictionary['runcard'] = runcard
-        dictionary['runname'] = runtag
+        dictionary["runcard"] = runcard
+        dictionary["runname"] = runtag
         return self._format_args(dictionary)
 
     def _get_prod_args(self, runcard, runtag, seed):
         """ Returns all arguments for production running. These arguments should
         match all those required by nnlorun.py"""
         base_string = self._make_base_argstring(runcard, runtag)
-        production_dict = {'Production': None,
-                           'seed': seed}
+        production_dict = {"Production": None, "seed": seed}
         # Pass the current production arguments to the program interface
         # and let it add new arguments
         production_dict = super().include_production_arguments(production_dict)
         production_str = self._format_args(production_dict)
         return base_string + production_str
 
-    def _get_warmup_args(self, runcard, runtag, threads=1,
-                         sockets=None, port=header.port):
+    def _get_warmup_args(
+        self, runcard, runtag, threads=1, sockets=None, port=header.port
+    ):
         """ Returns all necessary arguments for warmup running. These arguments
         should match those required by nnlorun.py."""
         base_string = self._make_base_argstring(runcard, runtag)
-        warmup_dict = {'Warmup': None,
-                       'threads': threads}
+        warmup_dict = {"Warmup": None, "threads": threads}
         if sockets:
-            warmup_dict['port'] = port
-            warmup_dict['Host'] = header.server_host
-            warmup_dict['Sockets'] = None
+            warmup_dict["port"] = port
+            warmup_dict["Host"] = header.server_host
+            warmup_dict["Sockets"] = None
 
         # Pass the current warmup arguments to the program interface
         # and let it add new arguments
@@ -700,8 +735,14 @@ class Backend(_mode):
         return base_string + warmup_str
 
 
-def generic_initialise(runcard, warmup=False, production=False, grid=None,
-                       overwrite_grid=False, local=False):
+def generic_initialise(
+    runcard,
+    warmup=False,
+    production=False,
+    grid=None,
+    overwrite_grid=False,
+    local=False,
+):
     logger.info("Initialising runcard: {0}".format(runcard))
     back = Backend()
 
@@ -714,4 +755,5 @@ def generic_initialise(runcard, warmup=False, production=False, grid=None,
     else:
         logger.critical(
             "Both warmup and production not selected. "
-            "What do you want me to initialise?")
+            "What do you want me to initialise?"
+        )

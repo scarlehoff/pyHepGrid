@@ -32,8 +32,10 @@ class RunDirac(Backend):
             return " {}".format(" ".join(input_args))
         else:
             header.logger.warning("Arguments: {}".format(input_args))
-            raise Exception(F"Type of input arguments: {type(input_args)} "
-                            "not recognised in DIRAC ._format_args")
+            raise Exception(
+                f"Type of input arguments: {type(input_args)} "
+                "not recognised in DIRAC ._format_args"
+            )
 
     def _write_JDL(self, argument_string, start_seed, no_runs, filename=None):
         """ Writes a unique JDL file
@@ -41,11 +43,11 @@ class RunDirac(Backend):
         """
         if not filename:
             filename = util.unique_filename()
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             for i in self.templ:
                 f.write(i)
                 f.write("\n")
-            f.write("Arguments = \"{}\";\n".format(argument_string))
+            f.write('Arguments = "{}";\n'.format(argument_string))
             f.write("Parameters = {0};\n".format(no_runs))
             f.write("ParameterStart = {0};\n".format(start_seed))
             f.write("ParameterStep = 1;\n".format(start_seed))
@@ -70,18 +72,22 @@ class RunDirac(Backend):
         procrun number of jobs to the diract management system
         """
         rncards, dCards = util.expandCard()
-        header.logger.info("Runcards selected: {0}".format(
-            " ".join(r for r in rncards)))
+        header.logger.info(
+            "Runcards selected: {0}".format(" ".join(r for r in rncards))
+        )
         self.runfolder = header.runcardDir
         from pyHepGrid.src.header import baseSeed, producRun
 
         increment = 750
         for r in rncards:
             header.logger.info(
-                "> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
+                "> Submitting {0} job(s) for {1} to Dirac".format(producRun, r)
+            )
             header.logger.info(
                 "> Beginning at seed {0} in increments of {1}.".format(
-                    baseSeed, increment))
+                    baseSeed, increment
+                )
+            )
             self.check_for_existing_output(r, dCards[r])
             jdlfile = None
             args = self._get_prod_args(r, dCards[r], "%s")
@@ -89,26 +95,30 @@ class RunDirac(Backend):
             while remaining_seeds > 0:
                 no_seeds = min(increment, remaining_seeds)
                 jdlfile = self._write_JDL(args, seed_start, no_seeds)
-                max_seed = seed_start+no_seeds-1
+                max_seed = seed_start + no_seeds - 1
                 header.logger.info(
                     " > jdl file path for seeds {0}-{1}: {2}".format(
-                        seed_start, max_seed, jdlfile))
+                        seed_start, max_seed, jdlfile
+                    )
+                )
                 joblist += self._run_JDL(jdlfile)
                 remaining_seeds = remaining_seeds - no_seeds
                 seed_start = seed_start + no_seeds
             # Create daily path
             pathfolder = util.generatePath(False)
             # Create database entr
-            jobStr = ' '.join(joblist)
-            dataDict = {'jobid': jobStr,
-                        'date': str(datetime.now()),
-                        'pathfolder': pathfolder,
-                        'runcard': r,
-                        'runfolder': dCards[r],
-                        'iseed': str(baseSeed),
-                        'no_runs': str(producRun),
-                        'jobtype': "Production",
-                        'status': "active", }
+            jobStr = " ".join(joblist)
+            dataDict = {
+                "jobid": jobStr,
+                "date": str(datetime.now()),
+                "pathfolder": pathfolder,
+                "runcard": r,
+                "runfolder": dCards[r],
+                "iseed": str(baseSeed),
+                "no_runs": str(producRun),
+                "jobtype": "Production",
+                "status": "active",
+            }
             self.dbase.insert_data(self.table, dataDict)
 
 
@@ -116,7 +126,8 @@ def runWrapper(runcard, test=None):
     header.logger.info("Running dirac job for {0}".format(runcard))
     if test:
         header.logger.critical(
-            "--test flag disallowed for Dirac as there is no test queue.")
+            "--test flag disallowed for Dirac as there is no test queue."
+        )
     dirac = RunDirac()
     dirac.run_wrap_production()
 
@@ -125,6 +136,7 @@ def testWrapper(r, dCards):
     header.logger.info("Running dirac job for {0}".format(r))
     dirac = RunDirac()
     return dirac._get_prod_args(r, dCards[r], 1)
+
 
 # code graveyard
 

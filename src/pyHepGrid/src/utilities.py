@@ -11,6 +11,7 @@ import tarfile
 from uuid import uuid4
 
 import pyHepGrid.src.header as header
+
 # ------------------------- Misc. Utilities -------------------------
 MAX_COPY_TRIES = 5
 PROTOCOLS = ["xroot", "gsiftp", "dav"]
@@ -39,11 +40,12 @@ def spCall(cmd, suppress_errors=False, shell=False):
         if not suppress_errors:
             return subprocess.call(cmd, shell=shell)
         else:
-            return subprocess.call(cmd, stderr=subprocess.DEVNULL,
-                                   stdout=subprocess.DEVNULL, shell=shell)
+            return subprocess.call(
+                cmd, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, shell=shell
+            )
         return 0
     except BaseException:
-        raise Exception("Couldn't issue the following command: ", ' '.join(cmd))
+        raise Exception("Couldn't issue the following command: ", " ".join(cmd))
         return -1
 
 
@@ -54,7 +56,8 @@ def getOutputCall(cmd, suppress_errors=False, include_return_code=True):
             popen = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         else:
             popen = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
         outbyt, syserr = popen.communicate()
         header.logger.debug(outbyt)
         header.logger.debug(syserr)
@@ -63,7 +66,7 @@ def getOutputCall(cmd, suppress_errors=False, include_return_code=True):
             outstr = (outstr, popen.returncode)
         return outstr
     except BaseException:
-        raise Exception("Something went wrong with Popen: ", ' '.join(cmd))
+        raise Exception("Something went wrong with Popen: ", " ".join(cmd))
         return -1
 
 
@@ -76,14 +79,14 @@ def unique_filename():
     filename = os.path.join("/tmp/", unique_name)
     # better ask for forgiveness than for permission
     try:
-        f = open(filename, 'w')
+        f = open(filename, "w")
         f.close()
         return filename
     except BaseException:
         return unique_name
 
 
-def checkIfThere(dirPath, filename=''):
+def checkIfThere(dirPath, filename=""):
     if not os.path.exists(os.path.join(dirPath, filename)):
         return False
     else:
@@ -95,7 +98,7 @@ def generatePath(warmup):
     date = datetime.now()
     month = date.strftime("%B")
     day = str(date.day)
-    homePath = os.environ['HOME']
+    homePath = os.environ["HOME"]
     if warmup:
         baseDir = header.warmup_base_dir
     else:
@@ -104,7 +107,7 @@ def generatePath(warmup):
         basePath = homePath + baseDir
         monthlyPath = os.path.join(basePath, month)
         dailyPath = os.path.join(monthlyPath, day)
-    # Only create the folder structure if we are using the "native" get_data
+        # Only create the folder structure if we are using the "native" get_data
         if not header.finalisation_script and not os.path.exists(dailyPath):
             header.logger.info("Creating daily path at {0}".format(dailyPath))
             os.makedirs(dailyPath)
@@ -124,7 +127,7 @@ def sanitiseGeneratedPath(dailyPath, rname):
 # ------------------------- Miscellaneous helpers -------------------------
 def batch_gen(data, batch_size):
     for i in range(0, len(data), batch_size):
-        yield data[i:i+batch_size]
+        yield data[i : i + batch_size]
 
 
 # ------------------------- Library initialisation -------------------------
@@ -132,8 +135,7 @@ def lhapdfIni():
     lha_conf = "lhapdf-config"
     if getOutputCall(["which", lha_conf], include_return_code=False) != "":
         header.logger.info("Using lhapdf-config to get lhapdf directory")
-        lha_raw = getOutputCall([lha_conf, "--prefix"],
-                                include_return_code=False)
+        lha_raw = getOutputCall([lha_conf, "--prefix"], include_return_code=False)
         lha_dir = lha_raw.rstrip()
     else:
         lha_dir = header.lhapdf
@@ -159,24 +161,28 @@ def lhapdfIni():
         for xfile in files:
             fullpath = os.path.join(root, xfile)
             if "share" and ".dat" in fullpath and "._" not in fullpath:
-                if "_0000.dat" not in fullpath and \
-                        header.lhapdf_central_scale_only:
+                if "_0000.dat" not in fullpath and header.lhapdf_central_scale_only:
                     os.remove(fullpath)
                     continue
                 elif header.lhapdf_central_scale_only:
-                    prettyname = fullpath.split(
-                        "/")[-1].replace("_0000.dat", "")
+                    prettyname = fullpath.split("/")[-1].replace("_0000.dat", "")
                     header.logger.info(
                         "Including central PDF for {0} from {1}".format(
-                            prettyname, root))
+                            prettyname, root
+                        )
+                    )
                 setname = re.sub(r"_([0-9]*).dat", "", fullpath.split("/")[-1])
-                member = int(re.search(r"_([0-9]*).dat", fullpath.split("/")[-1]
-                                       ).group(0).replace(
-                    "_", "").replace(".dat", ""))
+                member = int(
+                    re.search(r"_([0-9]*).dat", fullpath.split("/")[-1])
+                    .group(0)
+                    .replace("_", "")
+                    .replace(".dat", "")
+                )
                 pdfs[setname].update(set([member]))
 
-    pdf_file_name = os.path.join(os.path.dirname(
-        os.path.realpath(__file__)), ".pdfinfo")
+    pdf_file_name = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), ".pdfinfo"
+    )
     for key, val in pdfs.items():
         pdfs[key] = list(val)
 
@@ -184,8 +190,9 @@ def lhapdfIni():
     header.logger.info("Writing pdf contents to .pdfinfo file")
 
     with open(pdf_file_name, "w") as pdf_file_obj:
-        pdf_file_obj.write(json.dumps(pdfs, sort_keys=True,
-                                      indent=2, separators=(',', ':')))
+        pdf_file_obj.write(
+            json.dumps(pdfs, sort_keys=True, indent=2, separators=(",", ":"))
+        )
 
     # Tar lhapdf and prepare it to be sent
     lhapdf_remote = header.lhapdf_grid_loc
@@ -194,13 +201,12 @@ def lhapdfIni():
     tar_w = TarWrap()
     grid_w = GridWrap()
     tar_w.tarDir(lhapdf, lhapdf_gridname)
-    size = os.path.getsize(lhapdf_gridname)/float(1 << 20)
+    size = os.path.getsize(lhapdf_gridname) / float(1 << 20)
     header.logger.info("> LHAPDF tar size: {0:>6.3f} MB".format(size))
     if grid_w.checkForThis(lhapdf_gridname, lhapdf_griddir):
         header.logger.info("> Removing previous version of lhapdf in the grid")
         grid_w.delete(lhapdf_gridname, lhapdf_griddir)
-    header.logger.info(
-        "> Sending new lhapdf to grid as {0}".format(lhapdf_gridname))
+    header.logger.info("> Sending new lhapdf to grid as {0}".format(lhapdf_gridname))
     grid_w.send(lhapdf_gridname, lhapdf_griddir)
     shutil.rmtree(lhapdf)
     os.remove(lhapdf_gridname)
@@ -208,31 +214,30 @@ def lhapdfIni():
 
 # ------------------------- Tar wrappers -------------------------
 class TarWrap:
-
     def tarDir(self, inputDir, output_name):
         with tarfile.open(output_name, "w:gz") as output_tar:
             output_tar.add(inputDir)
 
     def tarFiles(self, inputList: list, output_name):
         if not isinstance(inputList, list):
-            raise TypeError("List of files to tar should be a \"list\".")
+            raise TypeError('List of files to tar should be a "list".')
         with tarfile.open(output_name, "w:gz") as output_tar:
             for infile in inputList:
                 output_tar.add(infile)
 
     def listFilesTar(self, tarred_file):
-        with tarfile.open(tarred_file, 'r|gz') as tfile:
+        with tarfile.open(tarred_file, "r|gz") as tfile:
             outp = tfile.getnames()
         return outp
 
     def extractThese(self, tarred_file, listFiles):
-        with tarfile.open(tarred_file, 'r|gz') as tfile:
+        with tarfile.open(tarred_file, "r|gz") as tfile:
             for t in tfile:
                 if t.name in listFiles:
                     tfile.extract(t)
 
     def extractAll(self, tarred_file):
-        with tarfile.open(tarred_file, 'r|gz') as tfile:
+        with tarfile.open(tarred_file, "r|gz") as tfile:
             tfile.extractall()
 
     def extract_extension_to(self, tarred_file, extension_dict):
@@ -241,7 +246,7 @@ class TarWrap:
         if the file has extension "ext" it will be extracted to "path"
         """
         # TODO: I don't like this, I'm sure there is a better way...
-        with tarfile.open(tarred_file, 'r|gz') as tfile:
+        with tarfile.open(tarred_file, "r|gz") as tfile:
             for t in tfile:
                 for ext in extension_dict:
                     if t.name.endswith(ext):
@@ -252,7 +257,7 @@ class TarWrap:
         matches = []
         sizes = []
         tuple_ext = tuple(extensions)
-        with tarfile.open(tarred_file, 'r|gz') as tfile:
+        with tarfile.open(tarred_file, "r|gz") as tfile:
             for t in tfile:
                 if t.name.endswith(tuple_ext):
                     sizes.append(t.size)
@@ -262,7 +267,7 @@ class TarWrap:
     def extract_extensions(self, tarred_file, extensions):
         matches = []
         tuple_ext = tuple(extensions)
-        with tarfile.open(tarred_file, 'r|gz') as tfile:
+        with tarfile.open(tarred_file, "r|gz") as tfile:
             for t in tfile:
                 if t.name.endswith(tuple_ext):
                     tfile.extract(t)
@@ -287,17 +292,20 @@ class GridWrap:
             elif count < 3:  # 3 attempts before asking for input...
                 header.logger.warning(
                     f"{tarfile} could not be copied to the grid storage /for "
-                    f"some reason/ after {count} attempt(s)")
+                    f"some reason/ after {count} attempt(s)"
+                )
                 header.logger.info("Automatically trying again...")
             else:
                 header.logger.warning(
                     f"{tarfile} could not be copied to the grid storage /for "
-                    f"some reason/ after {count} attempt(s)")
+                    f"some reason/ after {count} attempt(s)"
+                )
                 yn = input(" Try again? (y/n) ")
                 if not yn.startswith("y"):
                     header.logger.error(
                         f"{tarfile} was not copied to the grid storage after "
-                        f"{count} attempt(s)")
+                        f"{count} attempt(s)"
+                    )
                     break
             count += 1
         return success
@@ -350,44 +358,44 @@ def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES, force=False):
             infile_tmp = infile.replace(protoc, protocol)
             outfile_tmp = outfile.replace(protoc, protocol)
             header.logger.debug("Attempting Protocol {0}".format(protocol))
-            cmd = "gfal-copy {f} {inf} {outf}".format(f=forcestr,
-                                                      inf=infile_tmp,
-                                                      outf=outfile_tmp)
+            cmd = "gfal-copy {f} {inf} {outf}".format(
+                f=forcestr, inf=infile_tmp, outf=outfile_tmp
+            )
             retval = spCall([cmd], shell=True)
             if retval == 0:
                 return retval
-        # if copying to the grid and it has failed, remove before trying again
+            # if copying to the grid and it has failed, remove before trying again
             if retval != 0 and "file:" not in outfile:
                 os.system("gfal-rm {0}".format(outfile_tmp))
     header.logger.error("Copy failed.")
     return 9999999
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tar = TarWrap()
     grid = GridWrap()
     print("Test for Utilities.py")
     print("Running with: Python ", version_info.major)
     waitEnter = input
     if version_info.major == 2:  # python 2
-        waitEnter = raw_input # noqa
-#    print("This will test access to the GRID and the tar/untar utilities")
-#    print("Press [ENTER] after each test")
-#    a = "TEST_FILE" ; al = [a]; b = "TEST.TAR.GZ"
-#    spCall(["bash", "-c", "echo TEST > " + a])
-#    print("Tar " + a + " into " + b)
-#    tar.tarFiles(al, b)
-#    waitEnter()
-#    print("List files inside " + b)
-#    print(tar.listFilesTar(b))
-#    waitEnter()
-#    print("Extract a from b")
-#    tar.extractThese(b, al)
-#    waitEnter()
-#    print("Extract all from b")
-#    tar.extractAll(b)
-#    waitEnter()
-#    spCall(["rm", a, b])
+        waitEnter = raw_input  # noqa
+    #    print("This will test access to the GRID and the tar/untar utilities")
+    #    print("Press [ENTER] after each test")
+    #    a = "TEST_FILE" ; al = [a]; b = "TEST.TAR.GZ"
+    #    spCall(["bash", "-c", "echo TEST > " + a])
+    #    print("Tar " + a + " into " + b)
+    #    tar.tarFiles(al, b)
+    #    waitEnter()
+    #    print("List files inside " + b)
+    #    print(tar.listFilesTar(b))
+    #    waitEnter()
+    #    print("Extract a from b")
+    #    tar.extractThese(b, al)
+    #    waitEnter()
+    #    print("Extract all from b")
+    #    tar.extractAll(b)
+    #    waitEnter()
+    #    spCall(["rm", a, b])
     print("--------------------------")
     print("Runcard parser:")
     runcards, dictCards, runfolder = expandCard()

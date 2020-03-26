@@ -15,6 +15,7 @@ def socket_sync_str(host, port, handshake="greetings"):
     # Blocking call, it will receive a str of the form
     # -sockets {0} -ns {1}
     import socket
+
     sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sid.connect((host, int(port)))
     sid.send(handshake)

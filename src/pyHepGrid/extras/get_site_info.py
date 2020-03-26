@@ -28,7 +28,7 @@ def get_ce(line):
 def get_idx(string, inlist):
     for idx, val in enumerate(inlist):
         if string in val:
-            return(idx)
+            return idx
 
 
 def good_site_present(line, goodelements):
@@ -40,34 +40,43 @@ def good_site_present(line, goodelements):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--all", "-a",
-                        help="Look at all ces, not just known good ones",
-                        action="store_true",
-                        default=False)
-    parser.add_argument("--rev", "-r",
-                        help="Reverse output",
-                        action="store_false",
-                        default=True)
     parser.add_argument(
-        "--sort", "-s",
+        "--all",
+        "-a",
+        help="Look at all ces, not just known good ones",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--rev", "-r", help="Reverse output", action="store_false", default=True
+    )
+    parser.add_argument(
+        "--sort",
+        "-s",
         help="Sort by given attribute. Case insensitive, and will sort by first"
         " attribute that matches the provided string (e.g -s fre will match "
         "attribute Free.)",
-        nargs="+", default=False)
+        nargs="+",
+        default=False,
+    )
     parser.add_argument(
-        "--print_sort_possibilities", "-psp",
+        "--print_sort_possibilities",
+        "-psp",
         help="Print all attributes that you can sort by. There will be some "
         "duplicates.",
-        action="store_true")
+        action="store_true",
+    )
     parser.add_argument(
-        "--aliases", "-al",
+        "--aliases",
+        "-al",
         help="Print all aliases that can be used in runcards/headers.",
-        action="store_true")
+        action="store_true",
+    )
     args = parser.parse_args()
     return args
 
 
-class CE_Data():
+class CE_Data:
     def __init__(self, line):
         splitln = line.split()
         self.CPU = int(splitln[0])
@@ -90,9 +99,8 @@ class CE_Data():
             elif val < 0:
                 if total is not None:
                     val = "{0}/{1}".format(val, total)
-                    return "{0}{1}: {2:10}  \033[0m".format('\033[91m', name,
-                                                            val)
-                return "{0}{1}: {2:5}  \033[0m".format('\033[91m', name, val)
+                    return "{0}{1}: {2:10}  \033[0m".format("\033[91m", name, val)
+                return "{0}{1}: {2:5}  \033[0m".format("\033[91m", name, val)
             else:
                 if total is not None:
                     val = "{0}/{1}".format(val, total)
@@ -100,41 +108,41 @@ class CE_Data():
                 return "{0}: {1:5}  ".format(name, val)
 
         string = "{0:33} ".format(self.CE)
-        string += addline("Free CPUs", self.Free, '\033[92m',
-                          total=self.CPU)
-        string += addline("Waiting", self.Waiting, '\033[93m')
-        string += addline("Running", self.Running, '\033[94m')
+        string += addline("Free CPUs", self.Free, "\033[92m", total=self.CPU)
+        string += addline("Waiting", self.Waiting, "\033[93m")
+        string += addline("Running", self.Running, "\033[94m")
         string += "Total: {0:4}".format(self.TotJobs)
         return string
 
 
 def get_ces(all_ces):
     from pyHepGrid.src.header import ce_listfile
+
     with open(ce_listfile) as cefile:
         celines = cefile.readlines()
 
     if not all_ces:
-        good_idx = get_idx("Known to work", celines)+1
+        good_idx = get_idx("Known to work", celines) + 1
         end_good_idx = get_idx("Known NOT to work", celines)
         celines = celines[good_idx:end_good_idx]
-    good_elements = [get_ce(line) for line in celines
-                     if "." in line and len(line) > 0]
+    good_elements = [get_ce(line) for line in celines if "." in line and len(line) > 0]
 
-    result = sp.Popen(["lcg-infosites", "ce", "--vo", "pheno"],
-                      stdout=sp.PIPE, stderr=sp.PIPE)
+    result = sp.Popen(
+        ["lcg-infosites", "ce", "--vo", "pheno"], stdout=sp.PIPE, stderr=sp.PIPE
+    )
     out, err = result.communicate()
     site_info = str(out).split("\\n")
     site_info = [si.replace("\\t", "   ") for si in site_info]
-    site_info = [CE_Data(si) for si in site_info if
-                 good_site_present(si, good_elements)]
+    site_info = [
+        CE_Data(si) for si in site_info if good_site_present(si, good_elements)
+    ]
     return site_info
 
 
 def get_most_free_cores():
     """API for main.py to link in"""
     site_info = get_ces(False)
-    site_info = sorted(site_info,
-                       key=lambda x: x.Free, reverse=False)
+    site_info = sorted(site_info, key=lambda x: x.Free, reverse=False)
     return site_info[-1].CE
 
 
@@ -147,26 +155,31 @@ def main():
         this_file = sys.modules[__name__]
         print("> get_site_info.py ce aliases:")
         for alias in sorted(aliases):
-            print("{0:20} {1}".format(alias+":", getattr(this_file, alias)))
+            print("{0:20} {1}".format(alias + ":", getattr(this_file, alias)))
         sys.exit(0)
 
     if args.print_sort_possibilities:
-        attributes = [i for i in dir(site_info[0]) if not i.startswith("__")
-                      and not callable(getattr(site_info[0], i))]
+        attributes = [
+            i
+            for i in dir(site_info[0])
+            if not i.startswith("__") and not callable(getattr(site_info[0], i))
+        ]
         for attr in attributes:
             print(attr)
         sys.exit(0)
 
     if args.sort:
-        attributes = [i for i in dir(site_info[0]) if not i.startswith("__")
-                      and not callable(getattr(site_info[0], i))]
+        attributes = [
+            i
+            for i in dir(site_info[0])
+            if not i.startswith("__") and not callable(getattr(site_info[0], i))
+        ]
         for attribute in attributes:
             if args.sort[0].lower() in attribute.lower():
                 sortval = attribute
                 break
 
-    site_info = sorted(site_info, key=lambda x: getattr(x, sortval),
-                       reverse=args.rev)
+    site_info = sorted(site_info, key=lambda x: getattr(x, sortval), reverse=args.rev)
     for site in site_info:
         print(site)
 

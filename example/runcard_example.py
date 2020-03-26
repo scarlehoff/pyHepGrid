@@ -1,5 +1,6 @@
 import pyHepGrid.src.dbapi as dbapi
 import os
+
 print("Sourcing runcard")
 dictCard = {
     # folder       :   config file / runcard
@@ -20,7 +21,7 @@ jobName = "EXAMPLE_RUN"
 # ARC's jobs database: put this wherever you want
 arcbase = os.path.expanduser("~/.arc/jobs.dat")
 # pyHepGrid SQL database
-dbname = F"{exampleDir}/ARCdb_example.dat"
+dbname = f"{exampleDir}/ARCdb_example.dat"
 
 
 # user-specific global variables (could go in user's header)
@@ -37,7 +38,7 @@ baseSeed = dbapi.get_next_seed(dbname=dbname) + 1
 # import should be relative to this runcard
 runmode = "backend_example.ExampleProgram"
 
-runfile = exampleDir+"/simplerun.py"
+runfile = exampleDir + "/simplerun.py"
 
 # path to your executable: src_dir/exe
 executable_src_dir = exampleDir

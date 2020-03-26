@@ -4,6 +4,7 @@ import sqlite3 as dbapi
 class database(object):
     def __init__(self, db, tables=None, fields=None, logger=None):
         import os
+
         self._setup_logger(logger)
         self.dbname = db
         if not os.path.exists(os.path.dirname(self.dbname)):
@@ -86,8 +87,9 @@ class database(object):
 
     def _is_this_table_here(self, table):
         """ Checks whether table table exists"""
-        query = "SELECT name FROM sqlite_master "\
-                F"WHERE type='table' AND name='{table}';"
+        query = (
+            "SELECT name FROM sqlite_master " f"WHERE type='table' AND name='{table}';"
+        )
         c = self._execute_and_retrieve(query)
         for _ in c:
             c.close()
@@ -153,7 +155,7 @@ class database(object):
         if job_id:
             optional = "where rowid = {}".format(job_id)
         elif not self.list_disabled:
-            optional = "where status = \"active\""
+            optional = 'where status = "active"'
         else:
             optional = ""
         query = "select {0} from {1} {2};".format(keystr, table, optional)
@@ -174,7 +176,7 @@ class database(object):
         if self.list_disabled:
             search_string = "where ("
         else:
-            search_string = "where (status = \"active\") AND ("
+            search_string = 'where (status = "active") AND ('
         search_queries = []
         for field in find_in:
             search_queries.append("{0} like '%{1}%'".format(field, find_this))
@@ -192,7 +194,7 @@ class database(object):
 
     def update_entry(self, table, rowid, field, new_value):
         """ Update a given field for a given table for a given dbid! """
-        query_raw = "update {0} set {1} = \"{2}\" where rowid = {3} ;"
+        query_raw = 'update {0} set {1} = "{2}" where rowid = {3} ;'
         query = query_raw.format(table, field, new_value, rowid)
         self._execute_and_commit(query)
 
@@ -201,20 +203,31 @@ class database(object):
         newStat = "inactive"
         if revert:
             newStat = "active"
-        query = "update " + table + " set status = \"" + newStat + "\""
+        query = "update " + table + ' set status = "' + newStat + '"'
         rid = " where rowid = " + rowid + " ;"
         total_query = query + rid
         self._execute_and_commit(total_query)
 
 
 def get_next_seed(dbname=None):
-    from pyHepGrid.src.header import arctable, arcprodtable, diractable,\
-        slurmtable, slurmprodtable, dbfields, logger
+    from pyHepGrid.src.header import (
+        arctable,
+        arcprodtable,
+        diractable,
+        slurmtable,
+        slurmprodtable,
+        dbfields,
+        logger,
+    )
+
     if dbname is None:
         from pyHepGrid.src.header import dbname
-    db = database(dbname, tables=[arctable, arcprodtable, diractable,
-                                  slurmtable, slurmprodtable],
-                  fields=dbfields, logger=logger)
+    db = database(
+        dbname,
+        tables=[arctable, arcprodtable, diractable, slurmtable, slurmprodtable],
+        fields=dbfields,
+        logger=logger,
+    )
     db.list_disabled = True
     alldata = db.list_data(arctable, ["iseed", "jobid"])
     alldata += db.list_data(arcprodtable, ["iseed", "jobid"])
@@ -224,13 +237,13 @@ def get_next_seed(dbname=None):
     ret_seed = 1
     for run in alldata:
         try:
-            max_seed = int(run["iseed"])+len(run["jobid"].split())
+            max_seed = int(run["iseed"]) + len(run["jobid"].split())
         except TypeError:
             max_seed = ret_seed
         ret_seed = max(max_seed, ret_seed)
     for run in slurmdata:
         try:
-            max_seed = int(run["iseed"])+int(run["no_runs"])
+            max_seed = int(run["iseed"]) + int(run["no_runs"])
         except TypeError:
             max_seed = ret_seed
         ret_seed = max(max_seed, ret_seed)

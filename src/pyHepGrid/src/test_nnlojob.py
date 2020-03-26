@@ -11,8 +11,10 @@ def setup():
     except FileNotFoundError:
         pass
     os.mkdir(header.sandbox_dir)
-    shutil.copyfile(header.runfile, os.path.join(
-        header.sandbox_dir, os.path.basename(header.runfile)))
+    shutil.copyfile(
+        header.runfile,
+        os.path.join(header.sandbox_dir, os.path.basename(header.runfile)),
+    )
     os.chdir(header.sandbox_dir)
     path_to_orig = os.path.relpath(oldpath, os.getcwd())
     header.dbname = os.path.join(path_to_orig, header.dbname)
@@ -30,8 +32,7 @@ def run_test(args, runcard):
     elif args.runSlurm:
         from pyHepGrid.src.runSlurmjob import testWrapper
     elif args.runSlurmProduction:
-        from pyHepGrid.src.runSlurmjob import testWrapperProduction \
-            as testWrapper
+        from pyHepGrid.src.runSlurmjob import testWrapperProduction as testWrapper
     else:
         raise Exception("Choose what you want to test -(A/B/D/E/F)")
 
@@ -45,7 +46,7 @@ def run_test(args, runcard):
     setup()
 
     for r in rncards:
-        nnlojob_args = testWrapper(r, dCards).replace("\"", "").split()
+        nnlojob_args = testWrapper(r, dCards).replace('"', "").split()
         runfile = os.path.basename(header.runfile)
         util.spCall(["chmod", "+x", runfile])
         util.spCall(["./{0}".format(runfile)] + nnlojob_args)

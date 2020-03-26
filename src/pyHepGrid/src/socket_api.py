@@ -10,13 +10,12 @@ def send_command(cmd, target_host):
     ssh_cmd = ["ssh", target_host, cmd]
     return sp.call(ssh_cmd, stdout=sp.DEVNULL)
 
+
 # Tmux Wrapper
 
 
 class Tmux:
-
-    def __init__(self, session_name, target_host, create_new=True,
-                 tmuxloc="tmux"):
+    def __init__(self, session_name, target_host, create_new=True, tmuxloc="tmux"):
         """
         Creates a tmux session 'session_name' in remote 'target_host'
         """
@@ -57,8 +56,7 @@ class Tmux:
         Kills all tmux instances in the remote host
         """
         print("Killing tmux server at {}".format(self.target_computer))
-        return send_command(
-            "{1} kill-server".format(self.tmux), self.target_computer)
+        return send_command("{1} kill-server".format(self.tmux), self.target_computer)
 
     def get_kill_cmd(self):
         cmd = "{1} kill-session -t {0}".format(self.tms, self.tmux)
@@ -76,8 +74,8 @@ class Tmux:
         Check whether a tmux session with a given name exists in remote host
         """
         result = send_command(
-            "{1} has-session -t {0}".format(tms, self.tmux),
-            self.target_computer)
+            "{1} has-session -t {0}".format(tms, self.tmux), self.target_computer
+        )
         if result == 0:
             return True
         else:
@@ -95,6 +93,7 @@ def check_port_blocked(host, port):
     # return blocked
     # Below, only works with host == localhost
     import socket
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.bind((host, port))
@@ -105,10 +104,11 @@ def check_port_blocked(host, port):
         elif e.errno == 99:
             print(
                 "\033[91m WARNING:\033[0m Can't assign address for socket "
-                "server. Check that the server host is your current machine. ")
-            raise(e)
+                "server. Check that the server host is your current machine. "
+            )
+            raise (e)
         else:  # some other error
-            raise(e)
+            raise (e)
     finally:
         s.close()
 
@@ -116,9 +116,14 @@ def check_port_blocked(host, port):
 
 
 def fire_up_socket_server(
-        host, port, n_sockets, wait_time="18000",
-        socket_exe="/mt/home/jmartinez/Gangaless_new/src/socket_server.py",
-        tag="", tmuxloc="tmux"):
+    host,
+    port,
+    n_sockets,
+    wait_time="18000",
+    socket_exe="/mt/home/jmartinez/Gangaless_new/src/socket_server.py",
+    tag="",
+    tmuxloc="tmux",
+):
     """
     Fires up the vegas socket server inside a tmux terminal
     in the given 'host' for 'n_sockets' and with a 'wait_time' (s)
@@ -140,8 +145,9 @@ def fire_up_socket_server(
         waitstr = ""
     else:
         waitstr = "-w {0}".format(wait_time)
-    cmd_server = "{0} -N {1} -p {2} {3} -l {4}".format(socket_exe, n_sockets,
-                                                       port, waitstr, tms)
+    cmd_server = "{0} -N {1} -p {2} {3} -l {4}".format(
+        socket_exe, n_sockets, port, waitstr, tms
+    )
     kill_session_cmd = tmux.get_kill_cmd()
     cmd = "{0} && {1}".format(cmd_server, kill_session_cmd)
     tmux.run_cmd(cmd)
@@ -153,6 +159,7 @@ def socket_sync_str(host, port, handshake):
     # Blocking call, it will receive a str of the form
     # -sockets {0} -ns {1}
     import socket
+
     sid = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sid.connect((host, int(port)))
     sid.send(handshake)

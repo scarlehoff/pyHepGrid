@@ -8,6 +8,7 @@ import pyHepGrid.src.socket_api as sapi
 class RunArc(Backend):
     def __init__(self, prod=False, arcscript=None, **kwargs):
         import os
+
         super(RunArc, self).__init__(**kwargs)
         if not prod:
             self.table = header.arctable
@@ -30,19 +31,20 @@ class RunArc(Backend):
             for key in input_args.keys():
                 arg_value = input_args[key]
                 if arg_value is not None:
-                    string_arg += " \"--{0}\" \"{1}\"".format(key, arg_value)
+                    string_arg += ' "--{0}" "{1}"'.format(key, arg_value)
                 else:
-                    string_arg += " \"--{0}\" ".format(key)
+                    string_arg += ' "--{0}" '.format(key)
             return string_arg
         elif isinstance(input_args, str):
-            return "\"{}\"".format(input_args)
+            return '"{}"'.format(input_args)
         elif isinstance(input_args, list):
-            return "\"{}\"".format("\" \"".join(input_args))
+            return '"{}"'.format('" "'.join(input_args))
         else:
             header.logger.warning("Arguments: {}".format(input_args))
             raise Exception(
                 "Type of input arguments: {} not regocnised in ARC "
-                "._format_args".format(type(input_args)))
+                "._format_args".format(type(input_args))
+            )
 
     def _write_XRSL(self, dictData, filename=None):
         """ Writes a unique XRSL file
@@ -50,17 +52,17 @@ class RunArc(Backend):
         """
         if not filename:
             filename = util.unique_filename()
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             for i in self.templ:
                 f.write(i)
-                f.write('\n')
+                f.write("\n")
             for key in dictData:
                 f.write("(" + key)
                 argument_value = dictData[key].strip()
-                if argument_value[0] == "\"" and argument_value[-1] == "\"":
+                if argument_value[0] == '"' and argument_value[-1] == '"':
                     f.write(" = {})\n".format(argument_value))
                 else:
-                    f.write(" = \"{}\")\n".format(argument_value))
+                    f.write(' = "{}")\n'.format(argument_value))
         return filename
 
     def _run_XRSL(self, filename, test=False, include_retcode=False):
@@ -70,14 +72,15 @@ class RunArc(Backend):
         import random
         from pyHepGrid.src.header import arc_direct
         from pyHepGrid.src.header import split_dur_ce
+
         if test:
             from pyHepGrid.src.header import ce_test as ce
         else:
             from pyHepGrid.src.header import ce_base as ce
+
             # Randomise ce at submission time to reduce load
             if split_dur_ce and ".dur.scotgrid.ac.uk" in ce:
-                ce = random.choice(
-                    ["ce1.dur.scotgrid.ac.uk", "ce2.dur.scotgrid.ac.uk"])
+                ce = random.choice(["ce1.dur.scotgrid.ac.uk", "ce2.dur.scotgrid.ac.uk"])
 
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
         # Can only use direct in Durham. Otherwise fails!
@@ -104,6 +107,7 @@ class RunArc(Backend):
         auto-resubmission
         """
         from pyHepGrid.src.header import warmupthr, jobName, warmup_base_dir
+
         # runcard names (of the form foo.run)
         # dCards, dictionary of { 'runcard' : 'name' }, can include extra info
         if expandedCard is None:
@@ -121,9 +125,11 @@ class RunArc(Backend):
             if ".dur.scotgrid.ac.uk" not in ce:
                 # Can't submit sockets elsewhere than Durham!!!!!!!
                 header.logger.info(
-                    "Current submission computing element: {0}".format(ce))
-                header.logger.critical("Can't submit socketed warmups "
-                                       "to locations other than Durham")
+                    "Current submission computing element: {0}".format(ce)
+                )
+                header.logger.critical(
+                    "Can't submit socketed warmups " "to locations other than Durham"
+                )
         else:
             sockets = False
             n_sockets = 1
@@ -136,39 +142,47 @@ class RunArc(Backend):
         if test and warmupthr > 2:
             self._press_yes_to_continue(
                 "  \033[93m WARNING:\033[0m About to submit job(s) to the test"
-                " queue with {0} threads each.".format(warmupthr))
+                " queue with {0} threads each.".format(warmupthr)
+            )
         if test and n_sockets > 2:
             self._press_yes_to_continue(
                 "  \033[93m WARNING:\033[0m About to submit job(s) to the test"
-                " queue with {0} sockets each.".format(n_sockets))
+                " queue with {0} sockets each.".format(n_sockets)
+            )
 
         self.runfolder = header.runcardDir
         # loop over all .run files defined in runcard.py
 
-        header.logger.info("Runcards selected: {0}".format(
-            " ".join(r for r in rncards)))
+        header.logger.info(
+            "Runcards selected: {0}".format(" ".join(r for r in rncards))
+        )
         port = header.port
         for r in rncards:
             if n_sockets > 1:
                 # Automagically activates the socket and finds the best port for
                 # it!
-                port = sapi.fire_up_socket_server(header.server_host,
-                                                  port, n_sockets,
-                                                  header.wait_time,
-                                                  header.socket_exe,
-                                                  tag="{0}-{1}".format(
-                                                      r, dCards[r]))
+                port = sapi.fire_up_socket_server(
+                    header.server_host,
+                    port,
+                    n_sockets,
+                    header.wait_time,
+                    header.socket_exe,
+                    tag="{0}-{1}".format(r, dCards[r]),
+                )
                 job_type = "Socket={}".format(port)
 
             # Check whether this run has something on the gridStorage
             self.check_for_existing_warmup(r, dCards[r])
             # Generate the XRSL file
-            arguments = self._get_warmup_args(r, dCards[r], threads=warmupthr,
-                                              sockets=sockets, port=port)
-            dictData = {'arguments': arguments,
-                        'jobName': jobName,
-                        'count': str(warmupthr),
-                        'countpernode': str(warmupthr), }
+            arguments = self._get_warmup_args(
+                r, dCards[r], threads=warmupthr, sockets=sockets, port=port
+            )
+            dictData = {
+                "arguments": arguments,
+                "jobName": jobName,
+                "count": str(warmupthr),
+                "countpernode": str(warmupthr),
+            }
             xrslfile = self._write_XRSL(dictData)
             header.logger.debug(" > Path of xrsl file: {0}".format(xrslfile))
 
@@ -177,8 +191,9 @@ class RunArc(Backend):
             try:
                 for _ in range(n_sockets):
                     # Run the file
-                    jobid, retcode = (self._run_XRSL(
-                        xrslfile, test=test, include_retcode=True))
+                    jobid, retcode = self._run_XRSL(
+                        xrslfile, test=test, include_retcode=True
+                    )
                     if int(retcode) != 0:
                         jobid = "None"
                     jobids.append(jobid)
@@ -186,7 +201,8 @@ class RunArc(Backend):
                 print("\n")
                 header.logger.error(
                     "Submission error encountered. Inserting all successful "
-                    "submissions to database")
+                    "submissions to database"
+                )
                 keyquit = interrupt
             # Create daily path
             finally:
@@ -195,19 +211,22 @@ class RunArc(Backend):
                 else:
                     pathfolder = "None"
                 # Create database entry
-                dataDict = {'jobid': ' '.join(jobids),
-                            'date': str(datetime.now()),
-                            'pathfolder': pathfolder,
-                            'runcard': r,
-                            'runfolder': dCards[r],
-                            'jobtype': job_type,
-                            'status': "active", }
+                dataDict = {
+                    "jobid": " ".join(jobids),
+                    "date": str(datetime.now()),
+                    "pathfolder": pathfolder,
+                    "runcard": r,
+                    "runfolder": dCards[r],
+                    "jobtype": job_type,
+                    "status": "active",
+                }
                 if len(jobids) > 0:
                     self.dbase.insert_data(self.table, dataDict)
                 else:
                     header.logger.critical(
                         "No jobids returned, no database entry inserted for "
-                        "submission: {0} {1}".format(r, dCards[r]))
+                        "submission: {0} {1}".format(r, dCards[r])
+                    )
                 port += 1
                 if keyquit is not None:
                     raise keyquit
@@ -219,25 +238,26 @@ class RunArc(Backend):
         """
         r, dcard, seed, jobName, baseSeed, test, jobids = args
         arguments = self._get_prod_args(r, dcard, seed)
-        dictData = {'arguments': arguments,
-                    'jobName': jobName,
-                    'count': str(1),
-                    'countpernode': str(1), }
+        dictData = {
+            "arguments": arguments,
+            "jobName": jobName,
+            "count": str(1),
+            "countpernode": str(1),
+        }
         xrslfile = self._write_XRSL(dictData, filename=None)
-        if(seed == baseSeed):
+        if seed == baseSeed:
             header.logger.debug(
-                " > Path of xrsl file for seed {1}: {0}".format(xrslfile, seed))
+                " > Path of xrsl file for seed {1}: {0}".format(xrslfile, seed)
+            )
 
         # Run the file
-        jobid, retcode = self._run_XRSL(
-            xrslfile, test=test, include_retcode=True)
+        jobid, retcode = self._run_XRSL(xrslfile, test=test, include_retcode=True)
         if int(retcode) != 0:
             jobid = "None"
         jobids.append(jobid)
         return jobid
 
-    def arg_iterator(self, r, dCards, jobName, baseSeed, producRun, test,
-                     jobids):
+    def arg_iterator(self, r, dCards, jobName, baseSeed, producRun, test, jobids):
         for seed in range(baseSeed, baseSeed + producRun):
             yield (r, dCards[r], seed, jobName, baseSeed, test, jobids)
 
@@ -255,8 +275,9 @@ class RunArc(Backend):
         self.runfolder = header.runcardDir
         job_type = "Production"
 
-        header.logger.info("Runcards selected: {0}".format(
-            " ".join(r for r in rncards)))
+        header.logger.info(
+            "Runcards selected: {0}".format(" ".join(r for r in rncards))
+        )
         for r in rncards:
             joblist = []
             # Check whether this run has something on the gridStorage
@@ -269,52 +290,59 @@ class RunArc(Backend):
             if test and producRun > 5:
                 self._press_yes_to_continue(
                     "  \033[93m WARNING:\033[0m About to submit a large "
-                    "number ({0}) of jobs to the test queue.".format(producRun))
+                    "number ({0}) of jobs to the test queue.".format(producRun)
+                )
 
             # use iterator for memory reasons :)
             from multiprocessing import Manager
+
             # Use shared memory list in case of submission failure
             jobids = Manager().list()
             arg_sets = self.arg_iterator(
-                r, dCards, jobName, baseSeed, producRun, test, jobids)
+                r, dCards, jobName, baseSeed, producRun, test, jobids
+            )
 
             try:
-                joblist = self._multirun(self.run_single_production, arg_sets,
-                                         n_threads=min(
-                                             header.arc_submit_threads,
-                                             producRun))
+                joblist = self._multirun(
+                    self.run_single_production,
+                    arg_sets,
+                    n_threads=min(header.arc_submit_threads, producRun),
+                )
             except (Exception, KeyboardInterrupt) as interrupt:
                 print("\n")
                 joblist = jobids
                 header.logger.error(
                     "Submission error encountered. "
-                    "Inserting all successful submissions to database")
+                    "Inserting all successful submissions to database"
+                )
                 keyquit = interrupt
 
             # Create daily path
             pathfolder = util.generatePath(warmup=False)
             # Create database entry
-            jobStr = ' '.join(joblist)
-            dataDict = {'jobid': jobStr,
-                        'date': str(datetime.now()),
-                        'pathfolder': pathfolder,
-                        'runcard': r,
-                        'jobtype': job_type,
-                        'runfolder': dCards[r],
-                        'iseed': str(baseSeed),
-                        'no_runs': str(producRun),
-                        'status': "active", }
+            jobStr = " ".join(joblist)
+            dataDict = {
+                "jobid": jobStr,
+                "date": str(datetime.now()),
+                "pathfolder": pathfolder,
+                "runcard": r,
+                "jobtype": job_type,
+                "runfolder": dCards[r],
+                "iseed": str(baseSeed),
+                "no_runs": str(producRun),
+                "status": "active",
+            }
             if len(joblist) > 0:
                 self.dbase.insert_data(self.table, dataDict)
                 # Set jobs to failed status if no jobid returned
                 dbid = self.get_active_dbids()[-1]
-                statuses = [self.cUNK if i !=
-                            "None" else self.cMISS for i in joblist]
+                statuses = [self.cUNK if i != "None" else self.cMISS for i in joblist]
                 self._set_new_status(dbid, statuses)
             else:
                 header.logger.critical(
                     "No jobids returned, no database entry inserted for "
-                    "submission: {0} {1}".format(r, dCards[r]))
+                    "submission: {0} {1}".format(r, dCards[r])
+                )
             if keyquit is not None:
                 raise keyquit
 
@@ -333,17 +361,18 @@ def runWrapperProduction(runcard, test=None):
 
 # Testing routines - just a wrapper to get the args for nnlojob
 
+
 def testWrapper(r, dCards):
     header.logger.info("Running arc job for {0}".format(r))
     arc = RunArc(arcscript=header.ARCSCRIPTDEFAULT)
-    return arc._get_warmup_args(r, dCards[r], threads=header.warmupthr,
-                                sockets=False)
+    return arc._get_warmup_args(r, dCards[r], threads=header.warmupthr, sockets=False)
 
 
 def testWrapperProduction(r, dCards):
     header.logger.info("Running arc job for {0}".format(r))
     arc = RunArc(prod=True, arcscript=header.ARCSCRIPTDEFAULTPRODUCTION)
     return arc._get_prod_args(r, dCards[r], 1)
+
 
 # Code graveyard
 

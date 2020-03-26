@@ -32,12 +32,13 @@ class RunSlurm(Backend):
             args["exclusive"] = ""
         if len(slurm_exclude) > 0:
             args["exclude_list"] = "#SBATCH --exclude={0}".format(
-                ",".join(slurm_exclude))
+                ",".join(slurm_exclude)
+            )
         else:
             args["exclude_list"] = ""
         args["stderrfile"] = args["stdoutfile"].replace(".out", ".err")
         args["stacksize"] = header.stacksize
-        args["memsize"] = int(threads*header.stacksize*1.2)
+        args["memsize"] = int(threads * header.stacksize * 1.2)
         args["jobName"] = jobName
         if queue is not None:
             args["partition"] = "#SBATCH --partition {0}".format(queue)
@@ -46,9 +47,17 @@ class RunSlurm(Backend):
         args["exe"] = header.executable_exe
         return args
 
-    def _get_warmup_args(self, runcard, tag, threads=1, n_sockets=1,
-                         sockets=None, port=header.port, array=False,
-                         queue=None):
+    def _get_warmup_args(
+        self,
+        runcard,
+        tag,
+        threads=1,
+        n_sockets=1,
+        sockets=None,
+        port=header.port,
+        array=False,
+        queue=None,
+    ):
         """
         Sets and returns arguments to be passed as sbatch commands, which are
         substituted into the warmup SLURM template file using string formatting.
@@ -57,27 +66,35 @@ class RunSlurm(Backend):
         with the corresponding value. Then in the template file, {<option_name>}
         will be replaced by the corresponding value.
         """
-        args = {"runcard": runcard,
-                "runcard_dir": self.get_local_dir_name(runcard, tag),
-                "threads": threads, "sockets": sockets, "port": port,
-                "host": header.server_host,
-                "socketstr": "", "array": ""}
+        args = {
+            "runcard": runcard,
+            "runcard_dir": self.get_local_dir_name(runcard, tag),
+            "threads": threads,
+            "sockets": sockets,
+            "port": port,
+            "host": header.server_host,
+            "socketstr": "",
+            "array": "",
+        }
         if sockets:
-            args["socketstr"] = (" -port {0} -sockets {1} -host {2} -ns "
-                                 "$((${{SLURM_ARRAY_TASK_ID}}))").format(
-                port, n_sockets, header.server_host)
+            args["socketstr"] = (
+                " -port {0} -sockets {1} -host {2} -ns " "$((${{SLURM_ARRAY_TASK_ID}}))"
+            ).format(port, n_sockets, header.server_host)
             args["array"] = "#SBATCH --array=1-{0}".format(n_sockets)
         if array or sockets:
-            args["stdoutfile"] = self.get_stdout_dir_name(
-                args["runcard_dir"])+"slurm-%A_%a.out"
+            args["stdoutfile"] = (
+                self.get_stdout_dir_name(args["runcard_dir"]) + "slurm-%A_%a.out"
+            )
         else:
-            args["stdoutfile"] = self.get_stdout_dir_name(
-                args["runcard_dir"])+"slurm-%j.out"
+            args["stdoutfile"] = (
+                self.get_stdout_dir_name(args["runcard_dir"]) + "slurm-%j.out"
+            )
         args = self.__do_common_args(args, threads, queue)
         return args
 
-    def _get_production_args(self, runcard, tag, baseSeed, producRun, threads,
-                             array=True, queue=None):
+    def _get_production_args(
+        self, runcard, tag, baseSeed, producRun, threads, array=True, queue=None
+    ):
         """
         Sets and returns arguments to be passed as sbatch commands, which are
         substituted into the production SLURM template file using string
@@ -87,23 +104,27 @@ class RunSlurm(Backend):
         with the corresponding value. Then in the template file, {<option_name>}
         will be replaced by the corresponding value.
         """
-        args = {"runcard": runcard,
-                "runcard_dir": self.get_local_dir_name(runcard, tag),
-                "baseSeed": baseSeed, "producRun": producRun,
-                "threads": threads}
+        args = {
+            "runcard": runcard,
+            "runcard_dir": self.get_local_dir_name(runcard, tag),
+            "baseSeed": baseSeed,
+            "producRun": producRun,
+            "threads": threads,
+        }
         if array:
-            args["stdoutfile"] = self.get_stdout_dir_name(
-                args["runcard_dir"])+"slurm-%A_%a.out"
+            args["stdoutfile"] = (
+                self.get_stdout_dir_name(args["runcard_dir"]) + "slurm-%A_%a.out"
+            )
         else:
-            args["stdoutfile"] = self.get_stdout_dir_name(
-                args["runcard_dir"])+"slurm-%j.out"
+            args["stdoutfile"] = (
+                self.get_stdout_dir_name(args["runcard_dir"]) + "slurm-%j.out"
+            )
         args = self.__do_common_args(args, threads, queue)
         # Add arguments coming from the parent interface
         args = super().include_arguments(args)
         return args
 
-    def _run_SLURM(self, filename, args, queue, test=False, socket=None,
-                   n_sockets=1):
+    def _run_SLURM(self, filename, args, queue, test=False, socket=None, n_sockets=1):
         """ Takes a slurm runfile and submits it to the SLURM batch system.
 
         Returns the jobid and queue used for submission"""
@@ -123,7 +144,7 @@ class RunSlurm(Backend):
         the template"""
         if not filename:
             filename = util.unique_filename()
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             slurmfile = template.format(**dictData)
             f.write(slurmfile)
         header.logger.debug(slurmfile)
@@ -139,6 +160,7 @@ class RunSlurm(Backend):
         auto-resubmission
         """
         from pyHepGrid.src.header import warmupthr
+
         if test:
             from pyHepGrid.src.header import test_queue as queue
         else:
@@ -172,9 +194,14 @@ class RunSlurm(Backend):
             if n_sockets > 1:
                 # Automatically activates the socket and finds the best port!
                 port = sapi.fire_up_socket_server(
-                    header.server_host, port, n_sockets, None,
-                    header.socket_exe, tag="{0}-{1}".format(r, dCards[r]),
-                    tmuxloc=header.tmux_location)
+                    header.server_host,
+                    port,
+                    n_sockets,
+                    None,
+                    header.socket_exe,
+                    tag="{0}-{1}".format(r, dCards[r]),
+                    tmuxloc=header.tmux_location,
+                )
                 job_type = "Socket={}".format(port)
             # TODO check if warmup exists? nah
 
@@ -183,34 +210,44 @@ class RunSlurm(Backend):
                 array = True
             else:
                 array = False
-            arguments = self._get_warmup_args(r, dCards[r], n_sockets=n_sockets,
-                                              threads=warmupthr,
-                                              sockets=sockets, port=port,
-                                              array=array, queue=queue)
+            arguments = self._get_warmup_args(
+                r,
+                dCards[r],
+                n_sockets=n_sockets,
+                threads=warmupthr,
+                sockets=sockets,
+                port=port,
+                array=array,
+                queue=queue,
+            )
             slurmfile = self._write_SLURM(arguments, self.templ)
             header.logger.debug(" > Path of slurm file: {0}".format(slurmfile))
             jobids = []
 
-            jobid, runqueue = self._run_SLURM(slurmfile, arguments, queue,
-                                              test=test, n_sockets=n_sockets)
+            jobid, runqueue = self._run_SLURM(
+                slurmfile, arguments, queue, test=test, n_sockets=n_sockets
+            )
             jobids.append(jobid)
 
             # Create database entry
-            dataDict = {'jobid': ' '.join(jobids),
-                        'no_runs': str(n_sockets),
-                        'date': str(datetime.now()),
-                        'pathfolder': arguments["runcard_dir"],
-                        'runcard': r,
-                        'runfolder': dCards[r],
-                        'jobtype': job_type,
-                        'queue': str(runqueue),
-                        'status': "active", }
+            dataDict = {
+                "jobid": " ".join(jobids),
+                "no_runs": str(n_sockets),
+                "date": str(datetime.now()),
+                "pathfolder": arguments["runcard_dir"],
+                "runcard": r,
+                "runfolder": dCards[r],
+                "jobtype": job_type,
+                "queue": str(runqueue),
+                "status": "active",
+            }
             if len(jobids) > 0:
                 self.dbase.insert_data(self.table, dataDict)
             else:
                 header.logger.critical(
                     "No jobids returned, no database entry inserted for "
-                    F"submission: {r} {dCards[r]}")
+                    f"submission: {r} {dCards[r]}"
+                )
             port += 1
 
     def run_wrap_production(self, test=None):
@@ -230,40 +267,48 @@ class RunSlurm(Backend):
         job_type = "Production"
         self.runfolder = header.runcardDir
         from pyHepGrid.src.header import producRun, baseSeed, production_threads
+
         # loop over all .run files defined in runcard.py
 
         header.logger.info("Runcards selected: {0}".format(" ".join(rncards)))
         for r in rncards:
-            self.check_for_existing_output_local(
-                r, dCards[r], baseSeed, producRun)
+            self.check_for_existing_output_local(r, dCards[r], baseSeed, producRun)
 
             # Generate the SLURM file
-            arguments = self._get_production_args(r, dCards[r], baseSeed,
-                                                  producRun, production_threads,
-                                                  array=True, queue=queue)
+            arguments = self._get_production_args(
+                r,
+                dCards[r],
+                baseSeed,
+                producRun,
+                production_threads,
+                array=True,
+                queue=queue,
+            )
             slurmfile = self._write_SLURM(arguments, self.prodtempl)
             header.logger.debug("Path of slurm file: {0}".format(slurmfile))
             jobids = []
-            jobid, runqueue = self._run_SLURM(
-                slurmfile, arguments, queue, test=test)
+            jobid, runqueue = self._run_SLURM(slurmfile, arguments, queue, test=test)
             jobids.append(jobid)
             # Create database entry
-            dataDict = {'jobid': ' '.join(jobids),
-                        'date': str(datetime.now()),
-                        'pathfolder': arguments["runcard_dir"],
-                        'runcard': r,
-                        'runfolder': dCards[r],
-                        'jobtype': job_type,
-                        'queue': str(runqueue),
-                        'iseed': str(baseSeed),
-                        'no_runs': str(producRun),
-                        'status': "active", }
+            dataDict = {
+                "jobid": " ".join(jobids),
+                "date": str(datetime.now()),
+                "pathfolder": arguments["runcard_dir"],
+                "runcard": r,
+                "runfolder": dCards[r],
+                "jobtype": job_type,
+                "queue": str(runqueue),
+                "iseed": str(baseSeed),
+                "no_runs": str(producRun),
+                "status": "active",
+            }
             if len(jobids) > 0:
                 self.dbase.insert_data(self.table, dataDict)
             else:
                 header.logger.critical(
                     "No jobids returned, no database entry inserted for "
-                    F"submission: {r} {dCards[r]}")
+                    f"submission: {r} {dCards[r]}"
+                )
 
 
 def runWrapper(runcard, test=None, expandedCard=None):

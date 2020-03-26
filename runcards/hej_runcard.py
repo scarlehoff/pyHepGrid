@@ -3,10 +3,11 @@
 # Only mandatory option
 import pyHepGrid.src.dbapi as dbapi
 from getpass import getuser
+
 dictCard = {  # first: -r second: -j
     # we use -r as the name and -j as the runcard
     # 'Wp2j_mw_13TeV-all': 'config_all',
-    'Wp2j_HT2_13TeV-all': 'config_all'
+    "Wp2j_HT2_13TeV-all": "config_all"
 }
 
 # You can overwrite any value in your header by specifying the same attribute

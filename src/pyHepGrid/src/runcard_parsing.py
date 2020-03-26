@@ -6,8 +6,20 @@ import pyHepGrid.src.utilities as util
 # --------------------------------------------------
 # In order to read new stuff from the fixed part just add here
 valid_channels = ["rr", "rv", "vv", "r", "v", "lo"]
-warmup_extensions = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb",
-                     ".V", ".R", ".LO", ".RV", ".VV", ".RR"]
+warmup_extensions = [
+    ".RRa",
+    ".RRb",
+    ".vRa",
+    ".vRb",
+    ".vBa",
+    ".vBb",
+    ".V",
+    ".R",
+    ".LO",
+    ".RV",
+    ".VV",
+    ".RR",
+]
 
 valid_channels = ["rr", "rv", "vv", "r", "v", "lo", "rra", "rrb"]
 
@@ -26,8 +38,16 @@ class PROGRAMruncard:
     _setup_logging()]
     """
 
-    def __init__(self, runcard_file=None, runcard_class=None, blocks=None,
-                 logger=None, grid_run=True, use_cvmfs=False, cvmfs_loc=""):
+    def __init__(
+        self,
+        runcard_file=None,
+        runcard_class=None,
+        blocks=None,
+        logger=None,
+        grid_run=True,
+        use_cvmfs=False,
+        cvmfs_loc="",
+    ):
 
         if blocks is None:
             blocks = {"channels": [], "process": {}, "run": {}, "misc": {}}
@@ -43,11 +63,11 @@ class PROGRAMruncard:
             for i in blocks:
                 self.blocks_to_read.append(i.lower())
 
-        #     # Read the runcard into runcard_dict
+            #     # Read the runcard into runcard_dict
             self._parse_runcard_from_file(runcard_file)
 
-        #     # Safety Checks
-        #     # Check channels
+            #     # Safety Checks
+            #     # Check channels
             self.debug("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i.lower())
@@ -65,6 +85,7 @@ class PROGRAMruncard:
 
     def __check_local_pdf(self):
         from subprocess import Popen, PIPE
+
         pdf, member = self.parse_pdf_entry()
         cmd = ["lhapdf", "ls", "--installed"]
         outbyt = Popen(cmd, stdout=PIPE).communicate()[0]
@@ -73,13 +94,14 @@ class PROGRAMruncard:
             assert pdf in pdfs
             self.debug("PDF set found")
         except AssertionError:
-            self.critical("PDF set {0} is not installed "
-                          "in local version of LHAPDF".format(pdf))
+            self.critical(
+                "PDF set {0} is not installed " "in local version of LHAPDF".format(pdf)
+            )
 
     def __check_grid_pdf(self, use_cvmfs=False, cvmfs_loc=""):
         import json
-        infofile = os.path.join(os.path.dirname(
-            os.path.realpath(__file__)), ".pdfinfo")
+
+        infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".pdfinfo")
         pdf, member = self.parse_pdf_entry()
         if not use_cvmfs:
             try:
@@ -91,7 +113,8 @@ class PROGRAMruncard:
                     except KeyError:
                         self.critical(
                             "PDF set {0} is not included in currently "
-                            "initialised version of LHAPDF".format(pdf))
+                            "initialised version of LHAPDF".format(pdf)
+                        )
                     try:
                         assert int(member) in members
                         self.debug("PDF member found")
@@ -99,7 +122,9 @@ class PROGRAMruncard:
                         self.critical(
                             "PDF member {1} for PDF set {0} is not included in "
                             "currently initialised version of LHAPDF".format(
-                                pdf, member))
+                                pdf, member
+                            )
+                        )
             except FileNotFoundError:
                 self.warning("No PDF info file found. Skipping check.")
         else:
@@ -107,14 +132,14 @@ class PROGRAMruncard:
             bindir = "{0}/bin/".format(cvmfs_loc)
             os.environ["LHA_DATA_PATH"] = sharedir
             os.environ["LHAPATH"] = sharedir
-            cvmfs_pdfs = util.getOutputCall(
-                [bindir+"lhapdf", "ls", "--installed"])
+            cvmfs_pdfs = util.getOutputCall([bindir + "lhapdf", "ls", "--installed"])
             cvmfs_pdfs = [i.strip() for i in cvmfs_pdfs.split()]
             if pdf not in cvmfs_pdfs:
                 self.critical(
                     "PDF set {0} is not included in cvmfs LHAPDF. "
                     "Turn cvmfs PDF off and use your own one "
-                    "(or ask the admins nicely...".format(pdf))
+                    "(or ask the admins nicely...".format(pdf)
+                )
             else:
                 self.debug("PDF set found in cvmfs LHAPDF setup")
 
@@ -134,10 +159,14 @@ class PROGRAMruncard:
             try:
                 float(self.runcard_dict[runcard_linecode[i]])  # noqa
             except BaseException:
-                self.critical("Line {0} [{1}] should be numeric type. "
-                              "Value is instead {2}.".format(
-                                  i, runcard_linecode[i],  # noqa
-                                  self.runcard_dict[runcard_linecode[i]]))  # noqa
+                self.critical(
+                    "Line {0} [{1}] should be numeric type. "
+                    "Value is instead {2}.".format(
+                        i,
+                        runcard_linecode[i],  # noqa
+                        self.runcard_dict[runcard_linecode[i]],
+                    )
+                )  # noqa
                 print(self.logger)
 
     # Safety check functions
@@ -154,8 +183,10 @@ class PROGRAMruncard:
                 int(element)  # numeric channel
             except ValueError:
                 if element not in valid_channels:
-                    self.error("{0} is not a valid channel in your PROGRAM "
-                               "runcard.".format(element.upper()))
+                    self.error(
+                        "{0} is not a valid channel in your PROGRAM "
+                        "runcard.".format(element.upper())
+                    )
                     sys.exit(-1)
 
     def _parse_block(self, block_name, blocks):
@@ -193,13 +224,16 @@ class PROGRAMruncard:
                     elif "=" in splitline[1:]:
                         blocks["misc"][splitline[1].lower()] = splitline[3]
         rc_dict[block_name] = block_content
-        self.debug("{0:<15}: {1:<20} {2}".format(block_name,
-                                                 str(rc_dict[block_name]),
-                                                 os.path.basename(
-                                                     self.runcard_file)))
+        self.debug(
+            "{0:<15}: {1:<20} {2}".format(
+                block_name,
+                str(rc_dict[block_name]),
+                os.path.basename(self.runcard_file),
+            )
+        )
 
     def _parse_runcard_from_file(self, filename):
-        f = open(filename, 'r', encoding="utf-8")
+        f = open(filename, "r", encoding="utf-8")
         self.name = filename.split("/")[-1]
         self.runcard_file = filename
         # Read entire runcard removing comments
@@ -252,25 +286,26 @@ class PROGRAMruncard:
         channels = channels_raw.strip().lower()
         channels = self.runcard_dict["channels"][-1].lower()
 
-        if channels in ['b', 'lo', 'v', 'vv']:
+        if channels in ["b", "lo", "v", "vv"]:
             warmup_suffix = channels.upper()
-        elif channels in ['rv', 'r']:
+        elif channels in ["rv", "r"]:
             warmup_suffix = channels.upper()
-        elif channels in ['rr']:
+        elif channels in ["rr"]:
             try:
-                warmup_suffix = channels.upper(
-                ) + self.runcard_dict["misc"]["region"]
+                warmup_suffix = channels.upper() + self.runcard_dict["misc"]["region"]
             except KeyError:
                 warmup_suffix = channels.upper()
         else:
             print("anomaly: channels.upper() is", channels.upper())
-            warmup_suffix = ''
+            warmup_suffix = ""
         process_name = self.runcard_dict["process"]["process"]
         runname = self.runcard_dict["run"]["run"]
-        tech_cut = '{0:.2E}'.format(
-            float(self.runcard_dict["run"]["tcut"].replace("d", "E")))
+        tech_cut = "{0:.2E}".format(
+            float(self.runcard_dict["run"]["tcut"].replace("d", "E"))
+        )
         warmup_name = "{0}.{1}.y{2}.{3}".format(
-            process_name, runname, tech_cut, warmup_suffix)
+            process_name, runname, tech_cut, warmup_suffix
+        )
 
         return warmup_name
 

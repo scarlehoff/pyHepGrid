@@ -26,8 +26,7 @@ def scratch_dir(folder):
 runcardDir = base_dir("Setup/")
 provided_warmup_dir = runcardDir
 # local directory for exe (TODO not used yet for automatic upload)
-executable_src_dir = "/mt/home/{0}/HEJ/reversed_hej/installed/".format(
-    getuser())
+executable_src_dir = "/mt/home/{0}/HEJ/reversed_hej/installed/".format(getuser())
 # Executable name
 executable_exe = "HEJ/bin/HEJ"
 
@@ -43,7 +42,7 @@ stacksize = 5000  # MB RAM per job smaller->higher priority (slurm only)
 runmode = "HEJ"
 
 # actual file to run
-runfile = os.path.dirname(os.path.realpath(__file__+"/../.."))+"/hejrun.py"
+runfile = os.path.dirname(os.path.realpath(__file__ + "/../..")) + "/hejrun.py"
 
 # grid storage (gfal) options
 grid_input_dir = "tst_grid/input"
@@ -54,12 +53,12 @@ grid_warmup_dir = "HEJ/HEJ.tar.gz"
 warmup_base_dir = ""
 production_base_dir = "/ResultsRunGrids"
 
-gfaldir = ("xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk" +
-           "/home/pheno/{0}/").format(getuser())
+gfaldir = (
+    "xroot://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk" + "/home/pheno/{0}/"
+).format(getuser())
 # set to None for environment gfal
 # relies on "pro" symlink
-cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/pro/" +\
-                      "Linux_x86_64_glibc-2.17/bin/"
+cvmfs_gfal_location = "/cvmfs/dirac.egi.eu/dirac/pro/" + "Linux_x86_64_glibc-2.17/bin/"
 
 # Lhapdf config
 cvmfs_lhapdf_location = "/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current"
