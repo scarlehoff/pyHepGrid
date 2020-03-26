@@ -102,9 +102,7 @@ ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
 ce_listfile = "computing_elements.txt"
 arcbase = scratch_dir("arc_jobs.dat")  # arc database
-# Threads for use in arc submission. Raising this too high /may/ result
-arc_submit_threads = 10
-# in some job loss due to filesystem locks on arc jobs database.
+arc_submit_threads = 1
 
 # DIRAC parameters
 dirac_name = "marian.heil"
