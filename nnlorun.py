@@ -438,10 +438,7 @@ def remove_file(filepath, args, tries=5, protocol=None):
             print_file("   > Command issued: {cmd}".format(
                 cmd=rmcmd), logfile=COPY_LOG)
         if debug_level > 1:
-            if hasattr(e, 'message'):
-                print_flush(e.message)
-            else:
-                print_flush(e)
+            print_flush(e)
         return 1
 
     return 0
@@ -478,10 +475,7 @@ def test_file_presence(filepath_in, args, protocol=None):
                 print_file("   > Command issued: {cmd}".format(
                     cmd=lscmd), logfile=COPY_LOG)
             if debug_level > 1:
-                if hasattr(e, 'message'):
-                    print_flush(e.message)
-                else:
-                    print_flush(e)
+                print_flush(e)
 
     if debug_level > 1:
         print_file("Gfal-ls failed for all protocols.")
@@ -508,10 +502,7 @@ def get_hash(filepath, args, algo="MD5", protocol=None):
             print_file("   > Command issued: {cmd}".format(
                 cmd=hashcmd), logfile=COPY_LOG)
         if debug_level > 1:
-            if hasattr(e, 'message'):
-                print_flush(e.message)
-            else:
-                print_flush(e)
+            print_flush(e)
         if protocol == "gsiftp":  # try again when gsiftp is down
             return get_hash(filepath, args, algo=algo, protocol="dav")
         return None
