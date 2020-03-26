@@ -11,9 +11,7 @@ on:
 
 jobs:
   flake8:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -25,3 +23,17 @@ jobs:
         pip install flake8 flake8-bugbear
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --show-source --statistics --count
+
+  pr-lint:
+    # Automaticall format code with black https://github.com/psf/black
+    # only triggers if the other tests worked, since automatic pushing does not
+    # trigger the workflow again
+    needs: flake8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        name: Checkout
+      - uses: Ahuge/black-action@v1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BLACK_ARGS: "."
