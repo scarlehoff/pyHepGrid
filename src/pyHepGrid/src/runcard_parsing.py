@@ -126,14 +126,17 @@ class PROGRAMruncard:
 
     def _check_numeric(self):
         """ Asserts that runcard elements that need to be numeric indeed are """
+        # FIXME runcard_linecode is not specified.
+        # Where is it coming from? What is this doing?
+        # This complete functio is never called. Can it go?
         for i in numeric_ids:
             try:
-                float(self.runcard_dict[runcard_linecode[i]])
+                float(self.runcard_dict[runcard_linecode[i]])  # noqa
             except BaseException:
                 self.critical("Line {0} [{1}] should be numeric type. "
                               "Value is instead {2}.".format(
-                                  i, runcard_linecode[i],
-                                  self.runcard_dict[runcard_linecode[i]]))
+                                  i, runcard_linecode[i],  # noqa
+                                  self.runcard_dict[runcard_linecode[i]]))  # noqa
                 print(self.logger)
 
     # Safety check functions
