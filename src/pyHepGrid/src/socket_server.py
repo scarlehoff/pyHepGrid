@@ -412,6 +412,6 @@ if __name__ == "__main__":
 
     try:
         do_server(args, log)
-    except (Exception, KeyboardInterrupt) as e:
+    except (Exception, KeyboardInterrupt):
         log.exception("Encountered Exception")  # Prints stack trace
         exit(-1)

@@ -193,9 +193,6 @@ class Backend(_mode):
         if not args.gnuplot:
             return
 
-        rawvals = [i[0] for i in histogram]
-        rawcounts = [i[1] for i in histogram]
-
         newvals = []
         newcounts = []
         for i in range(0, 105, 5):
@@ -511,7 +508,7 @@ class Backend(_mode):
                 break
 
         # Extract all
-        dummy = self._multirun(self._do_extract_outputData, tarfiles, n_threads)
+        self._multirun(self._do_extract_outputData, tarfiles, n_threads)
         os.chdir("..")
         logger.info("Everything saved at {0}".format(pathfolder))
         util.spCall(["mv", self.rfolder, pathfolder])

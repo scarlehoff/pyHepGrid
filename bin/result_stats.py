@@ -59,7 +59,7 @@ def get_stats(args):
                 try:
                     retval = RuncardStats(fullpath, thing, args)
                     stats.append(retval)
-                except OSError as e:
+                except OSError:
                     pass
     return stats
 
@@ -94,7 +94,7 @@ class RuncardStats():
             "results_", "").split(".run-")[0]+".run"
         try:
             self.tag = self.directory.split(".run-")[1]
-        except IndexError as e:
+        except IndexError:
             self.tag = " - "
         self.modified_time = time.strftime('%Y-%m-%d %H:%M:%S',
                                            time.localtime(

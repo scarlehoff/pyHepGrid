@@ -2,7 +2,6 @@
 Short script to kill tmux servers when a warmup is complete. Essentially does
 the job that nnlorun.py does at the end of an arc warmup.
 """
-import socket
 import sys
 
 if len(sys.argv) == 1:  # No socketstr

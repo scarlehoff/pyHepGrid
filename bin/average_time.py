@@ -58,7 +58,7 @@ def compile_time_info(directory):
                     times.append(float(time_data))
                 else:
                     skip_count += 1
-            except (TypeError, ValueError) as e:
+            except (TypeError, ValueError):
                 skip_count += 1
     times = np.array(times)
     return times, skip_count, total_runs
@@ -99,8 +99,8 @@ def print_full_output(directory, times, skip_count, total_runs, histogram):
                 last_nonzero_index = idx
         x = x[:last_nonzero_index+1]
         y = y[:last_nonzero_index+1]
-        src.gnuplot.do_plot(x, y, xlabel="No. hours",
-                            title="Run time histogram")
+        pyHepGrid.src.gnuplot.do_plot(x, y, xlabel="No. hours",
+                                      title="Run time histogram")
 
 
 def print_short_header():

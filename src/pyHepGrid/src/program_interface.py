@@ -11,6 +11,7 @@ init_warmup()
 from pyHepGrid.src.header import logger, local_run_directory, grid_warmup_dir
 import sys
 import os
+import pyHepGrid.src.utilities as util
 
 
 class ProgramInterface(object):

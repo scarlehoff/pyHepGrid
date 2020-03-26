@@ -28,7 +28,7 @@ if "phyip3" in socket.gethostname():
 
 try:
     logger = logmod.logger
-except AttributeError as e:
+except AttributeError:
     logger = logmod.setup_logger("INFO")
 grid_username = getpass.getuser()
 head = importlib.import_module(header_mappings.get(grid_username,
@@ -62,6 +62,13 @@ dbfields = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder',
             'status', 'jobtype', 'iseed', 'sub_status', "queue", "no_runs"]
 slurm_template = "slurm_template.sh"
 slurm_template_production = "slurm_template_production.sh"
+
+# Dummies overwritten by the template header
+arcbase = None
+ce_base = None
+DIRAC_BANNED_SITES = None
+dirac_platform = None
+jobName = None
 
 # DW This should be a hard link so socketed runs can be sent from other
 # folders/locations. Eventually will need to point towards where the sockets
@@ -106,7 +113,7 @@ for i in dir(head):
 for i in template_attributes:
     try:
         assert(hasattr(this_file, i))
-    except AssertionError as e:
+    except AssertionError:
         logger.error(
             F"Missing attribute {i} inside {head.__name__}.py that is present "
             F"in {template.__name__}.py.")
@@ -145,7 +152,7 @@ try:
     if use_best_ce:
         setattr(this_file, "ce_base", get_site_info.get_most_free_cores())
         logger.value("ce_base", ce_base, get_site_info.get_most_free_cores())
-except ImportError as e:
+except ImportError:
     pass
 
 # ------------------------- CMD LINE ARG OVERRIDES -------------------------
@@ -153,7 +160,7 @@ try:
     from pyHepGrid.src.argument_parser import additional_arguments
     for attr_name in additional_arguments:
         new = False
-        if not hasattr(this_file, attr_name) and attr_name is not "dictCard":
+        if not hasattr(this_file, attr_name) and attr_name != "dictCard":
             logger.warning(
                 "{0} defined in command line args but not in {1}.py.".format(
                     attr_name, template.__name__))
@@ -180,17 +187,17 @@ try:
                         # in the header. If not found or the type is None,
                         # defaults to a string.
                         attr_value = attrtype(attr_value)
-            except AttributeError as e:
+            except AttributeError:
                 logger.warning("{0} default type not found.".format(attr_name))
                 logger.info("Will be passed through as a string.")
-            except ValueError as e:
+            except ValueError:
                 logger.error(F"Additional argument {attr_name} with value "
                              F"{attr_value} cannot be coerced into expected "
                              F"type {attrtype.__name__}.")
                 sys.exit(-1)
         logger.value(attr_name, attr_value, "command line args")
         setattr(this_file, attr_name, attr_value)
-except ImportError as e:
+except ImportError:
     pass
 
 # Moved to the bottom to allow runcard to override jobName/arcbase

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import division, print_function
 import datetime
-import glob
 import importlib
 import itertools as it
 import multiprocessing as mp
@@ -82,12 +81,10 @@ def createdirs(currentdir, runcard, rtag):
 
 
 def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
-    seedstr = ".s{0}.log".format(seed)
 
     if attempts == 0:  # Otherwise already in the tmp dir
         os.chdir(tmpdir)
 
-    status = 0
     if verbose and attempts == 0:
         print("Pulling {0}, seed {1}".format(run, seed))
     elif verbose:
@@ -125,7 +122,7 @@ def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
                     os.rename("../log/node_info/"+t.name,
                               "../log/node_info/node_info_{0}.log".format(seed))
         os.remove(name)
-    except (FileNotFoundError, tarfile.ReadError) as e:
+    except (FileNotFoundError, tarfile.ReadError):
         # pull error - corrupted stays True
         pass
 

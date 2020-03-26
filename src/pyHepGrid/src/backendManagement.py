@@ -127,7 +127,7 @@ class Arc(Backend):
         fields = ["pathfolder", "runfolder", "jobid"]
         data = self.dbase.list_data(self.table, fields, db_id)[0]
         runfolder = data["runfolder"]
-        finfolder = pathfolder = data["pathfolder"] + "/" + runfolder + "/"
+        finfolder = data["pathfolder"] + "/" + runfolder + "/"
         if header.finalisation_script is not None:
             finfolder = header.default_runfolder
         jobids = data["jobid"].split()
@@ -205,7 +205,7 @@ class Dirac(Backend):
 
         try:
             self.__first_call_stats
-        except AttributeError as e:
+        except AttributeError:
             self.__first_call_stats = False
         date = runcard_info["date"].split()[0]
         jobids_set = set(jobids)
@@ -361,7 +361,6 @@ class Slurm(Backend):
             tot += self.get_status(jobid, "all")
         done = tot-fail-waiting-running
         self.stats_print_setup(runcard_info, dbid=dbid)
-        total = len(jobids)
         self.print_stats(done, waiting, running, fail, 0, 0, tot)
 
     def cat_job(self, jobids, jobinfo, print_stderr=None, store=False):
@@ -424,7 +423,6 @@ class Slurm(Backend):
             fail += self.get_status(jobid, "F")+self.get_status(jobid, "CA")
             tot += self.get_status(jobid, "all")
         done = tot-fail-waiting-running
-        total = len(jobids)
         self.print_stats(done, waiting, running, fail, 0, 0, tot)
 
 

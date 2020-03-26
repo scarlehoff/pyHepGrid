@@ -153,9 +153,11 @@ def setup_environment(lhapdf_dir, options):
     os.environ['LHA_DATA_PATH'] = lhapdf_share
     try:
         import gfal2_util.shell
-    except KeyError as e:
+        print_flush("Using default gfal at {0}".format(
+            gfal2_util.shell.__file__))
+    except KeyError:
         pass
-    except ImportError as e:
+    except ImportError:
         # If gfal can't be imported then the site packages need to be added to
         # the python path because ? :(
         try:
@@ -532,8 +534,6 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             outfile_tmp = outfile.replace(protoc, protocol, 1)
 
             print_flush("Attempting Protocol {0}".format(protocol))
-            outfile_dir = os.path.dirname(outfile_tmp)
-            outfile_fn = os.path.basename(outfile_tmp)
 
             cmd = "{2}gfal-copy -f -p {0} {1}".format(
                 infile_tmp, outfile_tmp, args.gfal_location)
@@ -597,6 +597,7 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
 
 # ------------------------- RUN FUNCTIONS-------------------------
 def run_executable(nnlojet_command):
+    global debug_level
     print_flush(" > Executing command: {0}".format(nnlojet_command))
     # Run command
     status_nnlojet = os.system(nnlojet_command)
@@ -662,7 +663,7 @@ if __name__ == "__main__":
         try:  # only the first one arriving will go through!
             print_flush("Close Socket connection")
             _ = socket_sync_str(args.Host, args.port, "bye!")  # Be polite
-        except socket.error as e:
+        except socket.error:
             pass
 
     teardown(status_nnlojet, status_copy, status_tar, bring_status)

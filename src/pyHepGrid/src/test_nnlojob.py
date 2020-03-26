@@ -1,16 +1,14 @@
 import os
-import sys
 import pyHepGrid.src.utilities as util
 import shutil
 import pyHepGrid.src.header as header
-import subprocess
 
 
 def setup():
     oldpath = os.getcwd()
     try:
         shutil.rmtree(header.sandbox_dir)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         pass
     os.mkdir(header.sandbox_dir)
     shutil.copyfile(header.runfile, os.path.join(

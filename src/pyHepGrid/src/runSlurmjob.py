@@ -107,7 +107,6 @@ class RunSlurm(Backend):
         """ Takes a slurm runfile and submits it to the SLURM batch system.
 
         Returns the jobid and queue used for submission"""
-        from pyHepGrid.src.header import slurm_exclusive
         if queue is not None:
             queuetag = "-p {0}".format(queue)
         else:
@@ -139,7 +138,7 @@ class RunSlurm(Backend):
         ExpandedCard is an override for util.expandCard for use in
         auto-resubmission
         """
-        from pyHepGrid.src.header import warmupthr, jobName
+        from pyHepGrid.src.header import warmupthr
         if test:
             from pyHepGrid.src.header import test_queue as queue
         else:
@@ -230,8 +229,7 @@ class RunSlurm(Backend):
             from pyHepGrid.src.header import production_queue as queue
         job_type = "Production"
         self.runfolder = header.runcardDir
-        from pyHepGrid.src.header import producRun, jobName, baseSeed, \
-            production_threads
+        from pyHepGrid.src.header import producRun, baseSeed, production_threads
         # loop over all .run files defined in runcard.py
 
         header.logger.info("Runcards selected: {0}".format(" ".join(rncards)))

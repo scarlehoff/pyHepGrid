@@ -38,7 +38,7 @@ def value(self, attrname, attrval, location_set, *args, **kws):
     }
     try:
         kws["extra"].update(valattrs)
-    except KeyError as e:
+    except KeyError:
         kws["extra"] = valattrs
 
     if self.isEnabledFor(logging.VALUES):
@@ -111,9 +111,9 @@ class MyFormatter(logging.Formatter):
         for attr in dir(record):
             try:
                 print_data[attr] = os.path.relpath(getattr(record, attr))
-            except (AttributeError, ValueError, TypeError) as e:
+            except (AttributeError, ValueError, TypeError):
                 print_data[attr] = getattr(record, attr)
         try:
             return MyFormatter.format_strs[record.levelno].format(**print_data)
-        except KeyError as e:
+        except KeyError:
             return self._fmt.format(record)

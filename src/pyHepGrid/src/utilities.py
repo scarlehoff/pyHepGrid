@@ -305,7 +305,7 @@ class GridWrap:
     def bring(self, tarfile, whereFrom, whereTo, force=False):
         gridname = os.path.join(header.gfaldir, whereFrom, tarfile)
         destpath = "file://$PWD/{0}".format(whereTo)
-        success = gfal_copy(gridname, destpath, force=force)
+        gfal_copy(gridname, destpath, force=force)
         return os.path.isfile(whereTo)
 
     def delete(self, tarfile, whereFrom):
@@ -369,8 +369,8 @@ if __name__ == '__main__':
     print("Test for Utilities.py")
     print("Running with: Python ", version_info.major)
     waitEnter = input
-    if version_info.major == 2:
-        waitEnter = raw_input
+    if version_info.major == 2:  # python 2
+        waitEnter = raw_input # noqa
 #    print("This will test access to the GRID and the tar/untar utilities")
 #    print("Press [ENTER] after each test")
 #    a = "TEST_FILE" ; al = [a]; b = "TEST.TAR.GZ"

@@ -141,7 +141,7 @@ class NNLOJET(ProgramInterface):
         try:
             gridFiles = [i for i in extractFiles if ".log" not in i]
             logfile = [i for i in extractFiles if ".log" in i][0]
-        except IndexError as e:
+        except IndexError:
             if not check_only:
                 logger.critical(
                     "Logfile not found. Did the warmup complete successfully?")
@@ -180,7 +180,7 @@ class NNLOJET(ProgramInterface):
             gridname = [i for i in stdout.split(
                 "\n") if "Writing grid" in i][0].split()[-1].strip()
             logger.info("Grid name from stdout: {0}".format(gridname))
-        except IndexError as e:
+        except IndexError:
             logger.critical("No grid filename found in stdout logs. "
                             "Did the warmup write a grid?")
 
@@ -189,7 +189,7 @@ class NNLOJET(ProgramInterface):
 
         try:
             grid = result.group(1)
-        except IndexError as e:
+        except IndexError:
             logger.critical(
                 "No grid found in stdout logs. Did the warmup write a grid?")
 
@@ -220,7 +220,7 @@ class NNLOJET(ProgramInterface):
             else:
                 multichannel = False
                 logger.info("Multichannel switched OFF in runcard")
-        except KeyError as e:
+        except KeyError:
             multichannel = False
             logger.info("Multichannel not enabled in runcard")
         return multichannel
@@ -606,7 +606,6 @@ class NNLOJET(ProgramInterface):
         Provides stats on whether a warmup file exists for a given run and
         optionally resubmit if absent
         """
-        from shutil import copy
         import tempfile
         import tarfile
 
@@ -627,7 +626,7 @@ class NNLOJET(ProgramInterface):
                 status = "\033[93mMissing\033[0m"
             else:
                 status = "\033[92mPresent\033[0m"
-        except tarfile.ReadError as e:
+        except tarfile.ReadError:
             status = "\033[91mCorrupted\033[0m"
         run_id = "{0}-{1}:".format(runcard, rname)
         logger.info("[{0}] {2:55} {1:>20}".format(db_id, status, run_id))

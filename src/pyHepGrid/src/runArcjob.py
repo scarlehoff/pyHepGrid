@@ -248,8 +248,6 @@ class RunArc(Backend):
         producrun number of jobs to the arc queue
         """
         from pyHepGrid.src.header import baseSeed, producRun, jobName
-        from pyHepGrid.src.header import lhapdf_grid_loc, lhapdf_loc
-        from pyHepGrid.src.header import executable_exe
 
         # runcard names (keys)
         # dCards, dictionary of { 'runcard' : 'name' }

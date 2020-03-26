@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 import argparse
-import pyHepGrid.src.header
 import subprocess as sp
 import sys
 
 # Aliases for quick reference when imported
 _old_dir = None  # Line requred to add _old_dir to namespace of first dir() call
 _old_dir = dir()
-#
+
 liverpool = "hepgrid5.ph.liv.ac.uk"
 glasgow = "svr009.gla.scotgrid.ac.uk"
 durham = "ce1.dur.scotgrid.ac.uk"
@@ -19,9 +18,7 @@ rl3 = "arc-ce03.gridpp.rl.ac.uk"
 rl4 = "arc-ce04.gridpp.rl.ac.uk"
 rlpheno = "heplnv147.pp.rl.ac.uk"
 manchester = "ce02.tier2.hep.manchester.ac.uk"
-#
 aliases = set(dir()).difference(set(_old_dir))
-#####
 
 
 def get_ce(line):

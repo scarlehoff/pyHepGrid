@@ -225,13 +225,13 @@ def get_next_seed(dbname=None):
     for run in alldata:
         try:
             max_seed = int(run["iseed"])+len(run["jobid"].split())
-        except TypeError as e:
+        except TypeError:
             max_seed = ret_seed
         ret_seed = max(max_seed, ret_seed)
     for run in slurmdata:
         try:
             max_seed = int(run["iseed"])+int(run["no_runs"])
-        except TypeError as e:
+        except TypeError:
             max_seed = ret_seed
         ret_seed = max(max_seed, ret_seed)
     return ret_seed

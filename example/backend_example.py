@@ -1,5 +1,4 @@
 import os
-import sys
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
 from pyHepGrid.src.header import logger

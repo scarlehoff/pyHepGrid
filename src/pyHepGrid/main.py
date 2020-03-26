@@ -22,9 +22,9 @@ def main():
     rmode = args.mode.lower()
 
     # Checks on modes
-    db = database(dbname, tables=[arctable, diractable, slurmtable,
-                                  arcprodtable, slurmprodtable],
-                  fields=dbfields, logger=logger)
+    database(dbname, tables=[arctable, diractable, slurmtable,
+                             arcprodtable, slurmprodtable],
+             fields=dbfields, logger=logger)
 
     mode = rmode[:3]
 

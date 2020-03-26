@@ -15,8 +15,7 @@ def arcProxy(validity, password=None):
 
 
 def arcProxyWiz():
-    err = arcProxy("24h")
-    return 0
+    return arcProxy("24h")
 
 
 def diracProxy(password=None):

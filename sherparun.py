@@ -10,7 +10,7 @@ try:
     dirac = os.environ["DIRAC"]
     sys.path.append(
         "{0}/Linux_x86_64_glibc-2.12/lib/python2.6/site-packages".format(dirac))
-except KeyError as e:
+except KeyError:
     pass
 
 MAX_COPY_TRIES = 15
@@ -179,9 +179,11 @@ def set_environment(lhapdf_dir):
     os.environ['OMP_STACKSIZE'] = "999999"
     try:
         import gfal2_util.shell
-    except KeyError as e:
+        print_flush("Using default gfal at {0}".format(
+            gfal2_util.shell.__file__))
+    except KeyError:
         pass
-    except ImportError as e:
+    except ImportError:
         # If gfal can't be imported then the site packages need to be added to
         # the python path because ? :(
         os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"]\
@@ -361,8 +363,6 @@ def grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             outfile_tmp = outfile.replace(protoc, protocol, 1)
 
             print_flush("Attempting Protocol {0}".format(protocol))
-            outfile_dir = os.path.dirname(outfile_tmp)
-            outfile_fn = os.path.basename(outfile_tmp)
 
             cmd = "{2}gfal-copy -f -p {0} {1}".format(
                 infile_tmp, outfile_tmp, args.gfal_location)

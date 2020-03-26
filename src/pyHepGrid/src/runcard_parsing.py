@@ -71,7 +71,7 @@ class PROGRAMruncard:
         try:
             assert pdf in pdfs
             self.debug("PDF set found")
-        except AssertionError as e:
+        except AssertionError:
             self.critical("PDF set {0} is not installed "
                           "in local version of LHAPDF".format(pdf))
 
@@ -87,19 +87,19 @@ class PROGRAMruncard:
                     try:
                         members = data[pdf]
                         self.debug("PDF set found")
-                    except KeyError as e:
+                    except KeyError:
                         self.critical(
                             "PDF set {0} is not included in currently "
                             "initialised version of LHAPDF".format(pdf))
                     try:
                         assert int(member) in members
                         self.debug("PDF member found")
-                    except AssertionError as e:
+                    except AssertionError:
                         self.critical(
                             "PDF member {1} for PDF set {0} is not included in "
                             "currently initialised version of LHAPDF".format(
                                 pdf, member))
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 self.warning("No PDF info file found. Skipping check.")
         else:
             sharedir = "{0}/share/LHAPDF/".format(cvmfs_loc)
@@ -148,7 +148,7 @@ class PROGRAMruncard:
         for element in channels:
             try:
                 int(element)  # numeric channel
-            except ValueError as e:
+            except ValueError:
                 if element not in valid_channels:
                     self.error("{0} is not a valid channel in your PROGRAM "
                                "runcard.".format(element.upper()))
@@ -256,7 +256,7 @@ class PROGRAMruncard:
             try:
                 warmup_suffix = channels.upper(
                 ) + self.runcard_dict["misc"]["region"]
-            except KeyError as e:
+            except KeyError:
                 warmup_suffix = channels.upper()
         else:
             print("anomaly: channels.upper() is", channels.upper())
