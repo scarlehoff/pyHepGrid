@@ -10,7 +10,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  flake8:
 
     runs-on: ubuntu-latest
 
@@ -24,4 +24,4 @@ jobs:
       run: |
         pip install flake8 flake8-bugbear
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --max-line-length=80 --show-source --statistics --count
+        flake8 . --show-source --statistics --count

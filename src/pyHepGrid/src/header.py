@@ -150,7 +150,7 @@ if runcard_file:
 try:
     from pyHepGrid.src.argument_parser import override_ce_base as use_best_ce
     if use_best_ce:
-        setattr(this_file, "ce_base", get_site_info.get_most_free_cores())
+        this_file.ce_base = get_site_info.get_most_free_cores()
         logger.value("ce_base", ce_base, get_site_info.get_most_free_cores())
 except ImportError:
     pass

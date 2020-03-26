@@ -89,7 +89,7 @@ class database(object):
         query = "SELECT name FROM sqlite_master "\
                 F"WHERE type='table' AND name='{table}';"
         c = self._execute_and_retrieve(query)
-        for i in c:
+        for _ in c:
             c.close()
             return True
         c.close()
@@ -126,7 +126,7 @@ class database(object):
         c = self._execute_and_retrieve(query)
         k = 0
         # Why didn't I use len(c)? Let's leave it like that for the moment...
-        for i in c:
+        for _ in c:
             k += 1
         c.close()
         return k

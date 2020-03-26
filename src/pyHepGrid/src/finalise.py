@@ -180,7 +180,9 @@ def print_final_stats(start_time, tot_no_new_files, corrupt_no):
     print("Finish time: {0}".format(end_time.strftime('%H:%M:%S')))
 
 
-def pull_folder(foldername, folders=[], pool=None, rtag=None):
+def pull_folder(foldername, folders=None, pool=None, rtag=None):
+    if folders is None:
+        folders = []
     print("\033[94mPulling Folder: {0} \033[0m".format(foldername))
     start_time = datetime.datetime.now()
 

@@ -144,7 +144,7 @@ def lhapdfIni():
     # Remove any unwanted directory from lhapdf
     rmdirs = header.lhapdf_ignore_dirs
     if header.lhapdf_ignore_dirs is not None:
-        for root, dirs, files in os.walk(lhapdf):
+        for root, dirs, _files in os.walk(lhapdf):
             for directory in dirs:
                 directory_path = os.path.join(root, directory)
                 for rname in rmdirs:
@@ -155,7 +155,7 @@ def lhapdfIni():
     if header.lhapdf_central_scale_only:
         header.logger.info("Removing non-central scales from lhapdf")
 
-    for root, dirs, files in os.walk(lhapdf):
+    for root, _dirs, files in os.walk(lhapdf):
         for xfile in files:
             fullpath = os.path.join(root, xfile)
             if "share" and ".dat" in fullpath and "._" not in fullpath:
@@ -344,7 +344,7 @@ def gfal_copy(infile, outfile, maxrange=MAX_COPY_TRIES, force=False):
         forcestr = "-f"
     else:
         forcestr = ""
-    for i in range(maxrange):
+    for _ in range(maxrange):
         # cycle through available protocols until one works.
         for protocol in PROTOCOLS:
             infile_tmp = infile.replace(protoc, protocol)

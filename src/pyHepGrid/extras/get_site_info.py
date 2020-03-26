@@ -134,7 +134,7 @@ def get_most_free_cores():
     """API for main.py to link in"""
     site_info = get_ces(False)
     site_info = sorted(site_info,
-                       key=lambda x: getattr(x, "Free"), reverse=False)
+                       key=lambda x: x.Free, reverse=False)
     return site_info[-1].CE
 
 

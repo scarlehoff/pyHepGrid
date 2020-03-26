@@ -175,7 +175,7 @@ class RunArc(Backend):
             jobids = []
             keyquit = None
             try:
-                for i_socket in range(n_sockets):
+                for _ in range(n_sockets):
                     # Run the file
                     jobid, retcode = (self._run_XRSL(
                         xrslfile, test=test, include_retcode=True))

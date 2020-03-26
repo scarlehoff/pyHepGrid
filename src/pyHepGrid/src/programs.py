@@ -523,7 +523,7 @@ class NNLOJET(ProgramInterface):
                                 "Searching subdirectories:".format(
                                     provided_warmup))
                     potmatches = []
-                    for path, subdirs, files in os.walk(provided_warmup):
+                    for path, _subdirs, files in os.walk(provided_warmup):
                         for name in files:
                             if SequenceMatcher(
                                     None, name, matchname_case).ratio() > 0.5:
@@ -668,8 +668,8 @@ class HEJ(ProgramInterface):
     def _init_Sherpa(self, warmup_base, rncards):
         import multiprocessing as mp
         warmup_dirs = []
-        for idx, i in enumerate(rncards):
-            warmup_dir = warmup_base + i.split("-")[0] + "/"
+        for card in rncards:
+            warmup_dir = warmup_base + card.split("-")[0] + "/"
             if not os.path.isdir(warmup_dir+"Process"):
                 warmup_dirs.append(warmup_dir)
         pool = mp.Pool(mp.cpu_count()-5)

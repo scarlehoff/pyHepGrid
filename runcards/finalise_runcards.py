@@ -10,7 +10,7 @@ from fnmatch import fnmatch
 runcard_basedir = os.path.dirname(os.path.abspath(__file__))
 pattern = "*.py"
 runcard_files = []
-for path, subdirs, files in os.walk(runcard_basedir):
+for path, _subdirs, files in os.walk(runcard_basedir):
     for name in files:
         if fnmatch(name, pattern):
             runcard_files.append(

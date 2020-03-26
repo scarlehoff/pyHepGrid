@@ -84,13 +84,14 @@ class Backend(_mode):
     def set_list_disabled(self):
         self.dbase.set_list_disabled()
 
-    def _db_list(self, fields, search_string=None,
-                 search_fields=["runcard", "runfolder", "jobtype"]):
+    def _db_list(self, fields, search_string=None, search_fields=None):
         """
         Returns a list with a dict for each member of the list. If a
         search_string is provided, only entries matching searc_string in
         search_fields will be returned
         """
+        if search_fields is None:
+            search_fields = ["runcard", "runfolder", "jobtype"]
         if search_string:
             return self.dbase.find_and_list(self.table, fields,
                                             search_fields, search_string)
@@ -167,7 +168,7 @@ class Backend(_mode):
         from pyHepGrid.src.gnuplot import do_plot
         job_outputs = self.cat_job(jobid, jobinfo, store=True)
         vals = []
-        for idx, job_stdout in enumerate(job_outputs):
+        for job_stdout in job_outputs:
             for line in reversed(job_stdout.split("\n")):
                 if "Current progress" in line and ".uk" not in line:
                     vals.append(

@@ -26,10 +26,11 @@ class PROGRAMruncard:
     _setup_logging()]
     """
 
-    def __init__(self, runcard_file=None, runcard_class=None,
-                 blocks={"channels": [], "process": {}, "run": {}, "misc": {}},
+    def __init__(self, runcard_file=None, runcard_class=None, blocks=None,
                  logger=None, grid_run=True, use_cvmfs=False, cvmfs_loc=""):
 
+        if blocks is None:
+            blocks = {"channels": [], "process": {}, "run": {}, "misc": {}}
         self._setup_logging(logger)
         self.runcard_dict = {}
         self.blocks = blocks
