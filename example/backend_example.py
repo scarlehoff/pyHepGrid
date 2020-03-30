@@ -1,5 +1,4 @@
 import os
-import sys
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
 from pyHepGrid.src.header import logger
@@ -11,7 +10,6 @@ class ExampleProgram(ProgramInterface):
     # For this simple example we only implement the "Production" mode for
     # Arc/Dirac, if you need anything else please implement the corresponding
     # function(s) from the `ProgramInterface`
-
 
     # list of 'warmup' (resource) files to include in tarball
     _WARMUP_FILES = []
@@ -28,14 +26,16 @@ class ExampleProgram(ProgramInterface):
         """
         import tempfile
         from pyHepGrid.src.header import runcardDir as runFol
-        from pyHepGrid.src.header import executable_exe, executable_src_dir, grid_input_dir
+        from pyHepGrid.src.header import executable_exe, executable_src_dir, \
+            grid_input_dir
 
         if local:
             self.init_local_production(provided_warmup=provided_warmup)
             return
 
         runFolders, dCards = util.expandCard()
-        path_to_exe_full = self._exe_fullpath(executable_src_dir, executable_exe)
+        path_to_exe_full = self._exe_fullpath(
+            executable_src_dir, executable_exe)
 
         origdir = os.path.abspath(os.getcwd())
         tmpdir = tempfile.mkdtemp()
@@ -57,7 +57,8 @@ class ExampleProgram(ProgramInterface):
         logger.debug("Temporary directory: {0}".format(tmpdir))
 
         if not os.path.isfile(path_to_exe_full):
-            logger.critical("Could not find executable at {0}".format(path_to_exe_full))
+            logger.critical(
+                "Could not find executable at {0}".format(path_to_exe_full))
         else:
             tar_name = os.path.basename(header.grid_executable)
             grid_exe_dir = os.path.dirname(header.grid_executable)
@@ -65,8 +66,11 @@ class ExampleProgram(ProgramInterface):
             os.system("cp -r " + path_to_exe_full + " " + exe_name)
             upload_exe = True
             if self.gridw.checkForThis(tar_name, grid_exe_dir):
-                if not self._press_yes_to_continue("Old executable found. Do you want to remove it?", fallback=1):
-                    logger.info("Removing old version of {0} from Grid Storage".format(tar_name))
+                if not self._press_yes_to_continue(
+                        "Old executable found. Do you want to remove it?",
+                        fallback=1):
+                    logger.info(
+                        F"Removing old version of {tar_name} from Grid Storage")
                     self.gridw.delete(tar_name, grid_exe_dir)
                 else:
                     upload_exe = False
@@ -79,19 +83,21 @@ class ExampleProgram(ProgramInterface):
 
             tarfile = runName + "+" + dCards[runName] + ".tar.gz"
             base_folder = runName.split("-")[0]
-            logger.info("Initialising {0} to {1} [{2}/{3}]".format(runName, tarfile, idx + 1, len(runFolders)))
+            logger.info(
+                "Initialising {0} to {1} [{2}/{3}]".format(
+                    runName, tarfile, idx + 1, len(runFolders)))
 
             # runcards
-            run_dir = os.path.join(runFol,base_folder)
+            run_dir = os.path.join(runFol, base_folder)
             runFiles = dCards[runName].split("+")
             for f in runFiles:
-                f = os.path.join(run_dir,f)
+                f = os.path.join(run_dir, f)
                 self._file_exists(f, logger)
                 os.system("cp -r " + f + " " + tmpdir)
 
             # warmup files
             for f in self._WARMUP_FILES:
-                f = os.path.join(warmup_base,base_folder,f)
+                f = os.path.join(warmup_base, base_folder, f)
                 self._file_exists(f, logger)
                 os.system("cp -r " + f + " " + tmpdir)
 
@@ -99,7 +105,9 @@ class ExampleProgram(ProgramInterface):
             self.tarw.tarFiles(self._WARMUP_FILES + runFiles, tarfile)
 
             if self.gridw.checkForThis(tarfile, grid_input_dir):
-                logger.info("Removing old version of {0} from Grid Storage".format(tarfile))
+                logger.info(
+                    "Removing old version of {0} from Grid Storage".format(
+                        tarfile))
                 self.gridw.delete(tarfile, grid_input_dir)
             logger.info("Sending {0} to {1}".format(tarfile, grid_input_dir))
             self.gridw.send(tarfile, grid_input_dir)

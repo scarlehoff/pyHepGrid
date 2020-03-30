@@ -2,19 +2,20 @@ import sqlite3 as dbapi
 
 
 class database(object):
-    def __init__(self, db, tables = None, fields = None, logger=None):
+    def __init__(self, db, tables=None, fields=None, logger=None):
         import os
         self._setup_logger(logger)
         self.dbname = db
-        if not os.path.exists( os.path.dirname(self.dbname) ):
-            os.makedirs( os.path.dirname(self.dbname) )
+        if not os.path.exists(os.path.dirname(self.dbname)):
+            os.makedirs(os.path.dirname(self.dbname))
         self.db = dbapi.connect(self.dbname, check_same_thread=True)
         self.list_disabled = False
         if tables:
             # check whether table exists and create it othewise
             for table in tables:
                 if self._is_this_table_here(table):
-                    # if table does exist, check the list of tables is correct and correct it otherwise
+                    # if table does exist, check the list of tables is correct
+                    # and correct it otherwise
                     self._protect_fields(table, fields)
                 else:
                     self._create_table(table, fields)
@@ -52,7 +53,7 @@ class database(object):
             c.execute(query)
         except Exception as e:
             database.logger.critical("Executed query: {0}".format(query))
-            raise e # For default case w/ no logger
+            raise e  # For default case w/ no logger
         c.close()
         self.db.commit()
 
@@ -64,7 +65,7 @@ class database(object):
             c.execute(query)
         except Exception as e:
             database.logger.critical("Executed query: {0}".format(query))
-            raise e # For default case w/ no logger
+            raise e  # For default case w/ no logger
         return c
 
     def _create_table(self, tablename, fields):
@@ -85,9 +86,10 @@ class database(object):
 
     def _is_this_table_here(self, table):
         """ Checks whether table table exists"""
-        query = "SELECT name FROM sqlite_master WHERE type='table' AND name='{}';".format(table)
+        query = "SELECT name FROM sqlite_master "\
+                F"WHERE type='table' AND name='{table}';"
         c = self._execute_and_retrieve(query)
-        for i in c:
+        for _ in c:
             c.close()
             return True
         c.close()
@@ -100,7 +102,6 @@ class database(object):
         fields = [i[1] for i in c]
         c.close()
         return fields
-
 
     def _is_field_in_table(self, table, field):
         """ Check whether field exists on table"""
@@ -118,12 +119,14 @@ class database(object):
         query = "ALTER TABLE {0} ADD {1} {2}".format(table, field, f_type)
         self._execute_and_commit(query)
 
-    def _how_many_tables(self): # DW 23/7/19 This function doesn't seem to be used. Deprecated?
+    # DW 23/7/19 This function doesn't seem to be used. Deprecated?
+    def _how_many_tables(self):
         """ Returns number of tables in database """
         query = "select * from sqlite_master WHERE type='table';"
         c = self._execute_and_retrieve(query)
         k = 0
-        for i in c: # Why didn't I use len(c)? Let's leave it like that for the moment...
+        # Why didn't I use len(c)? Let's leave it like that for the moment...
+        for _ in c:
             k += 1
         c.close()
         return k
@@ -141,9 +144,11 @@ class database(object):
         query = head + " " + tail
         self._execute_and_commit(query)
 
-    def list_data(self, table, keys, job_id = None):
-        """ List fields keys for active entries in database unless job_id is provided
-        in which case only list job_id run"""
+    def list_data(self, table, keys, job_id=None):
+        """
+        List fields keys for active entries in database unless job_id is
+        provided in which case only list job_id run
+        """
         keystr = ",".join(keys)
         if job_id:
             optional = "where rowid = {}".format(job_id)
@@ -156,8 +161,8 @@ class database(object):
         dataList = []
         for i in c:
             tmpDic = {}
-            for (key,j) in zip(keys,i):
-                tmpDic[key]= j
+            for (key, j) in zip(keys, i):
+                tmpDic[key] = j
             dataList.append(tmpDic)
         c.close()
         return dataList
@@ -179,8 +184,8 @@ class database(object):
         dataList = []
         for i in c:
             tmpDic = {}
-            for (key,j) in zip(keys,i):
-                tmpDic[key]= j
+            for (key, j) in zip(keys, i):
+                tmpDic[key] = j
             dataList.append(tmpDic)
         c.close()
         return dataList
@@ -191,7 +196,7 @@ class database(object):
         query = query_raw.format(table, field, new_value, rowid)
         self._execute_and_commit(query)
 
-    def disable_entry(self, table, rowid, revert = None):
+    def disable_entry(self, table, rowid, revert=None):
         """ Disables (or enables) rowid entry"""
         newStat = "inactive"
         if revert:
@@ -201,29 +206,32 @@ class database(object):
         total_query = query + rid
         self._execute_and_commit(total_query)
 
+
 def get_next_seed(dbname=None):
-    from pyHepGrid.src.header import arctable, arcprodtable, diractable, slurmtable, slurmprodtable, dbfields, logger
+    from pyHepGrid.src.header import arctable, arcprodtable, diractable,\
+        slurmtable, slurmprodtable, dbfields, logger
     if dbname is None:
         from pyHepGrid.src.header import dbname
-    db = database(dbname, tables = [arctable, arcprodtable, diractable, slurmtable, slurmprodtable],
+    db = database(dbname, tables=[arctable, arcprodtable, diractable,
+                                  slurmtable, slurmprodtable],
                   fields=dbfields, logger=logger)
     db.list_disabled = True
-    alldata = db.list_data(arctable,["iseed", "jobid"])
-    alldata += db.list_data(arcprodtable,["iseed", "jobid"])
-    alldata += db.list_data(diractable,["iseed", "jobid"])
-    slurmdata = db.list_data(slurmtable,["iseed", "no_runs"])
-    slurmdata += db.list_data(slurmprodtable,["iseed", "no_runs"])
+    alldata = db.list_data(arctable, ["iseed", "jobid"])
+    alldata += db.list_data(arcprodtable, ["iseed", "jobid"])
+    alldata += db.list_data(diractable, ["iseed", "jobid"])
+    slurmdata = db.list_data(slurmtable, ["iseed", "no_runs"])
+    slurmdata += db.list_data(slurmprodtable, ["iseed", "no_runs"])
     ret_seed = 1
     for run in alldata:
         try:
             max_seed = int(run["iseed"])+len(run["jobid"].split())
-        except TypeError as e:
+        except TypeError:
             max_seed = ret_seed
         ret_seed = max(max_seed, ret_seed)
     for run in slurmdata:
         try:
             max_seed = int(run["iseed"])+int(run["no_runs"])
-        except TypeError as e:
+        except TypeError:
             max_seed = ret_seed
         ret_seed = max(max_seed, ret_seed)
     return ret_seed

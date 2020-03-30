@@ -1,15 +1,18 @@
 import sys
 import os
 import pyHepGrid.src.utilities as util
-############
+
+
+# --------------------------------------------------
 # In order to read new stuff from the fixed part just add here
-valid_channels = ["rr","rv","vv","r","v","lo"]
-warmup_extensions =  [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb", 
-                      ".V", ".R", ".LO", ".RV", ".VV", ".RR"]
+valid_channels = ["rr", "rv", "vv", "r", "v", "lo"]
+warmup_extensions = [".RRa", ".RRb", ".vRa", ".vRb", ".vBa", ".vBb",
+                     ".V", ".R", ".LO", ".RV", ".VV", ".RR"]
 
-valid_channels = ["rr","rv","vv","r","v","lo","rra","rrb"]
+valid_channels = ["rr", "rv", "vv", "r", "v", "lo", "rra", "rrb"]
 
-numeric_ids = [3,4,5,9,13]
+numeric_ids = [3, 4, 5, 9, 13]
+
 
 class PROGRAMruncard:
     """
@@ -17,15 +20,17 @@ class PROGRAMruncard:
     all the different parameters
 
 
-    NOTE: FOR LOGGING PURPOSES, USE self.print, self.info etc rather than just print
-    If logger is initialised, these will use the logger, otherwise they'll default to
-    the inbuilt print function [set up controlled by _setup_logging()]
+    NOTE: FOR LOGGING PURPOSES, USE self.print, self.info etc rather than just
+    print If logger is initialised, these will use the logger, otherwise they'll
+    default to the inbuilt print function [set up controlled by
+    _setup_logging()]
     """
 
-    def __init__(self, runcard_file = None, runcard_class = None, 
-                 blocks = {"channels":[], "process":{}, "run":{}, "misc":{}},
-                 logger=None, grid_run = True, use_cvmfs=False, cvmfs_loc = ""):
+    def __init__(self, runcard_file=None, runcard_class=None, blocks=None,
+                 logger=None, grid_run=True, use_cvmfs=False, cvmfs_loc=""):
 
+        if blocks is None:
+            blocks = {"channels": [], "process": {}, "run": {}, "misc": {}}
         self._setup_logging(logger)
         self.runcard_dict = {}
         self.blocks = blocks
@@ -46,12 +51,10 @@ class PROGRAMruncard:
             self.debug("Checking channel block in {0}".format(runcard_file))
             for i in self.runcard_dict["channels"]:
                 self._check_channel(i.lower())
-        self._check_pdf(grid_run, use_cvmfs=use_cvmfs, cvmfs_loc = cvmfs_loc)
-
+        self._check_pdf(grid_run, use_cvmfs=use_cvmfs, cvmfs_loc=cvmfs_loc)
 
     def __repr__(self):
         return str(self.runcard_dict)
-        
 
     def parse_pdf_entry(self):
         """TODO rewrite with regexp for niceness"""
@@ -60,83 +63,99 @@ class PROGRAMruncard:
         member = pdf_tag.split("[")[-1].split("]")[0]
         return pdf, member
 
-
     def __check_local_pdf(self):
         from subprocess import Popen, PIPE
         pdf, member = self.parse_pdf_entry()
-        cmd = ["lhapdf","ls","--installed"]
-        outbyt = Popen(cmd, stdout = PIPE).communicate()[0]
+        cmd = ["lhapdf", "ls", "--installed"]
+        outbyt = Popen(cmd, stdout=PIPE).communicate()[0]
         pdfs = [i for i in outbyt.decode("utf-8").split("\n") if i != ""]
         try:
             assert pdf in pdfs
             self.debug("PDF set found")
-        except AssertionError as e:
-            self.critical("PDF set {0} is not installed in local version of LHAPDF".format(pdf))
-
+        except AssertionError:
+            self.critical("PDF set {0} is not installed "
+                          "in local version of LHAPDF".format(pdf))
 
     def __check_grid_pdf(self, use_cvmfs=False, cvmfs_loc=""):
         import json
-        infofile = os.path.join(os.path.dirname(os.path.realpath(__file__)),".pdfinfo") 
+        infofile = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), ".pdfinfo")
         pdf, member = self.parse_pdf_entry()
         if not use_cvmfs:
             try:
-                with open(infofile,"r") as f:
+                with open(infofile, "r") as f:
                     data = json.load(f)
                     try:
                         members = data[pdf]
                         self.debug("PDF set found")
-                    except KeyError as e:
-                        self.critical("PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf))
+                    except KeyError:
+                        self.critical(
+                            "PDF set {0} is not included in currently "
+                            "initialised version of LHAPDF".format(pdf))
                     try:
                         assert int(member) in members
                         self.debug("PDF member found")
-                    except AssertionError as e:
-                        self.critical("PDF member {1} for PDF set {0} is not included in currently initialised version of LHAPDF".format(pdf, member))
-            except FileNotFoundError as e:
+                    except AssertionError:
+                        self.critical(
+                            "PDF member {1} for PDF set {0} is not included in "
+                            "currently initialised version of LHAPDF".format(
+                                pdf, member))
+            except FileNotFoundError:
                 self.warning("No PDF info file found. Skipping check.")
         else:
             sharedir = "{0}/share/LHAPDF/".format(cvmfs_loc)
             bindir = "{0}/bin/".format(cvmfs_loc)
             os.environ["LHA_DATA_PATH"] = sharedir
             os.environ["LHAPATH"] = sharedir
-            cvmfs_pdfs = util.getOutputCall([bindir+"lhapdf", "ls", "--installed"])
+            cvmfs_pdfs = util.getOutputCall(
+                [bindir+"lhapdf", "ls", "--installed"])
             cvmfs_pdfs = [i.strip() for i in cvmfs_pdfs.split()]
             if pdf not in cvmfs_pdfs:
-                self.critical("PDF set {0} is not included in cvmfs LHAPDF. Turn cvmfs PDF off and use your own one (or ask the admins nicely...".format(pdf))
+                self.critical(
+                    "PDF set {0} is not included in cvmfs LHAPDF. "
+                    "Turn cvmfs PDF off and use your own one "
+                    "(or ask the admins nicely...".format(pdf))
             else:
                 self.debug("PDF set found in cvmfs LHAPDF setup")
-
 
     def _check_pdf(self, grid_run, use_cvmfs=False, cvmfs_loc=""):
         self.debug("Checking PDF set validity...")
         if grid_run:
-            self.__check_grid_pdf(use_cvmfs=use_cvmfs, cvmfs_loc = cvmfs_loc)
+            self.__check_grid_pdf(use_cvmfs=use_cvmfs, cvmfs_loc=cvmfs_loc)
         else:
             self.__check_local_pdf()
 
     def _check_numeric(self):
         """ Asserts that runcard elements that need to be numeric indeed are """
+        # FIXME runcard_linecode is not specified.
+        # Where is it coming from? What is this doing?
+        # This complete functio is never called. Can it go?
         for i in numeric_ids:
             try:
-                float(self.runcard_dict[runcard_linecode[i]])
-            except:
-                self.critical("Line {0} [{1}] should be numeric type. Value is instead {2}.".format(i,runcard_linecode[i], self.runcard_dict[runcard_linecode[i]]))
+                float(self.runcard_dict[runcard_linecode[i]])  # noqa
+            except BaseException:
+                self.critical("Line {0} [{1}] should be numeric type. "
+                              "Value is instead {2}.".format(
+                                  i, runcard_linecode[i],  # noqa
+                                  self.runcard_dict[runcard_linecode[i]]))  # noqa
                 print(self.logger)
 
     # Safety check functions
     def _check_channel(self, chan):
         chan = chan.strip()
         if " " in chan:
-            channels = [i for i in chan.split() if i != ""] # Split line in case it's a list of channels e.g 1 2 3
+            # Split line in case it's a list of channels e.g 1 2 3
+            channels = [i for i in chan.split() if i != ""]
         else:
-#            channels = [i for i in chan if i != ""]
+            #            channels = [i for i in chan if i != ""]
             channels = [chan]
         for element in channels:
             try:
-                int(element) # numeric channel
-            except ValueError as e:
-                if not element in valid_channels:
-                    self.error("{0} is not a valid channel in your PROGRAM runcard.".format(element.upper()))
+                int(element)  # numeric channel
+            except ValueError:
+                if element not in valid_channels:
+                    self.error("{0} is not a valid channel in your PROGRAM "
+                               "runcard.".format(element.upper()))
                     sys.exit(-1)
 
     def _parse_block(self, block_name, blocks):
@@ -174,8 +193,10 @@ class PROGRAMruncard:
                     elif "=" in splitline[1:]:
                         blocks["misc"][splitline[1].lower()] = splitline[3]
         rc_dict[block_name] = block_content
-        self.debug("{0:<15}: {1:<20} {2}".format(block_name, str(rc_dict[block_name]), 
-                                                 os.path.basename(self.runcard_file)))
+        self.debug("{0:<15}: {1:<20} {2}".format(block_name,
+                                                 str(rc_dict[block_name]),
+                                                 os.path.basename(
+                                                     self.runcard_file)))
 
     def _parse_runcard_from_file(self, filename):
         f = open(filename, 'r', encoding="utf-8")
@@ -195,7 +216,7 @@ class PROGRAMruncard:
             self._parse_block(block, self.blocks)
 
     # Internal functions for external API
-    def _is_mode(self, mode, accepted = None):
+    def _is_mode(self, mode, accepted=None):
         """
         Checks whether the mode is set to true from a set of
         predefined values.
@@ -209,7 +230,8 @@ class PROGRAMruncard:
             return False
 
     # External API
-    def is_continuation(self): # Legacy support. continuation no longer requires separate flag
+    # Legacy support. continuation no longer requires separate flag
+    def is_continuation(self):
         return self._is_mode("warmup")
 
     def is_warmup(self):
@@ -220,8 +242,9 @@ class PROGRAMruncard:
 
     def warmup_filename(self):
         """
-        If the runcard is set with one and only one of the generic channel names (LO, R, V...)
-        returns the corresponding warmup for the process. Otherwise don't fill suffix field
+        If the runcard is set with one and only one of the generic channel names
+        (LO, R, V...) returns the corresponding warmup for the process.
+        Otherwise don't fill suffix field
         """
         # Currently breaks for VJJ type processes with Ra/b contributions
 
@@ -235,16 +258,19 @@ class PROGRAMruncard:
             warmup_suffix = channels.upper()
         elif channels in ['rr']:
             try:
-                warmup_suffix = channels.upper() + self.runcard_dict["misc"]["region"]
-            except KeyError as e:
+                warmup_suffix = channels.upper(
+                ) + self.runcard_dict["misc"]["region"]
+            except KeyError:
                 warmup_suffix = channels.upper()
         else:
             print("anomaly: channels.upper() is", channels.upper())
             warmup_suffix = ''
         process_name = self.runcard_dict["process"]["process"]
         runname = self.runcard_dict["run"]["run"]
-        tech_cut = '{0:.2E}'.format(float(self.runcard_dict["run"]["tcut"].replace("d","E")))
-        warmup_name = "{0}.{1}.y{2}.{3}".format(process_name, runname, tech_cut, warmup_suffix)
+        tech_cut = '{0:.2E}'.format(
+            float(self.runcard_dict["run"]["tcut"].replace("d", "E")))
+        warmup_name = "{0}.{1}.y{2}.{3}".format(
+            process_name, runname, tech_cut, warmup_suffix)
 
         return warmup_name
 

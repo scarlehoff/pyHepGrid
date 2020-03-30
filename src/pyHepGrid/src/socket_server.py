@@ -4,6 +4,7 @@ import socket
 import struct
 import datetime
 
+
 class Generic_Socket:
     """
     Based on
@@ -36,7 +37,7 @@ class Generic_Socket:
         self.address = [host, port]
         self.sock.connect((host, port))
 
-    def bind(self, host, port, max_connections = 10):
+    def bind(self, host, port, max_connections=10):
         """ Makes the socket into a server
         """
         self.sock.bind((host, port))
@@ -50,7 +51,7 @@ class Generic_Socket:
         (client_socket, address) = self.sock.accept()
         return self.__class__(client_socket, address)
 
-    def receive_str(self, max_len = 2048):
+    def receive_str(self, max_len=2048):
         """ Receive a string and strips out padding bytes
         """
         data = self.sock.recv(max_len)
@@ -59,8 +60,9 @@ class Generic_Socket:
         data_str = data.decode().strip()
         return data_str
 
-    def receive_data(self, msg_len = 32, verbose=None):
-        """ Receive any kind of binary data until it fullfills msg_len bytes of data
+    def receive_data(self, msg_len=32, verbose=None):
+        """
+        Receive any kind of binary data until it fullfills msg_len bytes of data
         Returns binary data received
         """
         chunks = []
@@ -92,11 +94,12 @@ class Generic_Socket:
             info = socket.gethostbyaddr(host_addr)
             hostname = info[0]
             return hostname
-        except: # Assume your failure
+        except BaseException:  # Assume your failure
             return host_addr
 
     def close(self):
         self.sock.close()
+
 
 class Vegas_Socket(Generic_Socket):
     """ Extends Generic_Socket for its
@@ -124,11 +127,11 @@ class Vegas_Socket(Generic_Socket):
         s = struct.pack('d'*arr_len, double_array)
         return s
 
-    def read_partial_integral(self, size = 8, verbose = None):
+    def read_partial_integral(self, size=8, verbose=None):
         """ Read the total integral from one of the jobs
         and returns a double
         """
-        data = self.receive_data(size, verbose = verbose)
+        data = self.receive_data(size, verbose=verbose)
         double_array = []
         for i in range(0, size-1, self.double_size):
             double_array.append(self.bytes_to_double(data[i:i+8]))
@@ -151,12 +154,12 @@ class Vegas_Socket(Generic_Socket):
             if data.decode() == "gree":
                 return -1
             elif data.decode() == "bye!":
-                return -99 # Exit code
-        except:
+                return -99  # Exit code
+        except BaseException:
             pass
         return int.from_bytes(data, byteorder="little")
 
-    def harmonize_integral(self, n_jobs, verbose = None):
+    def harmonize_integral(self, n_jobs, verbose=None):
         """ Get the partial vegas integrals from the different n_jobs
         and send the sum back to each and every job.
         Only exits with success once all jobs receive their data
@@ -169,7 +172,9 @@ class Vegas_Socket(Generic_Socket):
 
             adr = self.get_host_by_address(str(new_endpoint.address[0]))
             prt = str(new_endpoint.address[1])
-            self._info_print("   New endpoint connected: {0}:{1} [{2}/{3}]".format(adr, prt,len(job_sockets)+1,n_jobs))
+            self._info_print(
+                "   New endpoint connected: {0}:{1} [{2}/{3}]".format(
+                    adr, prt, len(job_sockets)+1, n_jobs))
 
             # Get the size of the array of doubles we are going to receive
             size = new_endpoint.get_size()
@@ -178,20 +183,24 @@ class Vegas_Socket(Generic_Socket):
                 self._info_print(" > Killed orphan instance of nnlorun.py")
                 continue
             elif size == -99:
-                self._info_print(" > nnlorun.py sent exit code, exiting with success")
+                self._info_print(
+                    " > nnlorun.py sent exit code, exiting with success")
                 exit(0)
             doubles = int(size / 8)
             if verbose:
                 self._info_print("Size of array: " + str(size))
-                self._info_print("Meaning we will get " + str(doubles) + " doubles")
+                self._info_print("Meaning we will get " +
+                                 str(doubles) + " doubles")
 
             # Get the actual array of data
-            partial_value = new_endpoint.read_partial_integral(size, verbose = verbose)
+            partial_value = new_endpoint.read_partial_integral(
+                size, verbose=verbose)
             if verbose:
-                self._info_print("Partial value obtained: " + str(partial_value))
+                self._info_print("Partial value obtained: " +
+                                 str(partial_value))
 
-
-            # Store the socket and the array we just received, we will use it in the future
+            # Store the socket and the array we just received, we will use it in
+            # the future
             array_partial.append(partial_value)
             job_sockets.append(new_endpoint)
 
@@ -199,10 +208,12 @@ class Vegas_Socket(Generic_Socket):
         for array_values in array_partial:
             if len(array_values) != doubles:
                 raise Exception("Received arrays of different length!")
-            integral_value = list(map(lambda x,y: x+y, integral_value, array_values))
+            integral_value = list(
+                map(lambda x, y: x+y, integral_value, array_values))
 
         if verbose:
-            self._info_print("Total value of the integral received: " + str(integral_value))
+            self._info_print(
+                "Total value of the integral received: " + str(integral_value))
             self._info_print("Sending it back to all clients")
         while job_sockets:
             job_socket = job_sockets.pop()
@@ -210,12 +221,15 @@ class Vegas_Socket(Generic_Socket):
 
         return 0
 
+
 def timeout_handler(signum, frame):
     raise Exception("The time has passed, it's time to run")
 
+
 def create_stdout_log(logname):
     import logging
-    import sys, os
+    import sys
+    import os
     import getpass
     import datetime
     # TODO: add more logging levels
@@ -226,16 +240,18 @@ def create_stdout_log(logname):
     h = logging.StreamHandler(sys.stdout)
     h.setLevel(logging.INFO)
 
-    formatter = logging.Formatter("%(asctime) 8s %(message)s", datefmt="[%H:%M:%S %d/%m]")
+    formatter = logging.Formatter(
+        "%(asctime) 8s %(message)s", datefmt="[%H:%M:%S %d/%m]")
     h.setFormatter(formatter)
     logger.addHandler(h)
 
     username = getpass.getuser()
     datestr = datetime.datetime.now().strftime("%d-%m-%Y")
-    logloc = "/tmp/{1}/{0}/{3}/{2}".format(os.path.splitext(os.path.basename(__file__))[0],
-                                       username,logname,datestr)
+    logloc = "/tmp/{1}/{0}/{3}/{2}".format(
+        os.path.splitext(os.path.basename(__file__))[0],
+        username, logname, datestr)
     logger.info("Logfile: {0}".format(logloc))
-    os.makedirs(os.path.dirname(logloc),exist_ok=True)
+    os.makedirs(os.path.dirname(logloc), exist_ok=True)
 
     logfile = logging.FileHandler(logloc)
     logfile.setLevel(logging.DEBUG)
@@ -245,16 +261,26 @@ def create_stdout_log(logname):
     return logger
 
 
-
 def parse_all_arguments():
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument("-H", "--hostname", help = "Hostname", default = "")
-    parser.add_argument("-p", "--port", help = "Port", default = "8888")
-    parser.add_argument("-w", "--wait", help = "Wait for a given number of seconds. This options is only to be used on the gridui")
-    parser.add_argument("-N", "--N_clients", help = "Number of clients to wait for, if used alongside wait, stop waiting after N clients", default = "2")
-    parser.add_argument("-m", "--manual", help = "Print the manual and exit", action = "store_true")
-    parser.add_argument("-l", "--logfile", help = "Set the output logfile name (Stored in /tmp/<username>/socket_server/", default=None)
+    parser.add_argument("-H", "--hostname", help="Hostname", default="")
+    parser.add_argument("-p", "--port", help="Port", default="8888")
+    parser.add_argument(
+        "-w", "--wait",
+        help="Wait for a given number of seconds. "
+        "This options is only to be used on the gridui")
+    parser.add_argument(
+        "-N", "--N_clients",
+        help="Number of clients to wait for, if used alongside wait, "
+        "stop waiting after N clients", default="2")
+    parser.add_argument(
+        "-m", "--manual",
+        help="Print the manual and exit", action="store_true")
+    parser.add_argument(
+        "-l", "--logfile",
+        help="Set the output logfile name "
+        "(Stored in /tmp/<username>/socket_server/", default=None)
     args = parser.parse_args()
 
     if args.wait:
@@ -263,22 +289,24 @@ def parse_all_arguments():
 
     if args.logfile is None:
         import datetime
-        timestr=datetime.datetime.now().strftime("%H-%M-%S")
-        args.logfile = "{2}_Port_{0}_No_clients_{1}.log".format(args.port,args.N_clients,timestr)
+        timestr = datetime.datetime.now().strftime("%H-%M-%S")
+        args.logfile = "{2}_Port_{0}_No_clients_{1}.log".format(
+            args.port, args.N_clients, timestr)
 
     return args
 
 
-
-
-def do_server(args,log):
-    """ Main server running routine. Placed here so that we can catch exceptions with logger"""
+def do_server(args, log):
+    """
+    Main server running routine. Placed here so that we can catch exceptions
+    with logger
+    """
     HOST = str(args.hostname)
     PORT = int(args.port)
     n_clients = int(args.N_clients)
 
     # enable the server, and bind it to HOST:PORT
-    server = Vegas_Socket(logger = log)
+    server = Vegas_Socket(logger=log)
     server.bind(HOST, PORT)
 
     if HOST == "":
@@ -288,11 +316,13 @@ def do_server(args,log):
 
     log.info("Server up. Connect to " + host_str + ":" + str(PORT))
 
-    #### If wait (this whole block is for its use with the grid scripts)
+    # If wait (this whole block is for its use with the grid scripts)
     if args.wait:
-        # Wait for a number of ARC jobs to start before allowing the program to run
-        # it will "capture" the different instances of nnlorun.py until it gets all of them
-        # TODO: If we capture a rogue instance instead, skip to the while loop or make it fail? What should I do?
+        # Wait for a number of ARC jobs to start before allowing the program to
+        # run it will "capture" the different instances of nnlorun.py until it
+        # gets all of them
+        # TODO: If we capture a rogue instance instead, skip to the while loop
+        # or make it fail? What should I do?
 
         clients = []
 
@@ -304,25 +334,28 @@ def do_server(args,log):
 
         while n_clients < n_clients_max:
             try:
-                log.info("Waiting for {} more instances of nnlorun.py to salute".format(n_clients_max - n_clients))
+                log.info(("Waiting for {} more instances of nnlorun.py to "
+                          "salute").format(n_clients_max - n_clients))
                 new_client = server.wait_for_client()
-                if not clients: # Start the timer
-                    log.info("Starting timer for {0} secs".format(int(args.wait)))
+                if not clients:  # Start the timer
+                    log.info("Starting timer for {0} secs".format(
+                        int(args.wait)))
                     signal.alarm(int(args.wait))
-            except:
+            except BaseException:
                 break
             greetings = new_client.receive_str()
 
             if greetings == "greetings":
                 # nnlorun.py sends the word "greetins" at the start
-                #print("ARC.py captured")
+                # print("ARC.py captured")
                 clients.append(new_client)
             elif greetings == "oupsities":
                 n_clients_max -= 1
                 new_client.close()
                 continue
             else:
-                log.info("Waiting for nnlorun.py instance, got nonsense instead.")
+                log.info("Waiting for nnlorun.py instance, "
+                         "got nonsense instead.")
                 log.info("Received msg: {0}".format(greetings))
                 log.info("Sending kill signal...")
                 new_client.close()
@@ -332,14 +365,15 @@ def do_server(args,log):
         signal.alarm(0)
 
         if n_clients == 0:
-            log.critical("[WARNING] Something went wrong, no clients registered")
+            log.critical(
+                "[WARNING] Something went wrong, no clients registered")
             exit(-1)
 
         for i in range(n_clients):
             socket_str = "-sockets {0} -ns {1}".format(n_clients, i+1)
             client_out = clients.pop()
             client_out.send_data(socket_str.encode())
-    #### endif wait
+    # endif wait
 
     counter = 0
 
@@ -353,20 +387,19 @@ def do_server(args,log):
         # Wait for n_clients connections.
         # Once every client has sent its share of the data, sum it
         # together and send it back
-        success = server.harmonize_integral(n_clients, verbose = False)
+        success = server.harmonize_integral(n_clients, verbose=False)
         end_time = datetime.datetime.now()
         iteration_duration = end_time-start_time
         start_time = end_time
         hours, remainder = divmod(iteration_duration.total_seconds(), 3600)
         minutes, seconds = divmod(remainder, 60)
-        log.info("Iteration {0} completed in {1:02.0f}:{2:02.0f}:{3:02.0f}".format(counter, hours,
-                                                                 minutes, seconds))
+        log.info(
+            "Iteration {0} completed in {1:02.0f}:{2:02.0f}:{3:02.0f}".format(
+                counter, hours, minutes, seconds))
         if success < 0:
             print("[WARNING] Something went wrong")
 
     server.close()
-
-
 
 
 if __name__ == "__main__":
@@ -379,6 +412,6 @@ if __name__ == "__main__":
 
     try:
         do_server(args, log)
-    except (Exception,KeyboardInterrupt) as e:
-        log.exception("Encountered Exception") # Prints stack trace
+    except (Exception, KeyboardInterrupt):
+        log.exception("Encountered Exception")  # Prints stack trace
         exit(-1)

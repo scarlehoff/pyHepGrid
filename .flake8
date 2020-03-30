@@ -1,0 +1,9 @@
+[flake8]
+max-line-length = 80
+select = C,E,F,W,B,B950
+ignore = E203, E501, E121, E123, E126, E226, E24, E704, W503, W504
+exclude =
+    # No need to traverse our git directory
+    .git,
+    # There's no value in checking cache directories
+    __pycache__
