@@ -4,6 +4,19 @@ import shutil
 import pyHepGrid.src.header as header
 
 
+def setup_runfiles():
+    inputs = next(arg for arg in header.DIRACSCRIPTDEFAULT
+                  if arg.startswith('InputSandbox')
+                  ).split("=")[-1].strip(' {};')
+    inputs = [i.strip('" ') for i in inputs.split(',')]
+    if header.runfile not in inputs or header.grid_helper not in inputs:
+        raise Exception('"runfile" or "grid_helper" missing in Dirac arguments')
+
+    for file in inputs:
+        shutil.copyfile(
+            file, os.path.join(header.sandbox_dir, os.path.basename(file)))
+
+
 def setup():
     oldpath = os.getcwd()
     try:
@@ -11,8 +24,7 @@ def setup():
     except FileNotFoundError:
         pass
     os.mkdir(header.sandbox_dir)
-    shutil.copyfile(header.runfile, os.path.join(
-        header.sandbox_dir, os.path.basename(header.runfile)))
+    setup_runfiles()
     os.chdir(header.sandbox_dir)
     path_to_orig = os.path.relpath(oldpath, os.getcwd())
     header.dbname = os.path.join(path_to_orig, header.dbname)

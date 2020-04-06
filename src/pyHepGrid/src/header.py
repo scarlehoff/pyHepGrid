@@ -4,6 +4,7 @@ import os
 from types import ModuleType
 import getpass
 import importlib
+import pkgutil
 import socket
 
 import pyHepGrid.headers.template_header as template
@@ -219,6 +220,9 @@ if arcbase is None and \
 # if nothing is used, the end system will decide what the maximum is
 #
 
+grid_helper = pkgutil.get_loader("pyHepGrid.extras.grid_functions"
+                                 ).get_filename()
+
 # Default Arc Warmup
 ARCSCRIPTDEFAULT = ['&',
                     '(executable   = "{0}")'.format(os.path.basename(runfile)),
@@ -227,8 +231,12 @@ ARCSCRIPTDEFAULT = ['&',
                     '(stderr       = "stderr")',
                     '(gmlog        = "testjob.log")',
                     '(memory       = "100")',
-                    '(inputFiles   = ("{file}" "{path}"))'.format(
-                        file=os.path.basename(runfile), path=runfile),
+                    ('(inputFiles   = ("{file}" "{path}")'
+                        '("{helper}" "{hpath}"))').format(
+                            file=os.path.basename(runfile), path=runfile,
+                            helper=os.path.basename(grid_helper),
+                            hpath=grid_helper,
+                        ),
                     ]
 
 # Default Arc Production
@@ -240,9 +248,9 @@ DIRACSCRIPTDEFAULT = [
     'Executable = "{0}";'.format(os.path.basename(runfile)),
     'StdOutput  = "StdOut";',
     'StdError   = "StdErr";',
-    'InputSandbox  = {{"{0}"}};'.format(runfile),
+    'InputSandbox  = {{"{0}", "{1}"}};'.format(runfile, grid_helper),
     'OutputSandbox = {"StdOut","StdErr"};',
-    'Platform = "{0}";'.format(dirac_platform)
+    'Platform = "{0}";'.format(dirac_platform),
 ]
 
 # If Dirac banned sites are specified, include them in JDL
