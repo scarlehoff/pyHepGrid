@@ -10,6 +10,13 @@ pyHepGrid: Tool for distributed computing management geared towards HEP applicat
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3233862.svg
    :target: https://doi.org/10.5281/zenodo.3233862
 
+.. image:: https://github.com/scarlehoff/pyHepGrid/workflows/Python%20application/badge.svg
+   :target: https://github.com/scarlehoff/pyHepGrid/
+
+.. image:: https://github.com/scarlehoff/pyHepGrid/workflows/Docs/badge.svg
+   :target: https://scarlehoff.github.io/pyHepGrid/index.html
+
+
 Welcome to the documentation for pyHepGrid.
 
 (Incomplete, and always will be. The grid is a mysterious thing...)
