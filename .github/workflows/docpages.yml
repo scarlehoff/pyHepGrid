@@ -24,8 +24,9 @@ jobs:
           pip install .[docs]
           cd docs
           make html
+          cd ..
 
-      - name: Install SSH client
+      - name: Install SSH Client 🔑
         uses: webfactory/ssh-agent@v0.2.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_KEY }}
@@ -34,6 +35,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           SSH: true
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: gh-pages 
           FOLDER: docs/build/html 
