@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Setup &mdash; pyHepGrid  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="pyHepGrid: Tool for distributed computing management geared towards HEP applications." href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyHepGrid
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#initial-setup">Initial setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#for-nnlojet-developers-nnlojet-setup">(for nnlojet developers) NNLOJET SETUP</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#grid-scripts-setup">GRID SCRIPTS SETUP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#further-customisations-advanced-usage">Further customisations (advanced usage)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#proxy-setup">Proxy setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automated-set-forget">Automated (set &amp; forget)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring.html">Monitoring</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyHepGrid</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Setup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/setup.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="setup">
+<span id="setup-label"></span><h1>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#initial-setup" id="id3">Initial setup</a></p>
+<ul>
+<li><p><a class="reference internal" href="#for-nnlojet-developers-nnlojet-setup" id="id4">(for nnlojet developers) NNLOJET SETUP</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#grid-scripts-setup" id="id5">GRID SCRIPTS SETUP</a></p></li>
+<li><p><a class="reference internal" href="#further-customisations-advanced-usage" id="id6">Further customisations (advanced usage)</a></p></li>
+<li><p><a class="reference internal" href="#proxy-setup" id="id7">Proxy setup</a></p></li>
+<li><p><a class="reference internal" href="#automated-set-forget" id="id8">Automated (set &amp; forget)</a></p></li>
+</ul>
+</div>
+<div class="section" id="initial-setup">
+<h2><a class="toc-backref" href="#id3">Initial setup</a><a class="headerlink" href="#initial-setup" title="Permalink to this headline">¶</a></h2>
+<p>Follow certificate setup as per <a class="reference external" href="https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html">Jeppe’s tutorial</a></p>
+<p>Make a careful note of passwords (can get confusing). Don’t use passwords used
+elsewhere in case you want to automate proxy renewal (like me and Juan)</p>
+<div class="section" id="for-nnlojet-developers-nnlojet-setup">
+<h3><a class="toc-backref" href="#id4">(for nnlojet developers) NNLOJET SETUP</a><a class="headerlink" href="#for-nnlojet-developers-nnlojet-setup" title="Permalink to this headline">¶</a></h3>
+<p>As usual - pull the NNLOJET repository, update to modules and <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-jXX</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>LHAPDF 6.2.1 will not work on the grid outside of Durham(!)</p>
+</div>
+<ul class="simple">
+<li><p>When installing lhapdf, don’t have the default prefix <cite>$HOME</cite> for installation
+as the entire home directory will be tarred up when initialising the grid
+libraries for LHAPDF(!)</p></li>
+<li><p>For this you will also need to install and link against boost (painful I
+know…)</p></li>
+<li><p>As of 20/4/2018, the minimum known compatible version of gcc with NNLOJET is
+gcc 4.9.1. Versions above this are generally ok</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="grid-scripts-setup">
+<h2><a class="toc-backref" href="#id5">GRID SCRIPTS SETUP</a><a class="headerlink" href="#grid-scripts-setup" title="Permalink to this headline">¶</a></h2>
+<p>To start using <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> you need to do the following steps.</p>
+<ol class="arabic simple" start="0">
+<li><p>Keep track of all your changes by committing them (e.g. fork the remote)</p></li>
+<li><p>Create your own header (e.g. copy and edit the <code class="docutils literal notranslate"><span class="pre">src/pyHepGrid/headers/template_header.py</span></code>)</p></li>
+</ol>
+<p>2. Add yourself to the <code class="docutils literal notranslate"><span class="pre">header_mappings</span></code> in <code class="docutils literal notranslate"><span class="pre">src/pyHepGrid/src/header.py</span></code>.
+This is used for a python import so a header in <code class="docutils literal notranslate"><span class="pre">some_folder/your_header.py</span></code>
+would require <code class="docutils literal notranslate"><span class="pre">your_name:</span> <span class="pre">some_folder.your_header</span></code></p>
+<p>3. Generate a <code class="docutils literal notranslate"><span class="pre">runcard.py</span></code> similar to <code class="docutils literal notranslate"><span class="pre">template_runcard.py</span></code> inside the <code class="docutils literal notranslate"><span class="pre">runcards</span></code>
+folder. <code class="docutils literal notranslate"><span class="pre">runcard.py</span></code> is used to run <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> <em>not your program</em>. The only
+required setting in there is <code class="docutils literal notranslate"><span class="pre">dictCard</span></code>, but you can also overwrite any
+setting you have in your personal header, e.g. <code class="docutils literal notranslate"><span class="pre">BaseSeed</span></code> or <code class="docutils literal notranslate"><span class="pre">producRun</span></code>.</p>
+<p>4. Create folders on gfal to save your in and output. They have to match
+<code class="docutils literal notranslate"><span class="pre">grid_input_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">grid_output_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">grid_warmup_dir</span></code> of your header</p>
+<p>5. If you use you own program: Write you own <code class="docutils literal notranslate"><span class="pre">runfile</span></code> similar to <code class="docutils literal notranslate"><span class="pre">nnlorun.py</span></code>.
+This script will be ran on each node, so it should be <em>self-contained</em> and
+<em>Python 2.4 compatible</em>. It should also be able to handle all arguments of
+the <code class="docutils literal notranslate"><span class="pre">nnnnlorun.py</span></code>, even if they are not used in the script itself. It is
+easiest to simply copy the <code class="docutils literal notranslate"><span class="pre">parse_arguments</span></code> function from there. Most
+arguments correspond to a similar named setting from the runcard/header.
+To run on Dirac make sure you do not depend on a specific local setup, i.e.
+download all required programs from gfal or use what is available on the
+<code class="docutils literal notranslate"><span class="pre">/cvmfs/</span></code>.</p>
+<ol class="arabic simple" start="6">
+<li><p>To install and run the scripts, run</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 setup.py install --user
+python3 setup.py develop --user
+</pre></div>
+</div>
+<p>(Include the <code class="docutils literal notranslate"><span class="pre">--prefix</span></code> option and add to a location contained in <code class="docutils literal notranslate"><span class="pre">$PYTHONPATH</span></code>
+if you want to install it elsewhere). <code class="docutils literal notranslate"><span class="pre">--user</span></code> is used on the gridui as we don’t
+have access to the python3 installation - if you have your own install, feel free
+to drop it.
+We currently need to be in develop mode given the way that the header system works -
+the plan is for this to change at some point.</p>
+<p>Alternatively: if you wish to run pyHepGrid from within a Conda environment,
+install the scripts by moving to the directory containing setup.py and running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install conda-build
+conda develop .
+</pre></div>
+</div>
+<p>If prompted to install any dependencies required by conda-build in step (1),
+type ‘Y’ to proceed.</p>
+<p>After this you should be able to run <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span> <span class="pre">test</span> <span class="pre">runcards/your_runcard.py</span>
+<span class="pre">-B</span></code>. This will execute the your <code class="docutils literal notranslate"><span class="pre">runfile</span></code> locally inside the <code class="docutils literal notranslate"><span class="pre">test_sandbox</span></code>
+folder. You might want to try running it with a <em>clean</em> environment, e.g.
+without sourcing your <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code>. If this works fine you can try submitting to
+the arc  test queue with <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span> <span class="pre">run</span> <span class="pre">runcards/your_runcard.py</span> <span class="pre">-B</span> <span class="pre">--test</span></code>. The
+test queue highly limited in resources. <strong>Only submit a few short jobs to it</strong>
+(&lt;10).</p>
+</div>
+<div class="section" id="further-customisations-advanced-usage">
+<h2><a class="toc-backref" href="#id6">Further customisations (advanced usage)</a><a class="headerlink" href="#further-customisations-advanced-usage" title="Permalink to this headline">¶</a></h2>
+<p>Beside the header and runcard setup, <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> has two big <em>attack points</em> for
+customisations. First and foremost the <code class="docutils literal notranslate"><span class="pre">runfile</span></code> which is run on each grid node.
+This is similar to other grid-scripts that you might have used before. However
+you can also change some local background behaviour through <code class="docutils literal notranslate"><span class="pre">runmodes</span></code>. A
+<code class="docutils literal notranslate"><span class="pre">runmode</span></code> is <em>program</em> specific, e.g. there is a <code class="docutils literal notranslate"><span class="pre">runmode</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;NNLOJET&quot;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">&quot;HEJ&quot;</span></code>. The behaviour of <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span> <span class="pre">ini</span></code> is completely controlled by a
+<code class="docutils literal notranslate"><span class="pre">runmode</span></code>. You could set it up to upload some common files (runcards,
+warmup-files, executable, etc.) with <code class="docutils literal notranslate"><span class="pre">gfal</span></code> before submitting jobs. An simple
+example for a completely customised <code class="docutils literal notranslate"><span class="pre">runfile</span></code> and <code class="docutils literal notranslate"><span class="pre">runmode</span></code> is provided in the
+<code class="docutils literal notranslate"><span class="pre">example</span></code> folder.</p>
+<p>If you want to implement your own <code class="docutils literal notranslate"><span class="pre">runmode</span></code> write a <em>program</em> class as a
+subclass of the [<cite>ProgramInterface</cite>](../src/pyHepGrid/src/program_interface.py).
+You can then load your program as a <code class="docutils literal notranslate"><span class="pre">runmode</span></code> in your <code class="docutils literal notranslate"><span class="pre">runcard.py</span></code>, e.g. you
+could specify <code class="docutils literal notranslate"><span class="pre">runmode=&quot;pyHepGrid.src.programs.HEJ&quot;</span></code> to explicitly load HEJ (the
+shorter <code class="docutils literal notranslate"><span class="pre">runmode=HEJ</span></code> is just an alias). As always, to get started it is easiest
+to look at existing <cite>runmodes</cite>/programs, i.e. the
+[<code class="docutils literal notranslate"><span class="pre">backend_example.py</span></code>](../example/backend_example.py) or any default in
+[<code class="docutils literal notranslate"><span class="pre">programs.py</span></code>](../src/pyHepGrid/src/programs.py). Dependent on your setup you
+might not need to implement all functions. For example to use the initialisation
+in production mode you only need to implement the <code class="docutils literal notranslate"><span class="pre">init_production</span></code> function.</p>
+<p>You can also use your custom program class to pass non-standard arguments to
+your <code class="docutils literal notranslate"><span class="pre">runfile</span></code> by overwriting the <code class="docutils literal notranslate"><span class="pre">include_arguments</span></code>,
+<code class="docutils literal notranslate"><span class="pre">include_production_arguments</span></code> or <code class="docutils literal notranslate"><span class="pre">include_warmup_arguments</span></code> functions. You can
+add, change or even delete entries as you want (the latter is not advised). The
+output of <cite>include_agruments</cite> is directly passed to your <cite>runfile</cite> as a
+command-line argument of the form <code class="docutils literal notranslate"><span class="pre">--key</span> <span class="pre">value</span></code> f`or Arc and Dirac, or replaces
+the corresponding arguments in the <a href="#id1"><span class="problematic" id="id2">``</span></a>slurm_template`.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> will and can not sanitise your setup and it is your responsibility
+to ensure your code runs as intended. As a general advice try to reuse code
+shipped with <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> where possible, since this should be tested to some
+expend.</p>
+</div>
+</div>
+<div class="section" id="proxy-setup">
+<h2><a class="toc-backref" href="#id7">Proxy setup</a><a class="headerlink" href="#proxy-setup" title="Permalink to this headline">¶</a></h2>
+<p>By default, jobs will fail if the proxy ends before they finish running, so it’s
+a good idea to keep them synced with new proxies as you need:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create new proxy</span>
+arcproxy -S pheno -N -c <span class="nv">validityPeriod</span><span class="o">=</span>24h -c <span class="nv">vomsACvalidityPeriod</span><span class="o">=</span>24h
+
+<span class="c1"># Sync current jobs with latest proxy</span>
+arcsync -c ce1.dur.scotgrid.ac.uk
+arcrenew -a
+</pre></div>
+</div>
+<p>There is also a method to create a long proxy for one week describes in
+<a class="reference external" href="https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html">Jeppe’s grid tutorial</a>.</p>
+</div>
+<div class="section" id="automated-set-forget">
+<h2><a class="toc-backref" href="#id8">Automated (set &amp; forget)</a><a class="headerlink" href="#automated-set-forget" title="Permalink to this headline">¶</a></h2>
+<p>In [<cite>proxy_renewal/</cite>](../proxy_renewal/) are some simple scripts to
+automatically update your proxy. To get these working, create a file</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nano ~/.password/arcpw
+chmod <span class="m">400</span> ~/.password/arcpw
+</pre></div>
+</div>
+<p>and enter your password. Make sure you that your <code class="docutils literal notranslate"><span class="pre">~/.password/arcpw</span></code> is hidden,
+i.e. <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">-l</span> <span class="pre">~/.password/arcpw</span></code> should show <code class="docutils literal notranslate"><span class="pre">-rw-------</span></code> otherwise other users
+could read your password. Afterwards add</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CERT_PW_LOCATION</span><span class="o">=</span>~/.password/arcpw
+<span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span>/path/to/pyHepGrid/proxy_renewal:<span class="si">${</span><span class="nv">PATH</span><span class="si">}</span>
+</pre></div>
+</div>
+<p>to your <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> and source it. Afterwards you should be able to run
+<cite>newproxy</cite> to get a new 24 hour proxy without typing your password, you can
+check the proxy time with <code class="docutils literal notranslate"><span class="pre">arcproxy</span> <span class="pre">-I</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">syncjobs</span></code> will update the certificate on all your queuing and running jobs. Set
+it to run as a <a class="reference external" href="https://crontab.guru/">cron job</a> at least once per day (even
+better suggest twice, in case of failure), such that no jobs will ever be
+stopped do to an invalid certificate.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="usage.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="pyHepGrid: Tool for distributed computing management geared towards HEP applications." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
