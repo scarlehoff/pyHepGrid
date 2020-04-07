@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Docs
 
 on:
   push:
@@ -24,6 +24,7 @@ jobs:
           pip install .[docs]
           cd docs
           make html
+          touch build/html/.nojekyll
           cd ..
 
       - name: Install SSH Client 🔑
