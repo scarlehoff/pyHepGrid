@@ -18,15 +18,15 @@ Follow certificate setup as per `Jeppe's tutorial <https://www.ippp.dur.ac.uk/~a
 Make a careful note of passwords (can get confusing). Don't use passwords used
 elsewhere in case you want to automate proxy renewal (like me and Juan)
 
-(for nnlojet developers) NNLOJET SETUP
---------------------------------------
+NNLOJET Setup (for nnlojet developers only)
+-------------------------------------------
 
 As usual - pull the NNLOJET repository, update to modules and ``make -jXX``
 
 .. note::
   LHAPDF 6.2.1 will not work on the grid outside of Durham(!)
 
-- When installing lhapdf, don't have the default prefix `$HOME` for installation
+- When installing lhapdf, don't have the default prefix ``$HOME`` for installation
   as the entire home directory will be tarred up when initialising the grid
   libraries for LHAPDF(!)
 
@@ -36,62 +36,68 @@ As usual - pull the NNLOJET repository, update to modules and ``make -jXX``
 - As of 20/4/2018, the minimum known compatible version of gcc with NNLOJET is
   gcc 4.9.1. Versions above this are generally ok
 
-GRID SCRIPTS SETUP
+Grid Script Setup
 ==================
 
 To start using ``pyHepGrid`` you need to do the following steps.
 
 0. Keep track of all your changes by committing them (e.g. fork the remote)
 
-1. Create your own header (e.g. copy and edit the ``src/pyHepGrid/headers/template_header.py``)
+#. Create your own header (e.g. copy and edit the
+   ``src/pyHepGrid/headers/template_header.py``)
 
-2. Add yourself to the ``header_mappings`` in ``src/pyHepGrid/src/header.py``.
-This is used for a python import so a header in ``some_folder/your_header.py``
-would require ``your_name: some_folder.your_header``
+#. Add yourself to the ``header_mappings`` in ``src/pyHepGrid/src/header.py``.
+   This is used for a python import so a header in
+   ``some_folder/your_header.py`` would require ``your_name:
+   some_folder.your_header``
 
-3. Generate a ``runcard.py`` similar to ``template_runcard.py`` inside the ``runcards``
-folder. ``runcard.py`` is used to run ``pyHepGrid`` *not your program*. The only
-required setting in there is ``dictCard``, but you can also overwrite any
-setting you have in your personal header, e.g. ``BaseSeed`` or ``producRun``.
+#. Generate a ``runcard.py`` similar to ``template_runcard.py`` inside the
+   ``runcards`` folder. ``runcard.py`` is used to run ``pyHepGrid`` *not your
+   program*. The only required setting in there is ``dictCard``, but you can
+   also overwrite any setting you have in your personal header, e.g.
+   ``BaseSeed`` or ``producRun``.
 
-4. Create folders on gfal to save your in and output. They have to match
-``grid_input_dir``, ``grid_output_dir`` and ``grid_warmup_dir`` of your header
+#. Create folders on gfal to save your in and output. They have to match
+   ``grid_input_dir``, ``grid_output_dir`` and ``grid_warmup_dir`` of your
+   header
 
-5. If you use you own program: Write you own ``runfile`` similar to ``nnlorun.py``.
-This script will be ran on each node, so it should be *self-contained* and
-*Python 2.4 compatible*. It should also be able to handle all arguments of
-the ``nnnnlorun.py``, even if they are not used in the script itself. It is
-easiest to simply copy the ``parse_arguments`` function from there. Most
-arguments correspond to a similar named setting from the runcard/header.
-To run on Dirac make sure you do not depend on a specific local setup, i.e.
-download all required programs from gfal or use what is available on the
-``/cvmfs/``.
+#. If you use you own program: Write you own ``runfile`` similar to `
+   `nnlorun.py``. This script will be ran on each node, so it should be
+   *self-contained* and *Python 2.4 compatible*. It should also be able to
+   handle all arguments of the ``nnnnlorun.py``, even if they are not used in
+   the script itself. It is easiest to simply copy the ``parse_arguments``
+   function from there. Most arguments correspond to a similar named setting
+   from the runcard/header. To run on Dirac make sure you do not depend on a
+   specific local setup, i.e. download all required programs from gfal or use
+   what is available on the ``/cvmfs/``.
 
-6. To install and run the scripts, run
+#. To install and run the scripts, run
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    python3 setup.py install --user
-    python3 setup.py develop --user
+      python3 setup.py install --user
+      python3 setup.py develop --user
 
-(Include the ``--prefix`` option and add to a location contained in ``$PYTHONPATH``
-if you want to install it elsewhere). ``--user`` is used on the gridui as we don't
-have access to the python3 installation - if you have your own install, feel free
-to drop it.
-We currently need to be in develop mode given the way that the header system works -
-the plan is for this to change at some point.
+   (Include the ``--prefix`` option and add to a location contained in
+   ``$PYTHONPATH`` if you want to install it elsewhere). ``--user`` is used on
+   the gridui as we don't have access to the python3 installation - if you have
+   your own install, feel free to drop it.
 
-Alternatively: if you wish to run pyHepGrid from within a Conda environment,
-install the scripts by moving to the directory containing setup.py and running:
+   .. note::
+       We currently need to be in develop mode given the way that the header
+       system works - the plan is for this to change at some point.
 
-.. code-block:: bash
+   Alternatively: if you wish to run pyHepGrid from within a Conda environment,
+   install the scripts by moving to the directory containing setup.py and
+   running:
 
-    conda install conda-build
-    conda develop .
+   .. code-block:: bash
 
-If prompted to install any dependencies required by conda-build in step (1),
-type 'Y' to proceed.
+      conda install conda-build
+      conda develop .
 
+   If prompted to install any dependencies required by conda-build in step 1.,
+   type ``Y`` to proceed.
 
 After this you should be able to run ``pyHepGrid test runcards/your_runcard.py
 -B``. This will execute the your ``runfile`` locally inside the ``test_sandbox``
@@ -116,7 +122,7 @@ example for a completely customised ``runfile`` and ``runmode`` is provided in t
 ``example`` folder.
 
 If you want to implement your own ``runmode`` write a *program* class as a
-subclass of the [`ProgramInterface`](../src/pyHepGrid/src/program_interface.py).
+subclass of the [``ProgramInterface``](../src/pyHepGrid/src/program_interface.py).
 You can then load your program as a ``runmode`` in your ``runcard.py``, e.g. you
 could specify ``runmode="pyHepGrid.src.programs.HEJ"`` to explicitly load HEJ (the
 shorter ``runmode=HEJ`` is just an alias). As always, to get started it is easiest
@@ -130,7 +136,7 @@ You can also use your custom program class to pass non-standard arguments to
 your ``runfile`` by overwriting the ``include_arguments``,
 ``include_production_arguments`` or ``include_warmup_arguments`` functions. You can
 add, change or even delete entries as you want (the latter is not advised). The
-output of `include_agruments` is directly passed to your `runfile` as a
+output of ``include_agruments`` is directly passed to your ``runfile`` as a
 command-line argument of the form ``--key value`` for Arc and Dirac, or replaces
 the corresponding arguments in the ``slurm_template``.
 
@@ -179,7 +185,7 @@ could read your password. Afterwards add
     export PATH=/path/to/pyHepGrid/proxy_renewal:${PATH}
 
 to your ``~/.bashrc`` and source it. Afterwards you should be able to run
-`newproxy` to get a new 24 hour proxy without typing your password, you can
+``newproxy`` to get a new 24 hour proxy without typing your password, you can
 check the proxy time with ``arcproxy -I``.
 
 ``syncjobs`` will update the certificate on all your queuing and running jobs. Set

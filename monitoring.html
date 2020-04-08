@@ -215,7 +215,7 @@ dirac-proxy-init -g pheno_user -M
 </div>
 <div class="section" id="uk-arc-info">
 <h3><a class="toc-backref" href="#id5">UK ARC INFO</a><a class="headerlink" href="#uk-arc-info" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./get_site_info.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./src/pyHepGrid/extras/get_site_info.py
 </pre></div>
 </div>
 </div>
@@ -259,29 +259,39 @@ amongst the clients)</p></li>
 </div>
 <div class="section" id="hamilton-queues">
 <h2><a class="toc-backref" href="#id8">Hamilton queues</a><a class="headerlink" href="#hamilton-queues" title="Permalink to this headline">¶</a></h2>
-<ul>
-<li><p>There are multiple queues I suggest using on the HAMILTON cluster:</p>
+<p>There are multiple queues I suggest using on the HAMILTON cluster:</p>
 <blockquote>
-<div><ul>
+<div><ul class="simple">
 <li><p>par6.q</p>
-<p>16 cores per node [set warmupthr = 16]No known job # limit, so you can chain as many nodes as you like to
-turbocharge warmups3 day job time limit</p>
+<ul>
+<li><p>16 cores per node [set warmupthr = 16]</p></li>
+<li><p>No known job # limit, so you can chain as many nodes as you like to</p></li>
+<li><p>turbocharge warmups</p></li>
+<li><p>3 day job time limit</p></li>
+</ul>
 </li>
 <li><p>par7.q</p>
-<p>24 cores per node [set warmupthr = 24]# jobs limited to 12, so you can use a maximum of 12*24 cores at a given
-time3 day job time limit</p>
+<ul>
+<li><p>24 cores per node [set warmupthr = 24]</p></li>
+<li><p># jobs limited to 12, so you can use a maximum of 12*24 cores at a given</p></li>
+<li><p>time</p></li>
+<li><p>3 day job time limit</p></li>
+</ul>
 </li>
 <li><p>openmp7.q <strong>NOT RECOMMENDED</strong></p>
-<p>58 cores total - this is tiny, so I would recommend par7 or par6# jobs limited to 12No time limitOften in competition with other jobs, so not great for sockets</p>
+<ul>
+<li><p>58 cores total - this is tiny, so I would recommend par7 or par6</p></li>
+<li><p># jobs limited to 12</p></li>
+<li><p>No time limit</p></li>
+<li><p>Often in competition with other jobs, so not great for sockets</p></li>
+</ul>
 </li>
 </ul>
 </div></blockquote>
-</li>
-<li><p>Use NNLOJET ludicrous mode if possible - it will have a reasonable speedup
-when using 16-24 core nodes in warmups</p></li>
-<li><p>Current monitoring info can be found using the <code class="docutils literal notranslate"><span class="pre">sfree</span></code> command, which gives
-the number of cores in use at any given time</p></li>
-</ul>
+<p>Use NNLOJET ludicrous mode if possible - it will have a reasonable speedup
+when using 16-24 core nodes in warmups.</p>
+<p>Current monitoring info can be found using the <code class="docutils literal notranslate"><span class="pre">sfree</span></code> command, which gives
+the number of cores in use at any given time.</p>
 </div>
 </div>
 
