@@ -184,7 +184,7 @@ def set_default_environment(args, lhapdf_dir):
     except ImportError:
         # If gfal can't be imported then the site packages need to be added to
         # the python path because ? :(
-        os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"]\
+        os.environ["PYTHONPATH"] = os.environ.get("PYTHONPATH", "")\
             + ":" + \
             args.gfal_location.replace("/bin/", "/lib/python2.7/site-packages/")
         os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]\
@@ -421,9 +421,9 @@ def print_node_info(outputfile):
     do_shell("cat {0}".format(outputfile))  # print to log
 
 
-def end_program(status, debug_level):
+def end_program(status):
     # print debug infos here if status!=0
-    if status != 0 or debug_level > 8:
+    if status != 0 or DEBUG_LEVEL > 8:
         do_shell("cat "+LOG_FILE)
         do_shell("ls")
     end_time = datetime.datetime.now()

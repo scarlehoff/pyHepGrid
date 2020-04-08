@@ -42,7 +42,7 @@ def setup():
     setup_environment(args, args.lhapdf_local)
     socket_config = None
 
-    if debug_level > 1:
+    if gf.DEBUG_LEVEL > 1:
         # Architecture info
         gf.print_flush("Python version: {0}".format(sys.version))
         gf.print_node_info("node_info.log")
@@ -54,7 +54,7 @@ def setup():
         # initialise with node name
         gf.do_shell("hostname >> {0}".format(gf.COPY_LOG))
 
-    return args, debug_level, socket_config
+    return args, socket_config
 
 
 def setup_sockets(args, nnlojet_command, bring_status):
@@ -119,9 +119,9 @@ def bring_files(args):
     bring_status = 0
     if not args.use_cvmfs_lhapdf:
         gf.print_flush("Using own version of LHAPDF")
-        bring_status += bring_lhapdf(args.lhapdf_grid, debug_level)
+        bring_status += bring_lhapdf(args.lhapdf_grid, gf.DEBUG_LEVEL)
     bring_status += bring_nnlojet(args.input_folder, args.runcard,
-                                  args.runname, debug_level)
+                                  args.runname, gf.DEBUG_LEVEL)
     gf.do_shell("chmod +x {0}".format(args.executable))
     if bring_status != 0:
         gf.print_flush("Not able to bring data from storage. Exiting now.")
@@ -163,7 +163,7 @@ def store_output(args, socketed=False, socket_config=""):
         output_file = os.path.join(args.warmup_folder, local_out)
 
     tar_status = gf.tar_this(local_out, "*")
-    if debug_level > 1:
+    if gf.DEBUG_LEVEL > 1:
         gf.do_shell("ls")
 
     if socketed:
@@ -218,7 +218,7 @@ def print_copy_status(args, status_copy):
 
 # ------------------------- MAIN -------------------------
 if __name__ == "__main__":
-    args, debug_level, socket_config = setup()
+    args, socket_config = setup()
     bring_status = bring_files(args)
 
     nnlojet_command = RUN_CMD.format(
@@ -230,7 +230,7 @@ if __name__ == "__main__":
     if args.Production:  # Assume sockets does not work with production
         nnlojet_command += " -iseed {0}".format(args.seed)
 
-    if debug_level > 1:
+    if gf.DEBUG_LEVEL > 1:
         gf.do_shell("ls")
         gf.do_shell("ldd -v {0}".format(args.executable))
 
@@ -249,4 +249,7 @@ if __name__ == "__main__":
         except socket.error:
             pass
 
-    gf.end_program(status_nnlojet, status_copy, status_tar, bring_status)
+    statuses = [ status_nnlojet, status_copy, status_tar, bring_status ]
+    status_code = int(any(status != 0 for status in statuses))
+
+    gf.end_program(status_code)
