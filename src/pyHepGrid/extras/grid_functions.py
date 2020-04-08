@@ -187,7 +187,7 @@ def set_default_environment(args, lhapdf_dir):
         os.environ["PYTHONPATH"] = os.environ.get("PYTHONPATH", "")\
             + ":" + \
             args.gfal_location.replace("/bin/", "/lib/python2.7/site-packages/")
-        os.environ["LD_LIBRARY_PATH"] = os.environ["LD_LIBRARY_PATH"]\
+        os.environ["LD_LIBRARY_PATH"] = os.environ.get("LD_LIBRARY_PATH", "")\
             + ":"+args.gfal_location.replace("/bin/", "/lib/")
     return 0
 
@@ -203,7 +203,7 @@ def run_command(command):
 
 
 # ------------------------- TAR UTILITIES -------------------------
-def untar_file(local_file, debug_level):
+def untar_file(local_file, debug_level=DEBUG_LEVEL):
     if debug_level > 16:
         cmd = "tar zxfv {0}".format(local_file)
     else:
