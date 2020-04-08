@@ -122,13 +122,13 @@ example for a completely customised ``runfile`` and ``runmode`` is provided in t
 ``example`` folder.
 
 If you want to implement your own ``runmode`` write a *program* class as a
-subclass of the [``ProgramInterface``](../src/pyHepGrid/src/program_interface.py).
+subclass of the `ProgramInterface <https://github.com/scarlehoff/pyHepGrid/blob/master/src/pyHepGrid/src/program_interface.py>`_.
 You can then load your program as a ``runmode`` in your ``runcard.py``, e.g. you
 could specify ``runmode="pyHepGrid.src.programs.HEJ"`` to explicitly load HEJ (the
 shorter ``runmode=HEJ`` is just an alias). As always, to get started it is easiest
-to look at existing `runmodes`/programs, i.e. the
-[``backend_example.py``](../example/backend_example.py) or any default in
-[``programs.py``](../src/pyHepGrid/src/programs.py). Dependent on your setup you
+to look at existing runmodes or programs, i.e. the
+`backend_example.py <https://github.com/scarlehoff/pyHepGrid/blob/master/example/backend_example.py>`_ or any default in
+`programs.py <https://github.com/scarlehoff/pyHepGrid/blob/master/src/pyHepGrid/src/programs.py>`_. Dependent on your setup you
 might not need to implement all functions. For example to use the initialisation
 in production mode you only need to implement the ``init_production`` function.
 
@@ -167,7 +167,7 @@ There is also a method to create a long proxy for one week describes in
 Automated (set & forget)
 ========================
 
-In [`proxy_renewal/`](../proxy_renewal/) are some simple scripts to
+In `proxy_renewal/ <https://github.com/scarlehoff/pyHepGrid/blob/master/proxy_renewal/>`_ are some simple scripts to
 automatically update your proxy. To get these working, create a file
 
 .. code-block:: bash
