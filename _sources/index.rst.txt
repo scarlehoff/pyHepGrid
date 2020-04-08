@@ -35,6 +35,8 @@ being allowing maximal access to the available computing infrastructure, with ma
 
 `James Whitehead <https://github.com/jcwhitehead/>`_
 
+`James Black`
+
 
 Indices and tables
 ==================
