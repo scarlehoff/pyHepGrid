@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     if status != 0:
         gf.print_flush("download failed")
-        gf.end_program(status, debug_level)
+        gf.end_program(status)
 
     download_time = datetime.datetime.now()
 
@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
     if status != 0:
         gf.print_flush("Sherpa failed")
-        gf.end_program(status, debug_level)
+        gf.end_program(status)
 
     run_time = datetime.datetime.now()
 
@@ -170,4 +170,4 @@ if __name__ == "__main__":
     gf.print_file("tar&copy time: "+str(tarcopy_time-run_time))
     gf.print_file("total time:    "+str(tarcopy_time-setup_time))
 
-    gf.end_program(status, debug_level)
+    gf.end_program(status)

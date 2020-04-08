@@ -136,7 +136,8 @@ if __name__ == "__main__":
     if not args.executable_location:
         # if path to executable not provided, exit with error.
         gf.print_flush("Executable location not specified")
-        gf.end_program(status=1, debug_level=99999)
+        gf.DEBUG_LEVEL = 99999
+        gf.end_program(status=1)
 
     status = download_program(args.executable_location, gf.DEBUG_LEVEL)
     status += download_runcard(args.input_folder,
@@ -144,7 +145,7 @@ if __name__ == "__main__":
 
     if status != 0:
         gf.print_flush("download failed")
-        gf.end_program(status, gf.DEBUG_LEVEL)
+        gf.end_program(status)
 
     download_time = datetime.datetime.now()
 
@@ -152,7 +153,7 @@ if __name__ == "__main__":
 
     if status != 0:
         gf.print_flush("Executable failed")
-        gf.end_program(status, gf.DEBUG_LEVEL)
+        gf.end_program(status)
 
     run_time = datetime.datetime.now()
 
@@ -177,4 +178,4 @@ if __name__ == "__main__":
     gf.print_file("tar&copy time:    "+str(tarcopy_time-run_time))
     gf.print_file("total time:       "+str(tarcopy_time-setup_time))
 
-    gf.end_program(status, gf.DEBUG_LEVEL)
+    gf.end_program(status)
