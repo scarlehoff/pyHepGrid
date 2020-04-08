@@ -1,4 +1,4 @@
-.. _setup-label:
+.. _monitor-label:
 
 ===============
 Monitoring

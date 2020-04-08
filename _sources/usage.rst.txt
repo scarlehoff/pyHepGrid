@@ -1,7 +1,7 @@
 .. _usage-label:
 
 ===============
-Usage 
+Usage
 ===============
 
 This page contains the pyHepGrid usage guide.
@@ -82,7 +82,7 @@ For ARC runs (either production or warmup)
 or for Dirac runs:
 
 .. code-block:: bash
-    
+
     pyHepGrid man -D --get_data
 
 The script will then ask you which database entry do you want to retrieve and
@@ -94,13 +94,13 @@ For instance, let's suppose you sent 4000 production runs to Dirac on the 1st of
 March and this job's entry is 14, you can do
 
 .. code-block:: bash
-    
+
     pyHepGrid man -D -g -j 14
 
 and it will download all .dat and .log files to ``warmup_base_dir/March/1/RUNNAME``
 
 Custom setups
-------------
+-------------
 
 For your own custom setup, you just need to write a finalisation script which
 exposes a function called ``do_finalise()``. This function does the pulling from
@@ -138,13 +138,18 @@ Normal workflow
 runcard.py files details
 ========================
 
-- Include a dictionary of all of the runcards you want to submit/initialise/manage, along with an identification tag that you can use for local accounting
+- Include a dictionary of all of the runcards you want to
+  submit/initialise/manage, along with an identification tag that you can use
+  for local accounting
 
 - ``template_runcard.py`` is the canonical example
 
 - Must be valid python to be used
 
-- Has a functionality whereby you can override any parameters in your header file by specifying them in the runcard file. So you can e.g specify a different submission location for specific runs, give different starting
-seeds/numbers of production runs.
+- Has a functionality whereby you can override any parameters in your header
+  file by specifying them in the runcard file. So you can e.g specify a
+  different submission location for specific runs, give different starting
+  seeds/numbers of production runs.
 
-- You can even link/import functions to e.g dynamically find the best submission location
+- You can even link/import functions to e.g dynamically find the best submission
+  location
