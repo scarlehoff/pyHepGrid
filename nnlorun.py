@@ -249,7 +249,7 @@ if __name__ == "__main__":
         except socket.error:
             pass
 
-    statuses = [ status_nnlojet, status_copy, status_tar, bring_status ]
+    statuses = [status_nnlojet, status_copy, status_tar, bring_status]
     status_code = int(any(status != 0 for status in statuses))
 
     gf.end_program(status_code)
