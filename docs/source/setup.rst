@@ -131,8 +131,8 @@ your ``runfile`` by overwriting the ``include_arguments``,
 ``include_production_arguments`` or ``include_warmup_arguments`` functions. You can
 add, change or even delete entries as you want (the latter is not advised). The
 output of `include_agruments` is directly passed to your `runfile` as a
-command-line argument of the form ``--key value`` f`or Arc and Dirac, or replaces
-the corresponding arguments in the ``slurm_template`.
+command-line argument of the form ``--key value`` for Arc and Dirac, or replaces
+the corresponding arguments in the ``slurm_template``.
 
 .. note::
     ``pyHepGrid`` will and can not sanitise your setup and it is your responsibility
@@ -186,5 +186,3 @@ check the proxy time with ``arcproxy -I``.
 it to run as a `cron job <https://crontab.guru/>`_ at least once per day (even
 better suggest twice, in case of failure), such that no jobs will ever be
 stopped do to an invalid certificate.
-
-

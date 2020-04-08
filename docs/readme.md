@@ -3,3 +3,6 @@
 [![Docs](https://github.com/scarlehoff/pyHepGrid/workflows/Docs/badge.svg)](https://scarlehoff.github.io/pyHepGrid/index.html)
 
 Tool for distributed computing management geared towards HEP applications.
+
+The documentation can be found
+[here](https://scarlehoff.github.io/pyHepGrid/index.html).

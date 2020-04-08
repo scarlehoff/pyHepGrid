@@ -2,9 +2,9 @@
     pyHepGrid's documentation!
 
 
-========================
+=====================================================================================
 pyHepGrid: Tool for distributed computing management geared towards HEP applications.
-========================
+=====================================================================================
 
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3233862.svg
@@ -31,7 +31,9 @@ being making sure the power saving goals of the Physics department are never met
 
 `Duncan Walker <https://github.com/DWalker487/>`_
 
-`Marian`
+`Marian Heil <https://github.com/marianheil/>`_
+
+`James`
 
 `James`
 
@@ -41,10 +43,9 @@ Indices and tables
 
 .. toctree::
     :maxdepth: 3
-    :glob: 
+    :glob:
     :caption: Contents:
 
     setup
     usage
     monitoring
-
