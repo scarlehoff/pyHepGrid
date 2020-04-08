@@ -44,32 +44,32 @@ def set_environment(lhapdf_dir):
 
 
 # ------------------------- Download executable -------------------------
-def download_program(source, debug_level):
+def download_program(source):
     tar_name = os.path.basename(source)
     if not tar_name.endswith("tar.gz"):
         gf.print_flush("{0} is not a valid path to download".format(source))
         return 1
     stat = gf.copy_from_grid(source, tar_name, args)
-    stat += gf.untar_file(tar_name, debug_level)
+    stat += gf.untar_file(tar_name)
     stat += gf.do_shell("rm {0}".format(tar_name))
-    if debug_level > 2:
+    if gf.DEBUG_LEVEL > 2:
         gf.do_shell("ls -l")
     return stat
 
 
-def download_runcard(input_folder, runcard, runname, debug_level):
+def download_runcard(input_folder, runcard, runname):
     tar = warmup_name(runcard, runname)
     gf.print_flush("downloading "+input_folder+"/"+tar)
     stat = gf.copy_from_grid(input_folder+"/"+tar, tar, args)
-    stat += gf.untar_file(tar, debug_level)
+    stat += gf.untar_file(tar)
     return gf.do_shell("rm {0}".format(tar))+stat
 
 
-def download_rivet(rivet_folder, debug_level):
+def download_rivet(rivet_folder):
     tar = os.path.basename(rivet_folder)
     gf.print_flush("downloading "+rivet_folder)
     stat = gf.copy_from_grid(rivet_folder, "", args)
-    stat += gf.untar_file(tar, debug_level)
+    stat += gf.untar_file(tar)
     rivet_dir = os.path.basename(os.path.splitext(rivet_folder)[0])
     os.environ['RIVET_ANALYSIS_PATH'] = os.getcwd()+"/"+rivet_dir
     return gf.do_shell("rm {0}".format(tar))+stat
@@ -139,9 +139,8 @@ if __name__ == "__main__":
         gf.DEBUG_LEVEL = 99999
         gf.end_program(status=1)
 
-    status = download_program(args.executable_location, gf.DEBUG_LEVEL)
-    status += download_runcard(args.input_folder,
-                               args.runcard, args.runname, gf.DEBUG_LEVEL)
+    status = download_program(args.executable_location)
+    status += download_runcard(args.input_folder, args.runcard, args.runname)
 
     if status != 0:
         gf.print_flush("download failed")

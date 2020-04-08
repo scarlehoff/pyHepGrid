@@ -119,9 +119,9 @@ def bring_files(args):
     bring_status = 0
     if not args.use_cvmfs_lhapdf:
         gf.print_flush("Using own version of LHAPDF")
-        bring_status += bring_lhapdf(args.lhapdf_grid, gf.DEBUG_LEVEL)
+        bring_status += bring_lhapdf(args.lhapdf_grid)
     bring_status += bring_nnlojet(args.input_folder, args.runcard,
-                                  args.runname, gf.DEBUG_LEVEL)
+                                  args.runname)
     gf.do_shell("chmod +x {0}".format(args.executable))
     if bring_status != 0:
         gf.print_flush("Not able to bring data from storage. Exiting now.")
@@ -129,20 +129,20 @@ def bring_files(args):
     return bring_status
 
 
-def bring_lhapdf(lhapdf_grid, debug):
+def bring_lhapdf(lhapdf_grid):
     tmp_tar = "lhapdf.tar.gz"
     stat = gf.copy_from_grid(lhapdf_grid, tmp_tar, args)
     gf.print_flush("LHAPDF copy from GRID status: {0}".format(stat))
-    stat += gf.untar_file(tmp_tar, debug)
+    stat += gf.untar_file(tmp_tar)
     return gf.do_shell("rm {0}".format(tmp_tar))+stat
 
 
-def bring_nnlojet(input_grid, runcard, runname, debug):
+def bring_nnlojet(input_grid, runcard, runname):
     # Todo: this is not very general, is it?
     tmp_tar = "nnlojet.tar.gz"
     input_name = "{0}/{1}{2}.tar.gz".format(input_grid, runcard, runname)
     stat = gf.copy_from_grid(input_name, tmp_tar, args)
-    stat += gf.untar_file(tmp_tar, debug)
+    stat += gf.untar_file(tmp_tar)
     stat += gf.do_shell("rm {0}".format(tmp_tar))
     stat += gf.do_shell("ls")
     return stat

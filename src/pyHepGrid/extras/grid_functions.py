@@ -203,8 +203,8 @@ def run_command(command):
 
 
 # ------------------------- TAR UTILITIES -------------------------
-def untar_file(local_file, debug_level=DEBUG_LEVEL):
-    if debug_level > 16:
+def untar_file(local_file):
+    if DEBUG_LEVEL > 16:
         cmd = "tar zxfv {0}".format(local_file)
     else:
         cmd = "tar zxf " + local_file

@@ -47,35 +47,35 @@ def set_environment(args, lhapdf_dir):
 
 
 # ------------------------- Download executable -------------------------
-def download_program(source, debug_level):
+def download_program(source):
     tar_name = os.path.basename(source)
     if not tar_name.endswith("tar.gz"):
         gf.print_flush("{0} is not a valid path to download HEJ".format(source))
         return 1
     stat = gf.copy_from_grid(source, tar_name, args)
-    stat += gf.untar_file(tar_name, debug_level)
+    stat += gf.untar_file(tar_name)
     stat += gf.do_shell("rm {0}".format(tar_name))
-    if debug_level > 2:
+    if gf.DEBUG_LEVEL > 2:
         gf.do_shell("ls -l HEJ")
     return stat
 
 
-def download_runcard(input_folder, runcard, runname, debug_level):
+def download_runcard(input_folder, runcard, runname):
     tar = warmup_name(runcard, runname)
     gf.print_flush("downloading "+input_folder+"/"+tar)
     stat = gf.copy_from_grid(input_folder+"/"+tar, tar, args)
-    stat += gf.untar_file(tar, debug_level)
+    stat += gf.untar_file(tar)
 
     # TODO download:
     #   Scale setters
     return gf.do_shell("rm {0}".format(tar))+stat
 
 
-def download_rivet(rivet_folder, debug_level):
+def download_rivet(rivet_folder):
     tar = os.path.basename(rivet_folder)
     gf.print_flush("downloading "+rivet_folder)
     stat = gf.copy_from_grid(rivet_folder, "", args)
-    stat += gf.untar_file(tar, debug_level)
+    stat += gf.untar_file(tar)
     rivet_dir = os.path.basename(os.path.splitext(rivet_folder)[0])
     os.environ['RIVET_ANALYSIS_PATH'] = os.getcwd()+"/"+rivet_dir
     return gf.do_shell("rm {0}".format(tar))+stat
@@ -157,18 +157,17 @@ if __name__ == "__main__":
     setup_time = datetime.datetime.now()
     # Download components
     # we are abusing "args.warmup_folder", which is otherwise not needed for HEJ
-    status = download_program(args.warmup_folder, gf.DEBUG_LEVEL)
+    status = download_program(args.warmup_folder)
 
     gf.do_shell("chmod +x {0}".format(args.executable))
 
     if gf.DEBUG_LEVEL > 8:
         gf.do_shell("ldd {0}".format(args.executable))
 
-    status += download_runcard(args.input_folder,
-                               args.runcard, args.runname, gf.DEBUG_LEVEL)
+    status += download_runcard(args.input_folder, args.runcard, args.runname)
 
     if args.use_custom_rivet:
-        status += download_rivet(args.rivet_folder, gf.DEBUG_LEVEL)
+        status += download_rivet(args.rivet_folder)
 
     if status != 0:
         gf.print_flush("download failed")

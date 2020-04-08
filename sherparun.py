@@ -37,7 +37,7 @@ def set_environment(args, lhapdf_dir):
 
 
 # ------------------------- Download executable -------------------------
-def download_program(debug):
+def download_program():
     # TODO read tar and source name from header
     gf.print_flush("using cvmfs Sherpa")
     return 0
@@ -46,26 +46,26 @@ def download_program(debug):
     # stat = gf.copy_from_grid(source, tar_name, args)
     # stat += gf.untar_file(tar_name, debug)
     # stat += gf.do_shell("rm {0}".format(tar_name))
-    # if debug_level > 2:
+    # if gf.DEBUG_LEVEL > 2:
     #     gf.do_shell("ls -l Sherpa")
     # return stat
 
 
-def download_runcard(input_folder, runcard, runname, debug_level):
+def download_runcard(input_folder, runcard, runname):
     tar = warmup_name(runcard, runname)
     gf.print_flush("downloading "+input_folder+"/"+tar)
     stat = gf.copy_from_grid(input_folder+"/"+tar, tar, args)
-    stat += gf.untar_file(tar, debug_level)
+    stat += gf.untar_file(tar)
     # TODO download:
     #   Scale setters
     return gf.do_shell("rm {0}".format(tar))+stat
 
 
-def download_rivet(rivet_folder, debug_level):
+def download_rivet(rivet_folder):
     tar = os.path.basename(rivet_folder)
     gf.print_flush("downloading "+rivet_folder)
     stat = gf.copy_from_grid(rivet_folder, "", args)
-    stat += gf.untar_file(tar, debug_level)
+    stat += gf.untar_file(tar)
     rivet_dir = os.path.basename(os.path.splitext(rivet_folder)[0])
     os.environ['RIVET_ANALYSIS_PATH'] = os.getcwd()+"/"+rivet_dir
     return gf.do_shell("rm {0}".format(tar))+stat
@@ -98,14 +98,13 @@ if __name__ == "__main__":
         start_time.strftime("%d-%m-%Y %H:%M:%S")))
 
     args = gf.parse_arguments()
-    debug_level = int(args.debug)
 
     lhapdf_local = ""
     if args.use_cvmfs_lhapdf:
         lhapdf_local = args.cvmfs_lhapdf_location
     set_environment(args, lhapdf_local)
 
-    if debug_level > -1:
+    if gf.DEBUG_LEVEL > -1:
         # Architecture info
         gf.print_flush("Python version: {0}".format(sys.version))
         gf.print_node_info("node_info.log")
@@ -115,26 +114,26 @@ if __name__ == "__main__":
         gf.do_shell("hostname >> {0}".format(gf.COPY_LOG))
 
     # Debug info
-    if debug_level > 16:
+    if gf.DEBUG_LEVEL > 16:
         gf.do_shell("env")
         gf.do_shell("voms-proxy-info --all")
 
     setup_time = datetime.datetime.now()
     # Download components
-    status = download_program(debug_level)
+    status = download_program()
 
     # uncomment for downloaded exe
     # gf.do_shell("chmod +x {0}".format(args.executable))
 
     # uncomment for downloaded exe
-    # if debug_level > 8:
+    # if gf.DEBUG_LEVEL > 8:
     #     gf.do_shell("ldd {0}".format(args.executable))
 
     status += download_runcard(args.input_folder,
-                               args.runcard, args.runname, debug_level)
+                               args.runcard, args.runname)
 
     if args.use_custom_rivet:
-        status += download_rivet(args.rivet_folder, debug_level)
+        status += download_rivet(args.rivet_folder)
 
     if status != 0:
         gf.print_flush("download failed")
@@ -160,7 +159,7 @@ if __name__ == "__main__":
     output_file = args.output_folder + "/" + local_out
     status += gf.copy_to_grid(local_out, output_file, args)
 
-    if debug_level > 1:
+    if gf.DEBUG_LEVEL > 1:
         gf.do_shell("ls")
 
     if status == 0:
