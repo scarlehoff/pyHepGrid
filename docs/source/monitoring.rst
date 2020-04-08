@@ -54,7 +54,7 @@ UK ARC INFO
 
 .. code-block:: bash
 
-    ./get_site_info.py
+    ./src/pyHepGrid/extras/get_site_info.py
 
 
 Grid storage management
@@ -101,31 +101,33 @@ NNLOJET can run warmups in distributed mode by using the `vegas-socket <https://
 Hamilton queues
 ===============
 
-- There are multiple queues I suggest using on the HAMILTON cluster:
+.. TODO is this up to date/still relevant?
 
+There are multiple queues I suggest using on the HAMILTON cluster:
 
-    - par6.q
+  - par6.q
 
-      16 cores per node [set warmupthr = 16]\
-      No known job \# limit, so you can chain as many nodes as you like to
-      turbocharge warmups\
-      3 day job time limit
+    * 16 cores per node [set warmupthr = 16]\
+    * No known job \# limit, so you can chain as many nodes as you like to
+    * turbocharge warmups\
+    * 3 day job time limit
 
-    - par7.q
+  - par7.q
 
-      24 cores per node [set warmupthr = 24]\
-      \# jobs limited to 12, so you can use a maximum of 12\*24 cores at a given
-      time\
-      3 day job time limit
+    * 24 cores per node [set warmupthr = 24]\
+    * \# jobs limited to 12, so you can use a maximum of 12\*24 cores at a given
+    * time\
+    * 3 day job time limit
 
-    - openmp7.q **NOT RECOMMENDED**
+  - openmp7.q **NOT RECOMMENDED**
 
-      58 cores total - this is tiny, so I would recommend par7 or par6\
-      \# jobs limited to 12\
-      No time limit\
-      Often in competition with other jobs, so not great for sockets
+    * 58 cores total - this is tiny, so I would recommend par7 or par6\
+    * \# jobs limited to 12\
+    * No time limit\
+    * Often in competition with other jobs, so not great for sockets
 
-- Use NNLOJET ludicrous mode if possible - it will have a reasonable speedup
-  when using 16-24 core nodes in warmups
-- Current monitoring info can be found using the ``sfree`` command, which gives
-  the number of cores in use at any given time
+Use NNLOJET ludicrous mode if possible - it will have a reasonable speedup
+when using 16-24 core nodes in warmups.
+
+Current monitoring info can be found using the ``sfree`` command, which gives
+the number of cores in use at any given time.

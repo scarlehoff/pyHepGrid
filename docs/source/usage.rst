@@ -13,66 +13,75 @@ This page contains the pyHepGrid usage guide.
 pyHepGrid instruction set
 =========================
 
-1. initialise libraries [LHAPDF,(OPENLOOPS?)]
+0. For nnlojet developers only: initialise LHAPDF
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   pyHepGrid ini -L
+      pyHepGrid ini -L
 
-2. initialise runcard
+#. initialise runcard
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    pyHepGrid ini runcard.py -Bn -w warmup.file
+       pyHepGrid ini runcard.py -B
 
-where ``-B`` is production in arc ``-D`` in dirac ``-A`` is warmup in arc
+   where ``-B`` is production in arc ``-D`` in dirac ``-A`` is warmup in arc.
+   If you want to provide warmup files add ``-w warmup.file``.
+
+#. test your setup locally
+
+   .. code-block:: bash
+
+       pyHepGrid test runcard.py -B
+
+   Make sure that you only run a small, quick setup locally, e.g. limit the
+   number of events. ``test`` will always use seed 0.
 
 
-3. send the jobs to run with one of:
+#. send the jobs to run with one of:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    pyHepGrid run <runcard.py> -A # ARC WARMUP
-    pyHepGrid run <runcard.py> -B # ARC PRODUCTION
-    pyHepGrid run <runcard.py> -D # DIRAC PRODUCTION
+       pyHepGrid run <runcard.py> -A # ARC WARMUP
+       pyHepGrid run <runcard.py> -B # ARC PRODUCTION
+       pyHepGrid run <runcard.py> -D # DIRAC PRODUCTION
 
-4. manage the jobs/view the database of runs with:
+#. manage the jobs/view the database of runs with:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    pyHepGrid man <runcard.py> -(A/B/D)
+       pyHepGrid man <runcard.py> -(A/B/D)
 
-include the flags:
+   include one or multiple of the following flags:
 
-  - ``-S/-s`` for job stats
-  - ``-p`` to print the stdout of the job (selects last job of set if production)
-  - ``-P`` to print the job log file (selects last job of set if production)
-  - ``-I/-i`` for job info
+     - ``-S/-s`` for job status
+     - ``-p`` to print the stdout of the job (selects last job of set if production)
+     - ``-P`` to print the job log file (selects last job of set if production)
+     - ``-I/-i`` for job information
 
-For running anything on the grid, the help text in ``pyHepGrid`` (``pyHepGrid
--h``) is useful for hidden options that aren't all necessarily documented(!).
+For running anything on the grid, the help text in ``pyHepGrid
+-h`` is useful for hidden options that aren't all necessarily documented(!).
 These features include warmup continuation, getting warmup data from running
 warmup jobs, initialising with your own warmup from elsewhere, database
-management stuff, local runcard testing.
+management stuff, running on the test queue.
 
 When running, the python script ``runfile`` (e.g. ``nnlorun.py``) is sent to the run
 location. This script then runs automatically, and pulls all of the appropriate
-files from grid storage (NNLOJET exe, runcard (warmups)). It then runs
+files from grid storage (e.g. NNLOJET executable, runcard, warmups). It then runs
 NNLOJET in the appropriate mode, before tarring up output files and sending
 them back to the grid storage.
 
 Finalising results
 ==================
 
-The process of pulling the production results from grid storage to the gridui
-
+The process of pulling the production results from grid storage to the gridui.
 You have a choice of setups for this (or you can implement your own)
 
 Default setup
 -------------
 
-By default, ``pyHepGrid ships a "--get_data"`` script that allows you to retrieve
-jobs looking at the database.
+By default, ``pyHepGrid`` ships a ``"--get_data"`` script that allows you to
+retrieve jobs looking at the database.
 
 .. code-block:: bash
 
@@ -128,12 +137,12 @@ Normal workflow
 ===============
 
 0. Make sure you have a working proxy
-1. initialise warmup runcard
-2. run warmup runcard
-3. switch warmup -> production in runcard
-4. When warmup complete, reinitialise runcard for production
-5. run production runcard as many times as you like w/ different seeds
-6. pull down the results (finalisation)
+#. initialise warmup runcard (optional)
+#. run warmup runcard (optional)
+#. switch warmup -> production in runcard
+#. When warmup complete, reinitialise runcard for production
+#. run production runcard as many times as you like w/ different seeds
+#. pull down the results (finalisation)
 
 runcard.py files details
 ========================
