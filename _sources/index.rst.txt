@@ -25,7 +25,7 @@ Authors and acknowledgements
 ============================
 This code has seen contributions from the authors listed below (no particular order).
 It has been developed mostly at Durham's `IPPP <https://www.ippp.dur.ac.uk/>`_, the main motivation
-being making sure the power saving goals of the Physics department are never met.
+being allowing maximal access to the available computing infrastructure, with maximal success.
 
 `Juan M Cruz-Martinez <https://github.com/scarlehoff/>`_
 
@@ -33,9 +33,7 @@ being making sure the power saving goals of the Physics department are never met
 
 `Marian Heil <https://github.com/marianheil/>`_
 
-`James`
-
-`James`
+`James Whitehead <https://github.com/jcwhitehead/>`_
 
 
 Indices and tables
