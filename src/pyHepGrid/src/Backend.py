@@ -27,7 +27,8 @@ def init_counter(args):
 
 class Backend(_mode):
     """
-    Abstract class for common functions needed for all Backends, to be inherited by their subclass.
+    Abstract class for common functions needed for all Backends,
+    to be inherited by their subclass.
     """
     cDONE = 1
     cWAIT = 0

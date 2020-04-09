@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-Utilities module containing wrappers for tar archives, subprocess calls and GFAL storage commands.
+Utilities module containing wrappers for tar archives, subprocess calls,
+and GFAL storage commands.
 """
 
 import collections
