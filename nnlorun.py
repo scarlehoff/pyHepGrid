@@ -94,7 +94,7 @@ def setup_environment(args, lhapdf_dir):
     lhapdf_lib = lhapdf_dir + "/lib"
     lhapdf_share = lhapdf_dir + "/share/LHAPDF"
     os.environ['LHA_DATA_PATH'] = lhapdf_share
-
+    os.environ['OMP_STACKSIZE'] = "999999"
     old_PATH = os.environ["PATH"]
     os.environ["PATH"] = "%s:%s:%s" % (gcc_PATH, lha_PATH, old_PATH)
     old_ldpath = os.environ["LD_LIBRARY_PATH"]

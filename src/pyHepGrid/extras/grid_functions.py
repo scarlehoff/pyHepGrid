@@ -174,7 +174,6 @@ def set_default_environment(args):
     os.environ["LFC_HOST"] = "lfc01.dur.scotgrid.ac.uk"
     os.environ["LCG_CATALOG_TYPE"] = "lfc"
     os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
-    os.environ['OMP_STACKSIZE'] = "999999"
     try:
         import gfal2_util.shell
         print_flush("Using default gfal at {0}".format(
