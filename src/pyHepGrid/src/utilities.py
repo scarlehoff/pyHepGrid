@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+"""
+Utilities module containing wrappers for tar archives, subprocess calls and GFAL storage commands.
+"""
+
 import collections
 from datetime import datetime
 import json
@@ -208,7 +213,9 @@ def lhapdfIni():
 
 # ------------------------- Tar wrappers -------------------------
 class TarWrap:
-
+    """
+    Wrapper class for tar archive management functions.
+    """
     def tarDir(self, inputDir, output_name):
         with tarfile.open(output_name, "w:gz") as output_tar:
             output_tar.add(inputDir)
@@ -272,6 +279,9 @@ class TarWrap:
 
 # ------------------------- Grid Utilities -------------------------
 class GridWrap:
+    """
+    Wrapper class for GFAL file utilities.
+    """
     # Defaults
     # Need to refactor post dpm gfal
 
