@@ -6,8 +6,16 @@ import pyHepGrid.src.utilities as util
 
 
 class RunSlurm(Backend):
-    """ Generic class for running Slurm scripts, both production and warmup"""
-
+    """
+    Subclass of Backend for SLURM submission.
+    
+    Attributes:
+        table: name of SLURM jobs table in local jobs database
+        templ: list of lines to be written to SLURM submission file
+        prodtempl: list of lines to be written to SLURM submission file (production)
+        runfolder: location of runcard (passed from header)
+        tarw: initialised instance of tarfile wrapper class
+    """
     def __init__(self, prod=False, slurmscript=None, **kwargs):
         super(RunSlurm, self).__init__(**kwargs)
         if prod:

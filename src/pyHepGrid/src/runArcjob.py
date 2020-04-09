@@ -6,6 +6,17 @@ import pyHepGrid.src.socket_api as sapi
 
 
 class RunArc(Backend):
+    """
+    Subclass of Backend for ARC submission.
+    
+    Attributes:
+        table: name of ARC jobs table in local jobs database
+        arcbd: location of remote ARC submission database
+        templ: list of lines to be written to ARC XRSL file
+        runfolder: location of runcard (passed from header)
+        gridw: initialised instance of grid function wrapper class
+        tarw: initialised instance of tarfile wrapper class
+    """
     def __init__(self, prod=False, arcscript=None, **kwargs):
         import os
         super(RunArc, self).__init__(**kwargs)
