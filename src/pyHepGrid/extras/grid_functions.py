@@ -171,9 +171,6 @@ def set_default_environment(args):
     do_shell(
         "export PYTHONPATH=${PYTHONPATH}:${DIRAC}/Linux_x86_64_glibc-2.12/lib"
         "/python2.6/site-packages")
-    os.environ["LFC_HOST"] = "lfc01.dur.scotgrid.ac.uk"
-    os.environ["LCG_CATALOG_TYPE"] = "lfc"
-    os.environ["LCG_GFAL_INFOSYS"] = "lcgbdii.gridpp.rl.ac.uk:2170"
     try:
         import gfal2_util.shell
         print_flush("Using default gfal at {0}".format(
