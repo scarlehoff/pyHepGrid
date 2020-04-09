@@ -30,7 +30,7 @@ def config_name(rname):
 
 
 def set_environment(args, lhapdf_dir):
-    gf.set_default_environment(args, lhapdf_dir)
+    gf.set_default_environment(args)
     # LHAPDF
     os.environ['LHAPDF_DATA_PATH'] = lhapdf_dir
     return 0

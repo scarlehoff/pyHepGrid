@@ -78,7 +78,7 @@ def setup_sockets(args, nnlojet_command, bring_status):
 
 
 def setup_environment(args, lhapdf_dir):
-    gf.set_default_environment(args, lhapdf_dir)
+    gf.set_default_environment(args)
     # GCC
     cvmfs_gcc_dir = '/cvmfs/pheno.egi.eu/compilers/GCC/5.2.0/'
     gcc_libpath = os.path.join(cvmfs_gcc_dir, "lib")

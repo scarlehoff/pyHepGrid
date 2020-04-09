@@ -164,7 +164,7 @@ def parse_arguments(parser=None):
 
 
 # ------------------------- SYSTEM UTILITIES -------------------------
-def set_default_environment(args, lhapdf_dir):
+def set_default_environment(args):
     """
     Initialise default environment, such that gfal works
     """
