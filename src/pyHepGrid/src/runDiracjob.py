@@ -7,7 +7,7 @@ import pyHepGrid.src.header as header
 class RunDirac(Backend):
     """
     Subclass of Backend for Dirac submission.
-    
+
     Attributes:
         table: name of Dirac jobs table in local jobs database
         templ: list of lines to be written to Dirac JDL file

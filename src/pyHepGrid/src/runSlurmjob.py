@@ -8,7 +8,7 @@ import pyHepGrid.src.utilities as util
 class RunSlurm(Backend):
     """
     Subclass of Backend for SLURM submission.
-    
+
     Attributes:
         table: name of SLURM jobs table in local jobs database
         templ: list of lines to be written to SLURM submission file

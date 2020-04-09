@@ -8,7 +8,7 @@ import pyHepGrid.src.socket_api as sapi
 class RunArc(Backend):
     """
     Subclass of Backend for ARC submission.
-    
+
     Attributes:
         table: name of ARC jobs table in local jobs database
         arcbd: location of remote ARC submission database
