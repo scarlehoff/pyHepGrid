@@ -54,6 +54,20 @@ def do_shell(*args):
     return abs(retval)
 
 
+def to_bool(v):
+    """
+    Convert a string to a bool
+    """
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('true', 't', 'yes', 'y', 'on', '1'):
+        return True
+    elif v.lower() in ('false', 'f', 'no', 'n', 'off', '0'):
+        return False
+    else:
+        raise TypeError("Can not convert '{0}' to bool".format(v))
+
+
 def parse_arguments(parser=None):
 
     """
@@ -153,6 +167,11 @@ def parse_arguments(parser=None):
     if options.Production == options.Warmup:
         parser.error(
             "You need to enable one and only one of production and warmup")
+
+    # Fix bools
+    options.copy_log = to_bool(options.copy_log)
+    options.use_cvmfs_lhapdf = to_bool(options.use_cvmfs_lhapdf)
+    options.use_custom_rivet = to_bool(options.use_custom_rivet)
 
     # Pedantic checks
     if options.Production:
