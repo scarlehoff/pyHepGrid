@@ -55,8 +55,15 @@ def do_shell(*args):
 
 
 def parse_arguments(parser=None):
+
     """
     Initialise default runtime arguments
+
+    Args:
+        parser (OptionParser, optional): Predefined parser for customisation
+
+    Returns:
+        dict: Arguments
     """
     from getpass import getuser
 
@@ -216,12 +223,34 @@ def tar_this(tarfile, sourcefiles):
 
 # ------------------------- COPY UTILITIES -------------------------
 def copy_from_grid(grid_file, local_file, args, maxrange=MAX_COPY_TRIES):
+    """Downloads a file from gfal
+
+    Args:
+        grid_file (string): source file on gfal, relative to args.gfaldir
+        local_file (string): target file name
+        args (dict): general configuration, i.e. from parse_arguments
+        maxrange (int, optional): maximal number of copy attempts
+
+    Returns:
+        int: Return value, 0 for successful download
+    """
     filein = os.path.join(args.gfaldir, grid_file)
     fileout = "file://$PWD/{0}".format(local_file)
     return _grid_copy(filein, fileout, args, maxrange=maxrange)
 
 
 def copy_to_grid(local_file, grid_file, args, maxrange=MAX_COPY_TRIES):
+    """Upload a file to gfal
+
+    Args:
+        local_file (string): source file name
+        grid_file (string): target file on gfal, relative to args.gfaldir
+        args (dict): general configuration, i.e. from parse_arguments
+        maxrange (int, optional): maximal number of copy attempts
+
+    Returns:
+        int: Return value, 0 for successful upload
+    """
     filein = "file://$PWD/{0}".format(local_file)
     fileout = os.path.join(args.gfaldir, grid_file)
     return _grid_copy(filein, fileout, args, maxrange=maxrange)
@@ -359,7 +388,7 @@ def _grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
             #     stderr=subprocess.PIPE, shell=True)
             # out, err = p.communicate()
             if retval == 0 and file_present:
-                return retval
+                return 0
             elif retval == 0 and not file_present:
                 print_flush("Copy command succeeded, but failed to copy file. "
                             "Retrying.")
@@ -408,6 +437,7 @@ def _grid_copy(infile, outfile, args, maxrange=MAX_COPY_TRIES):
 
 # ------------------------- Misc -------------------------
 def print_node_info(outputfile):
+    """Save information about this node to outputfile"""
     do_shell("hostname >> {0}".format(outputfile))
     do_shell("gcc --version >> {0}".format(outputfile))
     do_shell("python --version >> {0}".format(outputfile))
@@ -418,6 +448,11 @@ def print_node_info(outputfile):
 
 
 def end_program(status):
+    """Exit program and print general debug informations
+
+    Args:
+        status (int): return code, 0 for success
+    """
     # print debug infos here if status!=0
     if status != 0 or DEBUG_LEVEL > 8:
         do_shell("cat "+LOG_FILE)
