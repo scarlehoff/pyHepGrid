@@ -83,8 +83,7 @@ def parse_arguments(parser=None):
     parser.add_option("-e", "--executable",
                       help="Executable to be run", default="HEJ")
     parser.add_option("-d", "--debug", help="Debug level", default="0")
-    parser.add_option("--copy_log", help="Write copy log file.",
-                      action="store_true", default=False)
+    parser.add_option("--copy_log", help="Write copy log file.", default=False)
     parser.add_option("-s", "--seed", help="Run seed", default="1")
     parser.add_option("-E", "--events", help="Number of events", default="-1")
 
@@ -108,7 +107,7 @@ def parse_arguments(parser=None):
         "cvmfs locations]. Default is the environment gfal.")
 
     # LHAPDF options
-    parser.add_option("--use_cvmfs_lhapdf", action="store_true", default=True)
+    parser.add_option("--use_cvmfs_lhapdf", default=True)
     parser.add_option(
         "--cvmfs_lhapdf_location", default="",
         help="Provide a cvmfs location for LHAPDF.")
@@ -121,7 +120,7 @@ def parse_arguments(parser=None):
         default="lhapdf")
 
     # Rivet options
-    parser.add_option("--use_custom_rivet", action="store_true", default=False)
+    parser.add_option("--use_custom_rivet", default=False)
     parser.add_option("--rivet_folder", default="Wjets/Rivet/Rivet.tgz",
                       help="Provide the location of RivetAnalyses tarball.")
 
