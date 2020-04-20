@@ -11,33 +11,6 @@ This page includes some backend specific instruction for monitoring the differen
    :depth: 3
 
 
-DIRAC
-=====
-
-Installing Dirac is quite easy nowadays! This information comes directly from
-https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac. Running all commands will
-install dirac version ``$DIRAC_VERSION`` to ``$HOME/dirac_ui``. You can change this
-by modifying the variable ``DIRAC_FOLDER``
-
-.. code-block:: bash
-
-    DIRAC_FOLDER="~/dirac_ui"
-    DIRAC_VERSION="-r v6r20p5 -i 27 -g v14r1"
-
-    mkdir $DIRAC_FOLDER
-    cd $DIRAC_FOLDER
-    wget -np -O dirac-install https://raw.githubusercontent.com/DIRACGrid/DIRAC/integration/Core/scripts/dirac-install.py
-    chmod u+x dirac-install
-    ./dirac-install $DIRAC_VERSION
-    source $DIRAC_FOLDER/bashrc # this is not your .bashrc but Dirac's bashrc, see note below
-    dirac-proxy-init -x  ## Here you will need to give your grid certificate password
-    dirac-configure -F -S GridPP -C dips://dirac01.grid.hep.ph.ic.ac.uk:9135/Configuration/Server -I
-    dirac-proxy-init -g pheno_user -M
-
-.. note::
-    Remember you might need to source ``$DIRAC_FOLDER/bashrc`` every time you want to use dirac.
-
-
 Monitoring sites
 ===================
 

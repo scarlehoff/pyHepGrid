@@ -146,11 +146,11 @@ the corresponding arguments in the ``slurm_template``.
     shipped with ``pyHepGrid`` where possible, since this should be tested to some
     expend.
 
-Proxy setup
-===========
+Arc Proxy setup
+===============
 
-By default, jobs will fail if the proxy ends before they finish running, so it's
-a good idea to keep them synced with new proxies as you need:
+By default, jobs will fail if the arc proxy ends before they finish running, so
+it's a good idea to keep them synced with new proxies as you need:
 
 .. code-block:: bash
 
@@ -165,7 +165,7 @@ There is also a method to create a long proxy for one week describes in
 `Jeppe's grid tutorial <https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html>`_.
 
 Automated (set & forget)
-========================
+------------------------
 
 In `proxy_renewal/ <https://github.com/scarlehoff/pyHepGrid/blob/master/proxy_renewal/>`_ are some simple scripts to
 automatically update your proxy. To get these working, create a file
@@ -188,7 +188,33 @@ to your ``~/.bashrc`` and source it. Afterwards you should be able to run
 ``newproxy`` to get a new 24 hour proxy without typing your password, you can
 check the proxy time with ``arcproxy -I``.
 
-``syncjobs`` will update the certificate on all your queuing and running jobs. Set
-it to run as a `cron job <https://crontab.guru/>`_ at least once per day (even
-better suggest twice, in case of failure), such that no jobs will ever be
-stopped do to an invalid certificate.
+``syncjobs`` will update the certificate on all your queuing and running jobs.
+Set it to run as a `cron job <https://crontab.guru/>`_ at least twice per day,
+such that no jobs will ever be stopped do to an invalid certificate.
+
+
+DIRAC
+=====
+
+Installing Dirac is quite easy nowadays! This information comes directly from
+https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac. Running all commands will
+install dirac version ``$DIRAC_VERSION`` to ``$HOME/dirac_ui``. You can change this
+by modifying the variable ``DIRAC_FOLDER``
+
+.. code-block:: bash
+
+    DIRAC_FOLDER="~/dirac_ui"
+    DIRAC_VERSION="-r v6r22p6 -i 27 -g v14r1" # replace with newest version
+
+    mkdir $DIRAC_FOLDER
+    cd $DIRAC_FOLDER
+    wget -np -O dirac-install https://raw.githubusercontent.com/DIRACGrid/DIRAC/integration/Core/scripts/dirac-install.py
+    chmod u+x dirac-install
+    ./dirac-install $DIRAC_VERSION
+    source $DIRAC_FOLDER/bashrc # this is not your .bashrc but Dirac's bashrc, see note below
+    dirac-proxy-init -x  # Here you will need to give your grid certificate password
+    dirac-configure -F -S GridPP -C dips://dirac01.grid.hep.ph.ic.ac.uk:9135/Configuration/Server -I
+    dirac-proxy-init -g pheno_user -M
+
+.. note::
+    Remember you might need to source ``$DIRAC_FOLDER/bashrc`` every time you want to use dirac.
