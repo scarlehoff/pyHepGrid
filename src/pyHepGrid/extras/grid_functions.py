@@ -143,6 +143,10 @@ def parse_arguments(parser=None):
 
     (options, positional) = parser.parse_args()
 
+    if positional:
+        parser.error(
+            "Positional arguments are not allowed, found {0}".format(positional))
+
     if not options.runcard or not options.runname:
         parser.error("Runcard and runname must be provided")
 
