@@ -93,7 +93,7 @@ class ProgramInterface(object):
         if self.gridw.checkForThis(checkname, grid_warmup_dir):
             self._press_yes_to_continue(
                 F"Prior warmup output file {checkname} already exists at "
-                "gfal:~/{grid_warmup_dir}. Do you want to remove it?")
+                F"gfal:~/{grid_warmup_dir}. Do you want to remove it?")
             self.gridw.delete(checkname, grid_warmup_dir)
         else:
             logger.info("None found.")
@@ -104,7 +104,7 @@ class ProgramInterface(object):
         if self.gridw.checkForThis(checkname, grid_warmup_dir):
             self._press_yes_to_continue(
                 F"Prior socketed warmup backups {checkname} exist at "
-                "gfal:~/{grid_warmup_dir}. Do you want to remove the directory "
+                F"gfal:~/{grid_warmup_dir}. Do you want to remove the directory "
                 "and its contents?")
             self.gridw.delete_directory(checkname, grid_warmup_dir)
         else:

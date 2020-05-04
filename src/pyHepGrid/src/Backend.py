@@ -26,7 +26,9 @@ def init_counter(args):
 
 
 class Backend(_mode):
-    """ Abstract class
+    """
+    Abstract class for common functions needed for all Backends,
+    to be inherited by their subclass.
     """
     cDONE = 1
     cWAIT = 0
@@ -639,27 +641,26 @@ class Backend(_mode):
     def _get_default_args(self):
         # Defaults arguments that can always go in
         dictionary = {
+            'gfaldir': header.gfaldir,
             'gfal_location': header.cvmfs_gfal_location,
             'executable': header.executable_exe,
             'input_folder': header.grid_input_dir,
             'output_folder': header.grid_output_dir,
             'warmup_folder': header.grid_warmup_dir,
+            'debug': str(header.debug_level),
+            "copy_log": bool(header.copy_log),
+            "use_cvmfs_lhapdf": bool(header.use_cvmfs_lhapdf),
             'lhapdf_grid': header.lhapdf_grid_loc,
             'lhapdf_local': header.lhapdf_loc,
-            'debug': str(header.debug_level),
-            'gfaldir': header.gfaldir,
-            'events': str(header.events)
+            'events': str(header.events),
+            "use_custom_rivet": bool(header.use_custom_rivet),
         }
-        if header.use_cvmfs_lhapdf:
+        if dictionary["use_cvmfs_lhapdf"]:
             dictionary.update({
-                "use_cvmfs_lhapdf": header.use_cvmfs_lhapdf,
                 "cvmfs_lhapdf_location": header.cvmfs_lhapdf_location})
-        if header.use_custom_rivet:
+        if dictionary["use_custom_rivet"]:
             dictionary.update({
-                "use_custom_rivet": header.use_custom_rivet,
                 "rivet_folder": header.grid_rivet_dir})
-        if header.copy_log:
-            dictionary["copy_log"] = header.copy_log
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):

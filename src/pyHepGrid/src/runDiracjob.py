@@ -5,6 +5,17 @@ import pyHepGrid.src.header as header
 
 
 class RunDirac(Backend):
+    """
+    Subclass of Backend for Dirac submission.
+
+    Attributes:
+        table: name of Dirac jobs table in local jobs database
+        templ: list of lines to be written to Dirac JDL file
+        runfolder: location of runcard (passed from header)
+        gridw: initialised instance of grid function wrapper class
+        tarw: initialised instance of tarfile wrapper class
+
+    """
     def __init__(self, **kwargs):
         super(RunDirac, self).__init__(**kwargs)
         self.table = header.diractable
@@ -80,7 +91,7 @@ class RunDirac(Backend):
             header.logger.info(
                 "> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
             header.logger.info(
-                "> Beginning at seed {0} in increments of {1}.".format(
+                "> Beginning at seed {0} in batches of {1}.".format(
                     baseSeed, increment))
             self.check_for_existing_output(r, dCards[r])
             jdlfile = None
