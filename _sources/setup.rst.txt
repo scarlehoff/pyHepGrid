@@ -43,33 +43,42 @@ To start using ``pyHepGrid`` you need to do the following steps.
 
 0. Keep track of all your changes by committing them (e.g. fork the remote)
 
-#. Create your own header (e.g. copy and edit the
-   ``src/pyHepGrid/headers/template_header.py``)
-
-#. Add yourself to the ``header_mappings`` in ``src/pyHepGrid/src/header.py``.
-   This is used for a python import so a header in
-   ``some_folder/your_header.py`` would require ``your_name:
-   some_folder.your_header``
+#. (optional) Create your own header (e.g. copy and edit the
+   ``src/pyHepGrid/headers/template_header.py``) and add yourself to the
+   ``header_mappings`` in ``src/pyHepGrid/src/header.py``. This is used for a
+   python import so a header in ``some_folder/your_header.py`` would require
+   ``your_name: some_folder.your_header``. If you do not add yourself the
+   ``template_header.py`` will be used.
 
 #. Generate a ``runcard.py`` similar to ``template_runcard.py`` inside the
    ``runcards`` folder. ``runcard.py`` is used to run ``pyHepGrid`` *not your
    program*. The only required setting in there is ``dictCard``, but you can
-   also overwrite any setting you have in your personal header, e.g.
-   ``BaseSeed`` or ``producRun``.
+   also overwrite any setting from your header, e.g. ``BaseSeed`` or
+   ``producRun``.
 
-#. Create folders on gfal to save your in and output. They have to match
+#. Create folders on ``gfal`` to save your in and output. They have to match
    ``grid_input_dir``, ``grid_output_dir`` and ``grid_warmup_dir`` of your
    header
 
 #. If you use you own program: Write you own ``runfile`` similar to `
-   `nnlorun.py``. This script will be ran on each node, so it should be
-   *self-contained* and *Python 2.4 compatible*. It should also be able to
+   `example/simplerun.py``. This script will be ran on each node, so it should
+   be *self-contained* and *Python 2.7 compatible*. It should also be able to
    handle all arguments of the ``nnnnlorun.py``, even if they are not used in
-   the script itself. It is easiest to simply copy the ``parse_arguments``
-   function from there. Most arguments correspond to a similar named setting
-   from the runcard/header. To run on Dirac make sure you do not depend on a
-   specific local setup, i.e. download all required programs from gfal or use
-   what is available on the ``/cvmfs/``.
+   the script itself. An argument parser and other common functions are shipped
+   with ``pyHepGrid`` in `grid_functions.py
+   <https://github.com/scarlehoff/pyHepGrid/blob/master/src/pyHepGrid/extras/grid_functions.py>`_,
+   ``grid_functions.py`` will automatically be copied to each grid node and can
+   be used on there. To run on Dirac make sure you do not depend on a specific
+   local setup, i.e. download all required programs from ``gfal`` or use what is
+   available on the ``/cvmfs/``. Wrapper around ``gfal`` are provided in
+   ``grid_functions.py``, e.g. in your ``runfile`` you can download
+   ``grid_file`` with
+
+   .. code-block:: python
+
+      import grid_functions as gf
+      gf.copy_from_grid(grid_file, local_file, args)
+
 
 #. To install and run the scripts, run
 
@@ -108,18 +117,18 @@ test queue highly limited in resources. **Only submit a few short jobs to it**
 (<10).
 
 Further customisations (advanced usage)
-=======================================
+---------------------------------------
 
-Beside the header and runcard setup, ``pyHepGrid`` has two big *attack points* for
-customisations. First and foremost the ``runfile`` which is run on each grid node.
-This is similar to other grid-scripts that you might have used before. However
-you can also change some local background behaviour through ``runmodes``. A
-``runmode`` is *program* specific, e.g. there is a ``runmode`` ``"NNLOJET"`` and
-``"HEJ"``. The behaviour of ``pyHepGrid ini`` is completely controlled by a
-``runmode``. You could set it up to upload some common files (runcards,
-warmup-files, executable, etc.) with ``gfal`` before submitting jobs. An simple
-example for a completely customised ``runfile`` and ``runmode`` is provided in the
-``example`` folder.
+Beside the header and runcard setup, ``pyHepGrid`` has two big *attack points*
+for customisations. First and foremost the ``runfile`` which is run on each grid
+node. This is similar to other grid-scripts that you might have used before.
+Additionally you can change some local background behaviour through the
+``runmode``. A ``runmode`` is *program* specific, e.g. there is a ``runmode``
+``"NNLOJET"`` and ``"HEJ"``. The behaviour of ``pyHepGrid ini`` is completely
+controlled by the ``runmode``. You could set it up to upload some common files
+(runcards, warmup-files, executable, etc.) with ``gfal`` before submitting jobs.
+An simple example for a completely customised ``runfile`` and ``runmode`` is
+provided in the ``example/`` folder.
 
 If you want to implement your own ``runmode`` write a *program* class as a
 subclass of the `ProgramInterface <https://github.com/scarlehoff/pyHepGrid/blob/master/src/pyHepGrid/src/program_interface.py>`_.
@@ -141,16 +150,16 @@ command-line argument of the form ``--key value`` for Arc and Dirac, or replaces
 the corresponding arguments in the ``slurm_template``.
 
 .. note::
-    ``pyHepGrid`` will and can not sanitise your setup and it is your responsibility
-    to ensure your code runs as intended. As a general advice try to reuse code
-    shipped with ``pyHepGrid`` where possible, since this should be tested to some
-    expend.
+    ``pyHepGrid`` will and can not sanitise your setup and it is your
+    responsibility to ensure your code runs as intended. As a general advice try
+    to reuse code shipped with ``pyHepGrid`` where possible, in particular from
+    ``grid_functions.py``, since this should be tested to some expend.
 
-Proxy setup
-===========
+Arc Proxy setup
+===============
 
-By default, jobs will fail if the proxy ends before they finish running, so it's
-a good idea to keep them synced with new proxies as you need:
+By default, jobs will fail if the arc proxy ends before they finish running, so
+it's a good idea to keep them synced with new proxies as you need:
 
 .. code-block:: bash
 
@@ -165,7 +174,7 @@ There is also a method to create a long proxy for one week describes in
 `Jeppe's grid tutorial <https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html>`_.
 
 Automated (set & forget)
-========================
+------------------------
 
 In `proxy_renewal/ <https://github.com/scarlehoff/pyHepGrid/blob/master/proxy_renewal/>`_ are some simple scripts to
 automatically update your proxy. To get these working, create a file
@@ -188,7 +197,33 @@ to your ``~/.bashrc`` and source it. Afterwards you should be able to run
 ``newproxy`` to get a new 24 hour proxy without typing your password, you can
 check the proxy time with ``arcproxy -I``.
 
-``syncjobs`` will update the certificate on all your queuing and running jobs. Set
-it to run as a `cron job <https://crontab.guru/>`_ at least once per day (even
-better suggest twice, in case of failure), such that no jobs will ever be
-stopped do to an invalid certificate.
+``syncjobs`` will update the certificate on all your queuing and running jobs.
+Set it to run as a `cron job <https://crontab.guru/>`_ at least twice per day,
+such that no jobs will ever be stopped do to an invalid certificate.
+
+
+DIRAC
+=====
+
+Installing Dirac is quite easy nowadays! This information comes directly from
+https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac. Running all commands will
+install dirac version ``$DIRAC_VERSION`` to ``$HOME/dirac_ui``. You can change this
+by modifying the variable ``DIRAC_FOLDER``
+
+.. code-block:: bash
+
+    DIRAC_FOLDER="~/dirac_ui"
+    DIRAC_VERSION="-r v6r22p6 -i 27 -g v14r1" # replace with newest version
+
+    mkdir $DIRAC_FOLDER
+    cd $DIRAC_FOLDER
+    wget -np -O dirac-install https://raw.githubusercontent.com/DIRACGrid/DIRAC/integration/Core/scripts/dirac-install.py
+    chmod u+x dirac-install
+    ./dirac-install $DIRAC_VERSION
+    source $DIRAC_FOLDER/bashrc # this is not your .bashrc but Dirac's bashrc, see note below
+    dirac-proxy-init -x  # Here you will need to give your grid certificate password
+    dirac-configure -F -S GridPP -C dips://dirac01.grid.hep.ph.ic.ac.uk:9135/Configuration/Server -I
+    dirac-proxy-init -g pheno_user -M
+
+.. note::
+    Remember you might need to source ``$DIRAC_FOLDER/bashrc`` every time you want to use dirac.

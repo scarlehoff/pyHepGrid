@@ -87,10 +87,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#nnlojet-setup-for-nnlojet-developers-only">NNLOJET Setup (for nnlojet developers only)</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#grid-script-setup">Grid Script Setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#further-customisations-advanced-usage">Further customisations (advanced usage)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#proxy-setup">Proxy setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#automated-set-forget">Automated (set &amp; forget)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grid-script-setup">Grid Script Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#further-customisations-advanced-usage">Further customisations (advanced usage)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#arc-proxy-setup">Arc Proxy setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#automated-set-forget">Automated (set &amp; forget)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dirac">DIRAC</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
@@ -168,10 +173,17 @@
 <li><p><a class="reference internal" href="#nnlojet-setup-for-nnlojet-developers-only" id="id2">NNLOJET Setup (for nnlojet developers only)</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#grid-script-setup" id="id3">Grid Script Setup</a></p></li>
+<li><p><a class="reference internal" href="#grid-script-setup" id="id3">Grid Script Setup</a></p>
+<ul>
 <li><p><a class="reference internal" href="#further-customisations-advanced-usage" id="id4">Further customisations (advanced usage)</a></p></li>
-<li><p><a class="reference internal" href="#proxy-setup" id="id5">Proxy setup</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#arc-proxy-setup" id="id5">Arc Proxy setup</a></p>
+<ul>
 <li><p><a class="reference internal" href="#automated-set-forget" id="id6">Automated (set &amp; forget)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#dirac" id="id7">DIRAC</a></p></li>
 </ul>
 </div>
 <div class="section" id="initial-setup">
@@ -202,29 +214,37 @@ gcc 4.9.1. Versions above this are generally ok</p></li>
 <p>To start using <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> you need to do the following steps.</p>
 <ol class="arabic" start="0">
 <li><p>Keep track of all your changes by committing them (e.g. fork the remote)</p></li>
-<li><p>Create your own header (e.g. copy and edit the
-<code class="docutils literal notranslate"><span class="pre">src/pyHepGrid/headers/template_header.py</span></code>)</p></li>
-<li><p>Add yourself to the <code class="docutils literal notranslate"><span class="pre">header_mappings</span></code> in <code class="docutils literal notranslate"><span class="pre">src/pyHepGrid/src/header.py</span></code>.
-This is used for a python import so a header in
-<code class="docutils literal notranslate"><span class="pre">some_folder/your_header.py</span></code> would require <code class="docutils literal notranslate"><span class="pre">your_name:</span>
-<span class="pre">some_folder.your_header</span></code></p></li>
+<li><p>(optional) Create your own header (e.g. copy and edit the
+<code class="docutils literal notranslate"><span class="pre">src/pyHepGrid/headers/template_header.py</span></code>) and add yourself to the
+<code class="docutils literal notranslate"><span class="pre">header_mappings</span></code> in <code class="docutils literal notranslate"><span class="pre">src/pyHepGrid/src/header.py</span></code>. This is used for a
+python import so a header in <code class="docutils literal notranslate"><span class="pre">some_folder/your_header.py</span></code> would require
+<code class="docutils literal notranslate"><span class="pre">your_name:</span> <span class="pre">some_folder.your_header</span></code>. If you do not add yourself the
+<code class="docutils literal notranslate"><span class="pre">template_header.py</span></code> will be used.</p></li>
 <li><p>Generate a <code class="docutils literal notranslate"><span class="pre">runcard.py</span></code> similar to <code class="docutils literal notranslate"><span class="pre">template_runcard.py</span></code> inside the
 <code class="docutils literal notranslate"><span class="pre">runcards</span></code> folder. <code class="docutils literal notranslate"><span class="pre">runcard.py</span></code> is used to run <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> <em>not your
 program</em>. The only required setting in there is <code class="docutils literal notranslate"><span class="pre">dictCard</span></code>, but you can
-also overwrite any setting you have in your personal header, e.g.
-<code class="docutils literal notranslate"><span class="pre">BaseSeed</span></code> or <code class="docutils literal notranslate"><span class="pre">producRun</span></code>.</p></li>
-<li><p>Create folders on gfal to save your in and output. They have to match
+also overwrite any setting from your header, e.g. <code class="docutils literal notranslate"><span class="pre">BaseSeed</span></code> or
+<code class="docutils literal notranslate"><span class="pre">producRun</span></code>.</p></li>
+<li><p>Create folders on <code class="docutils literal notranslate"><span class="pre">gfal</span></code> to save your in and output. They have to match
 <code class="docutils literal notranslate"><span class="pre">grid_input_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">grid_output_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">grid_warmup_dir</span></code> of your
 header</p></li>
 <li><p>If you use you own program: Write you own <code class="docutils literal notranslate"><span class="pre">runfile</span></code> similar to `
-<cite>nnlorun.py`</cite>. This script will be ran on each node, so it should be
-<em>self-contained</em> and <em>Python 2.4 compatible</em>. It should also be able to
+<cite>example/simplerun.py`</cite>. This script will be ran on each node, so it should
+be <em>self-contained</em> and <em>Python 2.7 compatible</em>. It should also be able to
 handle all arguments of the <code class="docutils literal notranslate"><span class="pre">nnnnlorun.py</span></code>, even if they are not used in
-the script itself. It is easiest to simply copy the <code class="docutils literal notranslate"><span class="pre">parse_arguments</span></code>
-function from there. Most arguments correspond to a similar named setting
-from the runcard/header. To run on Dirac make sure you do not depend on a
-specific local setup, i.e. download all required programs from gfal or use
-what is available on the <code class="docutils literal notranslate"><span class="pre">/cvmfs/</span></code>.</p></li>
+the script itself. An argument parser and other common functions are shipped
+with <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> in <a class="reference external" href="https://github.com/scarlehoff/pyHepGrid/blob/master/src/pyHepGrid/extras/grid_functions.py">grid_functions.py</a>,
+<code class="docutils literal notranslate"><span class="pre">grid_functions.py</span></code> will automatically be copied to each grid node and can
+be used on there. To run on Dirac make sure you do not depend on a specific
+local setup, i.e. download all required programs from <code class="docutils literal notranslate"><span class="pre">gfal</span></code> or use what is
+available on the <code class="docutils literal notranslate"><span class="pre">/cvmfs/</span></code>. Wrapper around <code class="docutils literal notranslate"><span class="pre">gfal</span></code> are provided in
+<code class="docutils literal notranslate"><span class="pre">grid_functions.py</span></code>, e.g. in your <code class="docutils literal notranslate"><span class="pre">runfile</span></code> you can download
+<code class="docutils literal notranslate"><span class="pre">grid_file</span></code> with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">grid_functions</span> <span class="k">as</span> <span class="nn">gf</span>
+<span class="n">gf</span><span class="o">.</span><span class="n">copy_from_grid</span><span class="p">(</span><span class="n">grid_file</span><span class="p">,</span> <span class="n">local_file</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
 <li><p>To install and run the scripts, run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 setup.py install --user
 python3 setup.py develop --user
@@ -257,19 +277,18 @@ without sourcing your <code class="docutils literal notranslate"><span class="pr
 the arc  test queue with <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span> <span class="pre">run</span> <span class="pre">runcards/your_runcard.py</span> <span class="pre">-B</span> <span class="pre">--test</span></code>. The
 test queue highly limited in resources. <strong>Only submit a few short jobs to it</strong>
 (&lt;10).</p>
-</div>
 <div class="section" id="further-customisations-advanced-usage">
-<h2><a class="toc-backref" href="#id4">Further customisations (advanced usage)</a><a class="headerlink" href="#further-customisations-advanced-usage" title="Permalink to this headline">¶</a></h2>
-<p>Beside the header and runcard setup, <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> has two big <em>attack points</em> for
-customisations. First and foremost the <code class="docutils literal notranslate"><span class="pre">runfile</span></code> which is run on each grid node.
-This is similar to other grid-scripts that you might have used before. However
-you can also change some local background behaviour through <code class="docutils literal notranslate"><span class="pre">runmodes</span></code>. A
-<code class="docutils literal notranslate"><span class="pre">runmode</span></code> is <em>program</em> specific, e.g. there is a <code class="docutils literal notranslate"><span class="pre">runmode</span></code> <code class="docutils literal notranslate"><span class="pre">&quot;NNLOJET&quot;</span></code> and
-<code class="docutils literal notranslate"><span class="pre">&quot;HEJ&quot;</span></code>. The behaviour of <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span> <span class="pre">ini</span></code> is completely controlled by a
-<code class="docutils literal notranslate"><span class="pre">runmode</span></code>. You could set it up to upload some common files (runcards,
-warmup-files, executable, etc.) with <code class="docutils literal notranslate"><span class="pre">gfal</span></code> before submitting jobs. An simple
-example for a completely customised <code class="docutils literal notranslate"><span class="pre">runfile</span></code> and <code class="docutils literal notranslate"><span class="pre">runmode</span></code> is provided in the
-<code class="docutils literal notranslate"><span class="pre">example</span></code> folder.</p>
+<h3><a class="toc-backref" href="#id4">Further customisations (advanced usage)</a><a class="headerlink" href="#further-customisations-advanced-usage" title="Permalink to this headline">¶</a></h3>
+<p>Beside the header and runcard setup, <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> has two big <em>attack points</em>
+for customisations. First and foremost the <code class="docutils literal notranslate"><span class="pre">runfile</span></code> which is run on each grid
+node. This is similar to other grid-scripts that you might have used before.
+Additionally you can change some local background behaviour through the
+<code class="docutils literal notranslate"><span class="pre">runmode</span></code>. A <code class="docutils literal notranslate"><span class="pre">runmode</span></code> is <em>program</em> specific, e.g. there is a <code class="docutils literal notranslate"><span class="pre">runmode</span></code>
+<code class="docutils literal notranslate"><span class="pre">&quot;NNLOJET&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;HEJ&quot;</span></code>. The behaviour of <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span> <span class="pre">ini</span></code> is completely
+controlled by the <code class="docutils literal notranslate"><span class="pre">runmode</span></code>. You could set it up to upload some common files
+(runcards, warmup-files, executable, etc.) with <code class="docutils literal notranslate"><span class="pre">gfal</span></code> before submitting jobs.
+An simple example for a completely customised <code class="docutils literal notranslate"><span class="pre">runfile</span></code> and <code class="docutils literal notranslate"><span class="pre">runmode</span></code> is
+provided in the <code class="docutils literal notranslate"><span class="pre">example/</span></code> folder.</p>
 <p>If you want to implement your own <code class="docutils literal notranslate"><span class="pre">runmode</span></code> write a <em>program</em> class as a
 subclass of the <a class="reference external" href="https://github.com/scarlehoff/pyHepGrid/blob/master/src/pyHepGrid/src/program_interface.py">ProgramInterface</a>.
 You can then load your program as a <code class="docutils literal notranslate"><span class="pre">runmode</span></code> in your <code class="docutils literal notranslate"><span class="pre">runcard.py</span></code>, e.g. you
@@ -289,16 +308,17 @@ command-line argument of the form <code class="docutils literal notranslate"><sp
 the corresponding arguments in the <code class="docutils literal notranslate"><span class="pre">slurm_template</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> will and can not sanitise your setup and it is your responsibility
-to ensure your code runs as intended. As a general advice try to reuse code
-shipped with <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> where possible, since this should be tested to some
-expend.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> will and can not sanitise your setup and it is your
+responsibility to ensure your code runs as intended. As a general advice try
+to reuse code shipped with <code class="docutils literal notranslate"><span class="pre">pyHepGrid</span></code> where possible, in particular from
+<code class="docutils literal notranslate"><span class="pre">grid_functions.py</span></code>, since this should be tested to some expend.</p>
 </div>
 </div>
-<div class="section" id="proxy-setup">
-<h2><a class="toc-backref" href="#id5">Proxy setup</a><a class="headerlink" href="#proxy-setup" title="Permalink to this headline">¶</a></h2>
-<p>By default, jobs will fail if the proxy ends before they finish running, so it’s
-a good idea to keep them synced with new proxies as you need:</p>
+</div>
+<div class="section" id="arc-proxy-setup">
+<h2><a class="toc-backref" href="#id5">Arc Proxy setup</a><a class="headerlink" href="#arc-proxy-setup" title="Permalink to this headline">¶</a></h2>
+<p>By default, jobs will fail if the arc proxy ends before they finish running, so
+it’s a good idea to keep them synced with new proxies as you need:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create new proxy</span>
 arcproxy -S pheno -N -c <span class="nv">validityPeriod</span><span class="o">=</span>24h -c <span class="nv">vomsACvalidityPeriod</span><span class="o">=</span>24h
 
@@ -309,9 +329,8 @@ arcrenew -a
 </div>
 <p>There is also a method to create a long proxy for one week describes in
 <a class="reference external" href="https://www.ippp.dur.ac.uk/~andersen/GridTutorial/certificates.html">Jeppe’s grid tutorial</a>.</p>
-</div>
 <div class="section" id="automated-set-forget">
-<h2><a class="toc-backref" href="#id6">Automated (set &amp; forget)</a><a class="headerlink" href="#automated-set-forget" title="Permalink to this headline">¶</a></h2>
+<h3><a class="toc-backref" href="#id6">Automated (set &amp; forget)</a><a class="headerlink" href="#automated-set-forget" title="Permalink to this headline">¶</a></h3>
 <p>In <a class="reference external" href="https://github.com/scarlehoff/pyHepGrid/blob/master/proxy_renewal/">proxy_renewal/</a> are some simple scripts to
 automatically update your proxy. To get these working, create a file</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nano ~/.password/arcpw
@@ -328,10 +347,35 @@ could read your password. Afterwards add</p>
 <p>to your <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> and source it. Afterwards you should be able to run
 <code class="docutils literal notranslate"><span class="pre">newproxy</span></code> to get a new 24 hour proxy without typing your password, you can
 check the proxy time with <code class="docutils literal notranslate"><span class="pre">arcproxy</span> <span class="pre">-I</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">syncjobs</span></code> will update the certificate on all your queuing and running jobs. Set
-it to run as a <a class="reference external" href="https://crontab.guru/">cron job</a> at least once per day (even
-better suggest twice, in case of failure), such that no jobs will ever be
-stopped do to an invalid certificate.</p>
+<p><code class="docutils literal notranslate"><span class="pre">syncjobs</span></code> will update the certificate on all your queuing and running jobs.
+Set it to run as a <a class="reference external" href="https://crontab.guru/">cron job</a> at least twice per day,
+such that no jobs will ever be stopped do to an invalid certificate.</p>
+</div>
+</div>
+<div class="section" id="dirac">
+<h2><a class="toc-backref" href="#id7">DIRAC</a><a class="headerlink" href="#dirac" title="Permalink to this headline">¶</a></h2>
+<p>Installing Dirac is quite easy nowadays! This information comes directly from
+<a class="reference external" href="https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac">https://www.gridpp.ac.uk/wiki/Quick_Guide_to_Dirac</a>. Running all commands will
+install dirac version <code class="docutils literal notranslate"><span class="pre">$DIRAC_VERSION</span></code> to <code class="docutils literal notranslate"><span class="pre">$HOME/dirac_ui</span></code>. You can change this
+by modifying the variable <code class="docutils literal notranslate"><span class="pre">DIRAC_FOLDER</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">DIRAC_FOLDER</span><span class="o">=</span><span class="s2">&quot;~/dirac_ui&quot;</span>
+<span class="nv">DIRAC_VERSION</span><span class="o">=</span><span class="s2">&quot;-r v6r22p6 -i 27 -g v14r1&quot;</span> <span class="c1"># replace with newest version</span>
+
+mkdir <span class="nv">$DIRAC_FOLDER</span>
+<span class="nb">cd</span> <span class="nv">$DIRAC_FOLDER</span>
+wget -np -O dirac-install https://raw.githubusercontent.com/DIRACGrid/DIRAC/integration/Core/scripts/dirac-install.py
+chmod u+x dirac-install
+./dirac-install <span class="nv">$DIRAC_VERSION</span>
+<span class="nb">source</span> <span class="nv">$DIRAC_FOLDER</span>/bashrc <span class="c1"># this is not your .bashrc but Dirac&#39;s bashrc, see note below</span>
+dirac-proxy-init -x  <span class="c1"># Here you will need to give your grid certificate password</span>
+dirac-configure -F -S GridPP -C dips://dirac01.grid.hep.ph.ic.ac.uk:9135/Configuration/Server -I
+dirac-proxy-init -g pheno_user -M
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Remember you might need to source <code class="docutils literal notranslate"><span class="pre">$DIRAC_FOLDER/bashrc</span></code> every time you want to use dirac.</p>
+</div>
 </div>
 </div>
 
