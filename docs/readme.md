@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/172027514.svg)](https://zenodo.org/badge/latestdoi/172027514)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3233861.svg)](https://doi.org/10.5281/zenodo.3233861)
 ![Flake8](https://github.com/scarlehoff/pyHepGrid/workflows/Python%20application/badge.svg)
 [![Docs](https://github.com/scarlehoff/pyHepGrid/workflows/Docs/badge.svg)](https://scarlehoff.github.io/pyHepGrid/index.html)
 
