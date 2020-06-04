@@ -117,7 +117,7 @@ def pullrun(name, seed, run, tmpdir, subfolder, attempts=0):
                     tfile.extract(t, "../log/copylog/")
                     os.rename(f"../log/copylog/{t.name}",
                               f"../log/copylog/copies_{seed}.log")
-                elif t.name.endswith(".log") and "node_info"in t.name:
+                elif t.name.endswith(".log") and "node_info" in t.name:
                     tfile.extract(t, "../log/node_info/")
                     os.rename("../log/node_info/"+t.name,
                               "../log/node_info/node_info_{0}.log".format(seed))
@@ -219,8 +219,7 @@ def pull_folder(foldername, folders=None, pool=None, rtag=None):
     print("Finalisation setup complete. Preparing to pull data.")
 
     for rc_no, (runcard, tag) in enumerate(use_list):
-        # printstr = "> {0}-{1} ".format(runcard, tag)
-        printstr = "> {0} ".format(runcard, tag)
+        printstr = "> {0}-{1} ".format(runcard, tag)
         counter = "[{0}/{1}]".format(rc_no+1, tot_rc_no)
         print("{0:<60}{1:<7}".format(printstr, counter), end="")
 
