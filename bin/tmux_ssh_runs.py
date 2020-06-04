@@ -33,7 +33,7 @@ def create_new_session_with_server(name, serverloc, tot, host, port):
         serverloc, tot, host, port)
     os.system(
         "TMUX= tmux new-session -d -s {0} 'python3 {1}'".format(
-            name, servercommand, host))
+            name, servercommand))
     return name
 
 
