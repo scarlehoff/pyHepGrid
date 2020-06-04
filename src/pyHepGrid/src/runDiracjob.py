@@ -59,8 +59,8 @@ class RunDirac(Backend):
             f.write("Arguments = \"{}\";\n".format(argument_string))
             f.write("Parameters = {0};\n".format(no_runs))
             f.write("ParameterStart = {0};\n".format(start_seed))
-            f.write("ParameterStep = 1;\n".format(start_seed))
-            f.write("ParameterFactor = 1;\n".format(start_seed))
+            f.write("ParameterStep = 1;\n")
+            f.write("ParameterFactor = 1;\n")
         return filename
 
     def _run_JDL(self, filename):
