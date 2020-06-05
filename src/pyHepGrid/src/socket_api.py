@@ -58,7 +58,7 @@ class Tmux:
         """
         print("Killing tmux server at {}".format(self.target_computer))
         return send_command(
-            "{1} kill-server".format(self.tmux), self.target_computer)
+            "{} kill-server".format(self.tmux), self.target_computer)
 
     def get_kill_cmd(self):
         cmd = "{1} kill-session -t {0}".format(self.tms, self.tmux)
