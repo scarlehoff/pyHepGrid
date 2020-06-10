@@ -1,5 +1,6 @@
-from pyHepGrid.src.Backend import Backend
+from itertools import cycle
 from datetime import datetime
+from pyHepGrid.src.Backend import Backend
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
 import pyHepGrid.src.socket_api as sapi
@@ -34,6 +35,7 @@ class RunArc(Backend):
         self.runfolder = header.runcardDir
         self.gridw = util.GridWrap()
         self.tarw = util.TarWrap()
+        self.ce_cycle = cycle(["ce1.dur.scotgrid.ac.uk", "ce2.dur.scotgrid.ac.uk"])
 
     def _format_args(self, input_args):
         if isinstance(input_args, dict):
@@ -78,17 +80,15 @@ class RunArc(Backend):
         """ Sends XRSL to the queue defined in header
         If test = True, use test queue
         """
-        import random
         from pyHepGrid.src.header import arc_direct
         from pyHepGrid.src.header import split_dur_ce
         if test:
             from pyHepGrid.src.header import ce_test as ce
         else:
             from pyHepGrid.src.header import ce_base as ce
-            # Randomise ce at submission time to reduce load
+            # Alternate between CEs at submission time to reduce load
             if split_dur_ce and ".dur.scotgrid.ac.uk" in ce:
-                ce = random.choice(
-                    ["ce1.dur.scotgrid.ac.uk", "ce2.dur.scotgrid.ac.uk"])
+                ce = next(self.ce_cycle)
 
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
         # Can only use direct in Durham. Otherwise fails!
