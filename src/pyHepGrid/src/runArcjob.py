@@ -76,19 +76,17 @@ class RunArc(Backend):
                     f.write(" = \"{}\")\n".format(argument_value))
         return filename
 
-    def _run_XRSL(self, filename, test=False):
-        """ Sends XRSL to the queue defined in header
-        If test = True, use test queue
-        """
-        from pyHepGrid.src.header import arc_direct
-        from pyHepGrid.src.header import split_dur_ce
+    def _get_ce(self, test):
         if test:
-            from pyHepGrid.src.header import ce_test as ce
-        else:
-            from pyHepGrid.src.header import ce_base as ce
-            # Alternate between CEs at submission time to reduce load
-            if split_dur_ce and ".dur.scotgrid.ac.uk" in ce:
-                ce = next(self.ce_cycle)
+            return header.ce_test
+        # Alternate between CEs at submission time to reduce load
+        if header.split_dur_ce and ".dur.scotgrid.ac.uk" in header.ce_base:
+            return next(self.ce_cycle)
+        return header.ce_base
+
+    def _run_XRSL(self, filename, ce):
+        """ Sends XRSL to the queue defined in header """
+        from pyHepGrid.src.header import arc_direct
 
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
         # Can only use direct in Durham. Otherwise fails!
@@ -100,7 +98,7 @@ class RunArc(Backend):
         return jobid, output[1]
 
     # Runs for ARC
-    def run_wrap_warmup(self, test=None, expandedCard=None):
+    def run_wrap_warmup(self, test=False, expandedCard=None):
         """
         Wrapper function. It assumes the initialisation stage has already
         happend Writes XRSL file with the appropiate information and send one
@@ -116,20 +114,17 @@ class RunArc(Backend):
             rncards, dCards = util.expandCard()
         else:
             rncards, dCards = expandedCard
-        if test:
-            from pyHepGrid.src.header import ce_test as ce
-        else:
-            from pyHepGrid.src.header import ce_base as ce
+        ce = self._get_ce(test)
 
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
             if ".dur.scotgrid.ac.uk" not in ce:
-                # Can't submit sockets elsewhere than Durham!!!!!!!
-                header.logger.info(
-                    "Current submission computing element: {0}".format(ce))
                 header.logger.critical("Can't submit socketed warmups "
                                        "to locations other than Durham")
+            else:
+                header.logger.info(
+                    f"Current submission computing element: {ce}")
         else:
             sockets = False
             n_sockets = 1
@@ -183,7 +178,7 @@ class RunArc(Backend):
             try:
                 for _ in range(n_sockets):
                     # Run the file
-                    jobid, retcode = self._run_XRSL(xrslfile, test=test)
+                    jobid, retcode = self._run_XRSL(xrslfile, ce)
                     if int(retcode) != 0:
                         jobid = "None"
                     jobids.append(jobid)
@@ -234,7 +229,7 @@ class RunArc(Backend):
                 " > Path of xrsl file for seed {1}: {0}".format(xrslfile, seed))
 
         # Run the file
-        jobid, retcode = self._run_XRSL(xrslfile, test=test)
+        jobid, retcode = self._run_XRSL(xrslfile, self._get_ce(test))
         if int(retcode) != 0:
             jobid = "None"
         jobids.append(jobid)
@@ -245,7 +240,7 @@ class RunArc(Backend):
         for seed in range(baseSeed, baseSeed + producRun):
             yield (r, dCards[r], seed, jobName, baseSeed, test, jobids)
 
-    def run_wrap_production(self, test=None):
+    def run_wrap_production(self, test=False):
         """
         Wrapper function. It assumes the initialisation stage has already
         happend Writes XRSL file with the appropiate information and send a
@@ -323,13 +318,13 @@ class RunArc(Backend):
                 raise keyquit
 
 
-def runWrapper(runcard, test=None, expandedCard=None):
+def runWrapper(runcard, test=False, expandedCard=None):
     header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(arcscript=header.ARCSCRIPTDEFAULT)
     arc.run_wrap_warmup(test, expandedCard)
 
 
-def runWrapperProduction(runcard, test=None):
+def runWrapperProduction(runcard, test=False):
     header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(prod=True, arcscript=header.ARCSCRIPTDEFAULTPRODUCTION)
     arc.run_wrap_production(test)
