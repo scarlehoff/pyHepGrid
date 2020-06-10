@@ -41,12 +41,6 @@ logger.info("Using header file {0}.py".format(head.__name__))
 # This should not be changed unless you really know what you are doing!
 # Grid config
 
-gsiftp = "gsiftp://se01.dur.scotgrid.ac.uk/dpm/dur.scotgrid.ac.uk/home/" + \
-    "pheno/generated/"
-LFC_HOST = "lfc01.dur.scotgrid.ac.uk"
-LFC_CATALOG_TYPE = "lfc"
-runfile = "nnlorun.py"
-runmode = "NNLOJET"
 sandbox_dir = "test_sandbox"
 arc_direct = True
 split_dur_ce = True
@@ -64,19 +58,20 @@ dbfields = ['jobid', 'date', 'runcard', 'runfolder', 'pathfolder',
 slurm_template = "slurm_template.sh"
 slurm_template_production = "slurm_template_production.sh"
 
-# Dummies overwritten by the template header
-arcbase = None
-ce_base = None
-DIRAC_BANNED_SITES = None
-dirac_platform = None
-jobName = None
-
 # DW This should be a hard link so socketed runs can be sent from other
 # folders/locations. Eventually will need to point towards where the sockets
 # are
 socket_exe = "{0}/socket_server.py".format(
     os.path.dirname(os.path.realpath(__file__)))
 sockets_active = 1  # 1 socket == no sockets
+
+# Dummies overwritten by the template header
+runfile = None
+arcbase = None
+ce_base = None
+DIRAC_BANNED_SITES = None
+dirac_platform = None
+jobName = None
 
 # --------------------- COPY NAMESPACE FROM MY_HEADER ---------------------
 # Only slightly abusive...
@@ -201,6 +196,8 @@ try:
 except ImportError:
     pass
 
+# ------------------------- Sanity checks -------------------------
+
 # Moved to the bottom to allow runcard to override jobName/arcbase
 
 if arcbase is None and \
@@ -209,9 +206,13 @@ if arcbase is None and \
         "arcbase (location of arc submission database) set to None. "
         "Please check your header/runcard.")
 
-#
-# Templates
-#
+assert runfile is not None
+assert ce_base is not None
+assert DIRAC_BANNED_SITES is not None
+assert dirac_platform is not None
+assert jobName is not None
+
+# ------------------------- Templates -------------------------
 
 # # If a job is expected to run for long, use the following property
 # "(wallTime  =    \"3 days\")"

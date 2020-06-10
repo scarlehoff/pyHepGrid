@@ -76,7 +76,7 @@ class RunArc(Backend):
                     f.write(" = \"{}\")\n".format(argument_value))
         return filename
 
-    def _run_XRSL(self, filename, test=False, include_retcode=False):
+    def _run_XRSL(self, filename, test=False):
         """ Sends XRSL to the queue defined in header
         If test = True, use test queue
         """
@@ -95,14 +95,9 @@ class RunArc(Backend):
         # Speeds up submission (according to Stephen)
         if arc_direct and ".dur.scotgrid.ac.uk" in ce:
             cmd += " -S org.nordugrid.gridftpjob --direct "
-        if include_retcode:
-            output = util.getOutputCall(cmd.split(), include_return_code=True)
-            jobid = output[0].split("jobid:")[-1].rstrip().strip()
-            return jobid, output[1]
-        else:
-            output = util.getOutputCall(cmd.split())
-            jobid = output.split("jobid:")[-1].rstrip().strip()
-            return jobid
+        output = util.getOutputCall(cmd.split(), include_return_code=True)
+        jobid = output[0].split("jobid:")[-1].rstrip().strip()
+        return jobid, output[1]
 
     # Runs for ARC
     def run_wrap_warmup(self, test=None, expandedCard=None):
@@ -188,8 +183,7 @@ class RunArc(Backend):
             try:
                 for _ in range(n_sockets):
                     # Run the file
-                    jobid, retcode = (self._run_XRSL(
-                        xrslfile, test=test, include_retcode=True))
+                    jobid, retcode = self._run_XRSL(xrslfile, test=test)
                     if int(retcode) != 0:
                         jobid = "None"
                     jobids.append(jobid)
@@ -240,8 +234,7 @@ class RunArc(Backend):
                 " > Path of xrsl file for seed {1}: {0}".format(xrslfile, seed))
 
         # Run the file
-        jobid, retcode = self._run_XRSL(
-            xrslfile, test=test, include_retcode=True)
+        jobid, retcode = self._run_XRSL(xrslfile, test=test)
         if int(retcode) != 0:
             jobid = "None"
         jobids.append(jobid)
