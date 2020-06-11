@@ -80,7 +80,6 @@ short_stats = True
 # ARC parameters
 ce_base = "ce2.dur.scotgrid.ac.uk"
 ce_test = "ce-test.dur.scotgrid.ac.uk"
-ce_listfile = "computing_elements.txt"
 arcbase = "/path/to/ARC/base/.arc/jobs.dat"  # arc database
 # Threads for use in arc submission. Raising this too high /may/ result in some
 # job loss or fails due to file system locks on the arc jobs database or the arc

@@ -132,6 +132,7 @@ def get_ces(all_ces):
 
 def get_most_free_cores():
     """API for main.py to link in"""
+    print("Warning: Reported number of free cores is unreliable!", file=sys.stderr,)
     site_info = get_ces(False)
     site_info = sorted(site_info,
                        key=lambda x: x.Free, reverse=False)

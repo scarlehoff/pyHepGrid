@@ -46,6 +46,8 @@ arc_direct = True
 split_dur_ce = True
 slurm_kill_exe = "{0}/kill_server.py".format(
     os.path.dirname(os.path.realpath(__file__)))
+ce_listfile = "{0}/computing_elements.txt".format(
+    os.path.join(os.path.dirname(__file__),"../extras/"))
 
 # Database config
 arctable = "arcjobs"
