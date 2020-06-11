@@ -46,12 +46,11 @@ class RunDirac(Backend):
             raise Exception(F"Type of input arguments: {type(input_args)} "
                             "not recognised in DIRAC ._format_args")
 
-    def _write_JDL(self, argument_string, start_seed, no_runs, filename=None):
+    def _write_JDL(self, argument_string, start_seed, no_runs, jobName):
         """ Writes a unique JDL file
         which instructs the dirac job to run
         """
-        if not filename:
-            filename = util.unique_filename()
+        filename = util.unique_filename()
         with open(filename, 'w') as f:
             for i in self.templ:
                 f.write(i)
@@ -59,8 +58,7 @@ class RunDirac(Backend):
             f.write("Arguments = \"{}\";\n".format(argument_string))
             f.write("Parameters = {0};\n".format(no_runs))
             f.write("ParameterStart = {0};\n".format(start_seed))
-            f.write("ParameterStep = 1;\n")
-            f.write("ParameterFactor = 1;\n")
+            f.write("JobName = {0};\n".format(jobName))
         return filename
 
     def _run_JDL(self, filename):
@@ -84,7 +82,7 @@ class RunDirac(Backend):
         header.logger.info("Runcards selected: {0}".format(
             " ".join(r for r in rncards)))
         self.runfolder = header.runcardDir
-        from pyHepGrid.src.header import baseSeed, producRun
+        from pyHepGrid.src.header import baseSeed, producRun, jobName
 
         increment = 750
         for r in rncards:
@@ -99,7 +97,7 @@ class RunDirac(Backend):
             joblist, remaining_seeds, seed_start = [], producRun, baseSeed
             while remaining_seeds > 0:
                 no_seeds = min(increment, remaining_seeds)
-                jdlfile = self._write_JDL(args, seed_start, no_seeds)
+                jdlfile = self._write_JDL(args, seed_start, no_seeds, jobName)
                 max_seed = seed_start+no_seeds-1
                 header.logger.info(
                     " > jdl file path for seeds {0}-{1}: {2}".format(

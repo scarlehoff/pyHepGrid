@@ -47,7 +47,7 @@ split_dur_ce = True
 slurm_kill_exe = "{0}/kill_server.py".format(
     os.path.dirname(os.path.realpath(__file__)))
 ce_listfile = "{0}/computing_elements.txt".format(
-    os.path.join(os.path.dirname(__file__),"../extras/"))
+    os.path.join(os.path.dirname(__file__), "../extras/"))
 
 # Database config
 arctable = "arcjobs"
@@ -247,13 +247,14 @@ ARCSCRIPTDEFAULTPRODUCTION = ARCSCRIPTDEFAULT
 
 # Default Dirac
 DIRACSCRIPTDEFAULT = [
-    'JobName    = "{0}";'.format(jobName),
     'Executable = "{0}";'.format(os.path.basename(runfile)),
     'StdOutput  = "StdOut";',
     'StdError   = "StdErr";',
     'InputSandbox  = {{"{0}", "{1}"}};'.format(runfile, grid_helper),
     'OutputSandbox = {"StdOut","StdErr"};',
     'Platform = "{0}";'.format(dirac_platform),
+    'ParameterStep = 1;',
+    'ParameterFactor = 1;',
 ]
 
 # If Dirac banned sites are specified, include them in JDL
