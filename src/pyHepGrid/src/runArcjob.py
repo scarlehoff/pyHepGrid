@@ -318,7 +318,7 @@ class RunArc(Backend):
 def runWrapper(runcard, test=False, expandedCard=None):
     header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(arcscript=header.ARCSCRIPTDEFAULT)
-    arc.run_wrap_warmup(test=test, expandedCard)
+    arc.run_wrap_warmup(test=test, expandedCard=expandedCard)
 
 
 def runWrapperProduction(runcard, test=False):

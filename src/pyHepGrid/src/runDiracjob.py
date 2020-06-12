@@ -79,7 +79,7 @@ class RunDirac(Backend):
         procrun number of jobs to the diract management system
         """
         if test:
-            raise NotImplementedError ("'Test' mode unavailable for Dirac.")
+            raise NotImplementedError("'Test' mode unavailable for Dirac.")
 
         rncards, dCards = util.expandCard()
         header.logger.info("Runcards selected: {0}".format(

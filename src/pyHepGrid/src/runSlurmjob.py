@@ -277,7 +277,7 @@ class RunSlurm(Backend):
 def runWrapper(runcard, test=False, expandedCard=None):
     header.logger.info("Running SLURM job for {0}".format(runcard))
     slurm = RunSlurm()
-    slurm.run_wrap_warmup(test=test, expandedCard)
+    slurm.run_wrap_warmup(test=test, expandedCard=expandedCard)
 
 
 def runWrapperProduction(runcard, test=False, expandedCard=None):
