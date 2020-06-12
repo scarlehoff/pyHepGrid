@@ -172,6 +172,9 @@ class Arc(Backend):
         elif "Running" in strOut:
             return self.cRUN
         elif "Failed" in strOut:
+            # if we still have a return code 0 something is odd
+            if "Exit Code: 0" in strOut:
+                return self.cMISS
             return self.cFAIL
         else:
             return self.cUNK
