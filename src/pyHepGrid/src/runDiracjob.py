@@ -78,6 +78,9 @@ class RunDirac(Backend):
         happened Writes JDL file with the appropiate information and send
         procrun number of jobs to the diract management system
         """
+        if test:
+            raise NotImplementedError ("'Test' mode unavailable for Dirac.")
+
         rncards, dCards = util.expandCard()
         header.logger.info("Runcards selected: {0}".format(
             " ".join(r for r in rncards)))
@@ -121,13 +124,13 @@ class RunDirac(Backend):
             self.dbase.insert_data(self.table, dataDict)
 
 
-def runWrapper(runcard, test=None):
+def runWrapper(runcard, test=False):
     header.logger.info("Running dirac job for {0}".format(runcard))
     if test:
         header.logger.critical(
             "--test flag disallowed for Dirac as there is no test queue.")
     dirac = RunDirac()
-    dirac.run_wrap_production()
+    dirac.run_wrap_production(test=test)
 
 
 def testWrapper(r, dCards):

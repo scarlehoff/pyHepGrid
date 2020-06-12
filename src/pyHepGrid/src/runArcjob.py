@@ -119,8 +119,7 @@ class RunArc(Backend):
             if ".dur.scotgrid.ac.uk" not in header.ce_base:
                 header.logger.critical("Can't submit socketed warmups "
                                        "to locations other than Durham")
-            else:
-                header.logger.info(
+            header.logger.info(
                     f"Current submission computing element: {header.ce_base}")
         else:
             sockets = False
@@ -167,7 +166,7 @@ class RunArc(Backend):
                         'jobName': jobName,
                         'count': str(warmupthr),
                         'countpernode': str(warmupthr), }
-            xrslfile = self._write_XRSL(dictData)
+            xrslfile = self._write_XRSL(dictData, filename=None)
             header.logger.debug(" > Path of xrsl file: {0}".format(xrslfile))
 
             jobids = []
@@ -319,13 +318,13 @@ class RunArc(Backend):
 def runWrapper(runcard, test=False, expandedCard=None):
     header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(arcscript=header.ARCSCRIPTDEFAULT)
-    arc.run_wrap_warmup(test, expandedCard)
+    arc.run_wrap_warmup(test=test, expandedCard)
 
 
 def runWrapperProduction(runcard, test=False):
     header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(prod=True, arcscript=header.ARCSCRIPTDEFAULTPRODUCTION)
-    arc.run_wrap_production(test)
+    arc.run_wrap_production(test=test)
 
 
 # Testing routines - just a wrapper to get the args for nnlojob

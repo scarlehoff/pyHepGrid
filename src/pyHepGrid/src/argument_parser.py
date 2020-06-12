@@ -113,7 +113,8 @@ if caller_script in ("main.py", "pyHepGrid"):
         "-test", "--test",
         help="Use test queue (only runs for 20 minutes). "
         "NB this is _different_ to the test mode, which runs your 'runfile' "
-        "locally for testing before submission.", action="store_true")
+        "locally for testing before submission.",
+        action="store_true")
 
     # Management options
     # Information about jobs

@@ -137,7 +137,7 @@ class RunSlurm(Backend):
         header.logger.debug(slurmfile)
         return filename
 
-    def run_wrap_warmup(self, test=None, expandedCard=None):
+    def run_wrap_warmup(self, test=False, expandedCard=None):
         """
         Wrapper function. It assumes the initialisation stage has already
         happend Writes sbatch file with the appropiate information and send one
@@ -274,16 +274,16 @@ class RunSlurm(Backend):
                     F"submission: {r} {dCards[r]}")
 
 
-def runWrapper(runcard, test=None, expandedCard=None):
+def runWrapper(runcard, test=False, expandedCard=None):
     header.logger.info("Running SLURM job for {0}".format(runcard))
     slurm = RunSlurm()
-    slurm.run_wrap_warmup(test, expandedCard)
+    slurm.run_wrap_warmup(test=test, expandedCard)
 
 
-def runWrapperProduction(runcard, test=None, expandedCard=None):
+def runWrapperProduction(runcard, test=False, expandedCard=None):
     header.logger.info("Running SLURM production job for {0}".format(runcard))
     slurm = RunSlurm(prod=True)
-    slurm.run_wrap_production(test)
+    slurm.run_wrap_production(test=test)
 
 
 def iniWrapper(runcard, warmup=None):
