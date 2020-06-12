@@ -221,7 +221,7 @@ class RunSlurm(Backend):
                     F"submission: {r} {dCards[r]}")
             port += 1
 
-    def run_wrap_production(self, test=None):
+    def run_wrap_production(self, test=False):
         """
         Wrapper function. It assumes the initialisation stage has already
         happend Writes sbatch file with the appropiate information and sends

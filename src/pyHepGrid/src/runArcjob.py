@@ -210,7 +210,7 @@ class RunArc(Backend):
                 if keyquit is not None:
                     raise keyquit
 
-    def run_single_production(self, args):
+    def _run_single_production(self, args):
         """
         Wrapper for passing to multirun, where args is a tuple of each argument
         required. Would be easier if multirun used starmap...
@@ -233,8 +233,8 @@ class RunArc(Backend):
         jobids.append(jobid)
         return jobid
 
-    def arg_iterator(self, r, dCards, jobName, baseSeed, producRun, test,
-                     jobids):
+    def _arg_iterator(self, r, dCards, jobName, baseSeed, producRun, test,
+                      jobids):
         for seed in range(baseSeed, baseSeed + producRun):
             yield (r, dCards[r], seed, jobName, baseSeed, test, jobids)
 
@@ -272,11 +272,11 @@ class RunArc(Backend):
             from multiprocessing import Manager
             # Use shared memory list in case of submission failure
             jobids = Manager().list()
-            arg_sets = self.arg_iterator(
+            arg_sets = self._arg_iterator(
                 r, dCards, jobName, baseSeed, producRun, test, jobids)
 
             try:
-                joblist = self._multirun(self.run_single_production, arg_sets,
+                joblist = self._multirun(self._run_single_production, arg_sets,
                                          n_threads=min(
                                              header.arc_submit_threads,
                                              producRun))

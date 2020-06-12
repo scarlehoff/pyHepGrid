@@ -72,7 +72,7 @@ class RunDirac(Backend):
         return jobids
 
     # Run for DIRAC
-    def run_wrap_production(self):
+    def run_wrap_production(self, test=False):
         """
         Wrapper function. It assumes the initialisation stage has already
         happened Writes JDL file with the appropiate information and send

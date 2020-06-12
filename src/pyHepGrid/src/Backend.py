@@ -111,6 +111,27 @@ class Backend(_mode):
         raise NotImplementedError("{0} not implemented for {1}".format(
             sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
 
+    def run_wrap_warmup(self, test=False, expandedCard=None):
+        """
+        Wrapper function. It assumes the initialisation stage has already
+        happend. Writes submission file with the appropiate information and send
+        one single job (or n_sockets jobs) to the queue
+
+        ExpandedCard is an override for util.expandCard for use in
+        auto-resubmission
+        """
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def run_wrap_production(self, test=False):
+        """
+        Wrapper function. It assumes the initialisation stage has already
+        happend. Writes submission file with the appropiate information and send
+        a producrun number of jobs to the queue
+        """
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
     # Helper functions and wrappers
     def set_oneliner_output(self):
         self.stats_one_line = True
