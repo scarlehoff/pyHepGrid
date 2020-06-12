@@ -141,11 +141,6 @@ class Arc(Backend):
 
     def status_job(self, jobids, verbose=False):
         """ print the current status of a given job """
-        # for jobid in jobids:
-        #     cmd = [self.cmd_stat, "-j", header.arcbase, jobid.strip()]
-        #     if verbose:
-        #         cmd += ["-l"]
-        #     util.spCall(cmd)
         cmd = [self.cmd_stat, "-j", header.arcbase]
         jobids = [jobid.strip() for jobid in jobids]
         if len(jobids) == 0:
@@ -154,6 +149,67 @@ class Arc(Backend):
         if verbose:
             cmd += ["-l"]
         util.spCall(cmd)
+
+    def _do_stats_job(self, jobid_raw):
+        """ version of stats job multithread ready
+        """
+        if isinstance(jobid_raw, tuple):
+            if (jobid_raw[1] == self.cDONE or
+                    jobid_raw[1] == self.cFAIL or
+                    jobid_raw[1] == self.cMISS):
+                return jobid_raw[1]
+            else:
+                jobid = jobid_raw[0]
+        else:
+            jobid = jobid_raw
+        cmd = [self.cmd_stat, jobid.strip(), "-j", header.arcbase]
+        strOut = util.getOutputCall(
+            cmd, suppress_errors=True, include_return_code=False)
+        if "Done" in strOut or "Finished" in strOut:
+            return self.cDONE
+        elif "Waiting" in strOut or "Queuing" in strOut:
+            return self.cWAIT
+        elif "Running" in strOut:
+            return self.cRUN
+        elif "Failed" in strOut:
+            return self.cFAIL
+        else:
+            return self.cUNK
+
+    def stats_job(self, dbid, do_print=True):
+        """ Given a list of jobs, returns the number of jobs which
+        are in each possible state (done/waiting/running/etc)
+        """
+        jobids = self.get_id(dbid)
+        current_status = self._get_old_status(dbid)
+        arglen = len(jobids)
+
+        if isinstance(current_status, list):
+            if len(current_status) == arglen:
+                jobids_lst = zip(jobids, current_status)
+            else:  # Current status corrupted somehow... Start again
+                jobids_lst = jobids
+        else:
+            jobids_lst = jobids
+
+        tags = ["runcard", "runfolder", "date"]
+        runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
+
+        n_threads = header.finalise_no_cores
+        status = self._multirun(self._do_stats_job, jobids_lst,
+                                n_threads, arglen=arglen)
+        done = status.count(self.cDONE)
+        wait = status.count(self.cWAIT)
+        run = status.count(self.cRUN)
+        fail = status.count(self.cFAIL)
+        miss = status.count(self.cMISS)
+        unk = status.count(self.cUNK)
+        if do_print:
+            self.stats_print_setup(runcard_info, dbid=dbid)
+            total = len(jobids)
+            self._print_stats(done, wait, run, fail, miss, unk, total)
+        self._set_new_status(dbid, status)
+        return done, wait, run, fail, unk
 
 
 class Dirac(Backend):
@@ -184,7 +240,7 @@ class Dirac(Backend):
         util.spCall(cmd, suppress_errors=True)
         return 0
 
-    def get_status(self, status, date):
+    def _get_status(self, status, date):
         output = set(util.getOutputCall(
             ['dirac-wms-select-jobs',
              F'--Status={status}',
@@ -210,11 +266,11 @@ class Dirac(Backend):
         date = runcard_info["date"].split()[0]
         jobids_set = set(jobids)
         # Get all jobs in each state
-        waiting_jobs = self.get_status('Waiting', date)
-        done_jobs = self.get_status('Done', date)
-        running_jobs = self.get_status('Running', date)
-        fail_jobs = self.get_status('Failed', date)
-        unk_jobs = self.get_status('Unknown', date)
+        waiting_jobs = self._get_status('Waiting', date)
+        done_jobs = self._get_status('Done', date)
+        running_jobs = self._get_status('Running', date)
+        fail_jobs = self._get_status('Failed', date)
+        unk_jobs = self._get_status('Unknown', date)
         failed_jobs_set = jobids_set & fail_jobs
         done_jobs_set = jobids_set & done_jobs
         # Count how many jobs we have in each state
@@ -231,7 +287,7 @@ class Dirac(Backend):
             status[jobids.index(jobid)] = self.cDONE
         self.stats_print_setup(runcard_info, dbid=dbid)
         total = len(jobids)
-        self.print_stats(done, wait, run, fail, 0, unk, total)
+        self._print_stats(done, wait, run, fail, 0, unk, total)
         self._set_new_status(dbid, status)
 
     def kill_job(self, jobids, jobinfo):
@@ -309,7 +365,7 @@ class Slurm(Backend):
             new = os.path.join(log_folder, logfile)
             shutil.copy(orig, new)
 
-    def cat_log_job(self, jobids, jobinfo, *args, **kwargs):
+    def cat_log_job(self, jobids, jobinfo):
         import re
         import glob
         run_dir = self.get_local_dir_name(
@@ -338,7 +394,7 @@ class Slurm(Backend):
             cmd = ["cat", os.path.join(run_dir, log)]
             util.spCall(cmd)
 
-    def get_status(self, jobid, status):
+    def _get_status(self, jobid, status):
         stat = len(
             [i for i in util.getOutputCall(
                 ["squeue", F"-j{jobid}", "-r", "-t", status],
@@ -355,13 +411,13 @@ class Slurm(Backend):
         runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
         running, waiting, fail, tot = 0, 0, 0, 0
         for jobid in jobids:
-            running += self.get_status(jobid, "R")
-            waiting += self.get_status(jobid, "PD")
-            fail += self.get_status(jobid, "F")+self.get_status(jobid, "CA")
-            tot += self.get_status(jobid, "all")
+            running += self._get_status(jobid, "R")
+            waiting += self._get_status(jobid, "PD")
+            fail += self._get_status(jobid, "F")+self._get_status(jobid, "CA")
+            tot += self._get_status(jobid, "all")
         done = tot-fail-waiting-running
         self.stats_print_setup(runcard_info, dbid=dbid)
-        self.print_stats(done, waiting, running, fail, 0, 0, tot)
+        self._print_stats(done, waiting, running, fail, 0, 0, tot)
 
     def cat_job(self, jobids, jobinfo, print_stderr=None, store=False):
         """ print standard output of a given job"""
@@ -418,12 +474,12 @@ class Slurm(Backend):
         """ print the current status of a given job """
         running, waiting, fail, tot = 0, 0, 0, 0
         for jobid in jobids:
-            running += self.get_status(jobid, "R")
-            waiting += self.get_status(jobid, "PD")
-            fail += self.get_status(jobid, "F")+self.get_status(jobid, "CA")
-            tot += self.get_status(jobid, "all")
+            running += self._get_status(jobid, "R")
+            waiting += self._get_status(jobid, "PD")
+            fail += self._get_status(jobid, "F")+self._get_status(jobid, "CA")
+            tot += self._get_status(jobid, "all")
         done = tot-fail-waiting-running
-        self.print_stats(done, waiting, running, fail, 0, 0, tot)
+        self._print_stats(done, waiting, running, fail, 0, 0, tot)
 
 
 if __name__ == '__main__':

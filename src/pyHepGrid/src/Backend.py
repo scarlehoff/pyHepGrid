@@ -37,9 +37,81 @@ class Backend(_mode):
     cMISS = 98
     cUNK = 99
 
-    def output_name_array(self, runcard, rname, seeds):
-        return [self.output_name(runcard, rname, seed) for seed in seeds]
+    def __init__(self, act_only_on_done=False):
+        from pyHepGrid.src.header import dbname, baseSeed
+        self.overwrite_warmup = False
+        self.tarw = util.TarWrap()
+        self.gridw = util.GridWrap()
+        self.dbase = pyHepGrid.src.dbapi.database(dbname, logger=header.logger)
+        self.table = None
+        self.bSeed = baseSeed
+        self.jobtype_get = {
+            'P': self._get_data_production,
+            'W': self._get_data_warmup,
+            'S': self._get_data_warmup
+        }
+        self.assume_yes = False
+        self.act_only_on_done = act_only_on_done
+        self.stats_one_line = False
 
+    def __str__(self):
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def update_stdout(self):
+        """ retrieves stdout of all running jobs and store the current state
+        into its correspondent folder
+        """
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def renew_proxy(self, jobids):
+        """ renew proxy for a given job (optional) """
+        pass
+
+    def kill_job(self, jobids, jobinfo):
+        """ kills given job """
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def clean_job(self, jobids, jobinfo):
+        """ remove the sandbox of a given job (including its stdout!) """
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def cat_job(self, jobids, jobinfo, print_stderr=None, store=False):
+        """ print standard output of a given job"""
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def cat_log_job(self, jobids, jobinfo):
+        """Sometimes the std output doesn't get updated
+        but we can choose to access the logs themselves"""
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def bring_current_warmup(self, db_id):
+        """ Sometimes we want to retrieve the warmup before the job finishes """
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def status_job(self, jobids, verbose=False):
+        """ print the current status of a given job """
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def stats_job(self, dbid, do_print=True):
+        """ Given a list of jobs, returns the number of jobs which
+        are in each possible state (done/waiting/running/etc)
+        """
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    def _format_args(self, *args, **kwargs):
+        raise NotImplementedError("{0} not implemented for {1}".format(
+            sys._getframe().f_code.co_name, self.__class__.__bases__[0]))
+
+    # Helper functions and wrappers
     def set_oneliner_output(self):
         self.stats_one_line = True
 
@@ -62,24 +134,6 @@ class Backend(_mode):
                                                runcard_info["runfolder"])
             logger.plain(string, end="")
 
-    def __init__(self, act_only_on_done=False):
-        from pyHepGrid.src.header import dbname, baseSeed
-        self.overwrite_warmup = False
-        self.tarw = util.TarWrap()
-        self.gridw = util.GridWrap()
-        self.dbase = pyHepGrid.src.dbapi.database(dbname, logger=header.logger)
-        self.table = None
-        self.bSeed = baseSeed
-        self.jobtype_get = {
-            'P': self._get_data_production,
-            'W': self._get_data_warmup,
-            'S': self._get_data_warmup
-        }
-        self.assume_yes = False
-        self.act_only_on_done = act_only_on_done
-        self.stats_one_line = False
-
-    # Helper functions and wrappers
     def dont_ask_dont_tell(self):
         self.assume_yes = True
 
@@ -118,7 +172,8 @@ class Backend(_mode):
             For ARC only single thread is allow as the arc database needs
             to be locked
         """
-        # If required # calls is lower than the # threads given, use the minimum
+        # If required number of calls is lower than the number of threads , use
+        # the minimum
         if arglen is None:
             arglen = n_threads
         threads = max(min(n_threads, arglen), 1)
@@ -243,18 +298,6 @@ class Backend(_mode):
         else:
             return jobid_list
 
-    def get_date(self, db_id):
-        """ Returns date from a given database entry
-        """
-        jobid = self.dbase.list_data(self.table, ["date"], db_id)
-        try:
-            idout = jobid[0]['date']
-        except IndexError:
-            logger.info("Selected job is %s out of bounds" % jobid)
-            idt = input("> Select id to act upon: ")
-            idout = self.get_date(idt)
-        return idout
-
     def disable_db_entry(self, db_id):
         """ Disable database entry
         """
@@ -268,41 +311,6 @@ class Backend(_mode):
     # src.Backend "independent" management options
     # (some of them need backend-dependent definitions but work the same
     # for both ARC and DIRAC)
-
-    def stats_job(self, dbid, do_print=True):
-        """ Given a list of jobs, returns the number of jobs which
-        are in each possible state (done/waiting/running/etc)
-        """
-        jobids = self.get_id(dbid)
-        current_status = self._get_old_status(dbid)
-        arglen = len(jobids)
-
-        if isinstance(current_status, list):
-            if len(current_status) == arglen:
-                jobids_lst = zip(jobids, current_status)
-            else:  # Current status corrupted somehow... Start again
-                jobids_lst = jobids
-        else:
-            jobids_lst = jobids
-
-        tags = ["runcard", "runfolder", "date"]
-        runcard_info = self.dbase.list_data(self.table, tags, dbid)[0]
-
-        n_threads = header.finalise_no_cores
-        status = self._multirun(self._do_stats_job, jobids_lst,
-                                n_threads, arglen=arglen)
-        done = status.count(self.cDONE)
-        wait = status.count(self.cWAIT)
-        run = status.count(self.cRUN)
-        fail = status.count(self.cFAIL)
-        miss = status.count(self.cMISS)
-        unk = status.count(self.cUNK)
-        if do_print:
-            self.stats_print_setup(runcard_info, dbid=dbid)
-            total = len(jobids)
-            self.print_stats(done, wait, run, fail, miss, unk, total)
-        self._set_new_status(dbid, status)
-        return done, wait, run, fail, unk
 
     def _get_old_status(self, db_id):
         field_name = "sub_status"
@@ -322,7 +330,7 @@ class Backend(_mode):
         status_str = ' '.join(map(str, status))
         self.dbase.update_entry(self.table, db_id, field_name, status_str)
 
-    def print_stats(self, done, wait, run, fail, miss, unk, total):
+    def _print_stats(self, done, wait, run, fail, miss, unk, total):
         total2 = done + wait + run + fail + unk + miss
         time = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
@@ -355,32 +363,6 @@ class Backend(_mode):
             logger.plain("    >> Missing: {0}".format(miss))
             logger.plain("    >> Unknown: {0}".format(unk))
             logger.plain("    >> Sum      {0}".format(total2))
-
-    def _do_stats_job(self, jobid_raw):
-        """ version of stats job multithread ready
-        """
-        if isinstance(jobid_raw, tuple):
-            if (jobid_raw[1] == self.cDONE or
-                    jobid_raw[1] == self.cFAIL or
-                    jobid_raw[1] == self.cMISS):
-                return jobid_raw[1]
-            else:
-                jobid = jobid_raw[0]
-        else:
-            jobid = jobid_raw
-        cmd = [self.cmd_stat, jobid.strip(), "-j", header.arcbase]
-        strOut = util.getOutputCall(
-            cmd, suppress_errors=True, include_return_code=False)
-        if "Done" in strOut or "Finished" in strOut:
-            return self.cDONE
-        elif "Waiting" in strOut or "Queuing" in strOut:
-            return self.cWAIT
-        elif "Running" in strOut:
-            return self.cRUN
-        elif "Failed" in strOut:
-            return self.cFAIL
-        else:
-            return self.cUNK
 
     def _get_data_warmup(self, db_id):
         """
@@ -424,6 +406,9 @@ class Backend(_mode):
         # Retrieve warmup from the grid storage warmup folder
         wname = self.warmup_name(runcard, runfolder)
         self.gridw.bring(wname, grid_warmup_dir, finfolder + "/" + wname)
+
+    def _output_name_array(self, runcard, rname, seeds):
+        return [self.output_name(runcard, rname, seed) for seed in seeds]
 
     def _get_data_production(self, db_id):
         """ Given a database entry, retrieve its data from
@@ -492,7 +477,7 @@ class Backend(_mode):
 
         from pyHepGrid.src.header import finalise_no_cores as n_threads
         # Check which of the seeds actually produced some data
-        all_remote = self.output_name_array(self.rcard, self.rfolder, seeds)
+        all_remote = self._output_name_array(self.rcard, self.rfolder, seeds)
         all_output = self.gridw.get_dir_contents(header.grid_output_dir).split()
         remote_tarfiles = list(set(all_remote) & set(all_output))
         logger.info("Found data for {0} of the {1} seeds.".format(
@@ -517,7 +502,7 @@ class Backend(_mode):
         util.spCall(["mv", self.rfolder, pathfolder])
 
     def _do_get_data(self, filename):
-        """ Multithread wrapper used in get_data_production
+        """ Multithread wrapper used in _get_data_production
         to download information from the grid storage
         """
         local_name = filename.replace("output", "")
@@ -543,7 +528,7 @@ class Backend(_mode):
         return self.tarw.extract_extensions(tarfile, extensions)
 
     def _do_extract_outputData(self, tarfile):
-        """ Multithread wrapper used in get_data_production
+        """ Multithread wrapper used in _get_data_production
             for untaring files
         """
         # It assumes log and dat folder are already there
@@ -633,10 +618,6 @@ class Backend(_mode):
         for i in dictC:
             all_ids.append(str(i[field_name]))
         return all_ids
-
-    def _format_args(self, *args, **kwargs):
-        raise Exception("Any children classes of pyHepGrid.src.Backend.py "
-                        "should override this method")
 
     def _get_default_args(self):
         # Defaults arguments that can always go in
