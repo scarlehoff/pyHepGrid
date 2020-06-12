@@ -1,4 +1,3 @@
-from itertools import cycle
 from datetime import datetime
 from pyHepGrid.src.Backend import Backend
 import pyHepGrid.src.utilities as util
@@ -35,7 +34,6 @@ class RunArc(Backend):
         self.runfolder = header.runcardDir
         self.gridw = util.GridWrap()
         self.tarw = util.TarWrap()
-        self.ce_cycle = cycle(["ce1.dur.scotgrid.ac.uk", "ce2.dur.scotgrid.ac.uk"])
 
     def _format_args(self, input_args):
         if isinstance(input_args, dict):
@@ -76,12 +74,12 @@ class RunArc(Backend):
                     f.write(" = \"{}\")\n".format(argument_value))
         return filename
 
-    def _get_ce(self, test):
+    def _get_ce(self, test, seed):
         if test:
             return header.ce_test
         # Alternate between CEs at submission time to reduce load
         if header.split_dur_ce and ".dur.scotgrid.ac.uk" in header.ce_base:
-            return next(self.ce_cycle)
+            return "ce{0}.dur.scotgrid.ac.uk".format(seed % 2+1)
         return header.ce_base
 
     def _run_XRSL(self, filename, ce):
@@ -114,17 +112,16 @@ class RunArc(Backend):
             rncards, dCards = util.expandCard()
         else:
             rncards, dCards = expandedCard
-        ce = self._get_ce(test)
 
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
-            if ".dur.scotgrid.ac.uk" not in ce:
+            if ".dur.scotgrid.ac.uk" not in header.ce_base:
                 header.logger.critical("Can't submit socketed warmups "
                                        "to locations other than Durham")
             else:
                 header.logger.info(
-                    f"Current submission computing element: {ce}")
+                    f"Current submission computing element: {header.ce_base}")
         else:
             sockets = False
             n_sockets = 1
@@ -176,9 +173,10 @@ class RunArc(Backend):
             jobids = []
             keyquit = None
             try:
-                for _ in range(n_sockets):
+                for socket in range(n_sockets):
                     # Run the file
-                    jobid, retcode = self._run_XRSL(xrslfile, ce)
+                    jobid, retcode = self._run_XRSL(xrslfile,
+                                                    self._get_ce(test, socket))
                     if int(retcode) != 0:
                         jobid = "None"
                     jobids.append(jobid)
@@ -229,7 +227,7 @@ class RunArc(Backend):
                 " > Path of xrsl file for seed {1}: {0}".format(xrslfile, seed))
 
         # Run the file
-        jobid, retcode = self._run_XRSL(xrslfile, self._get_ce(test))
+        jobid, retcode = self._run_XRSL(xrslfile, self._get_ce(test, seed))
         if int(retcode) != 0:
             jobid = "None"
         jobids.append(jobid)
