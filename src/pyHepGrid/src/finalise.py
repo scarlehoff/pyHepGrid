@@ -26,10 +26,6 @@ RECURSIVE = config.recursive_finalise
 ls_protocol = "dav"
 copy_protocol = "xroot"
 
-# Set up environment
-os.environ["LFC_HOST"] = config.LFC_HOST
-os.environ["LCG_CATALOG_TYPE"] = config.LFC_CATALOG_TYPE
-
 if FINALISE_ALL:
     runcards = os.path.dirname(os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

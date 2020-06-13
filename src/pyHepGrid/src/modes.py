@@ -54,7 +54,7 @@ def do_initialise(args, rcard):
         generic_initialise(rcard, production=True,
                            grid=args.provWarm, local=local)
     else:
-        logger.critical("Choose what do you want to initialise -(A/B/D/E/F/L)")
+        logger.critical("Choose which mode you want to initialise -(A/B/D/E/F/L)")
 
 
 def do_run(args, rcard):
@@ -75,7 +75,7 @@ def do_run(args, rcard):
             func_selected = True
 
     if not func_selected:
-        logger.critical("Choose what do you want to run -(A/B/D/E/F)")
+        logger.critical("Choose which mode you want to run -(A/B/D/E/F)")
 
 
 def do_proxy(args, rcard):

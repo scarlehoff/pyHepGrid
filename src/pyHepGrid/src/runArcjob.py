@@ -1,5 +1,5 @@
-from pyHepGrid.src.Backend import Backend
 from datetime import datetime
+from pyHepGrid.src.Backend import Backend
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
 import pyHepGrid.src.socket_api as sapi
@@ -74,38 +74,29 @@ class RunArc(Backend):
                     f.write(" = \"{}\")\n".format(argument_value))
         return filename
 
-    def _run_XRSL(self, filename, test=False, include_retcode=False):
-        """ Sends XRSL to the queue defined in header
-        If test = True, use test queue
-        """
-        import random
-        from pyHepGrid.src.header import arc_direct
-        from pyHepGrid.src.header import split_dur_ce
+    def _get_ce(self, test, seed):
         if test:
-            from pyHepGrid.src.header import ce_test as ce
-        else:
-            from pyHepGrid.src.header import ce_base as ce
-            # Randomise ce at submission time to reduce load
-            if split_dur_ce and ".dur.scotgrid.ac.uk" in ce:
-                ce = random.choice(
-                    ["ce1.dur.scotgrid.ac.uk", "ce2.dur.scotgrid.ac.uk"])
+            return header.ce_test
+        # Alternate between CEs at submission time to reduce load
+        if header.split_dur_ce and ".dur.scotgrid.ac.uk" in header.ce_base:
+            return "ce{0}.dur.scotgrid.ac.uk".format(seed % 2+1)
+        return header.ce_base
+
+    def _run_XRSL(self, filename, ce):
+        """ Sends XRSL to the queue defined in header """
+        from pyHepGrid.src.header import arc_direct
 
         cmd = "arcsub -c {0} {1} -j {2}".format(ce, filename, self.arcbd)
         # Can only use direct in Durham. Otherwise fails!
         # Speeds up submission (according to Stephen)
         if arc_direct and ".dur.scotgrid.ac.uk" in ce:
             cmd += " -S org.nordugrid.gridftpjob --direct "
-        if include_retcode:
-            output = util.getOutputCall(cmd.split(), include_return_code=True)
-            jobid = output[0].split("jobid:")[-1].rstrip().strip()
-            return jobid, output[1]
-        else:
-            output = util.getOutputCall(cmd.split())
-            jobid = output.split("jobid:")[-1].rstrip().strip()
-            return jobid
+        output = util.getOutputCall(cmd.split(), include_return_code=True)
+        jobid = output[0].split("jobid:")[-1].rstrip().strip()
+        return jobid, output[1]
 
     # Runs for ARC
-    def run_wrap_warmup(self, test=None, expandedCard=None):
+    def run_wrap_warmup(self, test=False, expandedCard=None):
         """
         Wrapper function. It assumes the initialisation stage has already
         happend Writes XRSL file with the appropiate information and send one
@@ -121,20 +112,15 @@ class RunArc(Backend):
             rncards, dCards = util.expandCard()
         else:
             rncards, dCards = expandedCard
-        if test:
-            from pyHepGrid.src.header import ce_test as ce
-        else:
-            from pyHepGrid.src.header import ce_base as ce
 
         if header.sockets_active > 1:
             sockets = True
             n_sockets = header.sockets_active
-            if ".dur.scotgrid.ac.uk" not in ce:
-                # Can't submit sockets elsewhere than Durham!!!!!!!
-                header.logger.info(
-                    "Current submission computing element: {0}".format(ce))
+            if ".dur.scotgrid.ac.uk" not in header.ce_base:
                 header.logger.critical("Can't submit socketed warmups "
                                        "to locations other than Durham")
+            header.logger.info(
+                    f"Current submission computing element: {header.ce_base}")
         else:
             sockets = False
             n_sockets = 1
@@ -180,16 +166,16 @@ class RunArc(Backend):
                         'jobName': jobName,
                         'count': str(warmupthr),
                         'countpernode': str(warmupthr), }
-            xrslfile = self._write_XRSL(dictData)
+            xrslfile = self._write_XRSL(dictData, filename=None)
             header.logger.debug(" > Path of xrsl file: {0}".format(xrslfile))
 
             jobids = []
             keyquit = None
             try:
-                for _ in range(n_sockets):
+                for socket in range(n_sockets):
                     # Run the file
-                    jobid, retcode = (self._run_XRSL(
-                        xrslfile, test=test, include_retcode=True))
+                    jobid, retcode = self._run_XRSL(xrslfile,
+                                                    self._get_ce(test, socket))
                     if int(retcode) != 0:
                         jobid = "None"
                     jobids.append(jobid)
@@ -223,7 +209,7 @@ class RunArc(Backend):
                 if keyquit is not None:
                     raise keyquit
 
-    def run_single_production(self, args):
+    def _run_single_production(self, args):
         """
         Wrapper for passing to multirun, where args is a tuple of each argument
         required. Would be easier if multirun used starmap...
@@ -240,19 +226,18 @@ class RunArc(Backend):
                 " > Path of xrsl file for seed {1}: {0}".format(xrslfile, seed))
 
         # Run the file
-        jobid, retcode = self._run_XRSL(
-            xrslfile, test=test, include_retcode=True)
+        jobid, retcode = self._run_XRSL(xrslfile, self._get_ce(test, seed))
         if int(retcode) != 0:
             jobid = "None"
         jobids.append(jobid)
         return jobid
 
-    def arg_iterator(self, r, dCards, jobName, baseSeed, producRun, test,
-                     jobids):
+    def _arg_iterator(self, r, dCards, jobName, baseSeed, producRun, test,
+                      jobids):
         for seed in range(baseSeed, baseSeed + producRun):
             yield (r, dCards[r], seed, jobName, baseSeed, test, jobids)
 
-    def run_wrap_production(self, test=None):
+    def run_wrap_production(self, test=False):
         """
         Wrapper function. It assumes the initialisation stage has already
         happend Writes XRSL file with the appropiate information and send a
@@ -286,11 +271,11 @@ class RunArc(Backend):
             from multiprocessing import Manager
             # Use shared memory list in case of submission failure
             jobids = Manager().list()
-            arg_sets = self.arg_iterator(
+            arg_sets = self._arg_iterator(
                 r, dCards, jobName, baseSeed, producRun, test, jobids)
 
             try:
-                joblist = self._multirun(self.run_single_production, arg_sets,
+                joblist = self._multirun(self._run_single_production, arg_sets,
                                          n_threads=min(
                                              header.arc_submit_threads,
                                              producRun))
@@ -330,16 +315,16 @@ class RunArc(Backend):
                 raise keyquit
 
 
-def runWrapper(runcard, test=None, expandedCard=None):
+def runWrapper(runcard, test=False, expandedCard=None):
     header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(arcscript=header.ARCSCRIPTDEFAULT)
-    arc.run_wrap_warmup(test, expandedCard)
+    arc.run_wrap_warmup(test=test, expandedCard=expandedCard)
 
 
-def runWrapperProduction(runcard, test=None):
+def runWrapperProduction(runcard, test=False):
     header.logger.info("Running arc job for {0}".format(runcard))
     arc = RunArc(prod=True, arcscript=header.ARCSCRIPTDEFAULTPRODUCTION)
-    arc.run_wrap_production(test)
+    arc.run_wrap_production(test=test)
 
 
 # Testing routines - just a wrapper to get the args for nnlojob

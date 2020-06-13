@@ -46,12 +46,11 @@ class RunDirac(Backend):
             raise Exception(F"Type of input arguments: {type(input_args)} "
                             "not recognised in DIRAC ._format_args")
 
-    def _write_JDL(self, argument_string, start_seed, no_runs, filename=None):
+    def _write_JDL(self, argument_string, start_seed, no_runs, jobName):
         """ Writes a unique JDL file
         which instructs the dirac job to run
         """
-        if not filename:
-            filename = util.unique_filename()
+        filename = util.unique_filename()
         with open(filename, 'w') as f:
             for i in self.templ:
                 f.write(i)
@@ -59,8 +58,7 @@ class RunDirac(Backend):
             f.write("Arguments = \"{}\";\n".format(argument_string))
             f.write("Parameters = {0};\n".format(no_runs))
             f.write("ParameterStart = {0};\n".format(start_seed))
-            f.write("ParameterStep = 1;\n")
-            f.write("ParameterFactor = 1;\n")
+            f.write("JobName = {0};\n".format(jobName))
         return filename
 
     def _run_JDL(self, filename):
@@ -74,17 +72,20 @@ class RunDirac(Backend):
         return jobids
 
     # Run for DIRAC
-    def run_wrap_production(self):
+    def run_wrap_production(self, test=False):
         """
         Wrapper function. It assumes the initialisation stage has already
         happened Writes JDL file with the appropiate information and send
         procrun number of jobs to the diract management system
         """
+        if test:
+            raise NotImplementedError("'Test' mode unavailable for Dirac.")
+
         rncards, dCards = util.expandCard()
         header.logger.info("Runcards selected: {0}".format(
             " ".join(r for r in rncards)))
         self.runfolder = header.runcardDir
-        from pyHepGrid.src.header import baseSeed, producRun
+        from pyHepGrid.src.header import baseSeed, producRun, jobName
 
         increment = 750
         for r in rncards:
@@ -99,7 +100,7 @@ class RunDirac(Backend):
             joblist, remaining_seeds, seed_start = [], producRun, baseSeed
             while remaining_seeds > 0:
                 no_seeds = min(increment, remaining_seeds)
-                jdlfile = self._write_JDL(args, seed_start, no_seeds)
+                jdlfile = self._write_JDL(args, seed_start, no_seeds, jobName)
                 max_seed = seed_start+no_seeds-1
                 header.logger.info(
                     " > jdl file path for seeds {0}-{1}: {2}".format(
@@ -123,13 +124,13 @@ class RunDirac(Backend):
             self.dbase.insert_data(self.table, dataDict)
 
 
-def runWrapper(runcard, test=None):
+def runWrapper(runcard, test=False):
     header.logger.info("Running dirac job for {0}".format(runcard))
     if test:
         header.logger.critical(
             "--test flag disallowed for Dirac as there is no test queue.")
     dirac = RunDirac()
-    dirac.run_wrap_production()
+    dirac.run_wrap_production(test=test)
 
 
 def testWrapper(r, dCards):
