@@ -1,14 +1,15 @@
-from collections import Counter
 import datetime
-import os
 import importlib
-import pyHepGrid.src.dbapi
-from pyHepGrid.src.header import logger
-import pyHepGrid.src.utilities as util
+import multiprocessing as mp
+import os
+import sys
+from collections import Counter
+
+import pyHepGrid.src.Database
 import pyHepGrid.src.header as header
 import pyHepGrid.src.runmodes
-import multiprocessing as mp
-import sys
+import pyHepGrid.src.utilities as util
+from pyHepGrid.src.header import logger
 
 counter = None
 
@@ -42,14 +43,14 @@ class Backend(_mode):
         self.overwrite_warmup = False
         self.tarw = util.TarWrap()
         self.gridw = util.GridWrap()
-        self.dbase = pyHepGrid.src.dbapi.database(dbname, logger=header.logger)
+        self.dbase = pyHepGrid.src.Database.Database(dbname, logger=header.logger)
         self.table = None
         self.bSeed = baseSeed
         self.jobtype_get = {
             'P': self._get_data_production,
             'W': self._get_data_warmup,
             'S': self._get_data_warmup
-        }
+            }
         self.assume_yes = False
         self.act_only_on_done = act_only_on_done
         self.stats_one_line = False
@@ -262,9 +263,9 @@ class Backend(_mode):
         val_line = "{0:<13}".format("% Completion")
         count_line = "{0:<13}".format("# Jobs")
         for element in histogram:
-            val_line += format_string.format(str(element[0])+"%")
+            val_line += format_string.format(str(element[0]) + "%")
             count_line += format_string.format(element[1])
-        divider = "-"*len(val_line)
+        divider = "-" * len(val_line)
         logger.plain(val_line)
         logger.plain(divider)
         logger.plain(count_line)
@@ -416,7 +417,7 @@ class Backend(_mode):
                         "Nothing will be moved to the warmup global folder")
                 else:
                     destination = finfolder + "/" + "arc_out_" + runcard + \
-                        outputfolder
+                                  outputfolder
                     util.spCall(["mv", outputfolder, destination])
                     # util.spCall(["rm", "-rf", outputfolder])
         except BaseException:
@@ -596,14 +597,14 @@ class Backend(_mode):
 
         # Could easily be optimised
         offset = 2
-        id_width = max(list(len(str(i["rowid"])) for i in dictC)+[2])+offset
+        id_width = max(list(len(str(i["rowid"])) for i in dictC) + [2]) + offset
         runcard_width = max(list(len(i["runcard"].strip())
-                                 for i in dictC)+[7])+offset
+                                 for i in dictC) + [7]) + offset
         runname_width = max(list(len(i["runfolder"].strip())
-                                 for i in dictC)+[7])+offset
+                                 for i in dictC) + [7]) + offset
         date_width = max(
             list(len(str(i['date']).split('.')[0].strip())
-                 for i in dictC)+[10])+offset
+                 for i in dictC) + [10]) + offset
         misc_width = 7
 
         header = "|".join(["id".center(id_width),
@@ -612,14 +613,14 @@ class Backend(_mode):
                                runname_width), "date".center(date_width),
                            "misc".center(misc_width)])
         logger.plain(header)
-        logger.plain("-"*len(header))
+        logger.plain("-" * len(header))
 
         for i in dictC:
             rid = str(i['rowid']).center(id_width)
             ruc = str(i['runcard']).center(runcard_width)
             run = str(i['runfolder']).center(runname_width)
             dat = str(i['date']).split('.')[0].center(date_width)
-            misc = str(" "+i['jobtype'])
+            misc = str(" " + i['jobtype'])
             jobids = str(i['jobid'])
             initial_seed = str(i['iseed'])
             no_jobs = len(jobids.split(" "))
@@ -643,26 +644,28 @@ class Backend(_mode):
     def _get_default_args(self):
         # Defaults arguments that can always go in
         dictionary = {
-            'gfaldir': header.gfaldir,
-            'gfal_location': header.cvmfs_gfal_location,
-            'executable': header.executable_exe,
-            'input_folder': header.grid_input_dir,
-            'output_folder': header.grid_output_dir,
-            'warmup_folder': header.grid_warmup_dir,
-            'debug': str(header.debug_level),
-            "copy_log": bool(header.copy_log),
+            'gfaldir'         : header.gfaldir,
+            'gfal_location'   : header.cvmfs_gfal_location,
+            'executable'      : header.executable_exe,
+            'input_folder'    : header.grid_input_dir,
+            'output_folder'   : header.grid_output_dir,
+            'warmup_folder'   : header.grid_warmup_dir,
+            'debug'           : str(header.debug_level),
+            "copy_log"        : bool(header.copy_log),
             "use_cvmfs_lhapdf": bool(header.use_cvmfs_lhapdf),
-            'lhapdf_grid': header.lhapdf_grid_loc,
-            'lhapdf_local': header.lhapdf_loc,
-            'events': str(header.events),
+            'lhapdf_grid'     : header.lhapdf_grid_loc,
+            'lhapdf_local'    : header.lhapdf_loc,
+            'events'          : str(header.events),
             "use_custom_rivet": bool(header.use_custom_rivet),
-        }
+            }
         if dictionary["use_cvmfs_lhapdf"]:
             dictionary.update({
-                "cvmfs_lhapdf_location": header.cvmfs_lhapdf_location})
+                "cvmfs_lhapdf_location": header.cvmfs_lhapdf_location
+                })
         if dictionary["use_custom_rivet"]:
             dictionary.update({
-                "rivet_folder": header.grid_rivet_dir})
+                "rivet_folder": header.grid_rivet_dir
+                })
         return dictionary
 
     def _make_base_argstring(self, runcard, runtag):
@@ -675,8 +678,10 @@ class Backend(_mode):
         """ Returns all arguments for production running. These arguments should
         match all those required by nnlorun.py"""
         base_string = self._make_base_argstring(runcard, runtag)
-        production_dict = {'Production': None,
-                           'seed': seed}
+        production_dict = {
+            'Production': None,
+            'seed'      : seed
+            }
         # Pass the current production arguments to the program interface
         # and let it add new arguments
         production_dict = super().include_production_arguments(production_dict)
@@ -688,8 +693,10 @@ class Backend(_mode):
         """ Returns all necessary arguments for warmup running. These arguments
         should match those required by nnlorun.py."""
         base_string = self._make_base_argstring(runcard, runtag)
-        warmup_dict = {'Warmup': None,
-                       'threads': threads}
+        warmup_dict = {
+            'Warmup' : None,
+            'threads': threads
+            }
         if sockets:
             warmup_dict['port'] = port
             warmup_dict['Host'] = header.server_host

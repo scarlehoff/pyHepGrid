@@ -641,7 +641,7 @@ class NNLOJET(ProgramInterface):
                 expandedCard = ([runcard], {runcard: rname})
                 logger.info(
                     "Warmup not found and job ended. Resubmitting to ARC")
-                from pyHepGrid.src.runArcjob import runWrapper
+                from pyHepGrid.src.ArcRunBackend import runWrapper
                 runWrapper(rcard, expandedCard=expandedCard)
 
 

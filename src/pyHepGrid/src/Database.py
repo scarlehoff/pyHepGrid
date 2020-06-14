@@ -1,14 +1,14 @@
-import sqlite3 as dbapi
+import sqlite3
 
 
-class database(object):
+class Database(object):
     def __init__(self, db, tables=None, fields=None, logger=None):
         import os
         self._setup_logger(logger)
         self.dbname = db
         if not os.path.exists(os.path.dirname(self.dbname)):
             os.makedirs(os.path.dirname(self.dbname))
-        self.db = dbapi.connect(self.dbname, check_same_thread=True)
+        self.db = sqlite3.connect(self.dbname, check_same_thread=True)
         self.list_disabled = False
         if tables:
             # check whether table exists and create it othewise
@@ -24,18 +24,18 @@ class database(object):
         self.db = None
 
     def reopen(self):
-        self.db = dbapi.connect(self.dbname)
+        self.db = sqlite3.connect(self.dbname)
 
     def _setup_logger(self, logger):
         if logger is not None:
-            database.logger = logger
+            Database.logger = logger
         else:
-            database.logger = type("", (), {})()
-            database.logger.info = print
-            database.logger.plain = print
-            database.logger.error = print
-            database.logger.debug = print
-            database.logger.critical = print
+            Database.logger = type("", (), {})()
+            Database.logger.info = print
+            Database.logger.plain = print
+            Database.logger.error = print
+            Database.logger.debug = print
+            Database.logger.critical = print
 
     def _protect_fields(self, table, fields):
         """ Make sure all the necessary fields exist in the table
@@ -47,24 +47,24 @@ class database(object):
 
     def _execute_and_commit(self, query):
         """ Executes a query and commits to the database """
-        database.logger.debug("<SQL> {0}".format(query))
+        Database.logger.debug("<SQL> {0}".format(query))
         c = self.db.cursor()
         try:
             c.execute(query)
         except Exception as e:
-            database.logger.critical("Executed query: {0}".format(query))
+            Database.logger.critical("Executed query: {0}".format(query))
             raise e  # For default case w/ no logger
         c.close()
         self.db.commit()
 
     def _execute_and_retrieve(self, query):
         """ Executes a query and returns the cursor """
-        database.logger.debug("<SQL> {0}".format(query))
+        Database.logger.debug("<SQL> {0}".format(query))
         c = self.db.cursor()
         try:
             c.execute(query)
         except Exception as e:
-            database.logger.critical("Executed query: {0}".format(query))
+            Database.logger.critical("Executed query: {0}".format(query))
             raise e  # For default case w/ no logger
         return c
 
@@ -74,8 +74,8 @@ class database(object):
         """
         head = "create table " + tablename
         tail = "("
-        database.logger.info("Creating new table: {0}".format(tablename))
-        database.logger.debug("<TABLE FIELDS> {0}".format(fields))
+        Database.logger.info("Creating new table: {0}".format(tablename))
+        Database.logger.debug("<TABLE FIELDS> {0}".format(fields))
 
         for i in fields:
             tail += i + " text, "
@@ -212,7 +212,7 @@ def get_next_seed(dbname=None):
         slurmtable, slurmprodtable, dbfields, logger
     if dbname is None:
         from pyHepGrid.src.header import dbname
-    db = database(dbname, tables=[arctable, arcprodtable, diractable,
+    db = Database(dbname, tables=[arctable, arcprodtable, diractable,
                                   slurmtable, slurmprodtable],
                   fields=dbfields, logger=logger)
     db.list_disabled = True

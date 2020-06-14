@@ -1,7 +1,7 @@
 # This is header is run specific
 
 # Only mandatory option
-import pyHepGrid.src.dbapi as dbapi
+import pyHepGrid.src.Database as dbapi
 from getpass import getuser
 dictCard = {  # first: -r second: -j
     # we use -r as the name and -j as the runcard

@@ -1,28 +1,40 @@
-from pyHepGrid.src.header import logger
-import pyHepGrid.src.proxyUtil as proxyUtil
 import pyHepGrid.src.main_routines as mr
-import pyHepGrid.src.runArcjob as runArcJob
-import pyHepGrid.src.runDiracjob as runDiracJob
-import pyHepGrid.src.runSlurmjob as runSlurmJob
-import pyHepGrid.src.backendManagement as bm
+import pyHepGrid.src.proxyUtil as proxyUtil
+import pyHepGrid.src.ArcRunBackend as runArcJob
+import pyHepGrid.src.DiracRunBackend as runDiracJob
+import pyHepGrid.src.SlurmRunBackend as runSlurmJob
 import pyHepGrid.src.test_nnlojob
+from pyHepGrid.src.ArcBackend import Arc
 from pyHepGrid.src.Backend import generic_initialise
+from pyHepGrid.src.DiracBackend import Dirac
+from pyHepGrid.src.SlurmBackend import Slurm
+from pyHepGrid.src.header import logger
 
 
 def do_management(args, rcard):
     # Management of running/finished jobs
     backend_setups = {
-        "runArc": {"backend": bm.Arc,
-                   "kwargs": {"production": False}},
-        "runArcProduction": {"backend": bm.Arc,
-                             "kwargs": {"production": True}},
-        "runDirac": {"backend": bm.Dirac,
-                     "kwargs": {}},
-        "runSlurm": {"backend": bm.Slurm,
-                     "kwargs": {"production": False}},
-        "runSlurmProduction": {"backend": bm.Slurm,
-                               "kwargs": {"production": True}}
-    }
+        "runArc"            : {
+            "backend": Arc,
+            "kwargs"  : {"production": False}
+            },
+        "runArcProduction"  : {
+            "backend": Arc,
+            "kwargs"  : {"production": True}
+            },
+        "runDirac"          : {
+            "backend": Dirac,
+            "kwargs"  : {}
+            },
+        "runSlurm"          : {
+            "backend": Slurm,
+            "kwargs"  : {"production": False}
+            },
+        "runSlurmProduction": {
+            "backend": Slurm,
+            "kwargs"  : {"production": True}
+            }
+        }
 
     for _backend in backend_setups:
         if getattr(args, _backend):  # If mode is selected

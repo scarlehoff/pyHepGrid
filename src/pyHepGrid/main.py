@@ -4,7 +4,7 @@
 from pyHepGrid.src.argument_parser import arguments as args
 from pyHepGrid.src.header import arctable, diractable, arcprodtable, \
     slurmprodtable, dbname, dbfields, logger, slurmtable
-from pyHepGrid.src.dbapi import database
+from pyHepGrid.src.Database import Database
 from pyHepGrid.src.modes import do_proxy, do_run, do_initialise, do_test, \
     do_management
 
@@ -22,7 +22,7 @@ def main():
     rmode = args.mode.lower()
 
     # Checks on modes
-    database(dbname, tables=[arctable, diractable, slurmtable,
+    Database(dbname, tables=[arctable, diractable, slurmtable,
                              arcprodtable, slurmprodtable],
              fields=dbfields, logger=logger)
 

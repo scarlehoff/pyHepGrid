@@ -1,4 +1,4 @@
-import pyHepGrid.src.dbapi as dbapi
+import pyHepGrid.src.Database as dbapi
 import os
 print("Sourcing runcard")
 dictCard = {

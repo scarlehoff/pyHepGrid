@@ -34,15 +34,15 @@ def run_test(args, runcard):
     # header.debug_level = 99999
 
     if args.runArc:
-        from pyHepGrid.src.runArcjob import testWrapper
+        from pyHepGrid.src.ArcRunBackend import testWrapper
     elif args.runArcProduction:
-        from pyHepGrid.src.runArcjob import testWrapperProduction as testWrapper
+        from pyHepGrid.src.ArcRunBackend import testWrapperProduction as testWrapper
     elif args.runDirac:
-        from pyHepGrid.src.runDiracjob import testWrapper
+        from pyHepGrid.src.DiracRunBackend import testWrapper
     elif args.runSlurm:
-        from pyHepGrid.src.runSlurmjob import testWrapper
+        from pyHepGrid.src.SlurmRunBackend import testWrapper
     elif args.runSlurmProduction:
-        from pyHepGrid.src.runSlurmjob import testWrapperProduction \
+        from pyHepGrid.src.SlurmRunBackend import testWrapperProduction \
             as testWrapper
     else:
         raise Exception("Choose what you want to test -(A/B/D/E/F)")
