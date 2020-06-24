@@ -3,7 +3,7 @@ import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
 from pyHepGrid.src.header import logger
 
-from pyHepGrid.src.program_interface import ProgramInterface
+from pyHepGrid.src.ProgramInterface import ProgramInterface
 
 
 class ExampleProgram(ProgramInterface):

@@ -33,7 +33,7 @@ baseSeed = dbapi.get_next_seed(dbname=dbname) + 1
 # Project-level Variables
 
 # Your custom subclass of `ProgramInterface` class in
-# "src/pyHepGrid/src/program_interface.py"
+# "src/pyHepGrid/src/ProgramInterface.py"
 # import should be relative to this runcard
 runmode = "backend_example.ExampleProgram"
 
