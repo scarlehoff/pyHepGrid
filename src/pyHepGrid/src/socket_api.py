@@ -117,7 +117,7 @@ def check_port_blocked(host, port):
 
 def fire_up_socket_server(
         host, port, n_sockets, wait_time="18000",
-        socket_exe="/mt/home/jmartinez/Gangaless_new/src/socket_server.py",
+        socket_exe="/mt/home/jmartinez/Gangaless_new/src/SocketServer.py",
         tag="", tmuxloc="tmux"):
     """
     Fires up the vegas socket server inside a tmux terminal
