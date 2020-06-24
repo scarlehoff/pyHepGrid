@@ -7,14 +7,22 @@ from collections import Counter
 
 import pyHepGrid.src.Database
 import pyHepGrid.src.header as header
-import pyHepGrid.src.runmodes
+import pyHepGrid.src.programs
 import pyHepGrid.src.utilities as util
 from pyHepGrid.src.header import logger
 
 counter = None
 
-if header.runmode.upper() in pyHepGrid.src.runmodes.mode_selector:
-    _mode = pyHepGrid.src.runmodes.mode_selector[header.runmode.upper()]
+
+mode_selector = {"NNLOJET": pyHepGrid.src.programs.NNLOJET,
+                 "HEJ": pyHepGrid.src.programs.HEJ,
+                 "SHERPA": pyHepGrid.src.programs.Sherpa,
+                 "N3FIT": pyHepGrid.src.programs.N3FIT
+                 }
+
+
+if header.runmode.upper() in mode_selector:
+    _mode = mode_selector[header.runmode.upper()]
 else:
     package, module = header.runmode.rsplit('.', 1)
     _mode = getattr(importlib.import_module(package), module)
