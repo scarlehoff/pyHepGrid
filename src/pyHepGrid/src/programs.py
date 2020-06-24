@@ -3,7 +3,7 @@ import sys
 from pyHepGrid.src.header import logger
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
-from pyHepGrid.src.runcard_parsing import PROGRAMruncard, warmup_extensions
+from pyHepGrid.src.ProgramRuncard import PROGRAMruncard, warmup_extensions
 from pyHepGrid.src.ProgramInterface import ProgramInterface
 from difflib import SequenceMatcher
 
