@@ -2,7 +2,7 @@ from datetime import datetime
 from pyHepGrid.src.Backend import Backend
 import pyHepGrid.src.utilities as util
 import pyHepGrid.src.header as header
-import pyHepGrid.src.socket_api as sapi
+import pyHepGrid.src.utilities_sockets as sapi
 
 
 class RunArc(Backend):
@@ -145,7 +145,8 @@ class RunArc(Backend):
         header.logger.info("Runcards selected: {0}".format(
             " ".join(r for r in rncards)))
         port = header.port
-        for r in rncards:
+        for j, r in enumerate(rncards):
+            header.logger.info(F"  {r:<60}  [{j + 1}/{len(rncards)}]")
             if n_sockets > 1:
                 # Automagically activates the socket and finds the best port for
                 # it!
@@ -253,7 +254,8 @@ class RunArc(Backend):
 
         header.logger.info("Runcards selected: {0}".format(
             " ".join(r for r in rncards)))
-        for r in rncards:
+        for j, r in enumerate(rncards):
+            header.logger.info(F"  {r:<60}  [{j + 1}/{len(rncards)}]")
             joblist = []
             # Check whether this run has something on the gridStorage
             self.check_for_existing_output(r, dCards[r])

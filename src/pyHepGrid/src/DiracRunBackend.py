@@ -88,7 +88,8 @@ class RunDirac(Backend):
         from pyHepGrid.src.header import baseSeed, producRun, jobName
 
         increment = 750
-        for r in rncards:
+        for j, r in enumerate(rncards):
+            header.logger.info(F"  {r:<60}  [{j + 1}/{len(rncards)}]")
             header.logger.info(
                 "> Submitting {0} job(s) for {1} to Dirac".format(producRun, r))
             header.logger.info(

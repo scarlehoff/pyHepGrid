@@ -193,4 +193,10 @@ if __name__ == '__main__':
     print("Running with: Python ", version_info.major)
     print("This test needs to be ran at gridui")
     slurm = Slurm()
+
     print("Instantiate classes")
+    assert os.path.isfile(header.dbname)
+    # clean up
+    os.remove("./test/test_db")
+    os.removedirs("./test")
+    print("Success")
