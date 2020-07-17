@@ -1,7 +1,7 @@
 from datetime import datetime
 from pyHepGrid.src.Backend import Backend
 import pyHepGrid.src.header as header
-import pyHepGrid.src.socket_api as sapi
+import pyHepGrid.src.utilities_sockets as sapi
 import pyHepGrid.src.utilities as util
 
 
@@ -176,7 +176,8 @@ class RunSlurm(Backend):
 
         header.logger.info("Runcards selected: {0}".format(" ".join(rncards)))
         port = header.port
-        for r in rncards:
+        for j, r in enumerate(rncards):
+            header.logger.info(F"  {r:<60}  [{j + 1}/{len(rncards)}]")
             if n_sockets > 1:
                 # Automatically activates the socket and finds the best port!
                 port = sapi.fire_up_socket_server(
@@ -241,7 +242,9 @@ class RunSlurm(Backend):
         # loop over all .run files defined in runcard.py
 
         header.logger.info("Runcards selected: {0}".format(" ".join(rncards)))
-        for r in rncards:
+        for j, r in enumerate(rncards):
+            header.logger.info(F"  {r:<60}  [{j + 1}/{len(rncards)}]")
+
             self.check_for_existing_output_local(
                 r, dCards[r], baseSeed, producRun)
 

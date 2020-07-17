@@ -1,5 +1,5 @@
 import pyHepGrid.src.main_routines as mr
-import pyHepGrid.src.proxyUtil as proxyUtil
+import pyHepGrid.src.utilities_proxy as proxyUtil
 import pyHepGrid.src.ArcRunBackend as runArcJob
 import pyHepGrid.src.DiracRunBackend as runDiracJob
 import pyHepGrid.src.SlurmRunBackend as runSlurmJob
