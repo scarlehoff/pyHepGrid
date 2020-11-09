@@ -60,8 +60,8 @@ To start using ``pyHepGrid`` you need to do the following steps.
    ``grid_input_dir``, ``grid_output_dir`` and ``grid_warmup_dir`` of your
    header
 
-#. If you use you own program: Write you own ``runfile`` similar to `
-   `example/simplerun.py``. This script will be ran on each node, so it should
+#. If you use you own program: Write you own ``runfile`` similar to
+   ``example/simplerun.py``. This script will be ran on each node, so it should
    be *self-contained* and *Python 2.7 compatible*. It should also be able to
    handle all arguments of the ``nnnnlorun.py``, even if they are not used in
    the script itself. An argument parser and other common functions are shipped
