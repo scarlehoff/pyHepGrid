@@ -101,7 +101,7 @@ class NNLOJET(ProgramInterface):
         logger.debug("local tmp tar name: {0}".format(tmpnm))
         success = self.gridw.bring(outnm, grid_warmup_dir, tmpnm)
 
-        success == self.__check_pulled_warmup(
+        success &= self.__check_pulled_warmup(
             success, tmpnm, warmup_extensions)
 
         if not success and not check_only:
@@ -122,7 +122,7 @@ class NNLOJET(ProgramInterface):
                         success = self.gridw.bring(
                             backup, backup_dir, tmpnm, force=True)
 
-                        success == self.__check_pulled_warmup(
+                        success &= self.__check_pulled_warmup(
                             success, tmpnm, warmup_extensions)
                         if success:
                             break
