@@ -1,4 +1,8 @@
 #!/bin/bash
-source ~/.bashrc # assuming CERT_PW_LOCATION is set in ~/.bashrc
-arcproxy -S pheno -c validityPeriod=24h -c vomsACvalidityPeriod=24h -p key=file:${CERT_PW_LOCATION}
-arcproxy -I
+
+echo "Automatic proxy generation is not allowed"
+echo "See https://github.com/scarlehoff/pyHepGrid/issues/82 for other strategies"
+
+#source ~/.bashrc # assuming CERT_PW_LOCATION is set in ~/.bashrc
+#arcproxy -S pheno -c validityPeriod=24h -c vomsACvalidityPeriod=24h -p key=file:${CERT_PW_LOCATION}
+#arcproxy -I
